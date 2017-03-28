@@ -4,18 +4,18 @@
 交流群：  604158262
 
 ## 目录
-- [特色](https://github.com/wayshall/onetwo/blob/master/core/modules/dbm/README.md#特色)
-- [示例项目](https://github.com/wayshall/onetwo/blob/master/core/modules/dbm/README.md#示例项目)
-- [maven配置](https://github.com/wayshall/onetwo/blob/master/core/modules/dbm/README.md#maven)
-- [一行代码启用](https://github.com/wayshall/onetwo/blob/master/core/modules/dbm/README.md#一行代码启用)
-- [实体映射](https://github.com/wayshall/onetwo/blob/master/core/modules/dbm/README.md#实体映射)
-- [BaseEntityManager接口](https://github.com/wayshall/onetwo/blob/master/core/modules/dbm/README.md#baseentitymanager接口)
-- [CrudEntityManager接口](https://github.com/wayshall/onetwo/blob/master/core/modules/dbm/README.md#crudentitymanager接口)
-- [DbmRepository-接口和sql绑定](https://github.com/wayshall/onetwo/blob/master/core/modules/dbm/README.md#dbmrepository-接口和sql绑定)
-- [查询映射](https://github.com/wayshall/onetwo/blob/master/core/modules/dbm/README.md#查询映射)
-- [复杂的嵌套查询映射](https://github.com/wayshall/onetwo/blob/master/core/modules/dbm/README.md#复杂的嵌套查询映射)
-- [批量插入](https://github.com/wayshall/onetwo/blob/master/core/modules/dbm/README.md#批量插入)
-- [充血模型支持](https://github.com/wayshall/onetwo/blob/master/core/modules/dbm/README.md#充血模型支持)
+- [特色](https://github.com/wayshall/dbm/tree/dev#特色)
+- [示例项目](https://github.com/wayshall/dbm/tree/dev#示例项目)
+- [maven配置](https://github.com/wayshall/dbm/tree/dev#maven)
+- [一行代码启用](https://github.com/wayshall/dbm/tree/dev#一行代码启用)
+- [实体映射](https://github.com/wayshall/dbm/tree/dev#实体映射)
+- [BaseEntityManager接口](https://github.com/wayshall/dbm/tree/dev#baseentitymanager接口)
+- [CrudEntityManager接口](https://github.com/wayshall/dbm/tree/dev#crudentitymanager接口)
+- [DbmRepository-接口和sql绑定](https://github.com/wayshall/dbm/tree/dev#dbmrepository-接口和sql绑定)
+- [查询映射](https://github.com/wayshall/dbm/tree/dev#查询映射)
+- [复杂的嵌套查询映射](https://github.com/wayshall/dbm/tree/dev#复杂的嵌套查询映射)
+- [批量插入](https://github.com/wayshall/dbm/tree/dev#批量插入)
+- [充血模型支持](https://github.com/wayshall/dbm/tree/dev#充血模型支持)
 
 
 ## 特色
