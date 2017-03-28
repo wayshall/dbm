@@ -4,18 +4,18 @@
 交流群：  604158262
 
 ## 目录
-- [特色](https://github.com/wayshall/dbm/#特色)
-- [示例项目](https://github.com/wayshall/dbm/#示例项目)
-- [maven配置](https://github.com/wayshall/dbm/#maven)
-- [一行代码启用](https://github.com/wayshall/dbm/#一行代码启用)
-- [实体映射](https://github.com/wayshall/dbm/#实体映射)
-- [BaseEntityManager接口](https://github.com/wayshall/dbm/#baseentitymanager接口)
-- [CrudEntityManager接口](https://github.com/wayshall/dbm/#crudentitymanager接口)
-- [DbmRepository-接口和sql绑定](https://github.com/wayshall/dbm/#dbmrepository-接口和sql绑定)
-- [查询映射](https://github.com/wayshall/dbm/#查询映射)
-- [复杂的嵌套查询映射](https://github.com/wayshall/dbm/#复杂的嵌套查询映射)
-- [批量插入](https://github.com/wayshall/dbm/#批量插入)
-- [充血模型支持](https://github.com/wayshall/dbm/#充血模型支持)
+- [特色](https://github.com/wayshall/dbm#特色)
+- [示例项目](https://github.com/wayshall/dbm#示例项目)
+- [maven配置](https://github.com/wayshall/dbm#maven)
+- [一行代码启用](https://github.com/wayshall/dbm#一行代码启用)
+- [实体映射](https://github.com/wayshall/dbm#实体映射)
+- [BaseEntityManager接口](https://github.com/wayshall/dbm#baseentitymanager接口)
+- [CrudEntityManager接口](https://github.com/wayshall/dbm#crudentitymanager接口)
+- [DbmRepository-接口和sql绑定](https://github.com/wayshall/dbm#dbmrepository-接口和sql绑定)
+- [查询映射](https://github.com/wayshall/dbm#查询映射)
+- [复杂的嵌套查询映射](https://github.com/wayshall/dbm#复杂的嵌套查询映射)
+- [批量插入](https://github.com/wayshall/dbm#批量插入)
+- [充血模型支持](https://github.com/wayshall/dbm#充血模型支持)
 
 
 ## 特色
@@ -160,7 +160,7 @@ entityManager.findList(entityClass, propertyName1, value1, propertyName2, value2
 key，value形式的参数最终会被and操作符连接起来。
 
 其中属性名和值都可以传入数组或者List类型的参数，这些多值参数最终会被or操作符连接起来，比如：
-** 属性名参数传入一个数组：
+** 属性名参数传入一个数组： **
 ```Java   
 entityManager.findList(entityClass, new String[]{propertyName1, propertyName2}, value1, propertyName3, value3);
 ```
@@ -169,7 +169,7 @@ entityManager.findList(entityClass, new String[]{propertyName1, propertyName2}, 
 select t.* from table t where (t.property_name1=:value1 or t.property_name2=:value1) and t.property_name3=:value3
 ```
 
-** 属性值参数传入一个数组：
+** 属性值参数传入一个数组： **
 ```Java   
 entityManager.findList(entityClass, propertyName1, new Object[]{value1, value2}, propertyName3, value3);
 ```
@@ -178,7 +178,7 @@ entityManager.findList(entityClass, propertyName1, new Object[]{value1, value2},
 select t.* from table t where (t.property_name1=:value1 or t.property_name1=:value2) and t.property_name3=:value3
 ```
 
-find* 风格的api会对一些特殊参数做特殊的处理，比如 K.IF_NULL 属性是告诉dbm当查询值查找的属性对应的值为null或者空时，该如何处理，IfNull.Ignore表示忽略这个条件。
+** find 风格的api会对一些特殊参数做特殊的处理，比如 K.IF_NULL 属性是告诉dbm当查询值查找的属性对应的值为null或者空时，该如何处理，IfNull.Ignore表示忽略这个条件。 **
 比如：
 ```Java   
 entityManager.findList(entityClass, propertyName1, new Object[]{value1, value2}, propertyName3, value3, K.IF_NULL, IfNull.Ignore);
