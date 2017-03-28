@@ -169,11 +169,11 @@
       <artifactId>mockito-all</artifactId>
       <scope>test</scope>
     </dependency>
-    <dependency>
+    <!-- <dependency>
         <groupId>org.onetwo4j</groupId>
         <artifactId>onetwo-test</artifactId>
         <scope>test</scope>
-    </dependency>
+    </dependency> -->
 	
   </dependencies>
   

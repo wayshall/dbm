@@ -1,9 +1,9 @@
-#dbm#
+# dbm
 ------
 基于spring jdbc实现的轻量级orm   
 交流群：  604158262
 
-##目录
+## 目录
 - [特色](https://github.com/wayshall/onetwo/blob/master/core/modules/dbm/README.md#特色)
 - [示例项目](https://github.com/wayshall/onetwo/blob/master/core/modules/dbm/README.md#示例项目)
 - [maven配置](https://github.com/wayshall/onetwo/blob/master/core/modules/dbm/README.md#maven)
@@ -18,7 +18,7 @@
 - [充血模型支持](https://github.com/wayshall/onetwo/blob/master/core/modules/dbm/README.md#充血模型支持)
 
 
-##特色
+## 特色
 - 基本的实体增删改查（单表）不需要生成样板代码和sql文件。
 - 返回结果不需要手动映射，会根据字段名称自动映射。
 - 支持sql语句和接口绑定风格的DAO，但sql不是写在丑陋的xml里，而是直接写在sql文件里，这样用eclipse或者相关支持sql的编辑器打开时，就可以语法高亮，更容易阅读。
@@ -31,11 +31,11 @@
 - 提供充血模型支持
 
    
-##示例项目   
+## 示例项目   
 单独使用dbm的示例项目
 [boot-dbm-sample](https://github.com/wayshall/boot-dbm-sample)
 
-##maven
+## maven
 当前snapshot版本：4.4.0-SNAPSHOT
 
 若使用snapshot版本，请添加snapshotRepository仓储：
@@ -55,13 +55,13 @@
 <dependency>
     <groupId>org.onetwo4j</groupId>
     <artifactId>onetwo-dbm</artifactId>
-    <version>4.4.0-SNAPSHOT</version>
+    <version>4.5.0-SNAPSHOT</version>
 </dependency>
 
 ```
 spring的依赖请自行添加。
 
-##一行代码启用
+## 一行代码启用
 在已配置好数据源的前提下，只需要在spring配置类（即有@Configuration注解的类）上加上注解@EnableDbm即可。
 ```java     
   
@@ -72,7 +72,7 @@ spring的依赖请自行添加。
    
 ```
 
-##实体映射
+## 实体映射
 ```java   
 @Entity   
 @Table(name="TEST_USER_AUTOID")   
@@ -93,7 +93,7 @@ public class UserAutoidEntity {
 	//省略getter和setter
 }   
 ```   
-###注意这里用到了一些jpa的注解，含义和jpa一致：
+### 注意这里用到了一些jpa的注解，含义和jpa一致：
 - @Entity，表示这是一个映射到数据库表的实体
 - @Table，表示这个实体映射的表
 - @Id，表示这是一个主键字段
@@ -104,7 +104,7 @@ java的字段名使用驼峰的命名风格，而数据库使用下划线的风�
 注意dbm并没有实现jpa规范，只是借用了几个jpa的注解，纯属只是为了方便。。。
 后来为了证明我也不是真的很懒，也写了和@Entity、@Table、@Column对应的注解，分别是：@DbmEntity（@Entity和@Table合一），@DbmColumn。。。
 
-##BaseEntityManager接口
+## BaseEntityManager接口
 大多数数据库操作都可以通过BaseEntityManager接口来完成。   
 BaseEntityManager可直接注入。   
 ```java    
@@ -153,7 +153,7 @@ BaseEntityManager可直接注入。
 	}
 ```
 
-##CrudEntityManager接口
+## CrudEntityManager接口
 CrudEntityManager是在BaseEntityManager基础上封装crud的接口，是给喜欢简单快捷的人使用的。   
 CrudEntityManager实例可在数据源已配置的情况下通过简单的方法获取：
 
@@ -192,10 +192,10 @@ public class UserAutoidEntity {
 或者使用Dbms的obtainCrudManager方法来获取带事务的接口。
 `
 
-##DbmRepository-接口和sql绑定
+## DbmRepository-接口和sql绑定
 支持类似mybatis的sql语句与接口绑定，但sql文件不是写在丑陋的xml里，而是直接写在sql文件里，这样用eclipse或者相关支持sql的编辑器打开时，就可以语法高亮，更容易阅读。
 
-###1、定义一个接口   
+### 1、定义一个接口   
 包名：test.dao   
 ```java   
 @DbmRepository
@@ -206,7 +206,7 @@ public interface UserAutoidDao {
 }
 
 ```
-###2、定义一个.jfish.sql文件
+### 2、定义一个.jfish.sql文件
 在resource源码代码文件下新建一个目录：sql
 然后在sql目录里新建一个UserAutoidDao全类名的.jfish.sql文件，完整路径和文件为：
 sql/test.dao.UserAutoidDao.jfish.sql
@@ -235,7 +235,7 @@ sql/test.dao.UserAutoidDao.jfish.sql
 - c的命名参数，和接口的方法参数绑定 
 - @ExecuteUpdate注解表示这个方法会以jdbc的executeUpdate方法执行，实际上可以忽略，因为dbm会识别某些update，insert，delete等前缀的方法名来判断。
 
-###3、调用   
+### 3、调用   
 ```java
 
 @Service   
@@ -256,13 +256,13 @@ public class UserAutoidServiceImpl {
    提示：如果你不想传入 "%userName%"，可以把sql文件里的命名参数“:userName”改成“:userName?likeString”试试，后面的?likeString是调用dbm内置的likeString方法，该方法会自动在传入的参数前后加上'%'。
 `
 
-##查询映射
+## 查询映射
 DbmRepository的查询映射无需任何xml配置，只需要遵循规则即可：   
 **1、**Java类的属性名与sql查询返回的列名一致   
 **2、**或者Java类的属性名采用驼峰命名，而列明采用下划线的方式分隔。如：userName对应user_name   
 
 举例：   
-###创建一个DbmRepository接口
+### 创建一个DbmRepository接口
 ```Java
 
 @DbmRepository
@@ -281,7 +281,7 @@ public class CompanyVO {
 }
 ```
 
-###对应的sql文件CompanyDao.jfish.sql
+### 对应的sql文件CompanyDao.jfish.sql
 内容如下：   
 ```sql
 /****
@@ -313,19 +313,19 @@ where
     comp.name in (:names)
 [/#if]
 ```
-###调用代码
+### 调用代码
 ```Java
 List<CompanyVO> companies = this.companyDao.findCompaniesByLikeName("测试公司");
 companies = this.companyDao.findCompaniesByNames(Collections.emptyList());
 companies = this.companyDao.findCompaniesByNames(Arrays.asList("测试公司-1", "测试公司-2"));
 ```
 
-##复杂的嵌套查询映射
+## 复杂的嵌套查询映射
 有时，我们会使用join语句，查询出一个复杂的数据列表，比如包含了company、department和employee三个表。
 返回的结果集中，一个company对应多条department数据，而一条department数据又对应多条employee数据，我们希望把多条数据这样的数据最终只映射到一个VO对象里。这时候，你需要使用@DbmResultMapping和@DbmNestedResult两个注解，以指定VO的那些属性需要进行复杂的嵌套映射。
 
 举例如下：
-###创建一个DbmRepository接口和相应的VO
+### 创建一个DbmRepository接口和相应的VO
 ```Java
 
 @DbmRepository
@@ -368,7 +368,7 @@ public class EmployeeVO  {
 - @DbmResultMapping注解表明，查询返回的结果需要复杂的嵌套映射
 - @DbmNestedResult注解告诉dbm，返回的CompanyVO对象中，哪些属性是需要复杂的嵌套映射的。property用于指明具体的属性名称，columnPrefix用于指明，需要把返回的结果集中，哪些前缀的列都映射到property指定的属性里，默认会使用property。nestedType标识该属性的嵌套类型，有三个值，ASSOCIATION表示一对一的关联对象，COLLECTION表示一对多的集合对象，MAP也是一对多，但该属性的类型是个Map类型。id属性可选，配置了可一定程度上加快映射速度。
 
-###对应的sql
+### 对应的sql
 ```sql
 /*****
  * @name: findNestedCompanies
@@ -388,12 +388,12 @@ left join
 left join
     employee emply on emply.department_id=depart.id
 ```
-###调用
+### 调用
 ```Java
 List<CompanyVO> companies = companyDao.findNestedCompanies();
 ```
 
-##批量插入
+## 批量插入
 在mybatis里，批量插入非常麻烦，我见过有些人甚至使用for循环生成value语句来批量插入的，这种方法插入的数据量如果很大，生成的sql语句以吨计，如果用jdbc接口执行这条语句，系统必挂无疑。   
 实际上，jdbc很多年就提供批量插入的接口，在dbm里，使用批量接口很简单。   
 定义接口：   
@@ -412,11 +412,11 @@ public interface UserAutoidDao {
    
 搞掂！   
 
-##充血模型支持   
+## 充血模型支持   
 
 dbm对充血模型提供一定的api支持，如果觉得好玩，可尝试使用。   
 使用充血模型，需要下面几个步骤：
-###1、需要在Configuration类配置model所在的包位置
+### 1、需要在Configuration类配置model所在的包位置
 单独使用dbm的项目，只要model类在@EnableDbm注解所在的配置类的包（包括子包）下面即可，dbm会自动扫描。
 ```Java
 @EnableDbm
@@ -431,7 +431,7 @@ public class DbmSampleApplication {
 public class AppContextConfig {
 }
 ```
-###2、继承RichModel类
+### 2、继承RichModel类
 ```Java
 
 @Entity
@@ -441,7 +441,7 @@ public class User extends RichModel<User, Long> {
    
 ```
 
-###3、使用api
+### 3、使用api
 ```Java   
 //根据id查找实体   
 User user = User.findById(id);   
@@ -454,4 +454,4 @@ List<User> users = User.findList("userName", userName, K.IF_NULL, IfNull.Ignore)
    
 ```
 
-###待续。。。
+### 待续。。。
