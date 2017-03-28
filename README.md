@@ -107,6 +107,8 @@ java的字段名使用驼峰的命名风格，而数据库使用下划线的风�
 ## BaseEntityManager接口
 大多数数据库操作都可以通过BaseEntityManager接口来完成。   
 BaseEntityManager可直接注入。   
+
+先来个简单的使用例子：
 ```java    
 
 	
@@ -134,13 +136,13 @@ BaseEntityManager可直接注入。
 		user = entityManager.findById(UserAutoidEntity.class, userId); 
 		assertThat(user.getMobile(), is(newMobile));
 		
-		//find one by properties
+		//通过实体属性查找，下面的调用相当于sql条件： where mobile=:mobile and status='NORMAL'
 		user = entityManager.findOne(UserAutoidEntity.class, 
 										"mobile", newMobile,
 										"status", UserStatus.NORMAL);
 		assertThat(user.getId(), is(userId));
 		
-		//user querys dsl api
+		//使用 querys dsl api，效果和上面一样
 		UserAutoidEntity queryUser = Querys.from(entityManager, UserAutoidEntity.class)
 											.where()
 												.field("mobile").is(newMobile)
@@ -152,6 +154,42 @@ BaseEntityManager可直接注入。
 		
 	}
 ```
+BaseEntityManager对象的find开头的接口，可变参数一般都是按键值对传入，相当于一个Map，键是实体对应的属性，值是对应属性的条件值：   
+entityManager.findOne(entityClass, propertyName1, value1, propertyName2, value2......);   
+entityManager.findList(entityClass, propertyName1, value1, propertyName2, value2......);
+key，value形式的参数最终会被and操作符连接起来。
+
+其中属性名和值都可以传入数组或者List类型的参数，这些多值参数最终会被or操作符连接起来，比如：
+** 属性名参数传入一个数组：
+```Java   
+entityManager.findList(entityClass, new String[]{propertyName1, propertyName2}, value1, propertyName3, value3);
+```
+最终生成的sql语句大概是：
+```sql
+select t.* from table t where (t.property_name1=:value1 or t.property_name2=:value1) and t.property_name3=:value3
+```
+
+** 属性值参数传入一个数组：
+```Java   
+entityManager.findList(entityClass, propertyName1, new Object[]{value1, value2}, propertyName3, value3);
+```
+最终生成的sql语句大概是：
+```sql
+select t.* from table t where (t.property_name1=:value1 or t.property_name1=:value2) and t.property_name3=:value3
+```
+
+find* 风格的api会对一些特殊参数做特殊的处理，比如 K.IF_NULL 属性是告诉dbm当查询值查找的属性对应的值为null或者空时，该如何处理，IfNull.Ignore表示忽略这个条件。
+比如：
+```Java   
+entityManager.findList(entityClass, propertyName1, new Object[]{value1, value2}, propertyName3, value3, K.IF_NULL, IfNull.Ignore);
+```
+那么，当value3（或者任何一个属性对应的值）为nul时，最终生成的sql语句大概是：
+```sql
+select t.* from table t where (t.property_name1=:value1 or t.property_name1=:value2) 
+```
+property_name3条件被忽略了。
+
+
 
 ## CrudEntityManager接口
 CrudEntityManager是在BaseEntityManager基础上封装crud的接口，是给喜欢简单快捷的人使用的。   
@@ -258,8 +296,8 @@ public class UserAutoidServiceImpl {
 
 ## 查询映射
 DbmRepository的查询映射无需任何xml配置，只需要遵循规则即可：   
-**1、**Java类的属性名与sql查询返回的列名一致   
-**2、**或者Java类的属性名采用驼峰命名，而列明采用下划线的方式分隔。如：userName对应user_name   
+** 1、 **Java类的属性名与sql查询返回的列名一致   
+** 2、 **或者Java类的属性名采用驼峰命名，而列明采用下划线的方式分隔。如：userName对应user_name   
 
 举例：   
 ### 创建一个DbmRepository接口
