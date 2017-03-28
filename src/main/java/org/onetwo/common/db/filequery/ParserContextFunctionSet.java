@@ -27,8 +27,6 @@ public class ParserContextFunctionSet implements QueryContextVariable {
 		return CONTEXT_KEY;
 	}
 
-
-
 	public boolean isEmpty(Object obj){
 		return LangUtils.size(obj)==0;
 	}
@@ -42,19 +40,6 @@ public class ParserContextFunctionSet implements QueryContextVariable {
 		return SqlUtils.check(sqlValue);
 	}
 	
-	@Deprecated
-	public String inParams(String name, int size){
-		StringBuilder str = new StringBuilder();
-//		str.append("(");
-		for(int i=0; i<size; i++){
-			if(i!=0)
-				str.append(", ");
-			str.append(":").append(name).append(i);
-		}
-//		str.append(")");
-		return str.toString();
-	}
-
 	/****
 	 * spring named sql supported List value
 	 * ${_func.paramIn('dptcode', dptcodeList)}
@@ -82,11 +67,6 @@ public class ParserContextFunctionSet implements QueryContextVariable {
 		return str.toString();
 	}
 
-	@Deprecated
-	public String inValue(String name, Object inValue){
-		return paramIn(name, inValue);
-	}
-	
 	public String join(String[] strs, String joiner){
 		return StringUtils.join(strs, joiner);
 	}
@@ -108,7 +88,7 @@ public class ParserContextFunctionSet implements QueryContextVariable {
 		return val;
 	}
 
-	private ParserContextFunctionSet(){
+	protected ParserContextFunctionSet(){
 	}
 
 }

@@ -21,7 +21,11 @@ public @interface QueryConfig {
 	 * 如果是hibernate实现，该方法决定使用何种session
 	 * @return
 	 */
-	public boolean stateful() default true;
+//	public boolean stateful() default true;
+	/***
+	 * 
+	 * @return
+	 */
 	public Class<? extends QueryContextVariable> funcClass() default ParserContextFunctionSet.class;
 	
 	

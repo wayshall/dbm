@@ -381,7 +381,7 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 	protected void buildQueryConfig(ParserContext parserContext){
 		QueryConfig queryConfig = AnnotationUtils.findAnnotation(method, QueryConfig.class, true);//method.getAnnotation(QueryConfig.class);
 		if(queryConfig!=null){
-			QueryConfigData config = new QueryConfigData(queryConfig.stateful());
+			QueryConfigData config = new QueryConfigData();
 			config.setLikeQueryFields(Arrays.asList(queryConfig.likeQueryFields()));
 			if(queryConfig.funcClass()==ParserContextFunctionSet.class){
 				config.setVariables(ParserContextFunctionSet.getInstance());

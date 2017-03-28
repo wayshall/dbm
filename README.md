@@ -11,7 +11,8 @@
 - [实体映射](https://github.com/wayshall/dbm#实体映射)
 - [BaseEntityManager接口](https://github.com/wayshall/dbm#baseentitymanager接口)
 - [CrudEntityManager接口](https://github.com/wayshall/dbm#crudentitymanager接口)
-- [DbmRepository-接口和sql绑定](https://github.com/wayshall/dbm#dbmrepository-接口和sql绑定)
+- [DbmRepository查询接口](https://github.com/wayshall/dbm#dbmrepository查询接口)
+- [DbmRepository查询接口的多数据源支持](https://github.com/wayshall/dbm#dbmrepository查询接口的多数据源支持)
 - [查询映射](https://github.com/wayshall/dbm#查询映射)
 - [复杂的嵌套查询映射](https://github.com/wayshall/dbm#复杂的嵌套查询映射)
 - [批量插入](https://github.com/wayshall/dbm#批量插入)
@@ -104,6 +105,10 @@ java的字段名使用驼峰的命名风格，而数据库使用下划线的风�
 注意dbm并没有实现jpa规范，只是借用了几个jpa的注解，纯属只是为了方便。。。
 后来为了证明我也不是真的很懒，也写了和@Entity、@Table、@Column对应的注解，分别是：@DbmEntity（@Entity和@Table合一），@DbmColumn。。。
 
+`
+注意：为了保持简单和轻量级，dbm的实体映射只支持单表，不支持多表级联映射。复杂的查询和映射请使用[DbmRepository查询接口](https://github.com/wayshall/dbm#dbmrepository查询接口)
+`
+
 ## BaseEntityManager接口
 大多数数据库操作都可以通过BaseEntityManager接口来完成。   
 BaseEntityManager可直接注入。   
@@ -160,7 +165,7 @@ entityManager.findList(entityClass, propertyName1, value1, propertyName2, value2
 key，value形式的参数最终会被and操作符连接起来。
 
 其中属性名和值都可以传入数组或者List类型的参数，这些多值参数最终会被or操作符连接起来，比如：
-** 属性名参数传入一个数组： **
+- 属性名参数传入一个数组： 
 ```Java   
 entityManager.findList(entityClass, new String[]{propertyName1, propertyName2}, value1, propertyName3, value3);
 ```
@@ -169,7 +174,7 @@ entityManager.findList(entityClass, new String[]{propertyName1, propertyName2}, 
 select t.* from table t where (t.property_name1=:value1 or t.property_name2=:value1) and t.property_name3=:value3
 ```
 
-** 属性值参数传入一个数组： **
+- 属性值参数传入一个数组： 
 ```Java   
 entityManager.findList(entityClass, propertyName1, new Object[]{value1, value2}, propertyName3, value3);
 ```
@@ -178,7 +183,7 @@ entityManager.findList(entityClass, propertyName1, new Object[]{value1, value2},
 select t.* from table t where (t.property_name1=:value1 or t.property_name1=:value2) and t.property_name3=:value3
 ```
 
-** find 风格的api会对一些特殊参数做特殊的处理，比如 K.IF_NULL 属性是告诉dbm当查询值查找的属性对应的值为null或者空时，该如何处理，IfNull.Ignore表示忽略这个条件。 **
+- find 风格的api会对一些特殊参数做特殊的处理，比如 K.IF_NULL 属性是告诉dbm当查询值查找的属性对应的值为null或者空时，该如何处理，IfNull.Ignore表示忽略这个条件。 **
 比如：
 ```Java   
 entityManager.findList(entityClass, propertyName1, new Object[]{value1, value2}, propertyName3, value3, K.IF_NULL, IfNull.Ignore);
@@ -200,7 +205,7 @@ CrudEntityManager实例可在数据源已配置的情况下通过简单的方法
 @Table(name="TEST_USER_AUTOID")   
 public class UserAutoidEntity {
 
-	final static public CrudEntityManager<UserAutoidEntity, Long> crudManager = Dbms.newCrudManager(UserAutoidEntity.class);
+	final static public CrudEntityManager<UserAutoidEntity, Long> crudManager = Dbms.obtainCrudManager(UserAutoidEntity.class);
 
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY) 
@@ -225,13 +230,10 @@ public class UserAutoidEntity {
 
 ```   
 
-`
-注意这样直接new创建的CrudEntityManager没有事务拦截，请在已配置事务的环境中使用。   
-或者使用Dbms的obtainCrudManager方法来获取带事务的接口。
-`
 
-## DbmRepository-接口和sql绑定
-支持类似mybatis的sql语句与接口绑定，但sql文件不是写在丑陋的xml里，而是直接写在sql文件里，这样用eclipse或者相关支持sql的编辑器打开时，就可以语法高亮，更容易阅读。
+
+## DbmRepository查询接口
+DbmRepository查询接口支持类似mybatis的sql语句与接口绑定，但sql文件不是写在丑陋的xml里，而是直接写在sql文件里，这样用eclipse或者相关支持sql的编辑器打开时，就可以语法高亮，更容易阅读。
 
 ### 1、定义一个接口   
 包名：test.dao   
@@ -293,6 +295,93 @@ public class UserAutoidServiceImpl {
 `
    提示：如果你不想传入 "%userName%"，可以把sql文件里的命名参数“:userName”改成“:userName?likeString”试试，后面的?likeString是调用dbm内置的likeString方法，该方法会自动在传入的参数前后加上'%'。
 `
+
+
+### 其他特性
+
+
+- 支持通过特殊的注解参数进行查询分派：
+```Java
+@DbmRepository
+public interface UserDao {
+
+	public List<UserVO> findUserList(@QueryDispatcher String type);
+
+}
+```
+dbm会根据QueryDispatcher注解标记的特殊参数的值，分派到不同的sql。
+如果type==inner时，那么这个查询会被分派到findUserList(inner)；
+如果type==outer时，那么这个查询会被分派到findUserList(inner)
+sql文件：
+```sql
+/***
+ * @name: findUserList(inner)
+ */
+select 
+    usr.*
+from 
+    inner_user usr
+
+
+/***
+ * @name: findUserList(outer)
+ */
+select 
+    usr.*
+from 
+    outer_user usr
+```
+
+- in条件可以传入List类型的值，会自动解释为多个in参数
+DbmRepository接口：   
+```Java
+@DbmRepository
+public interface UserDao {
+
+	public List<UserVO> findUser(List<String> userNames);
+
+}
+```
+sql文件：   
+```sql
+/***
+ * @name: findUser
+ */
+select 
+    usr.*
+from 
+    t_user usr
+where 
+	usr.user_name in ( :userNames )
+
+```
+- dbm默认会注入一些辅助函数以便在sql文件中调用，可通过_func前缀引用，比如${_func.dateAs(date, "yyyy-MM-dd")}格式化日期。通过QueryConfig注解扩展在sql文件使用的辅助函数集。
+sql文件：   
+```sql
+/***
+ * @name: findUser
+ */
+select 
+    usr.*
+from 
+    t_user usr
+where 
+	usr.birthday=${_func.dateAs(date, "yyyy-MM-dd")}
+
+```
+
+
+## DbmRepository查询接口的多数据源支持
+DbmRepository 查询接口还可以通过注解支持绑定不同的数据源：
+```Java
+@DbmRepository(dataSource="dataSourceName1")
+public interface Datasource1Dao {
+}
+
+@DbmRepository(dataSource="dataSourceName2")
+public interface Datasource2Dao {
+}
+```
 
 ## 查询映射
 DbmRepository的查询映射无需任何xml配置，只需要遵循规则即可：   

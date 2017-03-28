@@ -7,12 +7,10 @@ import org.onetwo.common.utils.LangUtils;
 public class QueryConfigData {
 	
 	private List<String> likeQueryFields;
-	private final boolean statful;
+//	private final boolean statful;
 	private QueryContextVariable[] variables;
 
-	public QueryConfigData(boolean statful) {
-		super();
-		this.statful = statful;
+	public QueryConfigData() {
 	}
 
 	public boolean isLikeQueryField(String name){
@@ -25,9 +23,9 @@ public class QueryConfigData {
 		this.likeQueryFields = likeQueryFields;
 	}
 
-	public boolean isStatful() {
+	/*public boolean isStatful() {
 		return statful;
-	}
+	}*/
 
 	public QueryContextVariable[] getVariables() {
 		return variables;

@@ -16,7 +16,7 @@ import org.springframework.jdbc.core.namedparam.ParsedSql;
 final public class ParsedSqlUtils {
 	public static final String SQL_POST_FIX_FUNC_MARK = "?";
 
-	public static final QueryConfigData EMPTY_CONFIG = new QueryConfigData(true){
+	public static final QueryConfigData EMPTY_CONFIG = new QueryConfigData(){
 		
 		{
 			setVariables(ParserContextFunctionSet.getInstance());
