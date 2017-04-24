@@ -1,5 +1,7 @@
 package org.onetwo.common.db.builder;
 
+import javax.persistence.metamodel.SingularAttribute;
+
 
 public interface WhereCauseBuilder {
 	public WhereCauseBuilder debug();
@@ -9,7 +11,7 @@ public interface WhereCauseBuilder {
 	public WhereCauseBuilder and(QueryBuilder subQuery);
 
 
-	public DefaultWhereCauseBuilder addFields(Object entity);
+	public WhereCauseBuilder addFields(Object entity);
 	
 	public WhereCauseBuilder addField(WhereCauseBuilderField field);
 
@@ -20,6 +22,7 @@ public interface WhereCauseBuilder {
 	public WhereCauseBuilder calmIfNull();
 
 	public DefaultWhereCauseBuilderField field(String... fields);
+	public DefaultWhereCauseBuilderField field(SingularAttribute<?, ?>... fields);
 	
 	public QueryBuilder end();
 }

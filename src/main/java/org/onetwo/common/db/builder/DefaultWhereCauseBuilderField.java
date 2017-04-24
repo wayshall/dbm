@@ -3,6 +3,10 @@ package org.onetwo.common.db.builder;
 import java.util.Date;
 import java.util.Optional;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import javax.persistence.metamodel.SingularAttribute;
 
 import org.onetwo.common.db.sqlext.ExtQueryUtils;
 import org.onetwo.common.db.sqlext.SQLSymbolManager.FieldOP;
@@ -19,6 +23,14 @@ public class DefaultWhereCauseBuilderField extends WhereCauseBuilderField {
 	public DefaultWhereCauseBuilderField(WhereCauseBuilder squery, String... fields) {
 		super(squery);
 		this.fields = fields;
+	}
+	
+	public DefaultWhereCauseBuilderField(WhereCauseBuilder squery, SingularAttribute<?, ?>... fields) {
+		super(squery);
+		this.fields = Stream.of(fields)
+							.map(f->f.getName())
+							.collect(Collectors.toList())
+							.toArray(new String[0]);
 	}
 
 	public WhereCauseBuilder like(String... values) {

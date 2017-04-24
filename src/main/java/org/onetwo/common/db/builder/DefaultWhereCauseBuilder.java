@@ -2,6 +2,8 @@ package org.onetwo.common.db.builder;
 
 import java.util.Map;
 
+import javax.persistence.metamodel.SingularAttribute;
+
 import org.onetwo.common.db.builder.QueryBuilderImpl.SubQueryBuilder;
 import org.onetwo.common.db.sqlext.ExtQuery.K;
 import org.onetwo.common.reflect.ReflectUtils;
@@ -92,7 +94,11 @@ public class DefaultWhereCauseBuilder implements WhereCauseBuilder {
 	
 	@Override
 	public DefaultWhereCauseBuilderField field(String...fields){
-//		this.throwIfHasBuild();
+		return new DefaultWhereCauseBuilderField(this, fields);
+	}
+
+	@Override
+	public DefaultWhereCauseBuilderField field(SingularAttribute<?, ?>... fields) {
 		return new DefaultWhereCauseBuilderField(this, fields);
 	}
 

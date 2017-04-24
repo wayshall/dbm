@@ -37,7 +37,7 @@
 [boot-dbm-sample](https://github.com/wayshall/boot-dbm-sample)
 
 ## maven
-当前snapshot版本：4.4.0-SNAPSHOT
+当前snapshot版本：4.5.0-SNAPSHOT
 
 若使用snapshot版本，请添加snapshotRepository仓储：
 ```xml
@@ -105,9 +105,9 @@ java的字段名使用驼峰的命名风格，而数据库使用下划线的风�
 注意dbm并没有实现jpa规范，只是借用了几个jpa的注解，纯属只是为了方便。。。
 后来为了证明我也不是真的很懒，也写了和@Entity、@Table、@Column对应的注解，分别是：@DbmEntity（@Entity和@Table合一），@DbmColumn。。。
 
-`
-注意：为了保持简单和轻量级，dbm的实体映射只支持单表，不支持多表级联映射。复杂的查询和映射请使用[DbmRepository查询接口](https://github.com/wayshall/dbm#dbmrepository查询接口)
-`
+
+- 注意：为了保持简单和轻量级，dbm的实体映射只支持单表，不支持多表级联映射。复杂的查询和映射请使用[DbmRepository查询接口](https://github.com/wayshall/dbm#dbmrepository查询接口)
+
 
 ## BaseEntityManager接口
 大多数数据库操作都可以通过BaseEntityManager接口来完成。   
@@ -160,8 +160,10 @@ BaseEntityManager可直接注入。
 	}
 ```
 BaseEntityManager对象的find开头的接口，可变参数一般都是按键值对传入，相当于一个Map，键是实体对应的属性，值是对应属性的条件值：   
+```Java
 entityManager.findOne(entityClass, propertyName1, value1, propertyName2, value2......);   
 entityManager.findList(entityClass, propertyName1, value1, propertyName2, value2......);
+```
 key，value形式的参数最终会被and操作符连接起来。
 
 其中属性名和值都可以传入数组或者List类型的参数，这些多值参数最终会被or操作符连接起来，比如：
@@ -213,11 +215,6 @@ public class UserAutoidEntity {
 	protected Long id;
 	@Length(min=1, max=50)
 	protected String userName;
-	@Length(min=0, max=50)
-	@Email
-	protected String email;
-	protected String mobile;
-	protected UserStatus status;
 
 	//省略getter和setter
 }   
@@ -273,7 +270,7 @@ sql/test.dao.UserAutoidDao.jfish.sql
 - \[\#if\]...\[/\#if\]，是freemarker的语法，表示条件判断。此处表示，如果userName的值不为空，才生成“user_name like ？” 这个条件   
 - :userName，spring jdg
 - c的命名参数，和接口的方法参数绑定 
-- @ExecuteUpdate注解表示这个方法会以jdbc的executeUpdate方法执行，实际上可以忽略，因为dbm会识别某些update，insert，delete等前缀的方法名来判断。
+- @ExecuteUpdate注解表示这个方法会以jdbc的executeUpdate方法执行，实际上可以忽略，因为dbm会识别update，insert，delete等前缀的方法名来判断。
 
 ### 3、调用   
 ```java
@@ -372,7 +369,7 @@ where
 
 
 ## DbmRepository查询接口的多数据源支持
-DbmRepository 查询接口还可以通过注解支持绑定不同的数据源：
+DbmRepository 查询接口还可以通过注解支持绑定不同的数据源，dataSource的值为spring bean的名称：
 ```Java
 @DbmRepository(dataSource="dataSourceName1")
 public interface Datasource1Dao {
@@ -385,8 +382,8 @@ public interface Datasource2Dao {
 
 ## 查询映射
 DbmRepository的查询映射无需任何xml配置，只需要遵循规则即可：   
-** 1、 **Java类的属性名与sql查询返回的列名一致   
-** 2、 **或者Java类的属性名采用驼峰命名，而列明采用下划线的方式分隔。如：userName对应user_name   
+** 1、 ** Java类的属性名与sql查询返回的列名一致   
+** 2、 ** 或者Java类的属性名采用驼峰命名，而列明采用下划线的方式分隔。如：userName对应user_name   
 
 举例：   
 ### 创建一个DbmRepository接口
