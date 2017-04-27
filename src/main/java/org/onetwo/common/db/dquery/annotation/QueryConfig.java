@@ -11,6 +11,11 @@ import org.onetwo.common.db.filequery.ParserContextFunctionSet;
 @Target({ElementType.METHOD, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface QueryConfig {
+	
+	//TODO 
+//	String value() default "";
+	//TODO
+//	String countQuery() default "";
 
 	/***
 	 * 配置参数中模糊查询的字段
