@@ -569,13 +569,15 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 		JdbcStatementContextBuilder sqlBuilder = JdbcStatementContextBuilder.create(DbmEventAction.update, this, sb);
 		Object val = null;
 		for(DbmMappedField mfield : this.mappedColumns.values()){
-			
-//			val = mfield.getColumnValue(entity);
-//			val = mfield.getValueForJdbcAndFireDbmEventAction(entity, JFishEventAction.update);
 			val = mfield.getValue(entity);
-			if(mfield.fireDbmEntityFieldEvents(val, DbmEventAction.update)!=val){
+			Object newFieldValue = mfield.fireDbmEntityFieldEvents(val, DbmEventAction.update);
+			if(newFieldValue!=val){
+				val = newFieldValue;
 				mfield.setValue(entity, val);
 			}
+			/*if(mfield.fireDbmEntityFieldEvents(val, DbmEventAction.update)!=val){
+				mfield.setValue(entity, val);
+			}*/
 			if(mfield.isIdentify()){
 				Assert.notNull(val, "id can not be null : " + entity);
 				sqlBuilder.appendWhere(mfield, val);

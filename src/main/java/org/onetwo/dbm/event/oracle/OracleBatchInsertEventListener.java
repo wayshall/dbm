@@ -12,23 +12,25 @@ import org.onetwo.dbm.mapping.JdbcStatementContext;
 
 public class OracleBatchInsertEventListener extends OracleInsertEventListener {
 	
+	@Override
 	protected void beforeDoInsert(DbmInsertEvent event, DbmMappedEntry entry){
-		Object entity = event.getObject();
+		if(entry.isEntity() && entry.getIdentifyField().isGeneratedValueFetchBeforeInsert()){
+			Object entity = event.getObject();
 
-		List<Object> list = LangUtils.asList(entity);
-		
-		TimeCounter counter = new TimeCounter("select batch seq...");
-		counter.start();
-		String seq_sql = entry.getStaticSeqSql() + " connect by rownum <= ?";
-		List<Long> seqs = event.getEventSource().getDbmJdbcOperations().queryForList(seq_sql, Long.class, list.size());
-		Assert.isTrue(list.size()==seqs.size(), "the size of seq is not equals to data, seq size:"+seqs.size()+", data size:"+list.size());
-		counter.stop();
-		
-		int i = 0;
-		for(Object en : list){
-			entry.setId(en, seqs.get(i++));
+			List<Object> list = LangUtils.asList(entity);
+			
+			TimeCounter counter = new TimeCounter("select batch seq...");
+			counter.start();
+			String seq_sql = entry.getStaticSeqSql() + " connect by rownum <= ?";
+			List<Long> seqs = event.getEventSource().getDbmJdbcOperations().queryForList(seq_sql, Long.class, list.size());
+			Assert.isTrue(list.size()==seqs.size(), "the size of seq is not equals to data, seq size:"+seqs.size()+", data size:"+list.size());
+			counter.stop();
+			
+			int i = 0;
+			for(Object en : list){
+				entry.setId(en, seqs.get(i++));
+			}
 		}
-		
 	}
 	
 	/********

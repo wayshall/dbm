@@ -159,7 +159,7 @@ public class DbmMappedEntryBuilder implements MappedEntryBuilder, RegisterManage
 			return ;
 		if(entry.getIdentifyField().getStrategyType()!=null && !dbDialect.isSupportedIdStrategy(entry.getIdentifyField().getStrategyType())){
 			if(!dbDialect.isAutoDetectIdStrategy()){
-				LangUtils.throwBaseException("db["+dbDialect.getDbmeta().getDbName()+"] do not support this strategy : " + entry.getIdentifyField().getStrategyType());
+				throw new DbmException("database["+dbDialect.getDbmeta().getDbName()+"] do not support this strategy : " + entry.getIdentifyField().getStrategyType());
 			}else{
 				entry.getIdentifyField().setStrategyType(dbDialect.getIdStrategy().get(0));
 			}

@@ -136,24 +136,25 @@ abstract public class AbstractMappedField implements DbmMappedField{
 		return convertSqlParameterValue(fieldValue);
 	}*/
 	
-	public Object fireDbmEntityFieldEvents(Object fieldValue, DbmEventAction eventAction){
+	public Object fireDbmEntityFieldEvents(final Object fieldValue, DbmEventAction eventAction){
 //		boolean doListener = false;
+		Object newFieldValue = fieldValue;
 		if(DbmEventAction.insert==eventAction){
-			if(!getFieldListeners().isEmpty()){
-				for(DbmEntityFieldListener fl : getFieldListeners()){
-					fieldValue = fl.beforeFieldInsert(propertyInfo, fieldValue);
+			if(!fieldListeners.isEmpty()){
+				for(DbmEntityFieldListener fl : fieldListeners){
+					newFieldValue = fl.beforeFieldInsert(this, newFieldValue);
 //					doListener = true;
 				}
 			}
 		}else if(DbmEventAction.update==eventAction){
-			if(!getFieldListeners().isEmpty()){
-				for(DbmEntityFieldListener fl : getFieldListeners()){
-					fieldValue = fl.beforeFieldUpdate(propertyInfo, fieldValue);
+			if(!fieldListeners.isEmpty()){
+				for(DbmEntityFieldListener fl : fieldListeners){
+					newFieldValue = fl.beforeFieldUpdate(this, newFieldValue);
 //					doListener = true;
 				}
 			}
 		}
-		return fieldValue;
+		return newFieldValue;
 	}
 	
 	public Class<?> getColumnType(){

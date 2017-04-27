@@ -60,7 +60,9 @@ public class JdbcStatementContextBuilder implements JdbcStatementContext<List<Ob
 		for(DbmMappedField field : builder.getFields()){
 			val = field.getValue(entity);
 //			val = field.getValueForJdbcAndFireDbmEventAction(entity, getEventAction());
-			if(field.fireDbmEntityFieldEvents(val, getEventAction())!=val){
+			Object newFieldValue = field.fireDbmEntityFieldEvents(val, getEventAction());
+			if(newFieldValue!=val){
+				val = newFieldValue;
 				field.setValue(entity, val);
 			}
 			if(field.isVersionControll()){

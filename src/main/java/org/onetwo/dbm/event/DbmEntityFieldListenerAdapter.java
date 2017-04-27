@@ -1,16 +1,16 @@
 package org.onetwo.dbm.event;
 
-import org.onetwo.common.utils.JFishProperty;
+import org.onetwo.dbm.mapping.DbmMappedField;
 
 public class DbmEntityFieldListenerAdapter implements DbmEntityFieldListener {
 
 	@Override
-	public Object beforeFieldInsert(JFishProperty field, Object value) {
+	public Object beforeFieldInsert(DbmMappedField field, Object value) {
 		return value;
 	}
 
 	@Override
-	public Object beforeFieldUpdate(JFishProperty field, Object value) {
+	public Object beforeFieldUpdate(DbmMappedField field, Object value) {
 		return value;
 	}
 

@@ -1,5 +1,6 @@
 package org.onetwo.common.dbm;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
@@ -15,8 +16,10 @@ import org.onetwo.common.date.DateUtils;
 import org.onetwo.common.db.BaseEntityManager;
 import org.onetwo.common.db.builder.Querys;
 import org.onetwo.common.dbm.model.entity.UserAutoidEntity;
-import org.onetwo.common.dbm.model.entity.UserEntity;
 import org.onetwo.common.dbm.model.entity.UserAutoidEntity.UserStatus;
+import org.onetwo.common.dbm.model.entity.UserEntity;
+import org.onetwo.common.dbm.model.entity.UserWithListenerEntity;
+import org.onetwo.common.dbm.model.entity.UserWithListenerEntity.AutoIdListener;
 import org.onetwo.common.utils.JodatimeUtils;
 import org.onetwo.common.utils.LangOps;
 import org.onetwo.common.utils.LangUtils;
@@ -28,6 +31,15 @@ public class DbmEntityManagerTest extends DbmBaseTest {
 	private BaseEntityManager entityManager;
 
 	private static UserEntity user;
+	
+	@Test
+	public void testFieldListener(){
+		entityManager.removeAll(UserWithListenerEntity.class);
+		UserWithListenerEntity user = new UserWithListenerEntity();
+		user.setUserName("test_name");
+		user.save();
+		assertThat(user.getId()).isEqualTo(AutoIdListener.START_VALUE+1);
+	}
 
 	@Test
 	public void testSample(){

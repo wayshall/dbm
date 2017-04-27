@@ -32,6 +32,9 @@ abstract public class AbstractDBDialect implements InnerDBDialet, DBDialect {
 //	protected DataBaseConfig dataBaseConfig;
 	
 	private List<StrategyType> idStrategy = new ArrayList<StrategyType>();
+	/***
+	 * 是否自动检测设置id策略
+	 */
 	private boolean autoDetectIdStrategy;
 
 //	protected JFishQueryableEventListener[] queryableEventListeners;
