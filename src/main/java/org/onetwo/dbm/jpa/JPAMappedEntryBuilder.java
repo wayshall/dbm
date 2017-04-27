@@ -33,10 +33,10 @@ import org.onetwo.dbm.exception.DbmException;
 import org.onetwo.dbm.mapping.AbstractMappedField;
 import org.onetwo.dbm.mapping.BaseColumnInfo;
 import org.onetwo.dbm.mapping.ColumnInfo;
-import org.onetwo.dbm.mapping.DbmMappedField;
 import org.onetwo.dbm.mapping.DbmMappedEntry;
 import org.onetwo.dbm.mapping.DbmMappedEntryBuilder;
 import org.onetwo.dbm.mapping.DbmMappedEntryImpl;
+import org.onetwo.dbm.mapping.DbmMappedField;
 import org.onetwo.dbm.mapping.TableInfo;
 import org.onetwo.dbm.mapping.version.DateVersionableType;
 import org.onetwo.dbm.mapping.version.IntegerVersionableType;
@@ -170,21 +170,25 @@ public class JPAMappedEntryBuilder extends DbmMappedEntryBuilder {
 		}
 	}
 	
+	/***
+	 * @author wayshall
+	 * @param mfield
+	 */
 	private void buildIdMappedField(DbmMappedField mfield){
-		GeneratedValue g = mfield.getPropertyInfo().getAnnotation(GeneratedValue.class);
+		GeneratedValueIAttrs g = mfield.getGeneratedValueIAttrs();
 		if(g!=null){
-			if(g.strategy()==GenerationType.AUTO){
+			GenerationType type = g.getGenerationType();
+			if(type==GenerationType.AUTO){
 				if(this.getDialect().getDbmeta().isMySQL()){
 					mfield.setStrategyType(StrategyType.INCREASE_ID);
 				}else{
 					mfield.setStrategyType(StrategyType.SEQ);
 				}
-			}else if(g.strategy()==GenerationType.IDENTITY){
-//					tableInfo.setDbCreatePrimaryKey(true);
+			}else if(type==GenerationType.IDENTITY){
 				mfield.setStrategyType(StrategyType.INCREASE_ID);
-			}else if(g.strategy()==GenerationType.SEQUENCE){
+			}else if(type==GenerationType.SEQUENCE){
 				mfield.setStrategyType(StrategyType.SEQ);
-			}
+			}a
 		}
 	}
 	

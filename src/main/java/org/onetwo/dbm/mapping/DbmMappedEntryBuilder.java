@@ -361,7 +361,7 @@ public class DbmMappedEntryBuilder implements MappedEntryBuilder, RegisterManage
 	}
 	
 	protected AbstractMappedField newMappedField(DbmMappedEntry entry, JFishProperty prop){
-		JFishMappedProperty mfield = new JFishMappedProperty(entry, prop);
+		DbmMappedProperty mfield = new DbmMappedProperty(entry, prop);
 		return mfield;
 	}
 
