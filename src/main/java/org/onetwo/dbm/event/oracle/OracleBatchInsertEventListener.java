@@ -3,15 +3,16 @@ package org.onetwo.dbm.event.oracle;
 import java.util.List;
 
 import org.onetwo.common.profiling.TimeCounter;
-import org.onetwo.common.utils.Assert;
 import org.onetwo.common.utils.LangUtils;
 import org.onetwo.dbm.event.DbmInsertEvent;
 import org.onetwo.dbm.exception.DbmException;
+import org.onetwo.dbm.id.IdGenerator;
 import org.onetwo.dbm.mapping.DbmMappedEntry;
 import org.onetwo.dbm.mapping.JdbcStatementContext;
 
 public class OracleBatchInsertEventListener extends OracleInsertEventListener {
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	protected void beforeDoInsert(DbmInsertEvent event, DbmMappedEntry entry){
 		if(entry.isEntity() && entry.getIdentifyField().isGeneratedValueFetchBeforeInsert()){
@@ -21,9 +22,12 @@ public class OracleBatchInsertEventListener extends OracleInsertEventListener {
 			
 			TimeCounter counter = new TimeCounter("select batch seq...");
 			counter.start();
-			String seq_sql = entry.getStaticSeqSql() + " connect by rownum <= ?";
+			/*String seq_sql = entry.getStaticSeqSql() + " connect by rownum <= ?";
 			List<Long> seqs = event.getEventSource().getDbmJdbcOperations().queryForList(seq_sql, Long.class, list.size());
 			Assert.isTrue(list.size()==seqs.size(), "the size of seq is not equals to data, seq size:"+seqs.size()+", data size:"+list.size());
+			*/
+			IdGenerator<Long> idGenerator = (IdGenerator<Long>)entry.getIdentifyField().getIdGenerator();
+			List<Long> seqs = idGenerator.batchGenerate(event.getEventSource(), list.size());
 			counter.stop();
 			
 			int i = 0;

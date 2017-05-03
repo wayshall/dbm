@@ -18,8 +18,8 @@ public class DbmMappedEntryImpl extends AbstractDbmMappedEntryImpl implements Db
 	private EntrySQLBuilderImpl staticFetchSqlBuilder;
 	private EntrySQLBuilderImpl staticDeleteSqlBuilder;
 	private EntrySQLBuilderImpl staticDeleteAllSqlBuilder;
-	private EntrySQLBuilderImpl staticSeqSqlBuilder;
-	private EntrySQLBuilderImpl staticCreateSeqSqlBuilder;
+	/*private EntrySQLBuilderImpl staticSeqSqlBuilder;
+	private EntrySQLBuilderImpl staticCreateSeqSqlBuilder;*/
 	private EntrySQLBuilderImpl staticSelectVersionSqlBuilder;
 	
 	public DbmMappedEntryImpl(AnnotationInfo annotationInfo, TableInfo tableInfo, DbmInnerServiceRegistry serviceRegistry) {
@@ -74,13 +74,13 @@ public class DbmMappedEntryImpl extends AbstractDbmMappedEntryImpl implements Db
 		staticDeleteSqlBuilder.appendWhere(getIdentifyField());
 		staticDeleteSqlBuilder.build();
 		
-		staticSeqSqlBuilder = createSQLBuilder(SqlBuilderType.seq);
+		/*staticSeqSqlBuilder = createSQLBuilder(SqlBuilderType.seq);
 		staticSeqSqlBuilder.setNamedPlaceHoder(false);
 		staticSeqSqlBuilder.build();
 		
 		staticCreateSeqSqlBuilder = createSQLBuilder(SqlBuilderType.createSeq);
 		staticCreateSeqSqlBuilder.setNamedPlaceHoder(false);
-		staticCreateSeqSqlBuilder.build();
+		staticCreateSeqSqlBuilder.build();*/
 
 		Collection<DbmMappedField> columns = getSelectableField();
 		staticFetchSqlBuilder = createSQLBuilder(SqlBuilderType.query);
@@ -120,7 +120,7 @@ public class DbmMappedEntryImpl extends AbstractDbmMappedEntryImpl implements Db
 		return staticFetchSqlBuilder.getSql();
 	}*/
 
-	@Override
+	/*@Override
 	public String getStaticSeqSql() {
 		return staticSeqSqlBuilder.getSql();
 	}
@@ -128,7 +128,7 @@ public class DbmMappedEntryImpl extends AbstractDbmMappedEntryImpl implements Db
 	@Override
 	public String getStaticCreateSeqSql() {
 		return staticCreateSeqSqlBuilder.getSql();
-	}
+	}*/
 
 	@Override
 	protected EntrySQLBuilderImpl getStaticInsertSqlBuilder() {
@@ -166,9 +166,8 @@ public class DbmMappedEntryImpl extends AbstractDbmMappedEntryImpl implements Db
 		return staticSelectVersionSqlBuilder;
 	}
 
-
-	public EntrySQLBuilderImpl getStaticCreateSeqSqlBuilder() {
+	/*public EntrySQLBuilderImpl getStaticCreateSeqSqlBuilder() {
 		return staticCreateSeqSqlBuilder;
-	}
+	}*/
 	
 }

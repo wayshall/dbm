@@ -5,9 +5,14 @@ import java.util.Map;
 
 import org.onetwo.dbm.event.DbmEntityFieldListener;
 import org.onetwo.dbm.event.DbmEntityListener;
+import org.onetwo.dbm.id.IdGenerator;
 import org.onetwo.dbm.mapping.SQLBuilderFactory.SqlBuilderType;
 
 public interface DbmMappedEntry extends DbmMappedEntryMeta {
+	
+	public Map<String, IdGenerator<?>> getIdGenerators();
+	public void addIdGenerator(IdGenerator<?> idGenerator);
+	
 	
 	public DbmTypeMapping getSqlTypeMapping();
 
@@ -46,8 +51,8 @@ public interface DbmMappedEntry extends DbmMappedEntryMeta {
 
 //	public String getStaticFetchSql();
 
-	public String getStaticSeqSql();
-	public String getStaticCreateSeqSql();
+	/*public String getStaticSeqSql();
+	public String getStaticCreateSeqSql();*/
 	
 	public JdbcStatementContext<Object[]> makeSelectVersion(Object object);
 	

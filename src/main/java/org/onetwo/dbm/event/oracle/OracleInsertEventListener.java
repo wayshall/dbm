@@ -1,17 +1,14 @@
 package org.onetwo.dbm.event.oracle;
 
-import java.sql.SQLException;
 import java.util.List;
 
-import org.onetwo.common.convert.Types;
-import org.onetwo.common.reflect.ReflectUtils;
 import org.onetwo.common.utils.LangUtils;
-import org.onetwo.dbm.event.DbmSessionEventSource;
 import org.onetwo.dbm.event.DbmInsertEvent;
 import org.onetwo.dbm.event.DbmInsertEventListener;
+import org.onetwo.dbm.event.DbmSessionEventSource;
+import org.onetwo.dbm.id.IdGenerator;
 import org.onetwo.dbm.mapping.DbmMappedEntry;
 import org.onetwo.dbm.mapping.JdbcStatementContext;
-import org.springframework.jdbc.BadSqlGrammarException;
 
 public class OracleInsertEventListener extends DbmInsertEventListener {
 
@@ -55,22 +52,11 @@ public class OracleInsertEventListener extends DbmInsertEventListener {
 		event.setUpdateCount(count);
 	}
 	
+	@SuppressWarnings("unchecked")
 	public Long fetchIdentifyBeforeInsert(DbmInsertEvent event, DbmMappedEntry entry){
 		DbmSessionEventSource es = event.getEventSource();
-		Long id = null;
-		try {
-			id = es.getDbmJdbcOperations().queryForObject(entry.getStaticSeqSql(), Long.class);
-		} catch (BadSqlGrammarException e) {
-			//ORA-02289: 序列不存在
-			SQLException sqe = e.getSQLException();
-			int vendorCode = Types.convertValue(ReflectUtils.getFieldValue(sqe, "vendorCode"), int.class);
-			if(vendorCode==2289){
-				es.getDbmJdbcOperations().execute(entry.getStaticCreateSeqSql());
-				id = es.getDbmJdbcOperations().queryForObject(entry.getStaticSeqSql(), Long.class);
-				if(id==null)
-					throw e;
-			}
-		}
+		IdGenerator<Long> idGenerator = (IdGenerator<Long>)entry.getIdentifyField().getIdGenerator();
+		Long id = idGenerator.generate(es);
 		return id;
 	}
 

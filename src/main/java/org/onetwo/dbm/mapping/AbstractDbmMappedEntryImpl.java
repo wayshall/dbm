@@ -26,9 +26,12 @@ import org.onetwo.dbm.event.DbmEntityFieldListener;
 import org.onetwo.dbm.event.DbmEntityListener;
 import org.onetwo.dbm.event.DbmEventAction;
 import org.onetwo.dbm.exception.DbmException;
+import org.onetwo.dbm.id.IdGenerator;
 import org.onetwo.dbm.mapping.SQLBuilderFactory.SqlBuilderType;
 import org.onetwo.dbm.utils.DbmUtils;
 import org.slf4j.Logger;
+
+import com.google.common.collect.Maps;
 
 @SuppressWarnings({"unchecked", "rawtypes"})
 abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
@@ -70,6 +73,8 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 	
 	private DbmTypeMapping sqlTypeMapping;
 	
+	private Map<String, IdGenerator<?>> idGenerators = Maps.newHashMap();
+	
 	/*public AbstractJFishMappedEntryImpl(AnnotationInfo annotationInfo) {
 		this(annotationInfo, null);
 	}*/
@@ -104,18 +109,41 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 			this.entityValidator = serviceRegistry.getEntityValidator();
 			Assert.notNull(entityValidator, "no entity validator config!");
 		}
+//		this.buildIdGenerators();
 	}
-
-
+	
 	@Override
+	public void addIdGenerator(IdGenerator<?> idGenerator){
+		this.idGenerators.put(idGenerator.getName(), idGenerator);
+	}
+	
+
+	/*private void buildIdGenerators(){
+		SequenceGenerator sg = annotationInfo.getAnnotation(SequenceGenerator.class);
+		if(sg!=null){
+			IdGenerator<Long> idGenerator = IdGeneratorFactory.create(sg);
+			this.idGenerators.put(idGenerator.getName(), idGenerator);
+		}
+		TableGenerator tg = annotationInfo.getAnnotation(TableGenerator.class);
+		if(sg!=null){
+			IdGenerator<Long> idGenerator = IdGeneratorFactory.create(tg);
+			this.idGenerators.put(idGenerator.getName(), idGenerator);
+		}
+	}*/
+
+	/*@Override
 	public String getStaticSeqSql() {
 		throw new UnsupportedOperationException("the queryable entity unsupported this operation!");
 	}
 	@Override
 	public String getStaticCreateSeqSql() {
 		throw new UnsupportedOperationException("the queryable entity unsupported this operation!");
-	}
+	}*/
 	
+	public Map<String, IdGenerator<?>> getIdGenerators() {
+		return idGenerators;
+	}
+
 	public DbmTypeMapping getSqlTypeMapping() {
 		return sqlTypeMapping;
 	}

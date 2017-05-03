@@ -47,10 +47,10 @@ public class DbmJoinedMappedEntryImpl extends AbstractDbmMappedEntryImpl impleme
 		staticFetchAllSqlBuilder.build();
 	}
 
-	@Override
+	/*@Override
 	public String getStaticSeqSql() {
 		throw new UnsupportedOperationException("the joined entity unsupported this operation!");
-	}
+	}*/
 
 	@Override
 	protected EntrySQLBuilderImpl getStaticInsertSqlBuilder() {

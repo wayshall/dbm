@@ -6,11 +6,17 @@ import org.onetwo.common.utils.JFishProperty;
 import org.onetwo.dbm.dialet.AbstractDBDialect.StrategyType;
 import org.onetwo.dbm.event.DbmEntityFieldListener;
 import org.onetwo.dbm.event.DbmEventAction;
+import org.onetwo.dbm.id.IdGenerator;
 import org.onetwo.dbm.jpa.GeneratedValueIAttrs;
 import org.onetwo.dbm.mapping.version.VersionableType;
 
 public interface DbmMappedField {
 
+	public IdGenerator<?> getIdGenerator();
+	public GeneratedValueIAttrs getGeneratedValueIAttrs();
+	public void addIdGenerator(IdGenerator<?> idGenerator);
+	public void setGeneratedValueIAttrs(GeneratedValueIAttrs generatedValueIAttrs);
+	
 	public void setValue(Object entity, Object value);
 
 	public Object getValue(Object entity);
@@ -90,5 +96,5 @@ public interface DbmMappedField {
 	
 	public boolean isEnumerated();
 	public DbmEnumType getEnumType();
-	public GeneratedValueIAttrs getGeneratedValueIAttrs();
+//	public GeneratedValueIAttrs getGeneratedValueIAttrs();
 }

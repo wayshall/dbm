@@ -44,7 +44,7 @@ public abstract class BaseEntityManagerAdapter implements InnerBaseEntityManager
 	 * @param sequenceName
 	 */
 	protected void createSequence(String sequenceName){
-		String sql = getSequenceNameManager().getSequenceSql(sequenceName);
+		String sql = getSequenceNameManager().getSequenceSql(sequenceName, null);
 		Long id = null;
 			try {
 				DbmQueryWrapper dq = this.createSQLQuery(getSequenceNameManager().getCreateSequence(sequenceName), null);

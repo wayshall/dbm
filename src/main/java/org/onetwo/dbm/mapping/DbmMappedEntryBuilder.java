@@ -7,6 +7,9 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import javax.persistence.SequenceGenerator;
+import javax.persistence.TableGenerator;
+
 import org.onetwo.common.annotation.AnnotationInfo;
 import org.onetwo.common.log.JFishLoggerFactory;
 import org.onetwo.common.reflect.ReflectUtils;
@@ -24,6 +27,7 @@ import org.onetwo.dbm.core.spi.DbmInnerServiceRegistry;
 import org.onetwo.dbm.dialet.AbstractDBDialect.StrategyType;
 import org.onetwo.dbm.dialet.DBDialect;
 import org.onetwo.dbm.exception.DbmException;
+import org.onetwo.dbm.id.IdGenerator;
 import org.onetwo.dbm.query.DbmQueryableMappedEntryImpl;
 import org.slf4j.Logger;
 import org.springframework.core.Ordered;
@@ -173,7 +177,7 @@ public class DbmMappedEntryBuilder implements MappedEntryBuilder, RegisterManage
 	 * @return
 	 */
 	@SuppressWarnings("deprecation")
-	protected DbmMappedEntry createJFishMappedEntry(AnnotationInfo annotationInfo){
+	protected DbmMappedEntry createDbmMappedEntry(AnnotationInfo annotationInfo){
 		AbstractDbmMappedEntryImpl entry = null;
 		Class<?> entityClass = annotationInfo.getSourceClass();
 		DbmEntity jentity = entityClass.getAnnotation(DbmEntity.class);
@@ -197,6 +201,20 @@ public class DbmMappedEntryBuilder implements MappedEntryBuilder, RegisterManage
 		entry.setSqlBuilderFactory(this.dialect.getSqlBuilderFactory());
 		return entry;
 	}
+	
+	protected void buildIdGenerators(DbmMappedEntry entry){
+		AnnotationInfo annotationInfo = entry.getAnnotationInfo();
+		SequenceGenerator sg = annotationInfo.getAnnotation(SequenceGenerator.class);
+		if(sg!=null){
+			IdGenerator<Long> idGenerator = IdGeneratorFactory.create(sg);
+			entry.addIdGenerator(idGenerator);
+		}
+		TableGenerator tg = annotationInfo.getAnnotation(TableGenerator.class);
+		if(sg!=null){
+			IdGenerator<Long> idGenerator = IdGeneratorFactory.create(tg);
+			entry.addIdGenerator(idGenerator);
+		}
+	}
 
 	/*********
 	 * build entity mapped info and put it into cache
@@ -206,8 +224,10 @@ public class DbmMappedEntryBuilder implements MappedEntryBuilder, RegisterManage
 	 */
 	public DbmMappedEntry buildMappedEntry(Class<?> entityClass, boolean byProperty) {
 		AnnotationInfo annotationInfo = new AnnotationInfo(entityClass);
-		DbmMappedEntry entry = createJFishMappedEntry(annotationInfo);
+		DbmMappedEntry entry = createDbmMappedEntry(annotationInfo);
 		this.listenerManager.notifyAfterCreatedMappedEntry(entry);
+
+		this.buildIdGenerators(entry);
 		if(byProperty){
 			entry = buildMappedEntryByProperty(entry);
 		}else{

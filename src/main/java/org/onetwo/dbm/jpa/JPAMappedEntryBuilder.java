@@ -18,6 +18,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import javax.persistence.TableGenerator;
 import javax.persistence.Transient;
 import javax.persistence.Version;
 
@@ -30,6 +31,7 @@ import org.onetwo.common.utils.StringUtils;
 import org.onetwo.dbm.core.spi.DbmInnerServiceRegistry;
 import org.onetwo.dbm.dialet.AbstractDBDialect.StrategyType;
 import org.onetwo.dbm.exception.DbmException;
+import org.onetwo.dbm.id.IdGenerator;
 import org.onetwo.dbm.mapping.AbstractMappedField;
 import org.onetwo.dbm.mapping.BaseColumnInfo;
 import org.onetwo.dbm.mapping.ColumnInfo;
@@ -37,6 +39,7 @@ import org.onetwo.dbm.mapping.DbmMappedEntry;
 import org.onetwo.dbm.mapping.DbmMappedEntryBuilder;
 import org.onetwo.dbm.mapping.DbmMappedEntryImpl;
 import org.onetwo.dbm.mapping.DbmMappedField;
+import org.onetwo.dbm.mapping.IdGeneratorFactory;
 import org.onetwo.dbm.mapping.TableInfo;
 import org.onetwo.dbm.mapping.version.DateVersionableType;
 import org.onetwo.dbm.mapping.version.IntegerVersionableType;
@@ -122,7 +125,7 @@ public class JPAMappedEntryBuilder extends DbmMappedEntryBuilder {
 	}
 	
 	@Override
-	protected DbmMappedEntry createJFishMappedEntry(AnnotationInfo annotationInfo) {
+	protected DbmMappedEntry createDbmMappedEntry(AnnotationInfo annotationInfo) {
 		TableInfo tableInfo = newTableInfo(annotationInfo);
 		DbmMappedEntryImpl entry = new DbmMappedEntryImpl(annotationInfo, tableInfo, serviceRegistry);
 		entry.setSqlBuilderFactory(this.getDialect().getSqlBuilderFactory());
@@ -175,9 +178,26 @@ public class JPAMappedEntryBuilder extends DbmMappedEntryBuilder {
 	 * @param mfield
 	 */
 	private void buildIdMappedField(DbmMappedField mfield){
-		GeneratedValueIAttrs g = mfield.getGeneratedValueIAttrs();
+		GeneratedValue g = mfield.getPropertyInfo().getAnnotation(GeneratedValue.class);
+		if(g==null){
+			return ;
+		}
+		GenerationType type = g.strategy();
+		GeneratedValueIAttrs generatedValueIAttrs = new GeneratedValueIAttrs(type, g.generator());
+		mfield.setGeneratedValueIAttrs(generatedValueIAttrs);
+		
+		SequenceGenerator sg = mfield.getPropertyInfo().getAnnotation(SequenceGenerator.class);
+		if(sg!=null){
+			IdGenerator<Long> idGenerator = IdGeneratorFactory.create(sg);
+			mfield.addIdGenerator(idGenerator);
+		}
+		TableGenerator tg = mfield.getPropertyInfo().getAnnotation(TableGenerator.class);
+		if(sg!=null){
+			IdGenerator<Long> idGenerator = IdGeneratorFactory.create(tg);
+			mfield.addIdGenerator(idGenerator);
+		}
+		
 		if(g!=null){
-			GenerationType type = g.getGenerationType();
 			if(type==GenerationType.AUTO){
 				if(this.getDialect().getDbmeta().isMySQL()){
 					mfield.setStrategyType(StrategyType.INCREASE_ID);
@@ -188,7 +208,7 @@ public class JPAMappedEntryBuilder extends DbmMappedEntryBuilder {
 				mfield.setStrategyType(StrategyType.INCREASE_ID);
 			}else if(type==GenerationType.SEQUENCE){
 				mfield.setStrategyType(StrategyType.SEQ);
-			}a
+			}
 		}
 	}
 	

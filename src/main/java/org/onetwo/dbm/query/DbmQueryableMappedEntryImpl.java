@@ -49,10 +49,10 @@ public class DbmQueryableMappedEntryImpl extends AbstractDbmMappedEntryImpl impl
 		return staticFetchSqlBuilder.getSql();
 	}*/
 
-	@Override
+	/*@Override
 	public String getStaticSeqSql() {
 		throw new UnsupportedOperationException("the queryable entity unsupported this operation!");
-	}
+	}*/
 
 	@Override
 	protected EntrySQLBuilderImpl getStaticInsertSqlBuilder() {
