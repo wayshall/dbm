@@ -6,9 +6,10 @@ package org.onetwo.dbm.id;
 public class SequenceGeneratorAttrs {
 	
 	final private String name;
+	final private int allocationSize;
+	
 	final private String sequenceName;
 	final private int initialValue;
-	final private int allocationSize;
 	
 	public SequenceGeneratorAttrs(String name, String sequenceName,
 			int initialValue, int allocationSize) {
