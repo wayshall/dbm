@@ -1,32 +1,37 @@
 package org.onetwo.dbm.id;
 
-import java.io.Serializable;
-
-import org.onetwo.common.propconf.JFishProperties;
-import org.onetwo.common.utils.StringUtils;
+import org.onetwo.dbm.core.spi.DbmSessionImplementor;
+import org.springframework.data.util.Pair;
 
 /**
  * @author wayshall
  * <br/>
  */
-abstract public class AbstractIdGenerator<T extends Serializable> implements IdGenerator<T>{
-	static final public String ATTR_NAME = "name";
+abstract public class AbstractIdGenerator implements IdGenerator<Long>{
 	
-	final private JFishProperties attrs;
 	final private String name;
 	
-	public AbstractIdGenerator(JFishProperties attrs, String name) {
-		super();
-		this.attrs = attrs;
-		if(StringUtils.isNotBlank(name)){
-			this.name = name;
-		}else{
-			this.name = attrs.getAndThrowIfEmpty(ATTR_NAME);
-		}
+	private Long currentId;
+	private Long maxId;
+	
+	public AbstractIdGenerator(String name) {
+		this.name = name;
 	}
 
-	public JFishProperties getAttrs() {
-		return attrs;
+	abstract protected int getAllocationSize();
+	
+	@Override
+	public synchronized Long generate(DbmSessionImplementor session) {
+		Long id = currentId;
+		if(id==null || id>maxId){
+			Pair<Long, Long> seqs = batchGenerate(session, getAllocationSize());
+			currentId = seqs.getFirst();
+			maxId = seqs.getSecond();
+			id = currentId;
+		}else{
+			id = currentId++;
+		}
+		return id;
 	}
 
 	public String getName() {

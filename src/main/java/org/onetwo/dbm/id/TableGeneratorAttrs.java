@@ -15,8 +15,11 @@ public class TableGeneratorAttrs {
 	//列1的键值
 	final private String pkColumnValue;
 	
+	final private int initialValue;
+	
 	public TableGeneratorAttrs(String name, int allocationSize, String table,
-			String pkColumnName, String valueColumnName, String pkColumnValue) {
+			String pkColumnName, String valueColumnName, String pkColumnValue,
+			int initialValue) {
 		super();
 		this.name = name;
 		this.allocationSize = allocationSize;
@@ -24,6 +27,7 @@ public class TableGeneratorAttrs {
 		this.pkColumnName = pkColumnName;
 		this.valueColumnName = valueColumnName;
 		this.pkColumnValue = pkColumnValue;
+		this.initialValue = initialValue;
 	}
 
 	public String getName() {
@@ -48,6 +52,10 @@ public class TableGeneratorAttrs {
 
 	public String getPkColumnValue() {
 		return pkColumnValue;
+	}
+
+	public int getInitialValue() {
+		return initialValue;
 	}  
 
 }

@@ -430,6 +430,9 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 		return kv;
 	}
 	
+	/***
+	 * 
+	 */
 	@Override
 	public JdbcStatementContext<List<Object[]>> makeFetch(Object objects, boolean isIdentify){
 		JdbcStatementContextBuilder dsb = JdbcStatementContextBuilder.create(DbmEventAction.find, this, getStaticFetchSqlBuilder());
@@ -642,11 +645,11 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 		return MappedType.ENTITY;
 	}
 
-	@Override
+	/*@Override
 	public boolean isJoined() {
 //		return getMappedType()==MappedType.JOINED;
 		return false;
-	}
+	}*/
 
 	@Override
 	public boolean isEntity() {

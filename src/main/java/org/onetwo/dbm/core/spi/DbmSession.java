@@ -12,6 +12,7 @@ import org.onetwo.dbm.annotation.DbmJdbcOperationMark;
 import org.onetwo.dbm.core.DbmJdbcOperationType;
 import org.onetwo.dbm.core.internal.SessionTransactionType;
 import org.onetwo.dbm.query.DbmQuery;
+import org.springframework.transaction.TransactionDefinition;
 
 public interface DbmSession {
 
@@ -20,6 +21,7 @@ public interface DbmSession {
 	public void flush();
 	public DbmSessionFactory getSessionFactory();
 	public DbmTransaction beginTransaction();
+	public DbmTransaction beginTransaction(TransactionDefinition definition);
 
 	/*****
 	 * 保存对象和关联属性的对象到数据库，<br/>

@@ -192,7 +192,7 @@ public class JPAMappedEntryBuilder extends DbmMappedEntryBuilder {
 			mfield.addIdGenerator(idGenerator);
 		}
 		TableGenerator tg = mfield.getPropertyInfo().getAnnotation(TableGenerator.class);
-		if(sg!=null){
+		if(tg!=null){
 			IdGenerator<Long> idGenerator = IdGeneratorFactory.create(tg);
 			mfield.addIdGenerator(idGenerator);
 		}

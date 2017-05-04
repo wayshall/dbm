@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.onetwo.common.utils.LangUtils;
 import org.onetwo.dbm.exception.EntityInsertException;
+import org.onetwo.dbm.id.IdGenerator;
 import org.onetwo.dbm.jdbc.SimpleArgsPreparedStatementCreator;
 import org.onetwo.dbm.mapping.DbmMappedEntry;
 import org.onetwo.dbm.mapping.JdbcStatementContext;
@@ -18,6 +19,22 @@ import org.springframework.jdbc.support.KeyHolder;
 public class DbmInsertEventListener extends InsertEventListener{
 
 	protected void beforeDoInsert(DbmInsertEvent event, DbmMappedEntry entry){
+		Object entity = event.getObject();
+
+		if(entry.isEntity() && entry.getIdentifyField().isGeneratedValueFetchBeforeInsert()){
+			Long id = null;
+			if(LangUtils.isMultiple(entity)){
+				List<Object> list = LangUtils.asList(entity);
+				for(Object en : list){
+					id = fetchIdentifyBeforeInsert(event, entry);
+					entry.setId(en, id);
+				}
+			}else{
+				id = fetchIdentifyBeforeInsert(event, entry);
+				entry.setId(entity, id);
+			}
+		}
+		
 	}
 	
 	protected void doInsert(DbmInsertEvent event, DbmMappedEntry entry) {
@@ -55,6 +72,14 @@ public class DbmInsertEventListener extends InsertEventListener{
 		}
 		
 		event.setUpdateCount(updateCount);
+	}
+	
+	@SuppressWarnings("unchecked")
+	public Long fetchIdentifyBeforeInsert(DbmInsertEvent event, DbmMappedEntry entry){
+		DbmSessionEventSource es = event.getEventSource();
+		IdGenerator<Long> idGenerator = (IdGenerator<Long>)entry.getIdentifyField().getIdGenerator();
+		Long id = idGenerator.generate(es);
+		return id;
 	}
 	
 }

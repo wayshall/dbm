@@ -12,7 +12,7 @@ public class DbmSessionEvent implements DbmEvent<DbmSessionEventSource> {
 	private DbmSessionEventSource eventSource;
 	private int updateCount;
 
-	private boolean joined;
+//	private boolean joined;
 //	private String[] relatedFields;
 //	private boolean relatedReferenceOnly;//是否只保存引用，只对jointable有用……
 	
@@ -60,13 +60,13 @@ public class DbmSessionEvent implements DbmEvent<DbmSessionEventSource> {
 		this.entityClass = entityClass;
 	}
 
-	public boolean isJoined() {
+	/*public boolean isJoined() {
 		return joined;
 	}
 
 	public void setJoined(boolean joined) {
 		this.joined = joined;
-	}
+	}*/
 
 	/*public String[] getRelatedFieldsBy(JFishMappedField field) {
 		if(LangUtils.isEmpty(relatedFields))

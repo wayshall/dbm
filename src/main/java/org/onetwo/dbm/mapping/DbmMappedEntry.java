@@ -60,6 +60,13 @@ public interface DbmMappedEntry extends DbmMappedEntryMeta {
 	
 	public JdbcStatementContext<Object[]> makeDeleteAll();
 	
+	/****
+	 * 
+	 * @author wayshall
+	 * @param objects
+	 * @param isIdentify 是否根据id查询
+	 * @return
+	 */
 	public JdbcStatementContext<List<Object[]>> makeFetch(Object objects, boolean isIdentify);
 	
 	public JdbcStatementContext<List<Object[]>> makeInsert(Object entity);

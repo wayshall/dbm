@@ -1,5 +1,6 @@
 package org.onetwo.common.db.generator;
 
+import java.io.Closeable;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
@@ -17,10 +18,10 @@ import org.onetwo.common.db.sql.DynamicQuery;
 import org.onetwo.common.db.sql.DynamicQueryFactory;
 import org.onetwo.common.exception.BaseException;
 import org.onetwo.common.exception.ServiceException;
-import org.onetwo.common.utils.MyUtils;
+import org.onetwo.common.utils.CUtils;
 
 @SuppressWarnings({ "unchecked", "rawtypes" })
-public class DBConnecton {
+public class DBConnecton implements Closeable {
 	
 	private Connection connection;
 	private PreparedStatement preparedStatement;
@@ -36,7 +37,7 @@ public class DBConnecton {
 	}
 	
 	public ResultSet query(String sql, Object...objects){
-		return query(sql, MyUtils.convertParamMap(objects));
+		return query(sql, CUtils.asMap(objects));
 	}
 	
 	public ResultSet query(String sql, Map params){
@@ -53,7 +54,7 @@ public class DBConnecton {
 	}
 
 	public Map<String, Object> one(String sql, Object...objects){
-		return one(sql, MyUtils.convertParamMap(objects));
+		return one(sql, CUtils.asMap(objects));
 	}
 	
 	public Map<String, Object> one(String sql, Map params){
@@ -66,14 +67,12 @@ public class DBConnecton {
 	
 	public List<Map<String, Object>> queryForList(String sql, Map params){
 		try {
-
 			ResultSet rs = query(sql, params);
 
 			List<Map<String, Object>> datas = new ArrayList<>();
 			datas = DBUtils.toList(rs, true);
 			
 			return datas;
-
 		}finally{
 			closePreparedStatement();
 		}
@@ -125,6 +124,7 @@ public class DBConnecton {
 		}
 	}
 	
+	@Override
 	public void close(){
 		this.closePreparedStatement();
 		DBUtils.closeCon(connection);

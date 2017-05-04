@@ -118,7 +118,7 @@ abstract public class AbstractDbmEventListener implements DbmEventListener<DbmSe
 	}
 	
 
-	protected void executeJFishEntityListener(boolean before, DbmSessionEvent jfishEvent, Object entities, List<DbmEntityListener> listeners){
+	protected void executeDbmEntityListener(boolean before, DbmSessionEvent jfishEvent, Object entities, List<DbmEntityListener> listeners){
 		if(LangUtils.isMultiple(entities)){
 			List<?> list = LangUtils.asList(entities);
 			for(Object entity : list){

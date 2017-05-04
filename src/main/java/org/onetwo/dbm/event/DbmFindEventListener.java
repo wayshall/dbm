@@ -16,7 +16,7 @@ public class DbmFindEventListener extends AbstractDbmEventListener {
 		Object entity = event.getObject();
 		DbmSessionEventSource es = event.getEventSource();
 		DbmMappedEntry entry = es.getMappedEntryManager().getEntry(event.getEntityClass());
-		findEvent.setJoined(entry.isJoined());
+//		findEvent.setJoined(entry.isJoined());
 
 		RowMapper rowMapper = es.getSessionFactory().getRowMapper(event.getEntityClass());
 		if(findEvent.isFindAll()){
@@ -24,7 +24,8 @@ public class DbmFindEventListener extends AbstractDbmEventListener {
 			List list = (List) es.getDbmJdbcOperations().query(fetch.getSql(), fetch.getValue(), rowMapper);
 			findEvent.setResultObject(list);
 		}else{
-			JdbcStatementContext<List<Object[]>> fetch = entry.makeFetch(entity, !findEvent.isJoined());
+//			JdbcStatementContext<List<Object[]>> fetch = entry.makeFetch(entity, !findEvent.isJoined());
+			JdbcStatementContext<List<Object[]>> fetch = entry.makeFetch(entity, true);
 			for(Object[] args : fetch.getValue()){
 				List list = (List) es.getDbmJdbcOperations().query(fetch.getSql(), args, rowMapper);
 				if(LangUtils.isNotEmpty(list))

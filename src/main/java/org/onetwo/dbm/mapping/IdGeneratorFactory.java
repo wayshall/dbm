@@ -32,7 +32,8 @@ public class IdGeneratorFactory {
 																tg.table(), 
 																tg.pkColumnName(), 
 																tg.valueColumnName(), 
-																tg.pkColumnValue());
+																tg.pkColumnValue(),
+																tg.initialValue());
 		TableIdGenerator generator = new TableIdGenerator(tgAttrs);
 		return generator;
 	}

@@ -1,9 +1,7 @@
 package org.onetwo.dbm.id;
 
 import java.sql.SQLException;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Queue;
 
 import org.onetwo.common.convert.Types;
 import org.onetwo.common.db.sql.SequenceNameManager;
@@ -11,39 +9,31 @@ import org.onetwo.common.profiling.TimeCounter;
 import org.onetwo.common.reflect.ReflectUtils;
 import org.onetwo.common.utils.Assert;
 import org.onetwo.dbm.core.spi.DbmSessionImplementor;
+import org.springframework.data.util.Pair;
 import org.springframework.jdbc.BadSqlGrammarException;
 
 /**
  * @author wayshall
  * <br/>
  */
-public class SequenceIdGenerator implements IdGenerator<Long> {
+public class SequenceIdGenerator extends AbstractIdGenerator {
 	
 	final private SequenceGeneratorAttrs attrs;
-	private Queue<Long> seqQueue;
+//	private Queue<Long> seqQueue;
 	
 	public SequenceIdGenerator(SequenceGeneratorAttrs attrs) {
-		super();
+		super(attrs.getName());
 		this.attrs = attrs;
-		this.seqQueue = new LinkedList<Long>();
+//		this.seqQueue = new LinkedList<Long>();
 	}
 	
+	
 	@Override
-	public String getName() {
-		return attrs.getName();
+	protected int getAllocationSize() {
+		return attrs.getAllocationSize();
 	}
 
-	@Override
-	public synchronized Long generate(DbmSessionImplementor session) {
-		Long id = seqQueue.poll();
-		if(id==null){
-			List<Long> seqs = batchGenerate(session, attrs.getAllocationSize());
-			seqQueue.addAll(seqs);
-			id = seqQueue.poll();
-		}
-		return id;
-	}
-	
+
 	private Long generateOneSeq(DbmSessionImplementor session) {
 		SequenceNameManager sequenceNameManager = session.getSequenceNameManager();
 		String seqSql = sequenceNameManager.getSequenceSql(attrs.getSequenceName(), null);
@@ -73,7 +63,7 @@ public class SequenceIdGenerator implements IdGenerator<Long> {
 	}
 
 	@Override
-	public List<Long> batchGenerate(DbmSessionImplementor session, int batchSize) {
+	public Pair<Long, Long> batchGenerate(DbmSessionImplementor session, int batchSize) {
 		Assert.notNull(session);
 		Assert.isTrue(batchSize>0);
 		
@@ -94,7 +84,7 @@ public class SequenceIdGenerator implements IdGenerator<Long> {
 			}
 		}
 		counter.stop();
-		return seqs;
+		return Pair.of(seqs.get(0), seqs.get(seqs.size()-1));
 	}
 
 	

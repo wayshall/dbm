@@ -6,7 +6,6 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.TableGenerator;
 
@@ -23,14 +22,24 @@ import org.onetwo.dbm.mapping.DbmMappedField;
 @Table(name="TEST_USER")
 public class UserTableIdEntity extends BaseModel<UserTableIdEntity, Long> {
 
+	/***
+	 CREATE TABLE `gen_ids` (
+		`gen_name`  varchar(255) NOT NULL ,
+		`gen_value`  bigint NOT NULL ,
+		PRIMARY KEY (`gen_name`)
+		)
+		;
+		
+
+	 */
 	@Id  
 	@GeneratedValue(strategy = GenerationType.TABLE, generator="tableIdGenerator")  
-	@TableGenerator(name = "pk_gen",  
-	    table="tableIdGenerator",  
+	@TableGenerator(name = "tableIdGenerator",  
+	    table="gen_ids",  
 	    pkColumnName="gen_name",  
 	    valueColumnName="gen_value",  
-	    pkColumnValue="PAYABLEMOENY_PK",  
-	    allocationSize=1  
+	    pkColumnValue="seq_test_user",  
+	    allocationSize=100
 	)
 //	@SequenceGenerator
 	protected Long id;

@@ -10,9 +10,9 @@ abstract public class UpdateEventListener extends AbstractDbmEventListener {
 		DbmSessionEventSource es = event.getEventSource();
 		DbmMappedEntry entry = es.getMappedEntryManager().getEntry(entity);
 
-		this.executeJFishEntityListener(true, event, entity, entry.getEntityListeners());
+		this.executeDbmEntityListener(true, event, entity, entry.getEntityListeners());
 		this.doUpdate((DbmUpdateEvent)event, entry);
-		this.executeJFishEntityListener(true, event, entity, entry.getEntityListeners());
+		this.executeDbmEntityListener(true, event, entity, entry.getEntityListeners());
 	}
 
 	abstract protected void doUpdate(DbmUpdateEvent event, DbmMappedEntry entry);

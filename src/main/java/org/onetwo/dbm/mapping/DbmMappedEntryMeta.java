@@ -33,7 +33,7 @@ public interface DbmMappedEntryMeta {
 	
 	public MappedType getMappedType();
 
-	public boolean isJoined();
+//	public boolean isJoined();
 	public boolean isEntity();
 	
 	public boolean isInstance(Object entity);

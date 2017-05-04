@@ -9,6 +9,7 @@ import org.onetwo.dbm.exception.DbmException;
 import org.onetwo.dbm.id.IdGenerator;
 import org.onetwo.dbm.mapping.DbmMappedEntry;
 import org.onetwo.dbm.mapping.JdbcStatementContext;
+import org.springframework.data.util.Pair;
 
 public class OracleBatchInsertEventListener extends OracleInsertEventListener {
 	
@@ -27,12 +28,18 @@ public class OracleBatchInsertEventListener extends OracleInsertEventListener {
 			Assert.isTrue(list.size()==seqs.size(), "the size of seq is not equals to data, seq size:"+seqs.size()+", data size:"+list.size());
 			*/
 			IdGenerator<Long> idGenerator = (IdGenerator<Long>)entry.getIdentifyField().getIdGenerator();
-			List<Long> seqs = idGenerator.batchGenerate(event.getEventSource(), list.size());
+			Pair<Long, Long> seqs = idGenerator.batchGenerate(event.getEventSource(), list.size());
 			counter.stop();
-			
-			int i = 0;
+
+			long startId = seqs.getFirst();
+			long maxId = seqs.getSecond();
 			for(Object en : list){
-				entry.setId(en, seqs.get(i++));
+//				entry.setId(en, seqs.get(i++));
+				if(startId>maxId){
+					throw new DbmException("error id, startId can not greater than maxId. startId:"+startId+", maxId:"+maxId);
+				}
+				entry.setId(en, startId);
+				startId++;
 			}
 		}
 	}
