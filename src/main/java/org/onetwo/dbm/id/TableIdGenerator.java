@@ -60,6 +60,7 @@ public class TableIdGenerator extends AbstractIdentifierGenerator {
 	 */
 	@Override
 	public List<Long> batchGenerate(DbmSessionImplementor contextSession, int batchSize) {
+//		System.out.println("==========> batchGenerate");
 		DbmSessionImplementor session = (DbmSessionImplementor)contextSession.getSessionFactory().openSession();
 		DefaultTransactionDefinition definition = new DefaultTransactionDefinition();
 		definition.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);

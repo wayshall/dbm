@@ -71,7 +71,7 @@ public class UserTableDbmIdEntity extends BaseModel<UserTableDbmIdEntity, Long> 
 		return true;
 	}
 	
-	static class SnowflakeGenerator implements CustomIdGenerator<Long>  {
+	public static class SnowflakeGenerator implements CustomIdGenerator<Long>  {
 
 		SnowflakeIdGenerator idGenerator = new SnowflakeIdGenerator(1);
 		

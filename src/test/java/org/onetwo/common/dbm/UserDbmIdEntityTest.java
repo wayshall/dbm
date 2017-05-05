@@ -13,14 +13,14 @@ import org.junit.Test;
 import org.onetwo.common.base.DbmBaseTest;
 import org.onetwo.common.db.BaseEntityManager;
 import org.onetwo.common.db.builder.Querys;
-import org.onetwo.common.dbm.model.entity.UserTableIdEntity;
+import org.onetwo.common.dbm.model.entity.UserTableDbmIdEntity;
 import org.onetwo.common.utils.LangOps;
 
 /**
  * @author wayshall
  * <br/>
  */
-public class UserTableIdEntityTest extends DbmBaseTest {
+public class UserDbmIdEntityTest extends DbmBaseTest {
 
 	@Resource
 	private BaseEntityManager entityManager;
@@ -28,7 +28,7 @@ public class UserTableIdEntityTest extends DbmBaseTest {
 
 	@Test
 	public void testSample(){
-		UserTableIdEntity user = new UserTableIdEntity();
+		UserTableDbmIdEntity user = new UserTableDbmIdEntity();
 		user.setUserName("dbm");
 		
 		//save
@@ -36,7 +36,7 @@ public class UserTableIdEntityTest extends DbmBaseTest {
 		assertThat(userId, notNullValue());
 		
 		//user querys dsl api
-		UserTableIdEntity queryUser = Querys.from(entityManager, UserTableIdEntity.class)
+		UserTableDbmIdEntity queryUser = Querys.from(entityManager, UserTableDbmIdEntity.class)
 											.where()
 												.field("userName").is(user.getUserName())
 											.end()
@@ -47,14 +47,14 @@ public class UserTableIdEntityTest extends DbmBaseTest {
 	
 	@Test
 	public void testSaveList(){
-		List<UserTableIdEntity> users = LangOps.generateList(1000, i->{
-			UserTableIdEntity user = new UserTableIdEntity();
+		List<UserTableDbmIdEntity> users = LangOps.generateList(1000, i->{
+			UserTableDbmIdEntity user = new UserTableDbmIdEntity();
 			user.setUserName("dbm-"+i);
 			return user;
 		});
 		
 		//save
-		Collection<UserTableIdEntity> dbUsers = entityManager.saves(users);
+		Collection<UserTableDbmIdEntity> dbUsers = entityManager.saves(users);
 		dbUsers.forEach(u->{
 			assertThat(u.getId(), notNullValue());
 		});
