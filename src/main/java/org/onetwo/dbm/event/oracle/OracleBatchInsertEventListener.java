@@ -6,32 +6,27 @@ import org.onetwo.common.profiling.TimeCounter;
 import org.onetwo.common.utils.LangUtils;
 import org.onetwo.dbm.event.DbmInsertEvent;
 import org.onetwo.dbm.exception.DbmException;
-import org.onetwo.dbm.id.IdGenerator;
+import org.onetwo.dbm.id.IdentifierGenerator;
 import org.onetwo.dbm.mapping.DbmMappedEntry;
 import org.onetwo.dbm.mapping.JdbcStatementContext;
-import org.springframework.data.util.Pair;
 
 public class OracleBatchInsertEventListener extends OracleInsertEventListener {
 	
 	@SuppressWarnings("unchecked")
 	@Override
 	protected void beforeDoInsert(DbmInsertEvent event, DbmMappedEntry entry){
-		if(entry.isEntity() && entry.getIdentifyField().isGeneratedValueFetchBeforeInsert()){
+		if(entry.isEntity() && entry.getIdentifyField().isSeqStrategy()){
 			Object entity = event.getObject();
 
 			List<Object> list = LangUtils.asList(entity);
 			
-			TimeCounter counter = new TimeCounter("select batch seq...");
-			counter.start();
-			/*String seq_sql = entry.getStaticSeqSql() + " connect by rownum <= ?";
-			List<Long> seqs = event.getEventSource().getDbmJdbcOperations().queryForList(seq_sql, Long.class, list.size());
-			Assert.isTrue(list.size()==seqs.size(), "the size of seq is not equals to data, seq size:"+seqs.size()+", data size:"+list.size());
-			*/
-			IdGenerator<Long> idGenerator = (IdGenerator<Long>)entry.getIdentifyField().getIdGenerator();
-			Pair<Long, Long> seqs = idGenerator.batchGenerate(event.getEventSource(), list.size());
-			counter.stop();
+			/*TimeCounter counter = new TimeCounter("select batch seq...");
+			counter.start();*/
+			IdentifierGenerator<Long> idGenerator = (IdentifierGenerator<Long>)entry.getIdentifyField().getIdGenerator();
+//			Pair<Long, Long> seqs = idGenerator.batchGenerate(event.getEventSource(), list.size());
+//			counter.stop();
 
-			long startId = seqs.getFirst();
+			/*long startId = seqs.getFirst();
 			long maxId = seqs.getSecond();
 			for(Object en : list){
 //				entry.setId(en, seqs.get(i++));
@@ -40,6 +35,12 @@ public class OracleBatchInsertEventListener extends OracleInsertEventListener {
 				}
 				entry.setId(en, startId);
 				startId++;
+			}*/
+			List<Long> seqs = idGenerator.batchGenerate(event.getEventSource(), list.size());
+			int i = 0;
+			for(Object en : list){
+				entry.setId(en, seqs.get(i));
+				i++;
 			}
 		}
 	}

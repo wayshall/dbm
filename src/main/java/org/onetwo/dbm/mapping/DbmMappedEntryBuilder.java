@@ -1,14 +1,15 @@
 package org.onetwo.dbm.mapping;
 
 import java.beans.PropertyDescriptor;
+import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import javax.persistence.SequenceGenerator;
-import javax.persistence.TableGenerator;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 
 import org.onetwo.common.annotation.AnnotationInfo;
 import org.onetwo.common.log.JFishLoggerFactory;
@@ -27,7 +28,8 @@ import org.onetwo.dbm.core.spi.DbmInnerServiceRegistry;
 import org.onetwo.dbm.dialet.AbstractDBDialect.StrategyType;
 import org.onetwo.dbm.dialet.DBDialect;
 import org.onetwo.dbm.exception.DbmException;
-import org.onetwo.dbm.id.IdGenerator;
+import org.onetwo.dbm.id.IdentifierGenerator;
+import org.onetwo.dbm.jpa.GeneratedValueIAttrs;
 import org.onetwo.dbm.query.DbmQueryableMappedEntryImpl;
 import org.slf4j.Logger;
 import org.springframework.core.Ordered;
@@ -202,18 +204,10 @@ public class DbmMappedEntryBuilder implements MappedEntryBuilder, RegisterManage
 		return entry;
 	}
 	
-	protected void buildIdGenerators(DbmMappedEntry entry){
+	protected void buildIdGeneratorsOnClass(DbmMappedEntry entry){
 		AnnotationInfo annotationInfo = entry.getAnnotationInfo();
-		SequenceGenerator sg = annotationInfo.getAnnotation(SequenceGenerator.class);
-		if(sg!=null){
-			IdGenerator<Long> idGenerator = IdGeneratorFactory.create(sg);
-			entry.addIdGenerator(idGenerator);
-		}
-		TableGenerator tg = annotationInfo.getAnnotation(TableGenerator.class);
-		if(sg!=null){
-			IdGenerator<Long> idGenerator = IdGeneratorFactory.create(tg);
-			entry.addIdGenerator(idGenerator);
-		}
+		IdGeneratorFactory.createDbmIdGenerator(annotationInfo)
+							.ifPresent(idGenerator->entry.addIdGenerator(idGenerator));
 	}
 
 	/*********
@@ -227,7 +221,7 @@ public class DbmMappedEntryBuilder implements MappedEntryBuilder, RegisterManage
 		DbmMappedEntry entry = createDbmMappedEntry(annotationInfo);
 		this.listenerManager.notifyAfterCreatedMappedEntry(entry);
 
-		this.buildIdGenerators(entry);
+		this.buildIdGeneratorsOnClass(entry);
 		if(byProperty){
 			entry = buildMappedEntryByProperty(entry);
 		}else{
@@ -395,6 +389,21 @@ public class DbmMappedEntryBuilder implements MappedEntryBuilder, RegisterManage
 		}
 		
 //		this.buildMappedFieldByAnnotations(mfield);
+	}
+	
+
+	protected void buildIdGeneratorsOnField(DbmMappedField mfield){
+		GeneratedValue g = mfield.getPropertyInfo().getAnnotation(GeneratedValue.class);
+		if(g==null){
+			return ;
+		}
+		GenerationType type = g.strategy();
+		GeneratedValueIAttrs generatedValueIAttrs = new GeneratedValueIAttrs(type, g.generator());
+		mfield.setGeneratedValueIAttrs(generatedValueIAttrs);
+		
+		AnnotationInfo annotationInfo = mfield.getPropertyInfo().getAnnotationInfo();
+		IdGeneratorFactory.createDbmIdGenerator(annotationInfo)
+							.ifPresent(idGenerator->mfield.addIdGenerator(idGenerator));
 	}
 	
 	/*private void buildMappedFieldByAnnotations(AbstractMappedField mfield){

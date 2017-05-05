@@ -26,7 +26,7 @@ import org.onetwo.dbm.event.DbmEntityFieldListener;
 import org.onetwo.dbm.event.DbmEntityListener;
 import org.onetwo.dbm.event.DbmEventAction;
 import org.onetwo.dbm.exception.DbmException;
-import org.onetwo.dbm.id.IdGenerator;
+import org.onetwo.dbm.id.IdentifierGenerator;
 import org.onetwo.dbm.mapping.SQLBuilderFactory.SqlBuilderType;
 import org.onetwo.dbm.utils.DbmUtils;
 import org.slf4j.Logger;
@@ -73,7 +73,7 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 	
 	private DbmTypeMapping sqlTypeMapping;
 	
-	private Map<String, IdGenerator<?>> idGenerators = Maps.newHashMap();
+	private Map<String, IdentifierGenerator<?>> idGenerators = Maps.newHashMap();
 	
 	/*public AbstractJFishMappedEntryImpl(AnnotationInfo annotationInfo) {
 		this(annotationInfo, null);
@@ -113,7 +113,7 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 	}
 	
 	@Override
-	public void addIdGenerator(IdGenerator<?> idGenerator){
+	public void addIdGenerator(IdentifierGenerator<?> idGenerator){
 		this.idGenerators.put(idGenerator.getName(), idGenerator);
 	}
 	
@@ -140,7 +140,7 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 		throw new UnsupportedOperationException("the queryable entity unsupported this operation!");
 	}*/
 	
-	public Map<String, IdGenerator<?>> getIdGenerators() {
+	public Map<String, IdentifierGenerator<?>> getIdGenerators() {
 		return idGenerators;
 	}
 

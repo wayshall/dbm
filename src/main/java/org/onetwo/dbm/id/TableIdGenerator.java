@@ -1,5 +1,7 @@
 package org.onetwo.dbm.id;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import org.onetwo.common.expr.Expression;
@@ -9,7 +11,6 @@ import org.onetwo.dbm.core.spi.DbmSessionImplementor;
 import org.onetwo.dbm.core.spi.DbmTransaction;
 import org.onetwo.dbm.exception.DbmException;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.data.util.Pair;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
@@ -18,7 +19,7 @@ import org.springframework.transaction.support.DefaultTransactionDefinition;
  * @author wayshall
  * <br/>
  */
-public class TableIdGenerator extends AbstractIdGenerator {
+public class TableIdGenerator extends AbstractIdentifierGenerator {
 	
 	private static final String TEMPLATE_CREATE_TABLE_SQL = " CREATE TABLE `${table}` ("
 			+ "`${pkColumnName}`  varchar(255) NOT NULL ,"
@@ -58,7 +59,53 @@ public class TableIdGenerator extends AbstractIdGenerator {
 	/****
 	 */
 	@Override
-	public Pair<Long, Long> batchGenerate(DbmSessionImplementor contextSession, int batchSize) {
+	public List<Long> batchGenerate(DbmSessionImplementor contextSession, int batchSize) {
+		DbmSessionImplementor session = (DbmSessionImplementor)contextSession.getSessionFactory().openSession();
+		DefaultTransactionDefinition definition = new DefaultTransactionDefinition();
+		definition.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+		DbmTransaction transaction = session.beginTransaction(definition);
+		try {
+			Long currentId = null;
+			try {
+				currentId = session.getDbmJdbcOperations().queryForObject(selectSql, Long.class, attrs.getPkColumnValue());
+			} catch (BadSqlGrammarException e) {
+				//MySQLSyntaxErrorException SQLState=42S02 vendorCode=1146
+//				throw e;
+				this.createSeqTable(session);
+			}catch (EmptyResultDataAccessException e) {
+				//no result
+			}
+			if(currentId==null){
+				int res = session.getDbmJdbcOperations().update(insertSql, attrs.getPkColumnValue(), attrs.getInitialValue());
+				if(res!=1){
+					throw new DbmException("error insert table sequeue : "+attrs.getPkColumnValue());
+				}
+				currentId = Long.valueOf(attrs.getInitialValue());
+			}
+			Long maxId = currentId + attrs.getAllocationSize();
+			int res = session.getDbmJdbcOperations().update(updateSql, maxId, attrs.getPkColumnValue(), currentId);
+			if(res!=1){
+				throw new DbmException("error update table sequeue : "+attrs.getPkColumnValue()+", updateSql:"+updateSql);
+			}
+			transaction.commit();
+			List<Long> ids = new ArrayList<Long>(batchSize);
+			long nextId = currentId;
+			for (; nextId < maxId; nextId++) {
+				ids.add(nextId);
+			}
+			if(ids.size()!=batchSize){
+				throw new DbmException("generate batch id count error. actual:"+ids.size()+", expect:"+batchSize);
+			}
+			return ids;
+		} catch (DbmException e) {
+			transaction.rollback();
+			throw e;
+		} catch (Exception e) {
+			transaction.rollback();
+			throw new DbmException("generate id error", e);
+		} 
+	}
+	/*public Pair<Long, Long> batchGenerate(DbmSessionImplementor contextSession, int batchSize) {
 		DbmSessionImplementor session = (DbmSessionImplementor)contextSession.getSessionFactory().openSession();
 		DefaultTransactionDefinition definition = new DefaultTransactionDefinition();
 		definition.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
@@ -92,7 +139,7 @@ public class TableIdGenerator extends AbstractIdGenerator {
 			transaction.rollback();
 			throw new DbmException("generate id error", e);
 		} 
-	}
+	}*/
 	
 	private void createSeqTable(DbmSessionImplementor session){
 		try {

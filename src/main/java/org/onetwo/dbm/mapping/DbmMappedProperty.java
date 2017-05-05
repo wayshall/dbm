@@ -10,7 +10,7 @@ import javax.persistence.TableGenerator;
 
 import org.onetwo.common.utils.JFishProperty;
 import org.onetwo.dbm.exception.DbmException;
-import org.onetwo.dbm.id.IdGenerator;
+import org.onetwo.dbm.id.IdentifierGenerator;
 import org.onetwo.dbm.jpa.GeneratedValueIAttrs;
 
 import com.google.common.collect.Maps;
@@ -20,7 +20,7 @@ public class DbmMappedProperty extends AbstractMappedField {
 
 	private DbmEnumType enumType;
 	private GeneratedValueIAttrs generatedValueIAttrs;
-	private Map<String, IdGenerator<?>> idGenerators = Maps.newHashMap();
+	private Map<String, IdentifierGenerator<?>> idGenerators = Maps.newHashMap();
 	
 	public DbmMappedProperty(DbmMappedEntry entry, JFishProperty prop){
 		super(entry, prop);
@@ -53,7 +53,7 @@ public class DbmMappedProperty extends AbstractMappedField {
 		}
 	}*/
 	
-	public void addIdGenerator(IdGenerator<?> idGenerator){
+	public void addIdGenerator(IdentifierGenerator<?> idGenerator){
 		this.idGenerators.put(idGenerator.getName(), idGenerator);
 	}
 	
@@ -61,12 +61,12 @@ public class DbmMappedProperty extends AbstractMappedField {
 		this.generatedValueIAttrs = generatedValueIAttrs;
 	}
 
-	public Map<String, IdGenerator<?>> getIdGenerators() {
+	public Map<String, IdentifierGenerator<?>> getIdGenerators() {
 		return idGenerators;
 	}
 	
-	public IdGenerator<?> getIdGenerator(){
-		IdGenerator<?> idGenerator = this.idGenerators.get(generatedValueIAttrs.getGenerator());
+	public IdentifierGenerator<?> getIdGenerator(){
+		IdentifierGenerator<?> idGenerator = this.idGenerators.get(generatedValueIAttrs.getGenerator());
 		if(idGenerator==null){
 			throw new DbmException("can not find IdGenerator for name: " + generatedValueIAttrs.getGenerator());
 		}

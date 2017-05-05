@@ -6,15 +6,15 @@ import org.onetwo.common.utils.JFishProperty;
 import org.onetwo.dbm.dialet.AbstractDBDialect.StrategyType;
 import org.onetwo.dbm.event.DbmEntityFieldListener;
 import org.onetwo.dbm.event.DbmEventAction;
-import org.onetwo.dbm.id.IdGenerator;
+import org.onetwo.dbm.id.IdentifierGenerator;
 import org.onetwo.dbm.jpa.GeneratedValueIAttrs;
 import org.onetwo.dbm.mapping.version.VersionableType;
 
 public interface DbmMappedField {
 
-	public IdGenerator<?> getIdGenerator();
+	public IdentifierGenerator<?> getIdGenerator();
 	public GeneratedValueIAttrs getGeneratedValueIAttrs();
-	public void addIdGenerator(IdGenerator<?> idGenerator);
+	public void addIdGenerator(IdentifierGenerator<?> idGenerator);
 	public void setGeneratedValueIAttrs(GeneratedValueIAttrs generatedValueIAttrs);
 	
 	public void setValue(Object entity, Object value);
@@ -47,7 +47,7 @@ public interface DbmMappedField {
 	 * 自动生成值是否需要在插入之前fetch数据，一般就是oracle序列
 	 * @return
 	 */
-	public boolean isGeneratedValueFetchBeforeInsert();
+//	public boolean isGeneratedValueFetchBeforeInsert();
 
 	public boolean isGeneratedValue();
 

@@ -1,10 +1,11 @@
 package org.onetwo.dbm.event;
 
+import java.io.Serializable;
 import java.util.List;
 
 import org.onetwo.common.utils.LangUtils;
 import org.onetwo.dbm.exception.EntityInsertException;
-import org.onetwo.dbm.id.IdGenerator;
+import org.onetwo.dbm.id.IdentifierGenerator;
 import org.onetwo.dbm.jdbc.SimpleArgsPreparedStatementCreator;
 import org.onetwo.dbm.mapping.DbmMappedEntry;
 import org.onetwo.dbm.mapping.JdbcStatementContext;
@@ -21,16 +22,16 @@ public class DbmInsertEventListener extends InsertEventListener{
 	protected void beforeDoInsert(DbmInsertEvent event, DbmMappedEntry entry){
 		Object entity = event.getObject();
 
-		if(entry.isEntity() && entry.getIdentifyField().isGeneratedValueFetchBeforeInsert()){
-			Long id = null;
+		if(entry.isEntity() && entry.getIdentifyField().isGeneratedValue()){
+			Serializable id = null;
 			if(LangUtils.isMultiple(entity)){
 				List<Object> list = LangUtils.asList(entity);
 				for(Object en : list){
-					id = fetchIdentifyBeforeInsert(event, entry);
+					id = generatedIdentifyBeforeInsert(event, entry);
 					entry.setId(en, id);
 				}
 			}else{
-				id = fetchIdentifyBeforeInsert(event, entry);
+				id = generatedIdentifyBeforeInsert(event, entry);
 				entry.setId(entity, id);
 			}
 		}
@@ -74,11 +75,11 @@ public class DbmInsertEventListener extends InsertEventListener{
 		event.setUpdateCount(updateCount);
 	}
 	
-	@SuppressWarnings("unchecked")
-	public Long fetchIdentifyBeforeInsert(DbmInsertEvent event, DbmMappedEntry entry){
+//	@SuppressWarnings("unchecked")
+	public Serializable generatedIdentifyBeforeInsert(DbmInsertEvent event, DbmMappedEntry entry){
 		DbmSessionEventSource es = event.getEventSource();
-		IdGenerator<Long> idGenerator = (IdGenerator<Long>)entry.getIdentifyField().getIdGenerator();
-		Long id = idGenerator.generate(es);
+		IdentifierGenerator<? extends Serializable> idGenerator = entry.getIdentifyField().getIdGenerator();
+		Serializable id = idGenerator.generate(es);
 		return id;
 	}
 	

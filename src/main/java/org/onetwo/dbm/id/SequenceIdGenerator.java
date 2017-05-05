@@ -9,14 +9,13 @@ import org.onetwo.common.profiling.TimeCounter;
 import org.onetwo.common.reflect.ReflectUtils;
 import org.onetwo.common.utils.Assert;
 import org.onetwo.dbm.core.spi.DbmSessionImplementor;
-import org.springframework.data.util.Pair;
 import org.springframework.jdbc.BadSqlGrammarException;
 
 /**
  * @author wayshall
  * <br/>
  */
-public class SequenceIdGenerator extends AbstractIdGenerator {
+public class SequenceIdGenerator extends AbstractIdentifierGenerator {
 	
 	final private SequenceGeneratorAttrs attrs;
 //	private Queue<Long> seqQueue;
@@ -63,7 +62,7 @@ public class SequenceIdGenerator extends AbstractIdGenerator {
 	}
 
 	@Override
-	public Pair<Long, Long> batchGenerate(DbmSessionImplementor session, int batchSize) {
+	public List<Long> batchGenerate(DbmSessionImplementor session, int batchSize) {
 		Assert.notNull(session);
 		Assert.isTrue(batchSize>0);
 		
@@ -84,7 +83,7 @@ public class SequenceIdGenerator extends AbstractIdGenerator {
 			}
 		}
 		counter.stop();
-		return Pair.of(seqs.get(0), seqs.get(seqs.size()-1));
+		return seqs;
 	}
 
 	

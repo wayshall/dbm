@@ -9,7 +9,6 @@ import java.util.Optional;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
@@ -18,7 +17,6 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
-import javax.persistence.TableGenerator;
 import javax.persistence.Transient;
 import javax.persistence.Version;
 
@@ -31,7 +29,6 @@ import org.onetwo.common.utils.StringUtils;
 import org.onetwo.dbm.core.spi.DbmInnerServiceRegistry;
 import org.onetwo.dbm.dialet.AbstractDBDialect.StrategyType;
 import org.onetwo.dbm.exception.DbmException;
-import org.onetwo.dbm.id.IdGenerator;
 import org.onetwo.dbm.mapping.AbstractMappedField;
 import org.onetwo.dbm.mapping.BaseColumnInfo;
 import org.onetwo.dbm.mapping.ColumnInfo;
@@ -163,7 +160,7 @@ public class JPAMappedEntryBuilder extends DbmMappedEntryBuilder {
 	protected void buildMappedField(DbmMappedField mfield){
 		if(mfield.getPropertyInfo().hasAnnotation(Id.class)){
 			mfield.setIdentify(true);
-			this.buildIdMappedField(mfield);
+			this.buildIdGeneratorsOnField(mfield);
 		}
 		if(mfield.getPropertyInfo().hasAnnotation(Version.class)){
 			if(!versionTypes.containsKey(mfield.getPropertyInfo().getType())){
@@ -177,27 +174,18 @@ public class JPAMappedEntryBuilder extends DbmMappedEntryBuilder {
 	 * @author wayshall
 	 * @param mfield
 	 */
-	private void buildIdMappedField(DbmMappedField mfield){
-		GeneratedValue g = mfield.getPropertyInfo().getAnnotation(GeneratedValue.class);
-		if(g==null){
-			return ;
-		}
-		GenerationType type = g.strategy();
-		GeneratedValueIAttrs generatedValueIAttrs = new GeneratedValueIAttrs(type, g.generator());
-		mfield.setGeneratedValueIAttrs(generatedValueIAttrs);
+	@Override
+	protected void buildIdGeneratorsOnField(DbmMappedField mfield){
+		super.buildIdGeneratorsOnField(mfield);
+		GeneratedValueIAttrs generatedValueIAttrs = mfield.getGeneratedValueIAttrs();
 		
-		SequenceGenerator sg = mfield.getPropertyInfo().getAnnotation(SequenceGenerator.class);
-		if(sg!=null){
-			IdGenerator<Long> idGenerator = IdGeneratorFactory.create(sg);
-			mfield.addIdGenerator(idGenerator);
-		}
-		TableGenerator tg = mfield.getPropertyInfo().getAnnotation(TableGenerator.class);
-		if(tg!=null){
-			IdGenerator<Long> idGenerator = IdGeneratorFactory.create(tg);
-			mfield.addIdGenerator(idGenerator);
-		}
+		IdGeneratorFactory.createSequenceGenerator(mfield.getPropertyInfo().getAnnotationInfo())
+							.ifPresent(idGenerator->mfield.addIdGenerator(idGenerator));
+		IdGeneratorFactory.createTableGenerator(mfield.getPropertyInfo().getAnnotationInfo())
+							.ifPresent(idGenerator->mfield.addIdGenerator(idGenerator));
 		
-		if(g!=null){
+		GenerationType type = generatedValueIAttrs.getGenerationType();
+		if(generatedValueIAttrs!=null){
 			if(type==GenerationType.AUTO){
 				if(this.getDialect().getDbmeta().isMySQL()){
 					mfield.setStrategyType(StrategyType.INCREASE_ID);
@@ -243,6 +231,18 @@ public class JPAMappedEntryBuilder extends DbmMappedEntryBuilder {
 		}
 		
 		return col;
+	}
+	
+	@Override
+	protected void buildIdGeneratorsOnClass(DbmMappedEntry entry){
+		super.buildIdGeneratorsOnClass(entry);
+		
+		AnnotationInfo annotationInfo = entry.getAnnotationInfo();
+
+		IdGeneratorFactory.createSequenceGenerator(annotationInfo)
+							.ifPresent(idGenerator->entry.addIdGenerator(idGenerator));
+		IdGeneratorFactory.createTableGenerator(annotationInfo)
+							.ifPresent(idGenerator->entry.addIdGenerator(idGenerator));
 	}
 	
 }

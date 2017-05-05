@@ -5,10 +5,13 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import javax.persistence.TableGenerator;
 
 import org.hibernate.validator.constraints.Length;
+import org.onetwo.dbm.annotation.DbmIdGenerator;
 import org.onetwo.dbm.core.BaseModel;
+import org.onetwo.dbm.core.spi.DbmSessionImplementor;
+import org.onetwo.dbm.id.CustomIdGenerator;
+import org.onetwo.dbm.id.SnowflakeIdGenerator;
 
 /**
  * @author wayshall
@@ -16,28 +19,11 @@ import org.onetwo.dbm.core.BaseModel;
  */
 @Entity
 @Table(name="TEST_USER")
-public class UserTableIdEntity extends BaseModel<UserTableIdEntity, Long> {
+public class UserTableDbmIdEntity extends BaseModel<UserTableDbmIdEntity, Long> {
 
-	/***
-	 CREATE TABLE `gen_ids` (
-		`gen_name`  varchar(255) NOT NULL ,
-		`gen_value`  bigint NOT NULL ,
-		PRIMARY KEY (`gen_name`)
-		)
-		;
-		
-
-	 */
 	@Id  
-	@GeneratedValue(strategy = GenerationType.TABLE, generator="tableIdGenerator")  
-	@TableGenerator(name = "tableIdGenerator",  
-	    table="gen_ids",  
-	    pkColumnName="gen_name",  
-	    valueColumnName="gen_value",  
-	    pkColumnValue="seq_test_user",  
-	    allocationSize=50
-	)
-//	@SequenceGenerator
+	@GeneratedValue(strategy = GenerationType.TABLE, generator="snowflake") 
+	@DbmIdGenerator(name="snowflake", generatorClass=SnowflakeGenerator.class)
 	protected Long id;
 	@Length(min=1, max=50)
 	protected String userName;
@@ -71,7 +57,7 @@ public class UserTableIdEntity extends BaseModel<UserTableIdEntity, Long> {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		UserTableIdEntity other = (UserTableIdEntity) obj;
+		UserTableDbmIdEntity other = (UserTableDbmIdEntity) obj;
 		if (id == null) {
 			if (other.id != null)
 				return false;
@@ -85,5 +71,14 @@ public class UserTableIdEntity extends BaseModel<UserTableIdEntity, Long> {
 		return true;
 	}
 	
-	
+	static class SnowflakeGenerator implements CustomIdGenerator<Long>  {
+
+		SnowflakeIdGenerator idGenerator = new SnowflakeIdGenerator(1);
+		
+		@Override
+		public Long generate(DbmSessionImplementor session) {
+			return idGenerator.nextId();
+		}
+		
+	}
 }

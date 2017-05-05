@@ -6,7 +6,6 @@ import java.util.List;
 
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
-import javax.persistence.GenerationType;
 
 import org.onetwo.common.utils.JFishProperty;
 import org.onetwo.common.utils.LangUtils;
@@ -230,14 +229,14 @@ abstract public class AbstractMappedField implements DbmMappedField{
 		this.label = label;
 	}
 
-	@Override
+	/*@Override
 	public boolean isGeneratedValueFetchBeforeInsert() {
 		return isSeqStrategy() || getGeneratedValueIAttrs().getGenerationType()==GenerationType.TABLE;
-	}
+	}*/
 
 	@Override
 	public boolean isGeneratedValue() {
-		return this.strategyType!=null;
+		return this.getGeneratedValueIAttrs()!=null;
 	}
 
 	@Override
