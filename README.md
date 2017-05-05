@@ -9,6 +9,7 @@
 - [maven配置](https://github.com/wayshall/dbm#maven)
 - [一行代码启用](https://github.com/wayshall/dbm#一行代码启用)
 - [实体映射](https://github.com/wayshall/dbm#实体映射)
+- [id策略](https://github.com/wayshall/dbm#id策略)
 - [BaseEntityManager接口](https://github.com/wayshall/dbm#baseentitymanager接口)
 - [CrudEntityManager接口](https://github.com/wayshall/dbm#crudentitymanager接口)
 - [DbmRepository查询接口](https://github.com/wayshall/dbm#dbmrepository查询接口)
@@ -108,6 +109,63 @@ java的字段名使用驼峰的命名风格，而数据库使用下划线的风�
 
 - 注意：为了保持简单和轻量级，dbm的实体映射只支持单表，不支持多表级联映射。复杂的查询和映射请使用[DbmRepository查询接口](https://github.com/wayshall/dbm#dbmrepository查询接口)
 
+## id策略
+dbm支持jpa的几种id策略注解：
+- GenerationType.IDENTITY
+  使用数据库本身的自增策略
+- GenerationType.SEQUENCE
+  使用数据库的序列策略（只支持oracle）
+- GenerationType.TABLE
+  使用自定义的数据库表管理序列
+- GenerationType.AUTO
+  目前的实现是：如果是mysql，则等同于GenerationType.IDENTITY，如果是oracle，则等同于GenerationType.SEQUENCE
+
+### 详细使用
+#### GenerationType.IDENTITY
+```Java
+@Entity
+@Table(name="t_user")
+public class UserEntity implements Serializable {
+
+	@Id
+	@GeneratedValue(strategy=GenerationType.IDENTITY) 
+	protected Long id;
+}
+```
+
+
+#### GenerationType.TABLE
+```Java
+@Entity
+@Table(name="t_user")
+public class UserEntity implements Serializable {
+
+	@Id
+	@GeneratedValue(strategy = GenerationType.TABLE, generator="tableIdGenerator")  
+	@TableGenerator(name = "tableIdGenerator",  
+	    table="gen_ids",  
+	    pkColumnName="gen_name",  
+	    valueColumnName="gen_value",  
+	    pkColumnValue="seq_test_user",  
+	    allocationSize=50
+	)
+	protected Long id;
+}
+```
+
+
+#### GenerationType.SEQUENCE
+```Java
+@Entity
+@Table(name="t_user")
+public class UserEntity implements Serializable {
+
+	@Id
+	@GeneratedValue(strategy=GenerationType.SEQUENCE, generator="seqGenerator") 
+	@SequenceGenerator(name="seqGenerator", sequenceName="SEQ_TEST_USER")
+	protected Long id;
+}
+```
 
 ## BaseEntityManager接口
 大多数数据库操作都可以通过BaseEntityManager接口来完成。   

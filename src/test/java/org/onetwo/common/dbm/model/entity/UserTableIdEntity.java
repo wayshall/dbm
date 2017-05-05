@@ -4,6 +4,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.TableGenerator;
 
@@ -37,7 +38,7 @@ public class UserTableIdEntity extends BaseModel<UserTableIdEntity, Long> {
 	    pkColumnValue="seq_test_user",  
 	    allocationSize=50
 	)
-//	@SequenceGenerator
+	@SequenceGenerator(name="seqGenerator", sequenceName="SEQ_TEST_USER")
 	protected Long id;
 	@Length(min=1, max=50)
 	protected String userName;
