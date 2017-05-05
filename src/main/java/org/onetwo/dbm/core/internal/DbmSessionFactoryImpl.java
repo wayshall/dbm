@@ -277,6 +277,7 @@ public class DbmSessionFactoryImpl implements InitializingBean, DbmSessionFactor
 		DbmSessionImpl session = createDbmSession(null);
 		session.setDebug(getDataBaseConfig().isLogSql());
 		session.setTransactionType(SessionTransactionType.MANUAL);
+		session.setDbmJdbcOperations(getServiceRegistry().getDbmJdbcOperations());
 		return proxySession(session);
 	}
 	

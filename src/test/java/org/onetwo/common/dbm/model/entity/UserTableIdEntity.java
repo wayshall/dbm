@@ -39,7 +39,7 @@ public class UserTableIdEntity extends BaseModel<UserTableIdEntity, Long> {
 	    pkColumnName="gen_name",  
 	    valueColumnName="gen_value",  
 	    pkColumnValue="seq_test_user",  
-	    allocationSize=100
+	    allocationSize=50
 	)
 //	@SequenceGenerator
 	protected Long id;
@@ -70,6 +70,36 @@ public class UserTableIdEntity extends BaseModel<UserTableIdEntity, Long> {
 	}
 	public void setUserName(String userName) {
 		this.userName = userName;
+	}
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((id == null) ? 0 : id.hashCode());
+		result = prime * result
+				+ ((userName == null) ? 0 : userName.hashCode());
+		return result;
+	}
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		UserTableIdEntity other = (UserTableIdEntity) obj;
+		if (id == null) {
+			if (other.id != null)
+				return false;
+		} else if (!id.equals(other.id))
+			return false;
+		if (userName == null) {
+			if (other.userName != null)
+				return false;
+		} else if (!userName.equals(other.userName))
+			return false;
+		return true;
 	}
 	
 	
