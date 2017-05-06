@@ -8,6 +8,7 @@ import org.onetwo.dbm.event.DbmEventAction;
 import org.onetwo.dbm.event.DbmEventListenerManager;
 import org.onetwo.dbm.event.oracle.OracleBatchInsertEventListener;
 import org.onetwo.dbm.event.oracle.OracleInsertEventListener;
+import org.onetwo.dbm.id.StrategyType;
 import org.onetwo.dbm.mapping.DbmTypeMapping.OracleSqlTypeMapping;
 
 
@@ -20,6 +21,8 @@ public class OracleDialect extends AbstractDBDialect {
 
 	public void registerIdStrategy(){
 		this.getIdStrategy().add(StrategyType.SEQ);
+		this.getIdStrategy().add(StrategyType.TABLE);
+		this.getIdStrategy().add(StrategyType.DBM);
 	}
 	
 	public String getLimitString(String sql, String firstName, String maxResultName) {

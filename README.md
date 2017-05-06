@@ -119,6 +119,7 @@ dbm支持jpa的几种id策略注解：
   使用自定义的数据库表管理序列
 - GenerationType.AUTO
   目前的实现是：如果是mysql，则等同于GenerationType.IDENTITY，如果是oracle，则等同于GenerationType.SEQUENCE
+- 
 
 ### 详细使用
 #### GenerationType.IDENTITY

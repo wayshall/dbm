@@ -19,6 +19,7 @@ import org.onetwo.dbm.event.DbmFindEventListener;
 import org.onetwo.dbm.event.DbmInsertEventListener;
 import org.onetwo.dbm.event.DbmInsertOrUpdateListener;
 import org.onetwo.dbm.event.DbmUpdateEventListener;
+import org.onetwo.dbm.id.StrategyType;
 import org.onetwo.dbm.mapping.DbmTypeMapping;
 import org.onetwo.dbm.mapping.DefaultSQLBuilderFactory;
 import org.onetwo.dbm.mapping.SQLBuilderFactory;
@@ -206,12 +207,6 @@ abstract public class AbstractDBDialect implements InnerDBDialet, DBDialect {
 	}*/
 	
 
-	
-	public static enum StrategyType {
-		INCREASE_ID,
-		SEQ
-	}
-	
 	public static class DBMeta {
 		
 		public static DBMeta create(DataBase db){

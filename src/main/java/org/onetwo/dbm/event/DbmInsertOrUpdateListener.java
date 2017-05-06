@@ -14,6 +14,7 @@ public class DbmInsertOrUpdateListener extends AbstractDbmEventListener {
 		int updateCount = 0;
 		
 		if(entry.hasIdentifyValue(entity)){
+			//如果id有值并且id是自增
 			if(entry.getIdentifyField().isGeneratedValue()){
 				if(insertOrUpdate.isDynamicUpdate()){
 					updateCount = es.dymanicUpdate(entity);

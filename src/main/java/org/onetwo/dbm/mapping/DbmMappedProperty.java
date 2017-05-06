@@ -3,10 +3,6 @@ package org.onetwo.dbm.mapping;
 import java.util.Map;
 
 import javax.persistence.Enumerated;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.TableGenerator;
 
 import org.onetwo.common.utils.JFishProperty;
 import org.onetwo.dbm.exception.DbmException;
@@ -66,9 +62,16 @@ public class DbmMappedProperty extends AbstractMappedField {
 	}
 	
 	public IdentifierGenerator<?> getIdGenerator(){
+		if(getGeneratedValueIAttrs()==null){
+			throw new DbmException("field not supported generated value: " + getName());
+		}
 		IdentifierGenerator<?> idGenerator = this.idGenerators.get(generatedValueIAttrs.getGenerator());
 		if(idGenerator==null){
 			throw new DbmException("can not find IdGenerator for name: " + generatedValueIAttrs.getGenerator());
+		}
+		if(!idGenerator.getStrategyType().equals(getStrategyType())){
+			throw new DbmException("the id generator GenerationType["+idGenerator.getStrategyType().getGenerationType()+"] "
+					+ "not match config type["+getGeneratedValueIAttrs().getGenerationType()+"] of field : " + getName());
 		}
 		return idGenerator;
 	}

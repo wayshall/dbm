@@ -8,6 +8,7 @@ import javax.persistence.TableGenerator;
 
 import org.onetwo.common.annotation.AnnotationInfo;
 import org.onetwo.common.reflect.ReflectUtils;
+import org.onetwo.common.spring.Springs;
 import org.onetwo.dbm.annotation.DbmIdGenerator;
 import org.onetwo.dbm.id.CustomIdGenerator;
 import org.onetwo.dbm.id.CustomerIdGeneratorAdapter;
@@ -55,7 +56,10 @@ public class IdGeneratorFactory {
 		if(dg==null){
 			return Optional.empty();
 		}
-		CustomIdGenerator<? extends Serializable> customIdGenerator = ReflectUtils.newInstance(dg.generatorClass());
+		CustomIdGenerator<? extends Serializable> customIdGenerator = Springs.getInstance().getBean(dg.generatorClass());
+		if(customIdGenerator==null){
+			customIdGenerator = ReflectUtils.newInstance(dg.generatorClass());
+		}
 		IdentifierGenerator<? extends Serializable> idGenerator = new CustomerIdGeneratorAdapter<>(dg.name(), customIdGenerator);
 		return Optional.of(idGenerator);
 	}

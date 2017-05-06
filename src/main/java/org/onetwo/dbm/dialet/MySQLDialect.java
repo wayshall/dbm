@@ -2,6 +2,7 @@ package org.onetwo.dbm.dialet;
 
 import org.onetwo.common.db.DataBase;
 import org.onetwo.common.utils.StringUtils;
+import org.onetwo.dbm.id.StrategyType;
 
 public class MySQLDialect extends AbstractDBDialect {
 
@@ -11,7 +12,9 @@ public class MySQLDialect extends AbstractDBDialect {
 
 
 	public void registerIdStrategy(){
-		this.getIdStrategy().add(StrategyType.INCREASE_ID);
+		this.getIdStrategy().add(StrategyType.IDENTITY);
+		this.getIdStrategy().add(StrategyType.TABLE);
+		this.getIdStrategy().add(StrategyType.DBM);
 	}
 	
 	public String getLimitString(String sql, String firstName, String maxResultName) {

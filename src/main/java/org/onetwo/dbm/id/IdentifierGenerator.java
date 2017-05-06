@@ -12,6 +12,9 @@ import org.onetwo.dbm.core.spi.DbmSessionImplementor;
 public interface IdentifierGenerator<T extends Serializable> {
 
 	String getName();
+	
+	StrategyType getStrategyType();
+	
 	T generate(DbmSessionImplementor session);
 	/***
 	 * 

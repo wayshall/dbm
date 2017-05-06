@@ -53,7 +53,7 @@ public class DbmInsertEventListener extends InsertEventListener{
 		
 		int updateCount = 0;
 		if(event.isFetchId()){
-			if(entry.getIdentifyField()!=null && entry.getIdentifyField().isIncreaseIdStrategy()){ 
+			if(entry.getIdentifyField()!=null && entry.getIdentifyField().isIdentityStrategy()){ 
 				int index = 0;
 				for(Object[] arg : args){
 					KeyHolder keyHolder = new GeneratedKeyHolder();

@@ -11,10 +11,11 @@ import org.onetwo.common.utils.JFishProperty;
 import org.onetwo.common.utils.LangUtils;
 import org.onetwo.common.utils.StringUtils;
 import org.onetwo.dbm.annotation.DbmFieldListeners;
-import org.onetwo.dbm.dialet.AbstractDBDialect.StrategyType;
 import org.onetwo.dbm.event.DbmEntityFieldListener;
 import org.onetwo.dbm.event.DbmEventAction;
 import org.onetwo.dbm.exception.DbmException;
+import org.onetwo.dbm.id.StrategyType;
+import org.onetwo.dbm.jpa.GeneratedValueIAttrs;
 import org.onetwo.dbm.mapping.version.VersionableType;
 import org.onetwo.dbm.utils.DbmUtils;
 
@@ -236,7 +237,8 @@ abstract public class AbstractMappedField implements DbmMappedField{
 
 	@Override
 	public boolean isGeneratedValue() {
-		return this.getGeneratedValueIAttrs()!=null;
+		GeneratedValueIAttrs attrs = getGeneratedValueIAttrs();
+		return attrs!=null && !isIdentityStrategy();
 	}
 
 	@Override
@@ -245,8 +247,8 @@ abstract public class AbstractMappedField implements DbmMappedField{
 	}
 
 	@Override
-	public boolean isIncreaseIdStrategy() {
-		return this.strategyType==StrategyType.INCREASE_ID;
+	public boolean isIdentityStrategy() {
+		return this.strategyType==StrategyType.IDENTITY;
 	}
 
 	@Override

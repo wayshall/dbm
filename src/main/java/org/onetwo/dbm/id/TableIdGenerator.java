@@ -56,6 +56,12 @@ public class TableIdGenerator extends AbstractIdentifierGenerator {
 		return attrs.getAllocationSize();
 	}
 
+	@Override
+	public StrategyType getStrategyType() {
+		return StrategyType.TABLE;
+	}
+
+
 	/****
 	 */
 	@Override

@@ -22,7 +22,7 @@ import org.onetwo.dbm.id.SnowflakeIdGenerator;
 public class UserTableDbmIdEntity extends BaseModel<UserTableDbmIdEntity, Long> {
 
 	@Id  
-	@GeneratedValue(strategy = GenerationType.TABLE, generator="snowflake") 
+	@GeneratedValue(strategy = GenerationType.AUTO, generator="snowflake") 
 	@DbmIdGenerator(name="snowflake", generatorClass=SnowflakeGenerator.class)
 	protected Long id;
 	@Length(min=1, max=50)

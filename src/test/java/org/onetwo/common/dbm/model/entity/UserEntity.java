@@ -96,8 +96,6 @@ public class UserEntity {
 	 * @return
 	 */
 	@Id
-	//TODO 未实现此id策略
-	@GeneratedValue(strategy=GenerationType.TABLE, generator="UserEntityGenerator") 
 	@Column(name="ID")
 	public Long getId() {
 		return this.id;

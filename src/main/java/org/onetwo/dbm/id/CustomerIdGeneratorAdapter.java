@@ -21,6 +21,11 @@ public class CustomerIdGeneratorAdapter<T extends Serializable> implements Ident
 	}
 
 	@Override
+	public StrategyType getStrategyType() {
+		return StrategyType.DBM;
+	}
+
+	@Override
 	public String getName() {
 		return name;
 	}

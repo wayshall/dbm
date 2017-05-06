@@ -49,7 +49,7 @@ public class DbmNestedMappingTest extends DbmBaseTest {
 		List<CompanyEntity> companies = LangOps.ntimesMap(10, i->{
 			return createCompany(i);
 		});
-		dbmEntityManager.save(companies);
+//		dbmEntityManager.save(companies);
 		
 		List<CompanyEntity> dbcompanies = dbmEntityManager.findAll(CompanyEntity.class);
 		assertThat(dbcompanies.size()).isEqualTo(companies.size());

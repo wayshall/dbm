@@ -33,6 +33,12 @@ public class SequenceIdGenerator extends AbstractIdentifierGenerator {
 	}
 
 
+	@Override
+	public StrategyType getStrategyType() {
+		return StrategyType.SEQ;
+	}
+
+
 	private Long generateOneSeq(DbmSessionImplementor session) {
 		SequenceNameManager sequenceNameManager = session.getSequenceNameManager();
 		String seqSql = sequenceNameManager.getSequenceSql(attrs.getSequenceName(), null);

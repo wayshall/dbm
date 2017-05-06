@@ -10,6 +10,7 @@ import org.onetwo.common.dbm.DbmDaoTest;
 import org.onetwo.common.dbm.DbmEntityManagerTest;
 import org.onetwo.common.dbm.DbmNestedMappingTest;
 import org.onetwo.common.dbm.TransactionalListenerTest;
+import org.onetwo.common.dbm.UserDbmIdEntityTest;
 import org.onetwo.common.dbm.UserTableIdEntityTest;
 
 @RunWith(Suite.class)
@@ -22,7 +23,8 @@ import org.onetwo.common.dbm.UserTableIdEntityTest;
 	DbmNestedMappingTest.class,
 	TransactionalListenerTest.class,
 	DbmSessionCacheTest.class,
-	UserTableIdEntityTest.class
+	UserTableIdEntityTest.class,
+	UserDbmIdEntityTest.class
 //	RichModelTest.class
 })
 public class DbmTestCase {

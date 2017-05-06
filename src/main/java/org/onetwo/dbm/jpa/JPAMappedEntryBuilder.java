@@ -27,8 +27,8 @@ import org.onetwo.common.utils.JFishProperty;
 import org.onetwo.common.utils.LangUtils;
 import org.onetwo.common.utils.StringUtils;
 import org.onetwo.dbm.core.spi.DbmInnerServiceRegistry;
-import org.onetwo.dbm.dialet.AbstractDBDialect.StrategyType;
 import org.onetwo.dbm.exception.DbmException;
+import org.onetwo.dbm.id.StrategyType;
 import org.onetwo.dbm.mapping.AbstractMappedField;
 import org.onetwo.dbm.mapping.BaseColumnInfo;
 import org.onetwo.dbm.mapping.ColumnInfo;
@@ -178,6 +178,9 @@ public class JPAMappedEntryBuilder extends DbmMappedEntryBuilder {
 	protected void buildIdGeneratorsOnField(DbmMappedField mfield){
 		super.buildIdGeneratorsOnField(mfield);
 		GeneratedValueIAttrs generatedValueIAttrs = mfield.getGeneratedValueIAttrs();
+		if(generatedValueIAttrs==null){
+			return ;
+		}
 		
 		IdGeneratorFactory.createSequenceGenerator(mfield.getPropertyInfo().getAnnotationInfo())
 							.ifPresent(idGenerator->mfield.addIdGenerator(idGenerator));
@@ -186,17 +189,25 @@ public class JPAMappedEntryBuilder extends DbmMappedEntryBuilder {
 		
 		GenerationType type = generatedValueIAttrs.getGenerationType();
 		if(generatedValueIAttrs!=null){
+			StrategyType stype = null;
 			if(type==GenerationType.AUTO){
-				if(this.getDialect().getDbmeta().isMySQL()){
-					mfield.setStrategyType(StrategyType.INCREASE_ID);
+				if(StringUtils.isNotBlank(generatedValueIAttrs.getGenerator())){
+					stype = StrategyType.DBM;
+				}else if(this.getDialect().getDbmeta().isMySQL()){
+					stype = StrategyType.IDENTITY;
+				}else if(this.getDialect().getDbmeta().isOracle()){
+					stype = StrategyType.SEQ;
 				}else{
-					mfield.setStrategyType(StrategyType.SEQ);
+					throw new DbmException("database["+this.getDialect().getDbmeta().getDbName()+"] not supported the GenerationType.AUTO");
 				}
 			}else if(type==GenerationType.IDENTITY){
-				mfield.setStrategyType(StrategyType.INCREASE_ID);
+				stype = StrategyType.IDENTITY;
 			}else if(type==GenerationType.SEQUENCE){
-				mfield.setStrategyType(StrategyType.SEQ);
+				stype = StrategyType.SEQ;
+			}else if(type==GenerationType.TABLE){
+				stype = StrategyType.TABLE;
 			}
+			mfield.setStrategyType(stype);
 		}
 	}
 	
@@ -226,8 +237,8 @@ public class JPAMappedEntryBuilder extends DbmMappedEntryBuilder {
 		}
 		
 		if(field.isIdentify()){
-			col.setInsertable(!field.isIncreaseIdStrategy());
-			col.setUpdatable(!field.isIncreaseIdStrategy());
+			col.setInsertable(!field.isIdentityStrategy());
+			col.setUpdatable(!field.isIdentityStrategy());
 		}
 		
 		return col;

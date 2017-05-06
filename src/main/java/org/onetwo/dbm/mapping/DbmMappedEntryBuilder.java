@@ -1,7 +1,6 @@
 package org.onetwo.dbm.mapping;
 
 import java.beans.PropertyDescriptor;
-import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Collection;
@@ -25,10 +24,9 @@ import org.onetwo.dbm.annotation.DbmColumn;
 import org.onetwo.dbm.annotation.DbmEntity;
 import org.onetwo.dbm.annotation.DbmQueryable;
 import org.onetwo.dbm.core.spi.DbmInnerServiceRegistry;
-import org.onetwo.dbm.dialet.AbstractDBDialect.StrategyType;
 import org.onetwo.dbm.dialet.DBDialect;
 import org.onetwo.dbm.exception.DbmException;
-import org.onetwo.dbm.id.IdentifierGenerator;
+import org.onetwo.dbm.id.StrategyType;
 import org.onetwo.dbm.jpa.GeneratedValueIAttrs;
 import org.onetwo.dbm.query.DbmQueryableMappedEntryImpl;
 import org.slf4j.Logger;
@@ -320,8 +318,8 @@ public class DbmMappedEntryBuilder implements MappedEntryBuilder, RegisterManage
 		col.setJavaType(field.getPropertyInfo().getType());
 		col.setPrimaryKey(field.isIdentify());
 		if(field.isIdentify()){
-			col.setInsertable(!field.isIncreaseIdStrategy());
-			col.setUpdatable(!field.isIncreaseIdStrategy());
+			col.setInsertable(!field.isIdentityStrategy());
+			col.setUpdatable(!field.isIdentityStrategy());
 		}
 		
 		return col;
@@ -383,7 +381,7 @@ public class DbmMappedEntryBuilder implements MappedEntryBuilder, RegisterManage
 		if("id".equals(mfield.getName()))
 			mfield.setIdentify(true);
 		if(this.getDialect().getDbmeta().isMySQL()){
-			mfield.setStrategyType(StrategyType.INCREASE_ID);
+			mfield.setStrategyType(StrategyType.IDENTITY);
 		}else if(this.getDialect().getDbmeta().isOracle()){
 			mfield.setStrategyType(StrategyType.SEQ);
 		}
