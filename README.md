@@ -119,7 +119,8 @@ dbm支持jpa的几种id策略注解：
   使用自定义的数据库表管理序列
 - GenerationType.AUTO
   目前的实现是：如果是mysql，则等同于GenerationType.IDENTITY，如果是oracle，则等同于GenerationType.SEQUENCE
-- 
+- DbmIdGenerator
+  dbm提供id生成注解，可通过配置 generatorClass 属性，配置自定义的id实现类，实现类必须实现CustomIdGenerator接口。dbm首先会通过尝试在spring context查找generatorClass类型的bean，如果找不到则通过反射创建实例。
 
 ### 详细使用
 #### GenerationType.IDENTITY
@@ -167,6 +168,21 @@ public class UserEntity implements Serializable {
 	protected Long id;
 }
 ```
+
+### DbmIdGenerator
+```Java
+@Entity
+@Table(name="t_user")
+public class UserEntity implements Serializable {
+
+	@Id  
+	@GeneratedValue(strategy = GenerationType.AUTO, generator="myIdGenerator") 
+	@DbmIdGenerator(name="myIdGenerator", generatorClass=MyIdGenerator.class)
+	protected Long id;
+}
+```
+
+
 
 ## BaseEntityManager接口
 大多数数据库操作都可以通过BaseEntityManager接口来完成。   
