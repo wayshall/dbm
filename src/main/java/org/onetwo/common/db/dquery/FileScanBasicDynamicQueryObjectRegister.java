@@ -69,7 +69,7 @@ public class FileScanBasicDynamicQueryObjectRegister implements DynamicQueryObje
 			BeanDefinition beandef = BeanDefinitionBuilder.rootBeanDefinition(JDKDynamicProxyCreator.class)
 								.addConstructorArgValue(interfaceClass)
 								.addConstructorArgValue(methodCache)
-								.addPropertyValue("sqlFile", f.getValue())
+								.addPropertyValue(JDKDynamicProxyCreator.ATTR_SQL_FILE, f.getValue())
 								.setScope(BeanDefinition.SCOPE_SINGLETON)
 //								.setRole(BeanDefinition.ROLE_APPLICATION)
 								.getBeanDefinition();

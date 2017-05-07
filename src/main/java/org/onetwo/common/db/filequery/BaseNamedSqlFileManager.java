@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.onetwo.common.db.dquery.DbmSqlFileResource;
 import org.onetwo.common.db.filequery.spi.DbmNamedQueryFileListener;
 import org.onetwo.common.db.filequery.spi.NamedSqlFileManager;
 import org.onetwo.common.db.filequery.spi.SqlFileParser;
@@ -63,7 +64,7 @@ public class BaseNamedSqlFileManager implements NamedSqlFileManager {
 	 * 解释sql文件
 	 */
 	@Override
-	public DbmNamedQueryFile buildSqlFile(ResourceAdapter<?> sqlFile){
+	public DbmNamedQueryFile buildSqlFile(DbmSqlFileResource<?> sqlFile){
 		Assert.notNull(sqlFile);
 		DbmNamedQueryFile info = this.parseSqlFile(sqlFile, true);
 		this.buildSqlFileMonitor(sqlFile);

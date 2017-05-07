@@ -63,27 +63,6 @@ public class DynamicQueryHandler implements InvocationHandler {
 	}
 	
 
-	/*@Override
-	public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-		DbmSessionFactory sf = em.getRawManagerObject(DbmSessionFactory.class);
-		if(sf.isTransactionManagerEqualsCurrentTransactionManager()){
-			return invoke0(proxy, method, args);
-		}else{
-			TransactionTemplate tt = new TransactionTemplate(sf.getTransactionManager());
-			tt.afterPropertiesSet();
-			return tt.execute(status->invoke0(proxy, method, args));
-			DbmSession session = sf.openSession();
-			DbmTransaction transaction = session.beginTransaction();
-			try {
-				Object result = invoke0(proxy, method, args);
-				transaction.commit();
-				return result;
-			} catch (Throwable e) {
-				DbmUtils.rollbackOnException(transaction, e);
-				throw new UndeclaredThrowableException(e, "TransactionCallback threw undeclared checked exception");
-			}
-		}
-	}*/
 	@Override
 	public Object invoke(Object proxy, Method method, Object[] args) {
 		if(Object.class  == method.getDeclaringClass()) {

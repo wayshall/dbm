@@ -17,9 +17,9 @@ import org.onetwo.common.db.dquery.DynamicMethod.DynamicMethodParameter;
 import org.onetwo.common.db.dquery.annotation.AsCountQuery;
 import org.onetwo.common.db.dquery.annotation.BatchObject;
 import org.onetwo.common.db.dquery.annotation.ExecuteUpdate;
-import org.onetwo.common.db.dquery.annotation.QueryDispatcher;
 import org.onetwo.common.db.dquery.annotation.Param;
 import org.onetwo.common.db.dquery.annotation.QueryConfig;
+import org.onetwo.common.db.dquery.annotation.QueryDispatcher;
 import org.onetwo.common.db.filequery.JNamedQueryKey;
 import org.onetwo.common.db.filequery.ParsedSqlUtils;
 import org.onetwo.common.db.filequery.ParserContext;
@@ -58,6 +58,8 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 	
 	private DynamicMethodParameter pageParamter;
 	private DynamicMethodParameter dispatcherParamter;
+	
+	private QueryConfigData queryConfig;
 	
 	public DynamicMethod(Method method){
 		super(method);
@@ -381,7 +383,7 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 	protected void buildQueryConfig(ParserContext parserContext){
 		QueryConfig queryConfig = AnnotationUtils.findAnnotation(method, QueryConfig.class, true);//method.getAnnotation(QueryConfig.class);
 		if(queryConfig!=null){
-			QueryConfigData config = new QueryConfigData();
+			QueryConfigData config = new QueryConfigData(queryConfig.value(), queryConfig.countQuery());
 			config.setLikeQueryFields(Arrays.asList(queryConfig.likeQueryFields()));
 			if(queryConfig.funcClass()==ParserContextFunctionSet.class){
 				config.setVariables(ParserContextFunctionSet.getInstance());
@@ -390,6 +392,7 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 				config.setVariables(ParserContextFunctionSet.getInstance(), func);
 			}
 			parserContext.setQueryConfig(config);
+			this.queryConfig = config;
 			
 		}else{
 			parserContext.setQueryConfig(ParsedSqlUtils.EMPTY_CONFIG);
@@ -455,6 +458,10 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 		return batchUpdate;//(executeUpdate!=null && executeUpdate.isBatch()) || );
 	}
 	
+	public QueryConfigData getQueryConfig() {
+		return queryConfig;
+	}
+
 	protected static class DynamicMethodParameter extends BaseMethodParameter {
 
 		final protected String[] condidateParameterNames;

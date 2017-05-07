@@ -5,6 +5,7 @@ package org.onetwo.common.base;
 import javax.annotation.Resource;
 import javax.sql.DataSource;
 
+import org.onetwo.common.base.DbmRichModelBaseTest.DbmRichModelBaseTestContextConfig;
 import org.onetwo.common.dbm.PackageInfo;
 import org.onetwo.common.spring.cache.JFishSimpleCacheManagerImpl;
 import org.onetwo.common.spring.config.JFishProfile;
@@ -21,7 +22,7 @@ import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
 @ActiveProfiles({ "dev" })
 //@ContextConfiguration(value="classpath:/applicationContext-test.xml")
-@ContextConfiguration(loader=AnnotationConfigContextLoader.class)
+@ContextConfiguration(loader=AnnotationConfigContextLoader.class, classes=DbmRichModelBaseTestContextConfig.class)
 //@Rollback(false)
 public class DbmRichModelBaseTest extends SpringBaseJUnitTestCase {
 	
@@ -30,7 +31,7 @@ public class DbmRichModelBaseTest extends SpringBaseJUnitTestCase {
 	@ImportResource("classpath:conf/applicationContext-test.xml")
 	@EnableDbm(packagesToScan="org.onetwo.common.dbm.richmodel")
 	@ComponentScan(basePackageClasses=PackageInfo.class)
-	public static class DbmOrmTestInnerContextConfig {
+	public static class DbmRichModelBaseTestContextConfig {
 
 		@Resource
 		private DataSource dataSource;

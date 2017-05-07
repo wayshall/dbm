@@ -9,8 +9,14 @@ public class QueryConfigData {
 	private List<String> likeQueryFields;
 //	private final boolean statful;
 	private QueryContextVariable[] variables;
+	
+	final private String query;
+	final private String countQuery;
 
-	public QueryConfigData() {
+	public QueryConfigData(String query, String countQuery) {
+		super();
+		this.query = query;
+		this.countQuery = countQuery;
 	}
 
 	public boolean isLikeQueryField(String name){
@@ -35,5 +41,12 @@ public class QueryConfigData {
 		this.variables = variable;
 	}
 
+	public String getQuery() {
+		return query;
+	}
+
+	public String getCountQuery() {
+		return countQuery;
+	}
 
 }

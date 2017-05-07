@@ -47,12 +47,12 @@ public class MultipCommentsSqlFileParser implements SqlFileParser {
 	protected SqlDirectiveExtractor sqlDirectiveExtractor = new SimpleDirectiveExtractor();
 	
 	@Override
-	public void parseToNamespaceProperty(DbmNamedQueryFile namespaceInfo, ResourceAdapter<?> f) {
-		if(!f.getName().endsWith(POSTFIX)){
-			logger.info("file["+f.getName()+" is not a ["+POSTFIX+"] file, ignore it.");
+	public void parseToNamespaceProperty(DbmNamedQueryFile namespaceInfo, ResourceAdapter<?> sqlFile) {
+		if(!sqlFile.getName().endsWith(POSTFIX)){
+			logger.info("file["+sqlFile.getName()+" is not a ["+POSTFIX+"] file, ignore it.");
 			return ;
 		}
-		SimpleSqlFileLineLexer lineLexer = new SimpleSqlFileLineLexer(createLineReader(f));
+		SimpleSqlFileLineLexer lineLexer = new SimpleSqlFileLineLexer(createLineReader(sqlFile));
 		lineLexer.nextLineToken();
 		while(lineLexer.getLineToken()!=LineToken.EOF){
 			LineToken token = lineLexer.getLineToken();
@@ -61,7 +61,7 @@ public class MultipCommentsSqlFileParser implements SqlFileParser {
 			
 			switch (token) {
 				case MULTIP_COMMENT:
-					this.parseQueryStatement(lineLexer, namespaceInfo, f);
+					this.parseQueryStatement(lineLexer, namespaceInfo, sqlFile);
 					break;
 					
 				default:
