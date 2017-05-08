@@ -3,7 +3,7 @@ package org.onetwo.common.db.filequery;
 import java.util.List;
 import java.util.Properties;
 
-import org.onetwo.common.db.filequery.spi.SqlFileParser;
+import org.onetwo.common.db.filequery.spi.DbmNamedQueryInfoParser;
 import org.onetwo.common.propconf.JFishProperties;
 import org.onetwo.common.propconf.ResourceAdapter;
 import org.onetwo.common.utils.LangUtils;
@@ -16,7 +16,7 @@ import org.onetwo.common.utils.StringUtils;
  * @author way
  *
  */
-public class OneCommentBasedSqlFileParser extends DefaultSqlFileParser implements SqlFileParser {
+public class OneCommentBasedSqlFileParser extends DefaultSqlFileParser implements DbmNamedQueryInfoParser {
 //	public static final String GLOBAL_NS_KEY = "global";
 //	public static final String COMMENT = "--";
 //	public static final String MULTIP_COMMENT_START = "/*";

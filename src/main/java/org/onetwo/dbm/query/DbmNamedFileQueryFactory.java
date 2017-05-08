@@ -7,7 +7,6 @@ import org.onetwo.common.db.dquery.NamedQueryInvokeContext;
 import org.onetwo.common.db.filequery.AbstractFileNamedQueryFactory;
 import org.onetwo.common.db.filequery.DbmNamedQueryInfo;
 import org.onetwo.common.db.filequery.DbmNamedSqlFileManager;
-import org.onetwo.common.db.filequery.spi.NamedSqlFileManager;
 import org.onetwo.common.utils.Assert;
 import org.onetwo.common.utils.Page;
 import org.springframework.jdbc.core.RowMapper;
@@ -59,16 +58,25 @@ public class DbmNamedFileQueryFactory extends AbstractFileNamedQueryFactory {
 
 	@Override
 	public <T> Page<T> findPage(Page<T> page, NamedQueryInvokeContext invokeContext) {
-		DbmQueryWrapper jq = this.createCountQuery(invokeContext);
-		Long total = jq.getSingleResult();
-		total = (total==null?0:total);
-		page.setTotalCount(total);
-		if(total>0){
-			jq = this.createQuery(invokeContext);
-			jq.setFirstResult(page.getFirst()-1);
-			jq.setMaxResults(page.getPageSize());
+		if(page.isAutoCount()){
+			DbmQueryWrapper jq = this.createCountQuery(invokeContext);
+			Long total = jq.getSingleResult();
+			total = (total==null?0:total);
+			page.setTotalCount(total);
+			if(total>0){
+				jq = this.createQuery(invokeContext);
+				/*jq.setFirstResult(page.getFirst()-1);
+				jq.setMaxResults(page.getPageSize());*/
+				jq.setPageParameter(page);
+				List<T> datalist = jq.getResultList();
+				page.setResult(datalist);
+			}
+		}else{
+			DbmQueryWrapper jq = this.createQuery(invokeContext);
+			jq.setPageParameter(page);
 			List<T> datalist = jq.getResultList();
 			page.setResult(datalist);
+//			page.setTotalCount(datalist.size());
 		}
 		return page;
 	}
@@ -76,13 +84,22 @@ public class DbmNamedFileQueryFactory extends AbstractFileNamedQueryFactory {
 	
 //	@Override
 	public <T> Page<T> findPage(Page<T> page, NamedQueryInvokeContext invokeContext, RowMapper<T> rowMapper) {
-		DbmQueryWrapperImpl jq = this.createCountQuery(invokeContext);
-		Long total = jq.getSingleResult();
-		page.setTotalCount(total);
-		if(total!=null && total>0){
-			jq = this.createQuery(invokeContext);
-			jq.setFirstResult(page.getFirst()-1);
-			jq.setMaxResults(page.getPageSize());
+		if(page.isAutoCount()){
+			DbmQueryWrapperImpl jq = this.createCountQuery(invokeContext);
+			Long total = jq.getSingleResult();
+			page.setTotalCount(total);
+			if(total!=null && total>0){
+				jq = this.createQuery(invokeContext);
+				/*jq.setFirstResult(page.getFirst()-1);
+				jq.setMaxResults(page.getPageSize());*/
+				jq.setPageParameter(page);
+				jq.getJfishQuery().setRowMapper(rowMapper);
+				List<T> datalist = jq.getResultList();
+				page.setResult(datalist);
+			}
+		}else{
+			DbmQueryWrapperImpl jq = this.createQuery(invokeContext);
+			jq.setPageParameter(page);
 			jq.getJfishQuery().setRowMapper(rowMapper);
 			List<T> datalist = jq.getResultList();
 			page.setResult(datalist);

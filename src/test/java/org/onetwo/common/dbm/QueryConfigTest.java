@@ -6,9 +6,11 @@ import java.util.List;
 
 import org.junit.Test;
 import org.onetwo.common.base.DbmBaseTest;
+import org.onetwo.common.db.BaseEntityManager;
 import org.onetwo.common.dbm.model.dao.UserQueryConfigDao;
 import org.onetwo.common.dbm.model.entity.UserEntity;
 import org.onetwo.common.utils.LangOps;
+import org.onetwo.common.utils.Page;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -20,6 +22,8 @@ public class QueryConfigTest extends DbmBaseTest {
 	
 	@Autowired
 	private UserQueryConfigDao userQueryConfigDao;
+	@Autowired
+	private BaseEntityManager baseEntityManager;
 	
 	
 	private UserEntity createUser(int index){
@@ -31,14 +35,29 @@ public class QueryConfigTest extends DbmBaseTest {
 		
 		return user;
 	}
+	
 	@Test
-	public void testSave(){
-		int count = 100;
+	public void testSaveAndFind(){
+		baseEntityManager.removeAll(UserEntity.class);
+		
+		final int count = 100;
 		List<UserEntity> users = LangOps.ntimesMap(count, i->{
 			return createUser(i);
 		});
 		int res = userQueryConfigDao.batchSaveUsers(users);
 		assertThat(res).isEqualTo(count);
+		
+		users = LangOps.ntimesMap(count, i->{
+			UserEntity user = new UserEntity();
+			user.setId(Integer.valueOf(count+i).longValue());
+			user.setUserName("another query test"+i);
+			return user;
+		});
+		res = userQueryConfigDao.batchSaveUsers(users);
+		assertThat(res).isEqualTo(count);
+		
+		Page<UserEntity> page = userQueryConfigDao.findUserPage(Page.create(1, UserEntity.class).noLimited(), USER_NAME_PREFIX);
+		assertThat(page.getSize()).isEqualTo(count);
 	}
 
 }

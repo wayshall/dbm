@@ -71,7 +71,7 @@ public class DefaultFileNamedSqlGenerator implements FileNamedSqlGenerator {
 	public ParsedSqlContext generatSql(){
 		String parsedSql = null;
 		ParsedSqlContext sv = null;
-		if(info.getFileSqlParserType()==FileSqlParserType.IGNORENULL){
+		if(info.getParserType()==FileSqlParserType.IGNORENULL){
 			String sql = countQuery?info.getCountSql():info.getSql();
 			DynamicQuery query = DynamicQueryFactory.createJFishDynamicQuery(sql, resultClass);
 			for(Entry<Object, Object> entry : this.params.entrySet()){
@@ -83,7 +83,7 @@ public class DefaultFileNamedSqlGenerator implements FileNamedSqlGenerator {
 			parsedSql = query.getTransitionSql();
 			sv = new SqlAndValues(false, parsedSql, query.getValues());
 			
-		}else if(info.getFileSqlParserType()==FileSqlParserType.TEMPLATE){
+		}else if(info.getParserType()==FileSqlParserType.TEMPLATE){
 //			Assert.notNull(parserContext);
 			if(parserContext==null){
 				parserContext = ParserContext.create();

@@ -7,10 +7,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.onetwo.common.db.dquery.DbmSqlFileResource;
 import org.onetwo.common.db.filequery.spi.DbmNamedQueryFileListener;
 import org.onetwo.common.db.filequery.spi.NamedSqlFileManager;
-import org.onetwo.common.db.filequery.spi.SqlFileParser;
+import org.onetwo.common.db.filequery.spi.DbmNamedQueryInfoParser;
 import org.onetwo.common.exception.BaseException;
 import org.onetwo.common.log.JFishLoggerFactory;
 import org.onetwo.common.propconf.ResourceAdapter;
@@ -23,18 +22,19 @@ import org.onetwo.dbm.exception.FileNamedQueryException;
 import org.slf4j.Logger;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 
 public class BaseNamedSqlFileManager implements NamedSqlFileManager {
 
 	
-	public static final String COMMENT = "--";
+	/*public static final String COMMENT = "--";
 	public static final String MULTIP_COMMENT_START = "/*";
-	public static final String MULTIP_COMMENT_END = "*/";
+	public static final String MULTIP_COMMENT_END = "* /";
 	public static final String CONFIG_PREFIX = "--@@";
 	public static final String NAME_PREFIX = "--@";
-	public static final String EQUALS_MARK = "=";
+	public static final String EQUALS_MARK = "=";*/
 //	public static final String IGNORE_NULL_KEY = "ignore.null";
 
 	protected final Logger logger = JFishLoggerFactory.getLogger(getClass());
@@ -46,7 +46,8 @@ public class BaseNamedSqlFileManager implements NamedSqlFileManager {
 //	private List<Properties> sqlfiles;
 //	private PropertiesWraper wrapper;
 	private Map<String, DbmNamedQueryInfo> namedQueryCache = Maps.newConcurrentMap();
-	private SqlFileParser sqlFileParser = new DefaultSqlFileParser();
+//	private DbmNamedQueryInfoParser sqlFileParser = new DefaultSqlFileParser();
+	private List<DbmNamedQueryInfoParser> queryInfoParsers = Lists.newArrayList(new DefaultSqlFileParser());
 	final private DbmNamedQueryFileListener listener;
 	
 	private boolean watchSqlFile;
@@ -60,11 +61,15 @@ public class BaseNamedSqlFileManager implements NamedSqlFileManager {
 		return listener;
 	}
 
+	final public void setQueryInfoParsers(List<DbmNamedQueryInfoParser> queryInfoParsers) {
+		this.queryInfoParsers = queryInfoParsers;
+	}
+
 	/****
 	 * 解释sql文件
 	 */
 	@Override
-	public DbmNamedQueryFile buildSqlFile(DbmSqlFileResource<?> sqlFile){
+	public DbmNamedQueryFile buildSqlFile(ResourceAdapter<?> sqlFile){
 		Assert.notNull(sqlFile);
 		DbmNamedQueryFile info = this.parseSqlFile(sqlFile, true);
 		this.buildSqlFileMonitor(sqlFile);
@@ -228,8 +233,11 @@ public class BaseNamedSqlFileManager implements NamedSqlFileManager {
 	 * @param file
 	 */
 	protected void buildNamedInfosToNamespaceFromResource(DbmNamedQueryFile np, ResourceAdapter<?> file){
-//		SqlFileParser<T> sqlFileParser = new DefaultSqlFileParser<>();a
-		sqlFileParser.parseToNamespaceProperty(np, file);
+//		sqlFileParser.parseToNamedQueryFile(np, file);
+		
+		this.queryInfoParsers.forEach(parser->{
+			parser.parseToNamedQueryFile(np, file);
+		});
 		
 		//post process 
 	}
@@ -277,9 +285,9 @@ public class BaseNamedSqlFileManager implements NamedSqlFileManager {
 		return namespaceProperties.values();
 	}
 	
-	final public void setSqlFileParser(SqlFileParser sqlFileParser) {
+	/*final public void setSqlFileParser(DbmNamedQueryInfoParser sqlFileParser) {
 		this.sqlFileParser = sqlFileParser;
-	}
+	}*/
 
 
 

@@ -3,7 +3,7 @@ package org.onetwo.common.db.filequery;
 import java.util.List;
 import java.util.Properties;
 
-import org.onetwo.common.db.filequery.spi.SqlFileParser;
+import org.onetwo.common.db.filequery.spi.DbmNamedQueryInfoParser;
 import org.onetwo.common.exception.BaseException;
 import org.onetwo.common.log.JFishLoggerFactory;
 import org.onetwo.common.propconf.JFishProperties;
@@ -13,7 +13,16 @@ import org.onetwo.common.utils.LangUtils;
 import org.onetwo.common.utils.StringUtils;
 import org.slf4j.Logger;
 
-public class DefaultSqlFileParser implements SqlFileParser {
+/****
+ * file example:
+ 	@findById = sql.....
+ 	@findById.propertyName1 = value1
+ 	@findById.propertyName2 = value2
+ * 
+ * @author wayshall
+ *
+ */
+public class DefaultSqlFileParser implements DbmNamedQueryInfoParser {
 
 	public static final String GLOBAL_NS_KEY = "global";
 	public static final String COMMENT = "--";
@@ -28,7 +37,7 @@ public class DefaultSqlFileParser implements SqlFileParser {
 	protected boolean debug = true;
 	
 	@Override
-	public void parseToNamespaceProperty(DbmNamedQueryFile np, ResourceAdapter<?> file) {
+	public void parseToNamedQueryFile(DbmNamedQueryFile np, ResourceAdapter<?> file) {
 		JFishPropertiesData jproperties = loadSqlFile(file);
 		if(jproperties==null){
 			return ;

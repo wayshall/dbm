@@ -6,7 +6,7 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.onetwo.common.db.filequery.SimpleSqlFileLineLexer.LineToken;
 import org.onetwo.common.db.filequery.spi.SqlDirectiveExtractor;
-import org.onetwo.common.db.filequery.spi.SqlFileParser;
+import org.onetwo.common.db.filequery.spi.DbmNamedQueryInfoParser;
 import org.onetwo.common.log.JFishLoggerFactory;
 import org.onetwo.common.propconf.JFishProperties;
 import org.onetwo.common.propconf.ResourceAdapter;
@@ -15,7 +15,19 @@ import org.slf4j.Logger;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.PropertyAccessorFactory;
 
-public class MultipCommentsSqlFileParser implements SqlFileParser {
+/****
+ * file example:
+ 	@name: findById
+ 	@propertyName1: value1
+ 	@propertyName2: value2
+ 	
+ 		sql.....
+ 		
+ * 
+ * @author wayshall
+ *
+ */
+public class MultipCommentsSqlFileParser implements DbmNamedQueryInfoParser {
 	
 	public static class SimpleDirectiveExtractor implements SqlDirectiveExtractor {
 		public static final String DIRECTIVE_PREFIX = SimpleSqlFileLineLexer.COMMENT + ">";//-->
@@ -47,7 +59,11 @@ public class MultipCommentsSqlFileParser implements SqlFileParser {
 	protected SqlDirectiveExtractor sqlDirectiveExtractor = new SimpleDirectiveExtractor();
 	
 	@Override
-	public void parseToNamespaceProperty(DbmNamedQueryFile namespaceInfo, ResourceAdapter<?> sqlFile) {
+	public void parseToNamedQueryFile(DbmNamedQueryFile namespaceInfo, ResourceAdapter<?> sqlFile) {
+		if(!sqlFile.exists()){
+			logger.info("sql file is not exists, ignore parse. namespace: " + namespaceInfo.getNamespace());
+			return ;
+		}
 		if(!sqlFile.getName().endsWith(POSTFIX)){
 			logger.info("file["+sqlFile.getName()+" is not a ["+POSTFIX+"] file, ignore it.");
 			return ;

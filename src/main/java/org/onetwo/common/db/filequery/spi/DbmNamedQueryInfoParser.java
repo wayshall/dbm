@@ -9,10 +9,10 @@ import org.onetwo.common.propconf.ResourceAdapter;
  *
  * @param <T>
  */
-public interface SqlFileParser {
+public interface DbmNamedQueryInfoParser {
 
 	String POSTFIX = SqlFileScanner.SQL_POSTFIX;
 	
-	void parseToNamespaceProperty(DbmNamedQueryFile np, ResourceAdapter<?> file);
+	void parseToNamedQueryFile(DbmNamedQueryFile namedQueryFile, ResourceAdapter<?> file);
 	
 }

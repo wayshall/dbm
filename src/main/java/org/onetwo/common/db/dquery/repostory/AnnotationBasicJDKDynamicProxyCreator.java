@@ -5,11 +5,11 @@ import java.lang.reflect.Method;
 import javax.sql.DataSource;
 
 import org.onetwo.common.db.DataBase;
+import org.onetwo.common.db.dquery.DbmSqlFileResource;
 import org.onetwo.common.db.dquery.DynamicMethod;
 import org.onetwo.common.db.dquery.JDKDynamicProxyCreator;
 import org.onetwo.common.db.filequery.SpringBasedSqlFileScanner;
 import org.onetwo.common.db.filequery.spi.SqlFileScanner;
-import org.onetwo.common.propconf.ResourceAdapter;
 import org.onetwo.common.spring.utils.SpringResourceAdapterImpl;
 import org.onetwo.dbm.exception.DbmException;
 import org.onetwo.dbm.jdbc.JdbcUtils;
@@ -26,7 +26,7 @@ public class AnnotationBasicJDKDynamicProxyCreator extends JDKDynamicProxyCreato
 	}
 
 	@Override
-	protected ResourceAdapter<?> getSqlFile(DataSource dataSource) {
+	protected DbmSqlFileResource<?> getSqlFile(DataSource dataSource) {
 		Class<?> repostoryClass = this.interfaceClass;
 		DataBase database = JdbcUtils.getDataBase(dataSource);
 		String filePath = repostoryClass.getName();
@@ -36,7 +36,8 @@ public class AnnotationBasicJDKDynamicProxyCreator extends JDKDynamicProxyCreato
 			sqlRes = getClassPathResource(database, filePath, true);
 		}
 		
-		return sqlRes;
+//		return sqlRes;
+		return new DbmSqlFileResource(sqlRes, interfaceClass);
 	}
 	
 	/***

@@ -105,7 +105,7 @@ public class JDKDynamicProxyCreator implements InitializingBean, ApplicationCont
 		Assert.notNull(sqlFile);
 
 		logger.info("initialize dynamic query proxy[{}] for : {}", beanName, sqlFile);
-		DbmNamedQueryFile queryFile = namedSqlFileManager.buildSqlFile(sqlFile);a
+		DbmNamedQueryFile queryFile = namedSqlFileManager.buildSqlFile(sqlFile);
 //		interfaceClass = ReflectUtils.loadClass(info.getNamespace());
 		if(!interfaceClass.getName().equals(queryFile.getNamespace())){
 			throw new FileNamedQueryException("namespace error:  interface->" + interfaceClass+", namespace->"+queryFile.getNamespace());

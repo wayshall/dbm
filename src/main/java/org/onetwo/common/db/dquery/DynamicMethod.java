@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.onetwo.common.annotation.AnnotationUtils;
 import org.onetwo.common.db.DbmQueryWrapper;
 import org.onetwo.common.db.QueryConfigData;
 import org.onetwo.common.db.QueryContextVariable;
@@ -33,6 +32,7 @@ import org.onetwo.common.utils.Page;
 import org.onetwo.common.utils.StringUtils;
 import org.onetwo.dbm.exception.FileNamedQueryException;
 import org.springframework.core.MethodParameter;
+import org.springframework.core.annotation.AnnotationUtils;
 
 
 public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter>{
@@ -73,12 +73,13 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 		Class<?> compClass = ReflectUtils.getGenricType(method.getGenericReturnType(), 0);
 		if(rClass==void.class){
 //			DynamicMethodParameter firstParamter = parameters.get(0);
-			pageParamter = dispatcherParamter!=null?parameters.get(1):parameters.get(0);
-			//如果返回类型为空，看第一个参数是否是page对象
+//			pageParamter = dispatcherParamter!=null?parameters.get(1):parameters.get(0);
+			//如果返回类型为空，看第参数里是否有page对象
+			this.pageParamter = this.findPagePrarameter();
 			rClass = pageParamter.getParameterType();
-			if(Page.class != rClass){
+			/*if(Page.class != rClass){
 				throw new FileNamedQueryException("["+method.toGenericString()+"] return void type, pelease define the Page object at parameter position : " + pageParamter.getParameterIndex());
-			}
+			}*/
 			/*if(pageParamter.getParameterAnnotation(Name.class)==null)//如果page对象没有name注解，移除它
 				this.parameters.remove(0)*/;
 			Type ptype = pageParamter.getGenericParameterType();
@@ -86,13 +87,14 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 				compClass = ReflectUtils.getGenricType(ptype, 0);
 			}
 		}else{
-			parameters.stream().filter(p->p.getParameterType()==Page.class)
+			/*parameters.stream().filter(p->p.getParameterType()==Page.class)
 							.findAny()
 							.ifPresent(p->{
 								throw new FileNamedQueryException("define Page Type at the first parameter and return void if you want to pagination: " + method.toGenericString());
-							});
+							});*/
 			if(Page.class==rClass){
-				throw new FileNamedQueryException("define Page Type at the first parameter and return void if you want to pagination: " + method.toGenericString());
+//				throw new FileNamedQueryException("define Page Type at the first parameter and return void if you want to pagination: " + method.toGenericString());
+				this.pageParamter = findPagePrarameter();
 			}else if(DbmQueryWrapper.class==rClass){
 				compClass = null;
 			}
@@ -108,6 +110,15 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 		findAndSetQueryName(this.asCountQuery);
 		
 		LangUtils.println("resultClass: ${0}, componentClass:${1}", resultClass, compClass);
+	}
+	
+	private DynamicMethodParameter findPagePrarameter(){
+		return parameters.stream()
+				.filter(p->p.getParameterType()==Page.class)
+				.findAny()
+				.orElseThrow(()->{
+					return new FileNamedQueryException("no Page type parameter found for paginaton method: " + method.toGenericString());
+				});
 	}
 	
 	/***
@@ -381,9 +392,11 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 	}
 	
 	protected void buildQueryConfig(ParserContext parserContext){
-		QueryConfig queryConfig = AnnotationUtils.findAnnotation(method, QueryConfig.class, true);//method.getAnnotation(QueryConfig.class);
+//		QueryConfig queryConfig = AnnotationUtils.findAnnotation(method, QueryConfig.class, true);//method.getAnnotation(QueryConfig.class);
+		QueryConfig queryConfig = AnnotationUtils.findAnnotation(method, QueryConfig.class);
 		if(queryConfig!=null){
-			QueryConfigData config = new QueryConfigData(queryConfig.value(), queryConfig.countQuery());
+//			QueryConfigData config = new QueryConfigData(queryConfig.value(), queryConfig.countQuery());
+			QueryConfigData config = new QueryConfigData();
 			config.setLikeQueryFields(Arrays.asList(queryConfig.likeQueryFields()));
 			if(queryConfig.funcClass()==ParserContextFunctionSet.class){
 				config.setVariables(ParserContextFunctionSet.getInstance());

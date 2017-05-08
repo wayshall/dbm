@@ -50,6 +50,7 @@ public class DbmNamedQueryInfo implements Cloneable{
 	
 	private DbmNamedQueryFile dbmNamedQueryFile;
 	private String namespace;
+	//TODO  not used
 	private JFishProperties config;
 	private ResourceAdapter<?> srcfile;
 	
@@ -57,7 +58,7 @@ public class DbmNamedQueryInfo implements Cloneable{
 //	private DataBase dataBaseType;
 	private String mappedEntity;
 	private String countSql;
-	private FileSqlParserType parser = FileSqlParserType.TEMPLATE;
+	private FileSqlParserType parserType = FileSqlParserType.TEMPLATE;
 	
 	
 	private Class<?> mappedEntityClass;
@@ -189,16 +190,19 @@ public class DbmNamedQueryInfo implements Cloneable{
 	}
 
 	public boolean isIgnoreNull() {
-		return parser==FileSqlParserType.IGNORENULL;
+		return parserType==FileSqlParserType.IGNORENULL;
 	}
 
 	
-	public FileSqlParserType getFileSqlParserType() {
-		return parser;
+	public FileSqlParserType getParserType() {
+		return parserType;
 	}
 
+	public void setParserType(FileSqlParserType parserType) {
+		this.parserType = parserType;
+	}
 	public void setParser(String parser) {
-		this.parser = FileSqlParserType.valueOf(parser.trim().toUpperCase());
+		this.parserType = FileSqlParserType.valueOf(parser.trim().toUpperCase());
 	}
 	
 /*
@@ -256,7 +260,7 @@ public class DbmNamedQueryInfo implements Cloneable{
 		prop.countSql = countSql;
 		prop.fragment = Maps.newHashMap(fragment);
 		prop.hql = hql;
-		prop.parser = parser;
+		prop.parserType = parserType;
 	}
 	/*@Override
 	public NamespaceProperty clone() throws CloneNotSupportedException {

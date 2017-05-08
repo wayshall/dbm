@@ -22,6 +22,11 @@ public class DbmSqlFileResource<T> implements ResourceAdapter<T> {
 		this.mappedInterface = mappedInterface;
 	}
 
+	@Override
+	public boolean exists() {
+		return source.exists();
+	}
+
 	public Class<T> getMappedInterface() {
 		return mappedInterface;
 	}

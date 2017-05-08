@@ -10,14 +10,18 @@ public class QueryConfigData {
 //	private final boolean statful;
 	private QueryContextVariable[] variables;
 	
-	final private String query;
-	final private String countQuery;
+	/*final private String query;
+	final private String countQuery;*/
+	
+	public QueryConfigData() {
+//		this(null, null);
+	}
 
-	public QueryConfigData(String query, String countQuery) {
+	/*public QueryConfigData(String query, String countQuery) {
 		super();
 		this.query = query;
 		this.countQuery = countQuery;
-	}
+	}*/
 
 	public boolean isLikeQueryField(String name){
 		if(LangUtils.isEmpty(likeQueryFields))
@@ -41,12 +45,5 @@ public class QueryConfigData {
 		this.variables = variable;
 	}
 
-	public String getQuery() {
-		return query;
-	}
-
-	public String getCountQuery() {
-		return countQuery;
-	}
 
 }
