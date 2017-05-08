@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.List;
 
 import org.onetwo.common.utils.LangUtils;
+import org.onetwo.dbm.exception.DbmException;
 import org.onetwo.dbm.exception.EntityInsertException;
 import org.onetwo.dbm.id.IdentifierGenerator;
 import org.onetwo.dbm.jdbc.SimpleArgsPreparedStatementCreator;
@@ -21,8 +22,16 @@ public class DbmInsertEventListener extends InsertEventListener{
 
 	protected void beforeDoInsert(DbmInsertEvent event, DbmMappedEntry entry){
 		Object entity = event.getObject();
-
+		
+		if(LangUtils.isMultiple(entity)){
+			throw new DbmException("the source object can not be a multiple object : "+entity.getClass());
+		}
 		if(entry.isEntity() && entry.getIdentifyField().isGeneratedValue()){
+			Serializable id = generatedIdentifyBeforeInsert(event, entry);
+			entry.setId(entity, id);
+		}
+
+		/*if(entry.isEntity() && entry.getIdentifyField().isGeneratedValue()){
 			Serializable id = null;
 			if(LangUtils.isMultiple(entity)){
 				List<Object> list = LangUtils.asList(entity);
@@ -34,7 +43,7 @@ public class DbmInsertEventListener extends InsertEventListener{
 				id = generatedIdentifyBeforeInsert(event, entry);
 				entry.setId(entity, id);
 			}
-		}
+		}*/
 		
 	}
 	

@@ -111,15 +111,15 @@ java的字段名使用驼峰的命名风格，而数据库使用下划线的风�
 
 ## id策略
 dbm支持jpa的几种id策略注解：
-- GenerationType.IDENTITY
+- GenerationType.IDENTITY   
   使用数据库本身的自增策略
-- GenerationType.SEQUENCE
+- GenerationType.SEQUENCE   
   使用数据库的序列策略（只支持oracle）
-- GenerationType.TABLE
+- GenerationType.TABLE   
   使用自定义的数据库表管理序列
-- GenerationType.AUTO
-  目前的实现是：如果是mysql，则等同于GenerationType.IDENTITY，如果是oracle，则等同于GenerationType.SEQUENCE
-- DbmIdGenerator
+- GenerationType.AUTO   
+  目前的实现是：如果是mysql，则等同于GenerationType.IDENTITY，如果是oracle，则等同于GenerationType.SEQUENCE   
+- DbmIdGenerator   
   dbm提供id生成注解，可通过配置 generatorClass 属性，配置自定义的id实现类，实现类必须实现CustomIdGenerator接口。dbm首先会通过尝试在spring context查找generatorClass类型的bean，如果找不到则通过反射创建实例。
 
 ### 详细使用

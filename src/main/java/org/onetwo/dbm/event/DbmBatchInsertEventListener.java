@@ -1,6 +1,7 @@
 package org.onetwo.dbm.event;
 
 
+import java.io.Serializable;
 import java.util.List;
 
 import org.onetwo.common.utils.LangUtils;
@@ -44,6 +45,23 @@ public class DbmBatchInsertEventListener extends DbmInsertEventListener{
 		JdbcStatementContext<List<Object[]>> insert = entry.makeInsert(entity);
 		int total = this.executeJdbcUpdate(true, insert.getSql(), insert.getValue(), es);
 		event.setUpdateCount(total);
+	}
+	
+	@Override
+	protected void beforeDoInsert(DbmInsertEvent event, DbmMappedEntry entry){
+		Object entity = event.getObject();
+		
+		if(!LangUtils.isMultiple(entity)){
+			throw new DbmException("the source object must be a multiple object : "+entity.getClass());
+		}
+		if(entry.isEntity() && entry.getIdentifyField().isGeneratedValue()){
+			Serializable id = null;
+			List<Object> list = LangUtils.asList(entity);
+			for(Object en : list){
+				id = generatedIdentifyBeforeInsert(event, entry);
+				entry.setId(en, id);
+			}
+		}
 	}
 
 }

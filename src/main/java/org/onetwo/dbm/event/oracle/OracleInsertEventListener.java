@@ -18,7 +18,9 @@ public class OracleInsertEventListener extends DbmInsertEventListener {
 	@Override
 	protected void doInsert(DbmInsertEvent event, DbmMappedEntry entry) {
 		DbmSessionEventSource es = event.getEventSource();
+		
 		this.beforeDoInsert(event, entry);
+		
 		Object entity = event.getObject();
 		JdbcStatementContext<List<Object[]>> insert = entry.makeInsert(entity);
 		/*
