@@ -38,7 +38,7 @@
 [boot-dbm-sample](https://github.com/wayshall/boot-dbm-sample)
 
 ## maven
-当前snapshot版本：4.5.0-SNAPSHOT
+当前snapshot版本：4.5.2-SNAPSHOT
 
 若使用snapshot版本，请添加snapshotRepository仓储：
 ```xml
@@ -369,7 +369,7 @@ public class UserAutoidServiceImpl {
 `
 
 ### 通过@Query直接在代码里写sql
-虽然本人不喜欢不推荐在代码里写sql，但实际开发中经常遇到很多人都是喜欢简单粗暴，直接在代码里通过注解写sql，所以，新版的dbm提供了@Query来支持在代码里写sql。
+虽然本人不喜欢不推荐在代码里写sql，但实际开发中经常遇到很多人都是喜欢简单粗暴，直接在代码里通过注解写sql，所以，新版（4.5.2-SNAPSHOT+）的dbm提供了@Query来支持在代码里写sql。
 
 使用示例：
 ```Java
