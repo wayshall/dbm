@@ -21,7 +21,9 @@ public interface UserQueryConfigDao {
 	int batchSaveUsers(List<UserEntity> users);
 	
 	@Query(value="select t.* from test_user t where 1=1 "
-			+ "[#if userName?has_content] and t.user_name like :userName?likeString [/#if]")
+			+ "[#if userName?has_content] "
+				+ "and t.user_name like :userName?likeString "
+			+ "[/#if]")
 	Page<UserEntity> findUserPage(Page<UserEntity> page, String userName);
 
 }

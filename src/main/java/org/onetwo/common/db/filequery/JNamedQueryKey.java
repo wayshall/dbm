@@ -2,7 +2,7 @@ package org.onetwo.common.db.filequery;
 
 public enum JNamedQueryKey {
 
-	ParserContext,
+//	ParserContext,
 	ResultClass,
 	ASC,
 	DESC;

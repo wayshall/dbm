@@ -21,6 +21,6 @@ public interface ParsedSqlContext {
 
 	public String getParsedSql();
 
-	public QueryConfigData getQueryConfig();
+//	public QueryConfigData getQueryConfig();
 
 }

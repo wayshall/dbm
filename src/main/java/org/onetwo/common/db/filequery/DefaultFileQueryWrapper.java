@@ -41,7 +41,7 @@ public class DefaultFileQueryWrapper extends AbstractDbmQueryWrapper implements 
 	
 	protected DbmNamedQueryInfo info;
 	private TemplateParser parser;
-	private ParserContext parserContext = ParserContext.create();
+	private ParserContext parserContext;
 	
 	private String[] ascFields;
 	private String[] desFields;
@@ -59,6 +59,7 @@ public class DefaultFileQueryWrapper extends AbstractDbmQueryWrapper implements 
 		}else{
 			this.resultClass = info.getMappedEntityClass();
 		}
+		this.parserContext = ParserContext.create(info);
 	}
 	
 //	abstract protected DataQuery createDataQuery(DynamicQuery query);
@@ -75,7 +76,7 @@ public class DefaultFileQueryWrapper extends AbstractDbmQueryWrapper implements 
 			return dataQuery;
 		}
 		DBDialect dbDialect = baseEntityManager.getSessionFactory().getDialect();
-		FileNamedSqlGenerator sqlGen = new DefaultFileNamedSqlGenerator(info, countQuery, parser, getParserContext(), 
+		FileNamedSqlGenerator sqlGen = new DefaultFileNamedSqlGenerator(countQuery, parser, parserContext, 
 																		resultClass, ascFields, desFields, params, dbDialect);
 		ParsedSqlContext sqlAndValues = sqlGen.generatSql();
 		if(sqlAndValues.isListValue()){
@@ -103,7 +104,7 @@ public class DefaultFileQueryWrapper extends AbstractDbmQueryWrapper implements 
 				value = ReflectUtils.invokeMethod(parameter.getFunction(), SqlParamterFunctions.getInstance(), value);
 			}*/
 			Object pvalue = parameter.getParamterValue(paramBean);
-			if(pvalue!=null && sqlAndValues.getQueryConfig().isLikeQueryField(parameter.getName())){
+			if(pvalue!=null && info.getQueryConfig().isLikeQueryField(parameter.getName())){
 				pvalue = ExtQueryUtils.getLikeString(pvalue.toString());
 			}
 			//wrap pvalue
@@ -203,8 +204,8 @@ public class DefaultFileQueryWrapper extends AbstractDbmQueryWrapper implements 
 				String[] desFields = CUtils.asStringArray(value);
 				desc(desFields);
 				break;
-			case ParserContext:
-				this.setParserContext((ParserContext)value);
+			/*case ParserContext:
+				this.setParserContext((ParserContext)value);*/
 			default:
 				break;
 		}
@@ -267,16 +268,13 @@ public class DefaultFileQueryWrapper extends AbstractDbmQueryWrapper implements 
 		return null;
 	}
 
-	public void setParserContext(ParserContext parserContext) {
+	/*public void setParserContext(ParserContext parserContext) {
 		this.parserContext = parserContext;
 	}
 
-	public ParserContext getParserContext() {
-		if(parserContext==null){
-			parserContext = ParserContext.create();
-		}
+	final public ParserContext getParserContext() {
 		return parserContext;
-	}
+	}*/
 
 	@Override
 	public void setRowMapper(RowMapper<?> rowMapper) {

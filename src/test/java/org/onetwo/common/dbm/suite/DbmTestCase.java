@@ -9,6 +9,7 @@ import org.onetwo.common.dbm.BatchInsertTest;
 import org.onetwo.common.dbm.DbmDaoTest;
 import org.onetwo.common.dbm.DbmEntityManagerTest;
 import org.onetwo.common.dbm.DbmNestedMappingTest;
+import org.onetwo.common.dbm.QueryConfigTest;
 import org.onetwo.common.dbm.TransactionalListenerTest;
 import org.onetwo.common.dbm.UserDbmIdEntityTest;
 import org.onetwo.common.dbm.UserTableIdEntityTest;
@@ -24,7 +25,8 @@ import org.onetwo.common.dbm.UserTableIdEntityTest;
 	TransactionalListenerTest.class,
 	DbmSessionCacheTest.class,
 	UserTableIdEntityTest.class,
-	UserDbmIdEntityTest.class
+	UserDbmIdEntityTest.class,
+	QueryConfigTest.class
 //	RichModelTest.class
 })
 public class DbmTestCase {

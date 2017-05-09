@@ -1,6 +1,7 @@
 package org.onetwo.common.db.filequery;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -14,27 +15,31 @@ import org.springframework.util.Assert;
 
 public class ParserContext implements Map<Object, Object> {
 	
-	public static ParserContext create(Object...params){
+	public static ParserContext create(DbmNamedQueryInfo queryInfo, Object...params){
 		if(LangUtils.isEmpty(params))
-			return new ParserContext();
-		return new ParserContext(CUtils.asMap(params));
+			return new ParserContext(queryInfo, new HashMap<Object, Object>());
+		return new ParserContext(queryInfo, CUtils.asMap(params));
 	}
 
 
-	public static final String CONTEXT_KEY = ParserContextFunctionSet.CONTEXT_KEY;//helper
+	public static final String CONTEXT_KEY = ParserContextFunctionSet.CONTEXT_KEY;//helper ParserContextFunctionSet
 	public static final String QUERY_CONFIG = "_queryConfig";
 	public static final String QUERY_CONFIG_FUNC = "_queryfunc";
+	public static final String DB_KEY = SqlFunctionFactory.CONTEXT_KEY;
+	public static final String PARSER_ACCESS_KEY = DbmNamedQueryInfo.FRAGMENT_KEY;
 	
 	private Map<Object, Object> context;
+	final private DbmNamedQueryInfo queryInfo;
 	
-	public ParserContext(){
-		context = LangUtils.newHashMap();
-		context.put(CONTEXT_KEY, ParserContextFunctionSet.getInstance());
+	public ParserContext(DbmNamedQueryInfo queryInfo, Map<Object, Object> context){
+		this.queryInfo = queryInfo;
+		this.context = context;
+		this.context.put(CONTEXT_KEY, ParserContextFunctionSet.getInstance());
 	}
 	
-	public ParserContext(Map<Object, Object> context) {
-		super();
-		this.context = context;
+
+	public DbmNamedQueryInfo getQueryInfo() {
+		return queryInfo;
 	}
 
 	public void setQueryConfig(QueryConfigData config){

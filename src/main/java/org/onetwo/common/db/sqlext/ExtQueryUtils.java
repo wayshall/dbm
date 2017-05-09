@@ -150,9 +150,9 @@ public abstract class ExtQueryUtils {
 	}
 	
 	public static String buildCountSql(String sql, String countValue){
-		/*if(SqlUtils.isDruidPresent()){
+		if(SqlUtils.isDruidPresent()){
 			return DruidUtils.toCountSql(sql, countValue);
-		}*/
+		}
 		
 		String[] tokens = StringUtils.split(sql.toLowerCase(), " ");
 		

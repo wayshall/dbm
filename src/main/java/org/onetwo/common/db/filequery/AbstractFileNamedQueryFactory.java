@@ -55,7 +55,8 @@ abstract public class AbstractFileNamedQueryFactory implements FileNamedQueryFac
 	public FileNamedSqlGenerator createFileNamedSqlGenerator(NamedQueryInvokeContext invokeContext) {
 		DBDialect dbDialect = invokeContext.getQueryProvideManager().getSessionFactory().getDialect();
 		DbmNamedQueryInfo nameInfo = getNamedQueryInfo(invokeContext);
-		FileNamedSqlGenerator g = new DefaultFileNamedSqlGenerator(nameInfo, false, sqlFileManager.getSqlStatmentParser(), invokeContext.getParsedParams(), dbDialect);
+		ParserContext parserContext = ParserContext.create(nameInfo);
+		FileNamedSqlGenerator g = new DefaultFileNamedSqlGenerator(parserContext, false, sqlFileManager.getSqlStatmentParser(), invokeContext.getParsedParams(), dbDialect);
 		return g;
 	}
 

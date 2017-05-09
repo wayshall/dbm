@@ -3,6 +3,7 @@ package org.onetwo.common.db.filequery;
 import java.util.List;
 import java.util.Map;
 
+import org.onetwo.common.db.QueryConfigData;
 import org.onetwo.common.db.sqlext.ExtQueryUtils;
 import org.onetwo.common.propconf.JFishProperties;
 import org.onetwo.common.propconf.ResourceAdapter;
@@ -69,7 +70,8 @@ public class DbmNamedQueryInfo implements Cloneable{
 //	private List<Object> matchers = ImmutableList.of();
 
 	private boolean hql;
-
+	
+	private QueryConfigData queryConfig = ParsedSqlUtils.EMPTY_CONFIG;
 
 	public String getNamespace() {
 		return namespace;
@@ -225,6 +227,12 @@ public class DbmNamedQueryInfo implements Cloneable{
 	public Map<String, String> getFragment() {
 		return fragment;
 	}
+	public QueryConfigData getQueryConfig() {
+		return queryConfig;
+	}
+	public void setQueryConfig(QueryConfigData queryConfig) {
+		this.queryConfig = queryConfig;
+	}
 	/***
 	 * fullName.fragment.attrName
 	 * @param attr
@@ -261,19 +269,6 @@ public class DbmNamedQueryInfo implements Cloneable{
 		prop.fragment = Maps.newHashMap(fragment);
 		prop.hql = hql;
 		prop.parserType = parserType;
+		prop.queryConfig = queryConfig;
 	}
-	/*@Override
-	public NamespaceProperty clone() throws CloneNotSupportedException {
-		NamespaceProperty prop = new NamespaceProperty();
-		cloneProperties(prop);
-		return prop;
-	}
-	protected void cloneProperties(NamespaceProperty newProp) {
-		newProp.name = name;
-		newProp.value = value;
-		newProp.namespace = namespace;
-		newProp.namespaceInfo = namespaceInfo;
-		newProp.srcfile = srcfile;
-		newProp.config = new JFishProperties(config);
-	}*/
 }

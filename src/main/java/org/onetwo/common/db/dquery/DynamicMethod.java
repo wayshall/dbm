@@ -4,25 +4,19 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.onetwo.common.db.DbmQueryWrapper;
 import org.onetwo.common.db.QueryConfigData;
-import org.onetwo.common.db.QueryContextVariable;
 import org.onetwo.common.db.dquery.DynamicMethod.DynamicMethodParameter;
 import org.onetwo.common.db.dquery.annotation.AsCountQuery;
 import org.onetwo.common.db.dquery.annotation.BatchObject;
 import org.onetwo.common.db.dquery.annotation.ExecuteUpdate;
 import org.onetwo.common.db.dquery.annotation.Param;
-import org.onetwo.common.db.dquery.annotation.QueryConfig;
 import org.onetwo.common.db.dquery.annotation.QueryDispatcher;
 import org.onetwo.common.db.filequery.JNamedQueryKey;
-import org.onetwo.common.db.filequery.ParsedSqlUtils;
-import org.onetwo.common.db.filequery.ParserContext;
-import org.onetwo.common.db.filequery.ParserContextFunctionSet;
 import org.onetwo.common.db.sqlext.ExtQueryUtils;
 import org.onetwo.common.proxy.AbstractMethodResolver;
 import org.onetwo.common.proxy.BaseMethodParameter;
@@ -32,7 +26,6 @@ import org.onetwo.common.utils.Page;
 import org.onetwo.common.utils.StringUtils;
 import org.onetwo.dbm.exception.FileNamedQueryException;
 import org.springframework.core.MethodParameter;
-import org.springframework.core.annotation.AnnotationUtils;
 
 
 public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter>{
@@ -316,10 +309,11 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 		return Pair.of(pname, val);
 	}
 	
-	protected void handleArg(Map<Object, Object> values, ParserContext parserContext, DynamicMethodParameter mp, Object pvalue){
-		if(pvalue instanceof ParserContext){
-			parserContext.putAll((ParserContext) pvalue);
-		}else if(mp.hasParameterAnnotation(Param.class)){
+	protected void handleArg(Map<Object, Object> values, DynamicMethodParameter mp, Object pvalue){
+		/*if(pvalue instanceof ParserContext){
+//			parserContext.putAll((ParserContext) pvalue);
+		}else */
+		if(mp.hasParameterAnnotation(Param.class)){
 			Param name = mp.getParameterAnnotation(Param.class);
 			if(name.renamedUseIndex()){
 				List<?> listValue = LangUtils.asList(pvalue);
@@ -391,7 +385,7 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 		}
 	}
 	
-	protected void buildQueryConfig(ParserContext parserContext){
+	/*protected void buildQueryConfig(ParserContext parserContext){
 //		QueryConfig queryConfig = AnnotationUtils.findAnnotation(method, QueryConfig.class, true);//method.getAnnotation(QueryConfig.class);
 		QueryConfig queryConfig = AnnotationUtils.findAnnotation(method, QueryConfig.class);
 		if(queryConfig!=null){
@@ -410,7 +404,7 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 		}else{
 			parserContext.setQueryConfig(ParsedSqlUtils.EMPTY_CONFIG);
 		}
-	}
+	}*/
 	
 	public Object getMatcherValue(Object[] args){
 		if(!hasDispatcher())
@@ -426,15 +420,16 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 		Map<Object, Object> values = LangUtils.newHashMap(parameters.size());
 		
 		Object pvalue = null;
-		ParserContext parserContext = ParserContext.create();
+//		ParserContext parserContext = ParserContext.create();
 		for(DynamicMethodParameter mp : parameters){
 			pvalue = args[mp.getParameterIndex()];
-			handleArg(values, parserContext, mp, pvalue);
+//			handleArg(values, parserContext, mp, pvalue);
+			handleArg(values, mp, pvalue);
 		}
 		
-		buildQueryConfig(parserContext);
+//		buildQueryConfig(parserContext);
 
-		values.put(JNamedQueryKey.ParserContext, parserContext);
+//		values.put(JNamedQueryKey.ParserContext, parserContext);
 		if(componentClass!=null){
 			values.put(JNamedQueryKey.ResultClass, componentClass);
 		}
