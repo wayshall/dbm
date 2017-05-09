@@ -6,7 +6,7 @@ import java.util.Map;
 import javax.sql.DataSource;
 
 import org.onetwo.common.db.DbmQueryValue;
-import org.onetwo.common.db.DbmQueryWrapper;
+import org.onetwo.common.db.spi.QueryWrapper;
 import org.onetwo.common.db.sql.SequenceNameManager;
 import org.onetwo.common.db.sqlext.SQLSymbolManager;
 import org.onetwo.common.db.sqlext.SelectExtQuery;
@@ -126,11 +126,11 @@ public interface DbmSessionImplementor extends DbmSession {
 	 * @param extQuery
 	 * @return
 	 */
-	public DbmQueryWrapper createAsDataQuery(SelectExtQuery extQuery);
+	public QueryWrapper createAsDataQuery(SelectExtQuery extQuery);
 	
-	public DbmQueryWrapper createAsDataQuery(String sqlString, Class<?> entityClass);
+	public QueryWrapper createAsDataQuery(String sqlString, Class<?> entityClass);
 	
-	public DbmQueryWrapper createAsDataQuery(String sql, Map<String, Object> values);
+	public QueryWrapper createAsDataQuery(String sql, Map<String, Object> values);
 	public DbmConfig getDataBaseConfig();
 
 	public DataSource getDataSource();

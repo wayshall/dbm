@@ -67,6 +67,11 @@ public class DbmJdbcTemplate extends JdbcTemplate implements DbmJdbcOperations {
 	}
 	
 	@Override
+	public DbmNamedJdbcTemplate getDbmNamedJdbcOperations() {
+		return dbmNamedJdbcOperations;
+	}
+
+	@Override
 	public int updateWith(final SimpleArgsPreparedStatementCreator spsc, final KeyHolder generatedKeyHolder) throws DataAccessException {
 		return updateWith(spsc, new AroundPreparedStatementExecute() {
 			

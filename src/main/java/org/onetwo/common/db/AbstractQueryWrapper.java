@@ -4,12 +4,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.onetwo.common.db.spi.QueryWrapper;
 import org.onetwo.common.log.JFishLoggerFactory;
 import org.onetwo.common.utils.Assert;
 import org.onetwo.common.utils.Page;
 import org.slf4j.Logger;
 
-abstract public class AbstractDbmQueryWrapper implements DbmQueryWrapper{
+abstract public class AbstractQueryWrapper implements QueryWrapper{
 	
 	protected final Logger logger = JFishLoggerFactory.getLogger(this.getClass());
 	
@@ -17,7 +18,7 @@ abstract public class AbstractDbmQueryWrapper implements DbmQueryWrapper{
 
 	
 	@SuppressWarnings("rawtypes")
-	public DbmQueryWrapper setPageParameter(final Page page) {
+	public QueryWrapper setPageParameter(final Page page) {
 		if(!page.isPagination())
 			return this;
 		return setLimited(page.getFirst()-1, page.getPageSize());
@@ -25,7 +26,7 @@ abstract public class AbstractDbmQueryWrapper implements DbmQueryWrapper{
 	
 
 	@Override
-	public DbmQueryWrapper setParameters(Map<String, Object> params) {
+	public QueryWrapper setParameters(Map<String, Object> params) {
 		for(Entry<String, Object> entry : params.entrySet()){
 			setParameter(entry.getKey(), entry.getValue());
 		}
@@ -34,7 +35,7 @@ abstract public class AbstractDbmQueryWrapper implements DbmQueryWrapper{
 	
 
 	@Override
-	public DbmQueryWrapper setParameters(List<Object> params) {
+	public QueryWrapper setParameters(List<Object> params) {
 		Assert.notNull(params);
 		int size = params.size();
 		for(int index=0; index<size; index++){
@@ -44,7 +45,7 @@ abstract public class AbstractDbmQueryWrapper implements DbmQueryWrapper{
 	}
 	
 	@Override
-	public DbmQueryWrapper setParameters(Object[] params){
+	public QueryWrapper setParameters(Object[] params){
 		Assert.notNull(params);
 		for(int index=0; index<params.length; index++){
 			setParameter(index, params[index]);

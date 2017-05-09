@@ -13,13 +13,13 @@ import java.util.concurrent.ExecutionException;
 import javax.sql.DataSource;
 
 import org.onetwo.common.convert.Types;
-import org.onetwo.common.db.DbmQueryWrapper;
 import org.onetwo.common.db.ParsedSqlContext;
 import org.onetwo.common.db.filequery.ParsedSqlUtils;
 import org.onetwo.common.db.filequery.ParsedSqlUtils.ParsedSqlWrapper;
 import org.onetwo.common.db.filequery.ParsedSqlUtils.ParsedSqlWrapper.SqlParamterMeta;
-import org.onetwo.common.db.filequery.spi.QueryProvideManager;
-import org.onetwo.common.db.filequery.spi.SqlParamterPostfixFunctionRegistry;
+import org.onetwo.common.db.spi.QueryWrapper;
+import org.onetwo.common.db.spi.QueryProvideManager;
+import org.onetwo.common.db.spi.SqlParamterPostfixFunctionRegistry;
 import org.onetwo.common.exception.BaseException;
 import org.onetwo.common.log.JFishLoggerFactory;
 import org.onetwo.common.profiling.TimeCounter;
@@ -32,7 +32,7 @@ import org.onetwo.common.utils.MathUtils;
 import org.onetwo.common.utils.Page;
 import org.onetwo.dbm.annotation.DbmInterceptorFilter.InterceptorType;
 import org.onetwo.dbm.core.internal.AbstractDbmInterceptorChain.RepositoryDbmInterceptorChain;
-import org.onetwo.dbm.core.internal.DbmInterceptorManager;
+import org.onetwo.dbm.core.spi.DbmEntityManager;
 import org.onetwo.dbm.core.spi.DbmInterceptor;
 import org.onetwo.dbm.core.spi.DbmInterceptorChain;
 import org.onetwo.dbm.exception.DbmException;
@@ -41,6 +41,8 @@ import org.onetwo.dbm.jdbc.DbmJdbcOperations;
 import org.onetwo.dbm.jdbc.DbmJdbcTemplate;
 import org.slf4j.Logger;
 import org.springframework.beans.BeanWrapper;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
+import org.springframework.util.Assert;
 
 import com.google.common.cache.LoadingCache;
 
@@ -51,18 +53,25 @@ public class DynamicQueryHandler implements InvocationHandler {
 	private LoadingCache<Method, DynamicMethod> methodCache;
 	private QueryProvideManager em;
 	private Object proxyObject;
-	private DbmJdbcOperations dbmJdbcOperations;
+	private NamedParameterJdbcOperations jdbcOperations;
 	
 	public DynamicQueryHandler(QueryProvideManager em, LoadingCache<Method, DynamicMethod> methodCache, Class<?>... proxiedInterfaces){
 		this.em = em;
 		this.methodCache = methodCache;
 		
 //		this.dbmJdbcOperations = em.getSessionFactory().getServiceRegistry().getDbmJdbcOperations();
-		this.dbmJdbcOperations = em.getDbmJdbcOperations();
+		this.jdbcOperations = em.getDbmJdbcOperations();
 		this.proxyObject = Proxy.newProxyInstance(ClassUtils.getDefaultClassLoader(), proxiedInterfaces, this);
-		
+		Assert.notNull(jdbcOperations);
 	}
 	
+
+	private Optional<DbmEntityManager> getDbmEntityManager(){
+		if(DbmEntityManager.class.isInstance(em)){
+			return Optional.of((DbmEntityManager)em);
+		}
+		return Optional.empty();
+	}
 
 	@Override
 	public Object invoke(Object proxy, Method method, Object[] args) {
@@ -87,11 +96,13 @@ public class DynamicQueryHandler implements InvocationHandler {
 	}
 	
 	private Object invokeWithInterceptor(Object proxy, DynamicMethod dmethod, Object[] args){
-		Optional<DbmInterceptorManager> interceptorManager = em.getDbmInterceptorManager();
-		if(!interceptorManager.isPresent()){
+		Optional<DbmEntityManager> dbmOpt = getDbmEntityManager();
+		if(!dbmOpt.isPresent()){
 			return invokeMethod(proxy, dmethod, args);
 		}
-		Collection<DbmInterceptor> interceptors = interceptorManager.get().getDbmSessionInterceptors(InterceptorType.REPOSITORY);
+		Collection<DbmInterceptor> interceptors = dbmOpt.get()
+														.getDbmInterceptorManager()
+														.getDbmSessionInterceptors(InterceptorType.REPOSITORY);
 		DbmInterceptorChain chain = new RepositoryDbmInterceptorChain(proxy, dmethod, args, interceptors, ()->invokeMethod(proxy, dmethod, args));
 		return chain.invoke();
 	}
@@ -144,7 +155,7 @@ public class DynamicQueryHandler implements InvocationHandler {
 //			methodArgs = Langs.toArray(invokeContext.getParsedParams());
 			
 			if(dmethod.isExecuteUpdate()){
-				DbmQueryWrapper dq = em.getFileNamedQueryManager().createQuery(invokeContext);
+				QueryWrapper dq = em.getFileNamedQueryManager().createQuery(invokeContext);
 				result = dq.executeUpdate();
 				
 			}else if(Page.class.isAssignableFrom(resultClass)){
@@ -161,13 +172,13 @@ public class DynamicQueryHandler implements InvocationHandler {
 					result = collections;
 				}
 				
-			}else if(DbmQueryWrapper.class.isAssignableFrom(resultClass)){
-				DbmQueryWrapper dq = em.getFileNamedQueryManager().createQuery(invokeContext);
+			}else if(QueryWrapper.class.isAssignableFrom(resultClass)){
+				QueryWrapper dq = em.getFileNamedQueryManager().createQuery(invokeContext);
 				return dq;
 				
 			}else if(dmethod.isAsCountQuery()){
 //				parsedQueryName.setMappedEntity(dmethod.getResultClass());
-				DbmQueryWrapper dq = em.getFileNamedQueryManager().createCountQuery(invokeContext);
+				QueryWrapper dq = em.getFileNamedQueryManager().createCountQuery(invokeContext);
 				result = dq.getSingleResult();
 				result = Types.convertValue(result, resultClass);
 			}else{
@@ -194,11 +205,11 @@ public class DynamicQueryHandler implements InvocationHandler {
 		ParsedSqlContext sv = sqlGen.generatSql();*/
 		ParsedSqlContext sv = em.getFileNamedQueryManager().parseNamedQuery(invokeContext);
 //		JdbcDao jdao = this.jdao;
-		DbmJdbcOperations dbmJdbcTemplate = this.dbmJdbcOperations;
+		/*DbmJdbcOperations dbmJdbcTemplate = this.dbmJdbcOperations;
 		if(dbmJdbcTemplate==null){
 			DataSource ds = Springs.getInstance().getBean(DataSource.class, false);
 			dbmJdbcTemplate = new DbmJdbcTemplate(ds);
-		}
+		}*/
 		
 		if(logger.isDebugEnabled()){
 			logger.debug("===>>> batch insert start ...");
@@ -242,7 +253,7 @@ public class DynamicQueryHandler implements InvocationHandler {
 
 		@SuppressWarnings("unchecked")
 //		int[] counts = jdao.getNamedParameterJdbcTemplate().batchUpdate(sv.getParsedSql(), batchValues.toArray(new HashMap[0]));
-		int[] counts = dbmJdbcTemplate.batchUpdate(sv.getParsedSql(), batchValues.toArray(new HashMap[0]));
+		int[] counts = jdbcOperations.batchUpdate(sv.getParsedSql(), batchValues.toArray(new HashMap[0]));
 
 		t.stop();
 		

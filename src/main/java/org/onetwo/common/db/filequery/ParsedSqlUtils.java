@@ -4,8 +4,8 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
-import org.onetwo.common.db.QueryConfigData;
-import org.onetwo.common.db.filequery.spi.SqlParamterPostfixFunctionRegistry;
+import org.onetwo.common.db.spi.QueryConfigData;
+import org.onetwo.common.db.spi.SqlParamterPostfixFunctionRegistry;
 import org.onetwo.common.reflect.ReflectUtils;
 import org.onetwo.common.utils.LangUtils;
 import org.onetwo.common.utils.StringUtils;

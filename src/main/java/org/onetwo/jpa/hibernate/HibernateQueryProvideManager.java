@@ -8,14 +8,14 @@ import javax.persistence.PersistenceContext;
 import javax.sql.DataSource;
 
 import org.hibernate.SQLQuery;
-import org.onetwo.common.db.DbmQueryWrapper;
 import org.onetwo.common.db.filequery.DbmNamedSqlFileManager;
 import org.onetwo.common.db.filequery.SqlParamterPostfixFunctions;
 import org.onetwo.common.db.filequery.func.SqlFunctionDialet;
-import org.onetwo.common.db.filequery.spi.CreateQueryCmd;
-import org.onetwo.common.db.filequery.spi.FileNamedQueryFactory;
-import org.onetwo.common.db.filequery.spi.QueryProvideManager;
-import org.onetwo.common.db.filequery.spi.SqlParamterPostfixFunctionRegistry;
+import org.onetwo.common.db.spi.CreateQueryCmd;
+import org.onetwo.common.db.spi.QueryWrapper;
+import org.onetwo.common.db.spi.FileNamedQueryFactory;
+import org.onetwo.common.db.spi.QueryProvideManager;
+import org.onetwo.common.db.spi.SqlParamterPostfixFunctionRegistry;
 import org.onetwo.dbm.core.internal.DbmInterceptorManager;
 import org.onetwo.dbm.jdbc.DbmJdbcOperations;
 import org.onetwo.dbm.jdbc.DbmJdbcTemplate;
@@ -47,7 +47,7 @@ public class HibernateQueryProvideManager implements QueryProvideManager {
 	}
 
 	@Override
-	public DbmQueryWrapper createQuery(CreateQueryCmd createQueryCmd) {
+	public QueryWrapper createQuery(CreateQueryCmd createQueryCmd) {
 		if(createQueryCmd.isNativeSql()){
 			SQLQuery sqlQuery = entityManager.createNativeQuery(createQueryCmd.getSql()).unwrap(SQLQuery.class);
 			sqlQuery.setResultTransformer(new RowToBeanTransformer(createQueryCmd.getMappedClass()));
@@ -74,25 +74,9 @@ public class HibernateQueryProvideManager implements QueryProvideManager {
 	}
 
 	@Override
-	public DbmJdbcOperations getDbmJdbcOperations() {
-		return dbmJdbcOperations;
-	}
-
-	@Override
-	public Optional<RowMapperFactory> getRowMapperFactory() {
-		return Optional.empty();
-	}
-
-	@Override
 	public Optional<SqlFunctionDialet> getSqlFunctionDialet() {
 		return Optional.empty();
 	}
 
-	@Override
-	public Optional<DbmInterceptorManager> getDbmInterceptorManager() {
-		return Optional.empty();
-	}
-	
-	
 
 }

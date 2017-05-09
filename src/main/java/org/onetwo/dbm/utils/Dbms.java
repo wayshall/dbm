@@ -7,8 +7,8 @@ import javax.sql.DataSource;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.onetwo.common.db.BaseCrudEntityManager;
-import org.onetwo.common.db.BaseEntityManager;
-import org.onetwo.common.db.CrudEntityManager;
+import org.onetwo.common.db.spi.BaseEntityManager;
+import org.onetwo.common.db.spi.CrudEntityManager;
 import org.onetwo.common.exception.BaseException;
 import org.onetwo.common.spring.SpringUtils;
 import org.onetwo.common.spring.Springs;

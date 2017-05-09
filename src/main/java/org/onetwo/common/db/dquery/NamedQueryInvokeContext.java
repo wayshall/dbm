@@ -2,7 +2,7 @@ package org.onetwo.common.db.dquery;
 
 import java.util.Map;
 
-import org.onetwo.common.db.filequery.spi.QueryProvideManager;
+import org.onetwo.common.db.spi.QueryProvideManager;
 import org.onetwo.common.spring.ftl.TemplateParser;
 
 public interface NamedQueryInvokeContext {

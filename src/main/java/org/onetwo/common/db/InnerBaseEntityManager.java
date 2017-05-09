@@ -2,6 +2,7 @@ package org.onetwo.common.db;
 
 import java.util.List;
 
+import org.onetwo.common.db.spi.BaseEntityManager;
 import org.onetwo.common.db.sqlext.SelectExtQuery;
 import org.onetwo.common.utils.Page;
 

@@ -1,12 +1,13 @@
-package org.onetwo.common.db;
+package org.onetwo.common.db.spi;
 
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import org.onetwo.common.db.DbmQueryValue;
+import org.onetwo.common.db.EntityManagerProvider;
 import org.onetwo.common.db.builder.QueryBuilder;
-import org.onetwo.common.db.filequery.spi.QueryProvideManager;
 import org.onetwo.common.db.sqlext.SQLSymbolManager;
 import org.onetwo.common.utils.Page;
 import org.onetwo.dbm.core.spi.DbmSessionFactory;
@@ -103,8 +104,8 @@ public interface BaseEntityManager extends QueryProvideManager {
 //	public DataQuery createMappingSQLQuery(String sqlString, String resultSetMapping);
 	
 	
-	public DbmQueryWrapper createNamedQuery(String name);
-	public DbmQueryWrapper createQuery(String sql, Map<String, Object> values);
+	public QueryWrapper createNamedQuery(String name);
+	public QueryWrapper createQuery(String sql, Map<String, Object> values);
 	
 	public Long getSequences(String sequenceName, boolean createIfNotExist);
 	public Long getSequences(Class<?> entityClass, boolean createIfNotExist);

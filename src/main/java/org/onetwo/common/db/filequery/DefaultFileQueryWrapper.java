@@ -2,19 +2,20 @@ package org.onetwo.common.db.filequery;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Map.Entry;
+import java.util.Optional;
 
-import org.onetwo.common.db.AbstractDbmQueryWrapper;
-import org.onetwo.common.db.DbmQueryWrapper;
+import org.onetwo.common.db.AbstractQueryWrapper;
 import org.onetwo.common.db.ParsedSqlContext;
 import org.onetwo.common.db.filequery.ParsedSqlUtils.ParsedSqlWrapper;
 import org.onetwo.common.db.filequery.ParsedSqlUtils.ParsedSqlWrapper.SqlParamterMeta;
 import org.onetwo.common.db.filequery.func.SqlFunctionDialet;
-import org.onetwo.common.db.filequery.spi.CreateQueryCmd;
-import org.onetwo.common.db.filequery.spi.FileNamedSqlGenerator;
-import org.onetwo.common.db.filequery.spi.QueryProvideManager;
-import org.onetwo.common.db.filequery.spi.SqlParamterPostfixFunctionRegistry;
+import org.onetwo.common.db.spi.CreateQueryCmd;
+import org.onetwo.common.db.spi.NamedQueryInfo;
+import org.onetwo.common.db.spi.QueryWrapper;
+import org.onetwo.common.db.spi.FileNamedSqlGenerator;
+import org.onetwo.common.db.spi.QueryProvideManager;
+import org.onetwo.common.db.spi.SqlParamterPostfixFunctionRegistry;
 import org.onetwo.common.db.sql.QueryOrderByable;
 import org.onetwo.common.db.sqlext.ExtQueryUtils;
 import org.onetwo.common.spring.SpringUtils;
@@ -23,15 +24,16 @@ import org.onetwo.common.utils.ArrayUtils;
 import org.onetwo.common.utils.Assert;
 import org.onetwo.common.utils.CUtils;
 import org.onetwo.common.utils.LangUtils;
+import org.onetwo.dbm.core.spi.DbmEntityManager;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.jdbc.core.RowMapper;
 
-public class DefaultFileQueryWrapper extends AbstractDbmQueryWrapper implements QueryOrderByable {
+public class DefaultFileQueryWrapper extends AbstractQueryWrapper implements QueryOrderByable {
 
 //	private DynamicQuery query;
 //	private JFishNamedFileQueryInfo info;
 	protected QueryProvideManager baseEntityManager;
-	private DbmQueryWrapper dataQuery;
+	private QueryWrapper dataQuery;
 	
 	protected boolean countQuery;
 
@@ -41,14 +43,14 @@ public class DefaultFileQueryWrapper extends AbstractDbmQueryWrapper implements 
 	private int maxRecords;
 	private Class<?> resultClass;
 	
-	protected DbmNamedQueryInfo info;
+	protected NamedQueryInfo info;
 	private TemplateParser parser;
 	private ParserContext parserContext;
 	
 	private String[] ascFields;
 	private String[] desFields;
 
-	public DefaultFileQueryWrapper(QueryProvideManager baseEntityManager, DbmNamedQueryInfo info, boolean count, TemplateParser parser) {
+	public DefaultFileQueryWrapper(QueryProvideManager baseEntityManager, NamedQueryInfo info, boolean count, TemplateParser parser) {
 		Assert.notNull(baseEntityManager);
 		this.baseEntityManager = baseEntityManager;
 		this.countQuery = count;
@@ -68,12 +70,12 @@ public class DefaultFileQueryWrapper extends AbstractDbmQueryWrapper implements 
 //	abstract protected DataQuery createDataQuery(String sql, Class<?> mappedClass);
 
 	
-	protected DbmQueryWrapper createDataQuery(CreateQueryCmd createQueryCmd){
-		DbmQueryWrapper dataQuery = this.baseEntityManager.createQuery(createQueryCmd);
+	protected QueryWrapper createDataQuery(CreateQueryCmd createQueryCmd){
+		QueryWrapper dataQuery = this.baseEntityManager.createQuery(createQueryCmd);
 		return dataQuery;
 	}
 	
-	protected DbmQueryWrapper createDataQueryIfNecessarry(){
+	protected QueryWrapper createDataQueryIfNecessarry(){
 		if(dataQuery!=null){
 			return dataQuery;
 		}
@@ -83,7 +85,7 @@ public class DefaultFileQueryWrapper extends AbstractDbmQueryWrapper implements 
 		ParsedSqlContext sqlAndValues = sqlGen.generatSql();
 		if(sqlAndValues.isListValue()){
 			CreateQueryCmd createQueryCmd = new CreateQueryCmd(sqlAndValues.getParsedSql(), resultClass, info.isNativeSql());
-			DbmQueryWrapper dataQuery = createDataQuery(createQueryCmd);
+			QueryWrapper dataQuery = createDataQuery(createQueryCmd);
 			int position = 0;
 			for(Object value : sqlAndValues.asList()){
 				dataQuery.setParameter(position++, value);
@@ -95,7 +97,7 @@ public class DefaultFileQueryWrapper extends AbstractDbmQueryWrapper implements 
 
 		String parsedSql = sqlAndValues.getParsedSql();
 		CreateQueryCmd createQueryCmd = new CreateQueryCmd(parsedSql, resultClass, info.isNativeSql());
-		DbmQueryWrapper dataQuery = createDataQuery(createQueryCmd);
+		QueryWrapper dataQuery = createDataQuery(createQueryCmd);
 		
 		SqlParamterPostfixFunctionRegistry sqlFunc = baseEntityManager.getSqlParamterPostfixFunctionRegistry();
 		ParsedSqlWrapper sqlWrapper = ParsedSqlUtils.parseSql(parsedSql, sqlFunc);
@@ -127,12 +129,12 @@ public class DefaultFileQueryWrapper extends AbstractDbmQueryWrapper implements 
 			dataQuery.setMaxResults(maxRecords);
 	}
 
-	public DbmQueryWrapper setParameter(int index, Object value) {
+	public QueryWrapper setParameter(int index, Object value) {
 		this.params.put(index, value);
 		return this;
 	}
 
-	public DbmQueryWrapper setParameter(String name, Object value) {
+	public QueryWrapper setParameter(String name, Object value) {
 		JNamedQueryKey key = JNamedQueryKey.ofKey(name);
 		if(key!=null){
 			this.processQueryKey(key, value);
@@ -154,22 +156,22 @@ public class DefaultFileQueryWrapper extends AbstractDbmQueryWrapper implements 
 		return createDataQueryIfNecessarry().getResultList();
 	}
 
-	public DbmQueryWrapper setFirstResult(int firstResult) {
+	public QueryWrapper setFirstResult(int firstResult) {
 		this.firstRecord = firstResult;
 		return this;
 	}
 
-	public DbmQueryWrapper setMaxResults(int maxResults) {
+	public QueryWrapper setMaxResults(int maxResults) {
 		this.maxRecords = maxResults;
 		return this;
 	}
 
-	public DbmQueryWrapper setResultClass(Class<?> resultClass) {
+	public QueryWrapper setResultClass(Class<?> resultClass) {
 		this.resultClass = resultClass;
 		return this;
 	}
 
-	public DbmQueryWrapper setParameters(Map<String, Object> params) {
+	public QueryWrapper setParameters(Map<String, Object> params) {
 		for(Entry<String, Object> entry : params.entrySet()){
 			setParameter(entry.getKey(), entry.getValue());
 		}
@@ -219,7 +221,7 @@ public class DefaultFileQueryWrapper extends AbstractDbmQueryWrapper implements 
 //		}
 	}
 	
-	public DbmQueryWrapper setParameters(List<Object> params) {
+	public QueryWrapper setParameters(List<Object> params) {
 		int position = 1;
 		for(Object value : params){
 			setParameter(position, value);
@@ -245,7 +247,7 @@ public class DefaultFileQueryWrapper extends AbstractDbmQueryWrapper implements 
 	
 
 	@Override
-	public DbmQueryWrapper setParameters(Object[] params) {
+	public QueryWrapper setParameters(Object[] params) {
 		if(ArrayUtils.hasNotElement(params))
 			return this;
 		int position = 1;
@@ -255,7 +257,7 @@ public class DefaultFileQueryWrapper extends AbstractDbmQueryWrapper implements 
 		return this;
 	}
 
-	public DbmQueryWrapper setLimited(final Integer first, final Integer max) {
+	public QueryWrapper setLimited(final Integer first, final Integer max) {
 		this.firstRecord = first;
 		this.maxRecords = max;
 		return this;
@@ -268,7 +270,7 @@ public class DefaultFileQueryWrapper extends AbstractDbmQueryWrapper implements 
 		return (T)dataQuery;
 	}
 	@Override
-	public DbmQueryWrapper setQueryConfig(Map<String, Object> configs) {
+	public QueryWrapper setQueryConfig(Map<String, Object> configs) {
 		return null;
 	}
 
@@ -279,6 +281,13 @@ public class DefaultFileQueryWrapper extends AbstractDbmQueryWrapper implements 
 	final public ParserContext getParserContext() {
 		return parserContext;
 	}*/
+	
+	public Optional<DbmEntityManager> getDbmEntityManager(){
+		if(DbmEntityManager.class.isInstance(baseEntityManager)){
+			return Optional.of((DbmEntityManager)baseEntityManager);
+		}
+		return Optional.empty();
+	}
 
 	@Override
 	public void setRowMapper(RowMapper<?> rowMapper) {

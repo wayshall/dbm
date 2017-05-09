@@ -11,8 +11,8 @@ import javax.validation.Validator;
 
 import org.onetwo.common.db.DataBase;
 import org.onetwo.common.db.filequery.SqlParamterPostfixFunctions;
-import org.onetwo.common.db.filequery.spi.SqlParamterPostfixFunctionRegistry;
 import org.onetwo.common.db.filter.annotation.DataQueryFilterListener;
+import org.onetwo.common.db.spi.SqlParamterPostfixFunctionRegistry;
 import org.onetwo.common.db.sql.SequenceNameManager;
 import org.onetwo.common.db.sqlext.SQLSymbolManager;
 import org.onetwo.common.exception.BaseException;
@@ -227,6 +227,7 @@ public class SimpleDbmInnerServiceRegistry implements DbmInnerServiceRegistry {
 		}
 		if(this.dbmJdbcOperations==null){
 			DbmJdbcTemplate jdbcTemplate = new DbmJdbcTemplate(dataSource, getJdbcParameterSetter());
+//			jdbcTemplate.afterPropertiesSet();
 			AspectJProxyFactory ajf = new AspectJProxyFactory(jdbcTemplate);
 			ajf.setProxyTargetClass(true);
 			ajf.addAspect(new DbmJdbcOperationsProxy(interceptorManager, jdbcTemplate));

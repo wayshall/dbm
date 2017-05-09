@@ -5,9 +5,9 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.onetwo.common.db.QueryContextVariable;
-import org.onetwo.common.db.filequery.FileSqlParserType;
 import org.onetwo.common.db.filequery.ParserContextFunctionSet;
+import org.onetwo.common.db.spi.FileSqlParserType;
+import org.onetwo.common.db.spi.QueryContextVariable;
 
 /**
  * @author wayshall

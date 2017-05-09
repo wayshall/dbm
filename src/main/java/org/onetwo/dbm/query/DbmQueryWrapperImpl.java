@@ -3,12 +3,12 @@ package org.onetwo.dbm.query;
 import java.util.List;
 import java.util.Map;
 
-import org.onetwo.common.db.AbstractDbmQueryWrapper;
-import org.onetwo.common.db.DbmQueryWrapper;
+import org.onetwo.common.db.AbstractQueryWrapper;
+import org.onetwo.common.db.spi.QueryWrapper;
 import org.onetwo.common.utils.LangUtils;
 import org.springframework.jdbc.core.RowMapper;
 
-public class DbmQueryWrapperImpl extends AbstractDbmQueryWrapper {
+public class DbmQueryWrapperImpl extends AbstractQueryWrapper {
 	
 	private DbmQuery dbmQuery;
 	
@@ -33,50 +33,50 @@ public class DbmQueryWrapperImpl extends AbstractDbmQueryWrapper {
 	}
 
 	@Override
-	public DbmQueryWrapper setFirstResult(int startPosition) {
+	public QueryWrapper setFirstResult(int startPosition) {
 		dbmQuery.setFirstResult(startPosition);
 		return this;
 	}
 
 	@Override
-	public DbmQueryWrapper setMaxResults(int maxResult) {
+	public QueryWrapper setMaxResults(int maxResult) {
 		dbmQuery.setMaxResults(maxResult);
 		return this;
 	}
 
 	@Override
-	public DbmQueryWrapper setParameter(int position, Object value) {
+	public QueryWrapper setParameter(int position, Object value) {
 		dbmQuery.setParameter(position, value);
 		return this;
 	}
 
 	@Override
-	public DbmQueryWrapper setParameter(String name, Object value) {
+	public QueryWrapper setParameter(String name, Object value) {
 		dbmQuery.setParameter(name, value);
 		return this;
 	}
 
 	@Override
-	public DbmQueryWrapper setParameters(Map<String, Object> params) {
+	public QueryWrapper setParameters(Map<String, Object> params) {
 		dbmQuery.setParameters(params);
 		return this;
 	}
 
 	@Override
-	public DbmQueryWrapper setParameters(List<Object> params) {
+	public QueryWrapper setParameters(List<Object> params) {
 		dbmQuery.setParameters(params);
 		return this;
 	}
 
 	@Override
-	public DbmQueryWrapper setParameters(Object[] params) {
+	public QueryWrapper setParameters(Object[] params) {
 		dbmQuery.setParameters(LangUtils.asList(params));
 		return this;
 	}
 
 
 	@Override
-	public DbmQueryWrapper setLimited(Integer first, Integer size) {
+	public QueryWrapper setLimited(Integer first, Integer size) {
 		if (first >= 0) {
 			dbmQuery.setFirstResult(first);
 		}
@@ -92,7 +92,7 @@ public class DbmQueryWrapperImpl extends AbstractDbmQueryWrapper {
 	}
 
 	@Override
-	public DbmQueryWrapper setQueryConfig(Map<String, Object> configs) {
+	public QueryWrapper setQueryConfig(Map<String, Object> configs) {
 		return this;
 	}
 

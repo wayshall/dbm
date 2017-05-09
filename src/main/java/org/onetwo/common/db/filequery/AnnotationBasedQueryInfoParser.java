@@ -4,11 +4,13 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Set;
 
-import org.onetwo.common.db.QueryConfigData;
-import org.onetwo.common.db.QueryContextVariable;
 import org.onetwo.common.db.dquery.DbmSqlFileResource;
 import org.onetwo.common.db.dquery.annotation.Query;
-import org.onetwo.common.db.filequery.spi.DbmNamedQueryInfoParser;
+import org.onetwo.common.db.spi.NamedQueryFile;
+import org.onetwo.common.db.spi.NamedQueryInfo;
+import org.onetwo.common.db.spi.NamedQueryInfoParser;
+import org.onetwo.common.db.spi.QueryConfigData;
+import org.onetwo.common.db.spi.QueryContextVariable;
 import org.onetwo.common.propconf.ResourceAdapter;
 import org.onetwo.common.reflect.ReflectUtils;
 import org.onetwo.common.utils.StringUtils;
@@ -21,10 +23,10 @@ import org.springframework.util.ReflectionUtils.MethodFilter;
  * @author wayshall
  * <br/>
  */
-public class AnnotationBasedQueryInfoParser implements DbmNamedQueryInfoParser {
+public class AnnotationBasedQueryInfoParser implements NamedQueryInfoParser {
 
 	@Override
-	public void parseToNamedQueryFile(DbmNamedQueryFile namedQueryFile, ResourceAdapter<?> file) {
+	public void parseToNamedQueryFile(NamedQueryFile namedQueryFile, ResourceAdapter<?> file) {
 		if(!DbmSqlFileResource.class.isInstance(file)){
 			return ;
 		}
@@ -39,9 +41,9 @@ public class AnnotationBasedQueryInfoParser implements DbmNamedQueryInfoParser {
 		}
 		for(Method method : methods){
 			Query query = AnnotationUtils.findAnnotation(method, Query.class);
-			DbmNamedQueryInfo info = namedQueryFile.getNamedProperty(method.getName());
+			NamedQueryInfo info = namedQueryFile.getNamedProperty(method.getName());
 			if(info==null){
-				info = new DbmNamedQueryInfo();
+				info = new NamedQueryInfo();
 				info.setName(method.getName());
 				info.setDbmNamedQueryFile(namedQueryFile);
 				namedQueryFile.put(info.getName(), info, true);

@@ -11,8 +11,8 @@ import javax.annotation.Resource;
 
 import org.junit.Test;
 import org.onetwo.common.base.DbmBaseTest;
-import org.onetwo.common.db.BaseEntityManager;
 import org.onetwo.common.db.builder.Querys;
+import org.onetwo.common.db.spi.BaseEntityManager;
 import org.onetwo.common.dbm.model.entity.UserTableIdEntity;
 import org.onetwo.common.utils.LangOps;
 

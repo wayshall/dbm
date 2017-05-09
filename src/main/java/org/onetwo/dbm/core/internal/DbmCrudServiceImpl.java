@@ -8,8 +8,8 @@ import java.util.Map;
 import javax.validation.ValidationException;
 
 import org.onetwo.common.db.BaseCrudEntityManager;
-import org.onetwo.common.db.BaseEntityManager;
 import org.onetwo.common.db.builder.QueryBuilder;
+import org.onetwo.common.db.spi.BaseEntityManager;
 import org.onetwo.common.exception.BusinessException;
 import org.onetwo.common.spring.Springs;
 import org.onetwo.common.spring.validator.ValidationBindingResult;

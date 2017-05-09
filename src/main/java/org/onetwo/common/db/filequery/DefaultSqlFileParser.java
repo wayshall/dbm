@@ -3,7 +3,9 @@ package org.onetwo.common.db.filequery;
 import java.util.List;
 import java.util.Properties;
 
-import org.onetwo.common.db.filequery.spi.DbmNamedQueryInfoParser;
+import org.onetwo.common.db.spi.NamedQueryFile;
+import org.onetwo.common.db.spi.NamedQueryInfo;
+import org.onetwo.common.db.spi.NamedQueryInfoParser;
 import org.onetwo.common.exception.BaseException;
 import org.onetwo.common.log.JFishLoggerFactory;
 import org.onetwo.common.propconf.JFishProperties;
@@ -22,7 +24,7 @@ import org.slf4j.Logger;
  * @author wayshall
  *
  */
-public class DefaultSqlFileParser implements DbmNamedQueryInfoParser {
+public class DefaultSqlFileParser implements NamedQueryInfoParser {
 
 	public static final String GLOBAL_NS_KEY = "global";
 	public static final String COMMENT = "--";
@@ -37,7 +39,7 @@ public class DefaultSqlFileParser implements DbmNamedQueryInfoParser {
 	protected boolean debug = true;
 	
 	@Override
-	public void parseToNamedQueryFile(DbmNamedQueryFile np, ResourceAdapter<?> file) {
+	public void parseToNamedQueryFile(NamedQueryFile np, ResourceAdapter<?> file) {
 		JFishPropertiesData jproperties = loadSqlFile(file);
 		if(jproperties==null){
 			return ;
@@ -152,7 +154,7 @@ public class DefaultSqlFileParser implements DbmNamedQueryInfoParser {
 	 * @param beanClassOfProperty
 	 * @return
 	 */
-	protected void buildPropertiesAsNamedInfos(DbmNamedQueryFile namespaceInfo, ResourceAdapter<?> resource, JFishPropertiesData jp){
+	protected void buildPropertiesAsNamedInfos(NamedQueryFile namespaceInfo, ResourceAdapter<?> resource, JFishPropertiesData jp){
 		JFishProperties wrapper = jp.getProperties();
 		List<String> keyNames = wrapper.sortedKeys();
 		if(debug){
@@ -161,7 +163,7 @@ public class DefaultSqlFileParser implements DbmNamedQueryInfoParser {
 				logger.info(str);
 			}
 		}
-		DbmNamedQueryInfo propBean = null;
+		NamedQueryInfo propBean = null;
 		boolean newBean = true;
 		String preKey = null;
 //		String val = "";
@@ -174,7 +176,7 @@ public class DefaultSqlFileParser implements DbmNamedQueryInfoParser {
 					extBuildNamedInfoBean(propBean);
 					namespaceInfo.put(propBean.getName(), propBean, true);
 				}
-				propBean = new DbmNamedQueryInfo();
+				propBean = new NamedQueryInfo();
 				String val = wrapper.getAndThrowIfEmpty(key);
 				/*if(key.endsWith(IGNORE_NULL_KEY)){
 					throw new BaseException("the query name["+key+"] cant be end with: " + IGNORE_NULL_KEY);
@@ -183,7 +185,7 @@ public class DefaultSqlFileParser implements DbmNamedQueryInfoParser {
 				propBean.setValue(val);
 //				propBean.setNamespace(namespace);
 				newBean = false;
-				preKey = key+DbmNamedQueryInfo.DOT_KEY;
+				preKey = key+NamedQueryInfo.DOT_KEY;
 				propBean.setSrcfile(resource);
 				propBean.setConfig(jp.getConfig());
 				propBean.setDbmNamedQueryFile(namespaceInfo);
@@ -205,7 +207,7 @@ public class DefaultSqlFileParser implements DbmNamedQueryInfoParser {
 		}
 		if(logger.isInfoEnabled()){
 			logger.info("================ {} named query start ================", namespaceInfo.getNamespace());
-			for(DbmNamedQueryInfo prop : namespaceInfo.getNamedProperties()){
+			for(NamedQueryInfo prop : namespaceInfo.getNamedProperties()){
 				logger.info(prop.getName()+": \t"+prop);
 			}
 			logger.info("================ {} named query end ================", namespaceInfo.getNamespace());
@@ -213,11 +215,11 @@ public class DefaultSqlFileParser implements DbmNamedQueryInfoParser {
 		
 //		return namedProperties;
 	}
-	protected void extBuildNamedInfoBean(DbmNamedQueryInfo propBean){
+	protected void extBuildNamedInfoBean(NamedQueryInfo propBean){
 	}
-	protected void setNamedInfoProperty(DbmNamedQueryInfo bean, String prop, Object val){
-		if(prop.indexOf(DbmNamedQueryInfo.DOT_KEY)!=-1){
-			prop = StringUtils.toCamel(prop, DbmNamedQueryInfo.DOT_KEY, false);
+	protected void setNamedInfoProperty(NamedQueryInfo bean, String prop, Object val){
+		if(prop.indexOf(NamedQueryInfo.DOT_KEY)!=-1){
+			prop = StringUtils.toCamel(prop, NamedQueryInfo.DOT_KEY, false);
 		}
 		try {
 			ReflectUtils.setExpr(bean, prop, val);

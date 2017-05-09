@@ -8,8 +8,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.onetwo.common.db.DbmQueryWrapper;
-import org.onetwo.common.db.QueryConfigData;
 import org.onetwo.common.db.dquery.DynamicMethod.DynamicMethodParameter;
 import org.onetwo.common.db.dquery.annotation.AsCountQuery;
 import org.onetwo.common.db.dquery.annotation.BatchObject;
@@ -17,6 +15,8 @@ import org.onetwo.common.db.dquery.annotation.ExecuteUpdate;
 import org.onetwo.common.db.dquery.annotation.Param;
 import org.onetwo.common.db.dquery.annotation.QueryDispatcher;
 import org.onetwo.common.db.filequery.JNamedQueryKey;
+import org.onetwo.common.db.spi.QueryConfigData;
+import org.onetwo.common.db.spi.QueryWrapper;
 import org.onetwo.common.db.sqlext.ExtQueryUtils;
 import org.onetwo.common.proxy.AbstractMethodResolver;
 import org.onetwo.common.proxy.BaseMethodParameter;
@@ -88,7 +88,7 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 			if(Page.class==rClass){
 //				throw new FileNamedQueryException("define Page Type at the first parameter and return void if you want to pagination: " + method.toGenericString());
 				this.pageParamter = findPagePrarameter();
-			}else if(DbmQueryWrapper.class==rClass){
+			}else if(QueryWrapper.class==rClass){
 				compClass = null;
 			}
 		}

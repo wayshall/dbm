@@ -2,7 +2,8 @@ package org.onetwo.common.db.filequery;
 
 import java.util.Arrays;
 
-import org.onetwo.common.db.filequery.spi.DbmNamedQueryFileListener;
+import org.onetwo.common.db.spi.NamedQueryInfo;
+import org.onetwo.common.db.spi.NamedQueryFileListener;
 import org.onetwo.common.spring.ftl.TemplateParser;
 import org.onetwo.dbm.exception.FileNamedQueryException;
 
@@ -26,11 +27,11 @@ public class DbmNamedSqlFileManager extends BaseNamedSqlFileManager {
 	}
 	
 	
-	public static final String ATTRS_KEY = DbmNamedQueryInfo.FRAGMENT_DOT_KEY;
+	public static final String ATTRS_KEY = NamedQueryInfo.FRAGMENT_DOT_KEY;
 	private TemplateParser sqlStatmentParser;
 	
 
-	public DbmNamedSqlFileManager(boolean watchSqlFile, TemplateParser sqlStatmentParser, DbmNamedQueryFileListener listener) {
+	public DbmNamedSqlFileManager(boolean watchSqlFile, TemplateParser sqlStatmentParser, NamedQueryFileListener listener) {
 		super(watchSqlFile, listener);
 //		this.databaseType = conf.getDatabaseType();
 //		this.setSqlFileParser(new MultipCommentsSqlFileParser());
@@ -41,7 +42,7 @@ public class DbmNamedSqlFileManager extends BaseNamedSqlFileManager {
 		this.sqlStatmentParser = sqlStatmentParser;
 	}
 
-	protected void putIntoCaches(String key, DbmNamedQueryInfo nsp){
+	protected void putIntoCaches(String key, NamedQueryInfo nsp){
 		super.putIntoCaches(key, nsp);
 		nsp.getAliasList().forEach(aliasName->{
 			/*try {
@@ -59,12 +60,12 @@ public class DbmNamedSqlFileManager extends BaseNamedSqlFileManager {
 		return sqlStatmentParser;
 	}
 
-	protected void extBuildNamedInfoBean(DbmNamedQueryInfo propBean){
+	protected void extBuildNamedInfoBean(NamedQueryInfo propBean){
 //		propBean.setDataBaseType(getDatabaseType());
 	}
 
-	public DbmNamedQueryInfo getNamedQueryInfo(String name) {
-		DbmNamedQueryInfo info = super.getNamedQueryInfo(name);
+	public NamedQueryInfo getNamedQueryInfo(String name) {
+		NamedQueryInfo info = super.getNamedQueryInfo(name);
 		if(info==null)
 			throw new FileNamedQueryException("namedQuery not found : " + name);
 		return info;

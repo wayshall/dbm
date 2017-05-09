@@ -15,6 +15,8 @@ import org.springframework.jdbc.support.KeyHolder;
 
 public interface DbmJdbcOperations /*extends JdbcOperations*/ {
 	
+	DbmNamedJdbcTemplate getDbmNamedJdbcOperations();
+	
 	@DbmJdbcOperationMark(type=DbmJdbcOperationType.QUERY)
 	<T> T query(String sql, Map<String, ?> paramMap, ResultSetExtractor<T> rse) throws DataAccessException;
 

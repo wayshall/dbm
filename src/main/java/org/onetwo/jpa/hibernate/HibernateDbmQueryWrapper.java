@@ -4,15 +4,15 @@ import java.util.List;
 import java.util.Map;
 
 import org.hibernate.SQLQuery;
-import org.onetwo.common.db.AbstractDbmQueryWrapper;
-import org.onetwo.common.db.DbmQueryWrapper;
+import org.onetwo.common.db.AbstractQueryWrapper;
+import org.onetwo.common.db.spi.QueryWrapper;
 import org.springframework.jdbc.core.RowMapper;
 
 /**
  * @author wayshall
  * <br/>
  */
-public class HibernateDbmQueryWrapper<E> extends AbstractDbmQueryWrapper implements DbmQueryWrapper {
+public class HibernateDbmQueryWrapper<E> extends AbstractQueryWrapper implements QueryWrapper {
 	
 	private SQLQuery<E> sqlQuery;
 
@@ -34,32 +34,32 @@ public class HibernateDbmQueryWrapper<E> extends AbstractDbmQueryWrapper impleme
 	}
 
 	@Override
-	public DbmQueryWrapper setFirstResult(int startPosition) {
+	public QueryWrapper setFirstResult(int startPosition) {
 		sqlQuery.setFirstResult(startPosition);
 		return this;
 	}
 
 	@Override
-	public DbmQueryWrapper setMaxResults(int maxResult) {
+	public QueryWrapper setMaxResults(int maxResult) {
 		sqlQuery.setMaxResults(maxResult);
 		return this;
 	}
 
 	@Override
-	public DbmQueryWrapper setParameter(int position, Object value) {
+	public QueryWrapper setParameter(int position, Object value) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public DbmQueryWrapper setParameter(String name, Object value) {
+	public QueryWrapper setParameter(String name, Object value) {
 		sqlQuery.setParameter(name, value);
 		return this;
 	}
 
 
 	@Override
-	public DbmQueryWrapper setLimited(Integer first, Integer size) {
+	public QueryWrapper setLimited(Integer first, Integer size) {
 		sqlQuery.setFirstResult(first);
 		sqlQuery.setMaxResults(size);
 		return this;
@@ -71,7 +71,7 @@ public class HibernateDbmQueryWrapper<E> extends AbstractDbmQueryWrapper impleme
 	}
 
 	@Override
-	public DbmQueryWrapper setQueryConfig(Map<String, Object> configs) {
+	public QueryWrapper setQueryConfig(Map<String, Object> configs) {
 		logger.info("ingore set query config");
 		return this;
 	}

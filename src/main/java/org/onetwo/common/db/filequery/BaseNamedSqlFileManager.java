@@ -7,9 +7,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.onetwo.common.db.filequery.spi.DbmNamedQueryFileListener;
-import org.onetwo.common.db.filequery.spi.NamedSqlFileManager;
-import org.onetwo.common.db.filequery.spi.DbmNamedQueryInfoParser;
+import org.onetwo.common.db.spi.NamedQueryFile;
+import org.onetwo.common.db.spi.NamedQueryInfo;
+import org.onetwo.common.db.spi.NamedQueryFileListener;
+import org.onetwo.common.db.spi.NamedQueryInfoParser;
+import org.onetwo.common.db.spi.NamedSqlFileManager;
 import org.onetwo.common.exception.BaseException;
 import org.onetwo.common.log.JFishLoggerFactory;
 import org.onetwo.common.propconf.ResourceAdapter;
@@ -42,26 +44,26 @@ public class BaseNamedSqlFileManager implements NamedSqlFileManager {
 	private FileWatcher fileMonitor;
 	private long period = 1;
 	
-	private Map<String, DbmNamedQueryFile> namespaceProperties = Maps.newHashMap();
+	private Map<String, NamedQueryFile> namespaceProperties = Maps.newHashMap();
 //	private List<Properties> sqlfiles;
 //	private PropertiesWraper wrapper;
-	private Map<String, DbmNamedQueryInfo> namedQueryCache = Maps.newConcurrentMap();
+	private Map<String, NamedQueryInfo> namedQueryCache = Maps.newConcurrentMap();
 //	private DbmNamedQueryInfoParser sqlFileParser = new DefaultSqlFileParser();
-	private List<DbmNamedQueryInfoParser> queryInfoParsers = Lists.newArrayList(new DefaultSqlFileParser());
-	final private DbmNamedQueryFileListener listener;
+	private List<NamedQueryInfoParser> queryInfoParsers = Lists.newArrayList(new DefaultSqlFileParser());
+	final private NamedQueryFileListener listener;
 	
 	private boolean watchSqlFile;
 	
-	public BaseNamedSqlFileManager(boolean watchSqlFile, DbmNamedQueryFileListener listener) {
+	public BaseNamedSqlFileManager(boolean watchSqlFile, NamedQueryFileListener listener) {
 		this.watchSqlFile = watchSqlFile;
 		this.listener = listener;
 	}
 	
-	public DbmNamedQueryFileListener getListener() {
+	public NamedQueryFileListener getListener() {
 		return listener;
 	}
 
-	final public void setQueryInfoParsers(List<DbmNamedQueryInfoParser> queryInfoParsers) {
+	final public void setQueryInfoParsers(List<NamedQueryInfoParser> queryInfoParsers) {
 		this.queryInfoParsers = queryInfoParsers;
 	}
 
@@ -69,9 +71,9 @@ public class BaseNamedSqlFileManager implements NamedSqlFileManager {
 	 * 解释sql文件
 	 */
 	@Override
-	public DbmNamedQueryFile buildSqlFile(ResourceAdapter<?> sqlFile){
+	public NamedQueryFile buildSqlFile(ResourceAdapter<?> sqlFile){
 		Assert.notNull(sqlFile);
-		DbmNamedQueryFile info = this.parseSqlFile(sqlFile, true);
+		NamedQueryFile info = this.parseSqlFile(sqlFile, true);
 		this.buildSqlFileMonitor(sqlFile);
 
 		if(this.listener!=null){
@@ -144,7 +146,7 @@ public class BaseNamedSqlFileManager implements NamedSqlFileManager {
 			logger.warn("no file relaoded : " + file);
 			return ;
 		}*/
-		DbmNamedQueryFile namepsaceInfo = this.parseSqlFile(file, false);
+		NamedQueryFile namepsaceInfo = this.parseSqlFile(file, false);
 		logger.warn("file relaoded : " + file);
 		if(listener!=null){
 			listener.afterReload(file, namepsaceInfo);
@@ -155,7 +157,7 @@ public class BaseNamedSqlFileManager implements NamedSqlFileManager {
 		return GLOBAL_NS_KEY.equals(namespace) || !namespace.contains(".");
 	}
 	
-	protected Map<String, DbmNamedQueryFile> parseSqlFiles(ResourceAdapter<?>[] sqlfileArray){
+	protected Map<String, NamedQueryFile> parseSqlFiles(ResourceAdapter<?>[] sqlfileArray){
 		if(LangUtils.isEmpty(sqlfileArray)){
 			logger.info("no named sql file found.");
 			return Collections.emptyMap();
@@ -170,7 +172,7 @@ public class BaseNamedSqlFileManager implements NamedSqlFileManager {
 	}
 
 
-	protected DbmNamedQueryFile parseSqlFile(ResourceAdapter<?> f, boolean throwIfExist){
+	protected NamedQueryFile parseSqlFile(ResourceAdapter<?> f, boolean throwIfExist){
 		logger.info("parse named sql file: {}", f.getName());
 		
 		String namespace = getFileNameNoJfishSqlPostfix(f);
@@ -180,7 +182,7 @@ public class BaseNamedSqlFileManager implements NamedSqlFileManager {
 		}
 		
 
-		DbmNamedQueryFile namespaceInfo = null;
+		NamedQueryFile namespaceInfo = null;
 		if(globalNamespace){
 			namespaceInfo = namespaceProperties.get(namespace);
 			if(namespaceInfo==null){
@@ -190,7 +192,7 @@ public class BaseNamedSqlFileManager implements NamedSqlFileManager {
 //			np.addAll(namedinfos, throwIfExist);
 		}else{
 			if(namespaceProperties.containsKey(namespace) && throwIfExist){
-				DbmNamedQueryFile existNp = namespaceProperties.get(namespace);
+				NamedQueryFile existNp = namespaceProperties.get(namespace);
 				throw new DbmException("sql namespace has already exist : " + namespace+", file: " + f+", exists file: "+ existNp.getSource());
 			}
 			namespaceInfo = new CommonNamespaceProperties(namespace, f);
@@ -202,7 +204,7 @@ public class BaseNamedSqlFileManager implements NamedSqlFileManager {
 			return null;*/
 
 //		namespacesMap.put(namespace, np);
-		for(DbmNamedQueryInfo nsp : namespaceInfo.getNamedProperties()){
+		for(NamedQueryInfo nsp : namespaceInfo.getNamedProperties()){
 			if(namedQueryCache.containsKey(nsp.getFullName()) && throwIfExist){
 				throw new FileNamedQueryException("cache file named query error, key is exists : " + nsp.getFullName());
 			}
@@ -212,7 +214,7 @@ public class BaseNamedSqlFileManager implements NamedSqlFileManager {
 		return namespaceInfo;
 	}
 	
-	protected void putIntoCaches(String key, DbmNamedQueryInfo nsp){
+	protected void putIntoCaches(String key, NamedQueryInfo nsp){
 		logger.info("cache query : {}", key);
 		this.namedQueryCache.put(key, nsp);
 	}
@@ -232,7 +234,7 @@ public class BaseNamedSqlFileManager implements NamedSqlFileManager {
 	 * @param np
 	 * @param file
 	 */
-	protected void buildNamedInfosToNamespaceFromResource(DbmNamedQueryFile np, ResourceAdapter<?> file){
+	protected void buildNamedInfosToNamespaceFromResource(NamedQueryFile np, ResourceAdapter<?> file){
 //		sqlFileParser.parseToNamedQueryFile(np, file);
 		
 		this.queryInfoParsers.forEach(parser->{
@@ -253,8 +255,8 @@ public class BaseNamedSqlFileManager implements NamedSqlFileManager {
 		});
 	}*/
 	@Override
-	public DbmNamedQueryInfo getNamedQueryInfo(String fullname) {
-		DbmNamedQueryInfo info = namedQueryCache.get(fullname);
+	public NamedQueryInfo getNamedQueryInfo(String fullname) {
+		NamedQueryInfo info = namedQueryCache.get(fullname);
 		return info;
 	}
 
@@ -270,18 +272,18 @@ public class BaseNamedSqlFileManager implements NamedSqlFileManager {
 
 	public String toString(){
 		StringBuilder sb = new StringBuilder("named query : \n");
-		for(DbmNamedQueryInfo info : this.namedQueryCache.values()){
+		for(NamedQueryInfo info : this.namedQueryCache.values()){
 			sb.append(info).append(",\n");
 		}
 		return sb.toString();
 	}
 
 	@Override
-	public DbmNamedQueryFile getNamespaceProperties(String namespace) {
+	public NamedQueryFile getNamespaceProperties(String namespace) {
 		return namespaceProperties.get(namespace);
 	}
 
-	public Collection<DbmNamedQueryFile> getAllNamespaceProperties() {
+	public Collection<NamedQueryFile> getAllNamespaceProperties() {
 		return namespaceProperties.values();
 	}
 	
@@ -291,10 +293,10 @@ public class BaseNamedSqlFileManager implements NamedSqlFileManager {
 
 
 
-	public static class CommonNamespaceProperties implements DbmNamedQueryFile {
+	public static class CommonNamespaceProperties implements NamedQueryFile {
 		private final String namespace;
 		private ResourceAdapter<?> source;
-		private Map<String, DbmNamedQueryInfo> dbmNamedQueryInfoMap;
+		private Map<String, NamedQueryInfo> dbmNamedQueryInfoMap;
 		
 		public CommonNamespaceProperties(String namespace){
 			this.namespace = namespace;
@@ -322,7 +324,7 @@ public class BaseNamedSqlFileManager implements NamedSqlFileManager {
 		}
 
 		@Override
-		public Collection<DbmNamedQueryInfo> getNamedProperties() {
+		public Collection<NamedQueryInfo> getNamedProperties() {
 			return ImmutableList.copyOf(dbmNamedQueryInfoMap.values());
 		}
 
@@ -330,21 +332,21 @@ public class BaseNamedSqlFileManager implements NamedSqlFileManager {
 			return source;
 		}
 		@Override
-		public DbmNamedQueryInfo getNamedProperty(String name) {
+		public NamedQueryInfo getNamedProperty(String name) {
 			return dbmNamedQueryInfoMap.get(name);
 		}
 		@Override
-		public void addAll(Map<String, DbmNamedQueryInfo> namedInfos, boolean throwIfExist) {
-			for(Entry<String, DbmNamedQueryInfo> entry : namedInfos.entrySet()){
+		public void addAll(Map<String, NamedQueryInfo> namedInfos, boolean throwIfExist) {
+			for(Entry<String, NamedQueryInfo> entry : namedInfos.entrySet()){
 				put(entry.getKey(), entry.getValue(), throwIfExist);
 			}
 		}
 		@Override
-		public void put(String name, DbmNamedQueryInfo info, boolean throwIfExist) {
+		public void put(String name, NamedQueryInfo info, boolean throwIfExist) {
 			Assert.hasText(name);
 			Assert.notNull(info);
 			if(throwIfExist && this.dbmNamedQueryInfoMap.containsKey(name)){
-				DbmNamedQueryInfo exitProp = this.dbmNamedQueryInfoMap.get(name);
+				NamedQueryInfo exitProp = this.dbmNamedQueryInfoMap.get(name);
 				throw new BaseException("int file["+info.getSrcfile()+"], sql key["+name+"] has already exist in namespace: " + namespace+", in file: "+ exitProp.getSrcfile());
 			}
 			this.dbmNamedQueryInfoMap.put(name, info);

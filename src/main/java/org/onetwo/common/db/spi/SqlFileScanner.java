@@ -1,4 +1,4 @@
-package org.onetwo.common.db.filequery.spi;
+package org.onetwo.common.db.spi;
 
 import java.util.Map;
 

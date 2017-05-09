@@ -5,8 +5,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.onetwo.common.db.QueryConfigData;
-import org.onetwo.common.db.QueryContextVariable;
+import org.onetwo.common.db.spi.NamedQueryInfo;
+import org.onetwo.common.db.spi.QueryConfigData;
+import org.onetwo.common.db.spi.QueryContextVariable;
 import org.onetwo.common.utils.CUtils;
 import org.onetwo.common.utils.LangUtils;
 import org.onetwo.common.utils.list.JFishList;
@@ -15,7 +16,7 @@ import org.springframework.util.Assert;
 
 public class ParserContext implements Map<Object, Object> {
 	
-	public static ParserContext create(DbmNamedQueryInfo queryInfo, Object...params){
+	public static ParserContext create(NamedQueryInfo queryInfo, Object...params){
 		if(LangUtils.isEmpty(params))
 			return new ParserContext(queryInfo, new HashMap<Object, Object>());
 		return new ParserContext(queryInfo, CUtils.asMap(params));
@@ -26,19 +27,19 @@ public class ParserContext implements Map<Object, Object> {
 	public static final String QUERY_CONFIG = "_queryConfig";
 	public static final String QUERY_CONFIG_FUNC = "_queryfunc";
 	public static final String DB_KEY = SqlFunctionFactory.CONTEXT_KEY;
-	public static final String PARSER_ACCESS_KEY = DbmNamedQueryInfo.FRAGMENT_KEY;
+	public static final String PARSER_ACCESS_KEY = NamedQueryInfo.FRAGMENT_KEY;
 	
 	private Map<Object, Object> context;
-	final private DbmNamedQueryInfo queryInfo;
+	final private NamedQueryInfo queryInfo;
 	
-	public ParserContext(DbmNamedQueryInfo queryInfo, Map<Object, Object> context){
+	public ParserContext(NamedQueryInfo queryInfo, Map<Object, Object> context){
 		this.queryInfo = queryInfo;
 		this.context = context;
 		this.context.put(CONTEXT_KEY, ParserContextFunctionSet.getInstance());
 	}
 	
 
-	public DbmNamedQueryInfo getQueryInfo() {
+	public NamedQueryInfo getQueryInfo() {
 		return queryInfo;
 	}
 

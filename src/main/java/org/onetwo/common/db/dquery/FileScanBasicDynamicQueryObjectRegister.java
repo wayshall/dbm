@@ -5,8 +5,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.onetwo.common.db.filequery.SpringBasedSqlFileScanner;
-import org.onetwo.common.db.filequery.spi.NamedSqlFileManager;
-import org.onetwo.common.db.filequery.spi.SqlFileScanner;
+import org.onetwo.common.db.spi.NamedSqlFileManager;
+import org.onetwo.common.db.spi.SqlFileScanner;
 import org.onetwo.common.log.JFishLoggerFactory;
 import org.onetwo.common.propconf.ResourceAdapter;
 import org.onetwo.common.reflect.ReflectUtils;

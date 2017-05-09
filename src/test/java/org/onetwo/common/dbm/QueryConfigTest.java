@@ -6,7 +6,7 @@ import java.util.List;
 
 import org.junit.Test;
 import org.onetwo.common.base.DbmBaseTest;
-import org.onetwo.common.db.BaseEntityManager;
+import org.onetwo.common.db.spi.BaseEntityManager;
 import org.onetwo.common.dbm.model.dao.UserQueryConfigDao;
 import org.onetwo.common.dbm.model.entity.UserEntity;
 import org.onetwo.common.utils.LangOps;

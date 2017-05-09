@@ -1,9 +1,9 @@
-package org.onetwo.common.db.filequery;
+package org.onetwo.common.db.spi;
 
 import java.util.List;
 import java.util.Map;
 
-import org.onetwo.common.db.QueryConfigData;
+import org.onetwo.common.db.filequery.ParsedSqlUtils;
 import org.onetwo.common.db.sqlext.ExtQueryUtils;
 import org.onetwo.common.propconf.JFishProperties;
 import org.onetwo.common.propconf.ResourceAdapter;
@@ -19,7 +19,7 @@ import com.google.common.collect.Maps;
  * @author way
  *
  */
-public class DbmNamedQueryInfo implements Cloneable{
+public class NamedQueryInfo implements Cloneable{
 	public static final char DOT_KEY = '.';
 	public static final char UNDERLINE_KEY = '_';
 	
@@ -49,7 +49,7 @@ public class DbmNamedQueryInfo implements Cloneable{
 	private String name;
 	private String value;
 	
-	private DbmNamedQueryFile dbmNamedQueryFile;
+	private NamedQueryFile dbmNamedQueryFile;
 	private String namespace;
 	//TODO  not used
 	private JFishProperties config;
@@ -103,11 +103,11 @@ public class DbmNamedQueryInfo implements Cloneable{
 		this.config = config;
 	}
 
-	public DbmNamedQueryFile getDbmNamedQueryFile() {
+	public NamedQueryFile getDbmNamedQueryFile() {
 		return dbmNamedQueryFile;
 	}
 
-	public void setDbmNamedQueryFile(DbmNamedQueryFile namespaceInfo) {
+	public void setDbmNamedQueryFile(NamedQueryFile namespaceInfo) {
 		this.dbmNamedQueryFile = namespaceInfo;
 		this.namespace = namespaceInfo.getNamespace();
 	}
@@ -247,13 +247,13 @@ public class DbmNamedQueryInfo implements Cloneable{
 	}
 	
 	@Override
-	public DbmNamedQueryInfo clone() throws CloneNotSupportedException {
-		DbmNamedQueryInfo prop = new DbmNamedQueryInfo();
+	public NamedQueryInfo clone() throws CloneNotSupportedException {
+		NamedQueryInfo prop = new NamedQueryInfo();
 		this.cloneProperties(prop);
 		return prop;
 	}
 
-	protected void cloneProperties(DbmNamedQueryInfo prop) {
+	protected void cloneProperties(NamedQueryInfo prop) {
 //		super.cloneProperties(prop);
 
 		prop.name = name;

@@ -12,15 +12,15 @@ import javax.sql.DataSource;
 import org.onetwo.common.db.BaseEntityManagerAdapter;
 import org.onetwo.common.db.DataBase;
 import org.onetwo.common.db.DbmQueryValue;
-import org.onetwo.common.db.DbmQueryWrapper;
 import org.onetwo.common.db.EntityManagerProvider;
 import org.onetwo.common.db.builder.QueryBuilder;
 import org.onetwo.common.db.builder.Querys;
 import org.onetwo.common.db.filequery.DbmNamedSqlFileManager;
 import org.onetwo.common.db.filequery.func.SqlFunctionDialet;
-import org.onetwo.common.db.filequery.spi.CreateQueryCmd;
-import org.onetwo.common.db.filequery.spi.FileNamedQueryFactory;
-import org.onetwo.common.db.filequery.spi.SqlParamterPostfixFunctionRegistry;
+import org.onetwo.common.db.spi.CreateQueryCmd;
+import org.onetwo.common.db.spi.QueryWrapper;
+import org.onetwo.common.db.spi.FileNamedQueryFactory;
+import org.onetwo.common.db.spi.SqlParamterPostfixFunctionRegistry;
 import org.onetwo.common.db.sql.SequenceNameManager;
 import org.onetwo.common.db.sqlext.SQLSymbolManager;
 import org.onetwo.common.db.sqlext.SelectExtQuery;
@@ -32,13 +32,13 @@ import org.onetwo.dbm.core.spi.DbmEntityManager;
 import org.onetwo.dbm.core.spi.DbmSessionFactory;
 import org.onetwo.dbm.core.spi.DbmSessionImplementor;
 import org.onetwo.dbm.exception.EntityNotFoundException;
-import org.onetwo.dbm.jdbc.DbmJdbcOperations;
 import org.onetwo.dbm.jdbc.mapper.RowMapperFactory;
 import org.onetwo.dbm.query.DbmNamedFileQueryFactory;
 import org.onetwo.dbm.query.DbmQuery;
 import org.onetwo.dbm.query.DbmQueryWrapperImpl;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
 
 //@SuppressWarnings({"rawtypes", "unchecked"})
 public class DbmEntityManagerImpl extends BaseEntityManagerAdapter implements DbmEntityManager, InitializingBean , DisposableBean {
@@ -187,14 +187,14 @@ public class DbmEntityManagerImpl extends BaseEntityManagerAdapter implements Db
 	}
 
 	@Override
-	public DbmQueryWrapper createQuery(CreateQueryCmd createQueryCmd) {
+	public QueryWrapper createQuery(CreateQueryCmd createQueryCmd) {
 		DbmQuery jq = getCurrentSession().createDbmQuery(createQueryCmd.getSql(), createQueryCmd.getMappedClass());
-		DbmQueryWrapper query = new DbmQueryWrapperImpl(jq);
+		QueryWrapper query = new DbmQueryWrapperImpl(jq);
 		return query;
 	}
 
 	
-	protected DbmQueryWrapper createQuery(SelectExtQuery extQuery){
+	protected QueryWrapper createQuery(SelectExtQuery extQuery){
 		return getCurrentSession().createAsDataQuery(extQuery);
 	}
 
@@ -204,7 +204,7 @@ public class DbmEntityManagerImpl extends BaseEntityManagerAdapter implements Db
 	}*/
 
 	@Override
-	public DbmQueryWrapper createNamedQuery(String name) {
+	public QueryWrapper createNamedQuery(String name) {
 		/*JFishNamedFileQueryInfo nameInfo = getFileNamedQueryFactory().getNamedQueryInfo(name);
 		return getFileNamedQueryFactory().createQuery(nameInfo);*/
 		throw new UnsupportedOperationException("jfish named query unsupported by this way!");
@@ -249,7 +249,7 @@ public class DbmEntityManagerImpl extends BaseEntityManagerAdapter implements Db
 		String sql = getSequenceNameManager().getSequenceSql(sequenceName);
 		Long id = null;
 		try {
-			DbmQueryWrapper dq = this.createQuery(sql, null);
+			QueryWrapper dq = this.createQuery(sql, null);
 			id = ((Number)dq.getSingleResult()).longValue();
 //			logger.info("createSequences id : "+id);
 		} catch (Exception e) {
@@ -277,7 +277,7 @@ public class DbmEntityManagerImpl extends BaseEntityManagerAdapter implements Db
 	}
 
 	@Override
-	public DbmQueryWrapper createQuery(String sql, Map<String, Object> values) {
+	public QueryWrapper createQuery(String sql, Map<String, Object> values) {
 		return getCurrentSession().createAsDataQuery(sql, values);
 	}
 
@@ -317,7 +317,7 @@ public class DbmEntityManagerImpl extends BaseEntityManagerAdapter implements Db
 	}
 
 	public <T> T findUnique(String sql, Object... values) {
-		DbmQueryWrapper dq = getCurrentSession().createAsDataQuery(sql, (Class<?>)null);
+		QueryWrapper dq = getCurrentSession().createAsDataQuery(sql, (Class<?>)null);
 		dq.setParameters(values);
 		return dq.getSingleResult();
 	}
@@ -370,9 +370,9 @@ public class DbmEntityManagerImpl extends BaseEntityManagerAdapter implements Db
 
 
 	@Override
-	public Optional<RowMapperFactory> getRowMapperFactory() {
+	public RowMapperFactory getRowMapperFactory() {
 		RowMapperFactory rmf = this.sessionFactory.getRowMapperFactory();
-		return Optional.ofNullable(rmf);
+		return rmf;
 	}
 	
 	@Override
@@ -387,13 +387,13 @@ public class DbmEntityManagerImpl extends BaseEntityManagerAdapter implements Db
 	}
 
 	@Override
-	public DbmJdbcOperations getDbmJdbcOperations() {
-		return getSessionFactory().getServiceRegistry().getDbmJdbcOperations();
+	public NamedParameterJdbcOperations getDbmJdbcOperations() {
+		return getSessionFactory().getServiceRegistry().getDbmJdbcOperations().getDbmNamedJdbcOperations();
 	}
 
 	@Override
-	public Optional<DbmInterceptorManager> getDbmInterceptorManager() {
-		return Optional.of(getSessionFactory().getInterceptorManager());
+	public DbmInterceptorManager getDbmInterceptorManager() {
+		return getSessionFactory().getInterceptorManager();
 	}
 
 }

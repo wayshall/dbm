@@ -9,7 +9,7 @@ import org.onetwo.common.db.dquery.DbmSqlFileResource;
 import org.onetwo.common.db.dquery.DynamicMethod;
 import org.onetwo.common.db.dquery.JDKDynamicProxyCreator;
 import org.onetwo.common.db.filequery.SpringBasedSqlFileScanner;
-import org.onetwo.common.db.filequery.spi.SqlFileScanner;
+import org.onetwo.common.db.spi.SqlFileScanner;
 import org.onetwo.common.spring.utils.SpringResourceAdapterImpl;
 import org.onetwo.dbm.exception.DbmException;
 import org.onetwo.dbm.jdbc.JdbcUtils;

@@ -2,8 +2,8 @@ package org.onetwo.common.db.builder;
 
 import javax.sql.DataSource;
 
-import org.onetwo.common.db.BaseEntityManager;
 import org.onetwo.common.db.InnerBaseEntityManager;
+import org.onetwo.common.db.spi.BaseEntityManager;
 import org.onetwo.dbm.utils.Dbms;
 
 /****

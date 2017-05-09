@@ -1,18 +1,15 @@
-package org.onetwo.common.db.filequery.spi;
+package org.onetwo.common.db.spi;
 
 import java.util.Optional;
 
 import javax.sql.DataSource;
 
-import org.onetwo.common.db.DbmQueryWrapper;
 import org.onetwo.common.db.filequery.func.SqlFunctionDialet;
-import org.onetwo.dbm.core.internal.DbmInterceptorManager;
-import org.onetwo.dbm.jdbc.DbmJdbcOperations;
-import org.onetwo.dbm.jdbc.mapper.RowMapperFactory;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
 
 public interface QueryProvideManager {
 
-	DbmQueryWrapper createQuery(CreateQueryCmd createQueryCmd);
+	QueryWrapper createQuery(CreateQueryCmd createQueryCmd);
 //	DbmQueryWrapper createQuery(String sqlString);
 	FileNamedQueryFactory getFileNamedQueryManager();
 	
@@ -36,10 +33,8 @@ public interface QueryProvideManager {
 	 * @author wayshall
 	 * @return
 	 */
-	DbmJdbcOperations getDbmJdbcOperations();
+	NamedParameterJdbcOperations getDbmJdbcOperations();
 //	DataBase getDataBase();
 
-	Optional<RowMapperFactory> getRowMapperFactory();
 	Optional<SqlFunctionDialet> getSqlFunctionDialet();
-	Optional<DbmInterceptorManager> getDbmInterceptorManager();
 }

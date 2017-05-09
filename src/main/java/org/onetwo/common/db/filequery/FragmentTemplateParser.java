@@ -1,5 +1,6 @@
 package org.onetwo.common.db.filequery;
 
+import org.onetwo.common.db.spi.NamedQueryInfo;
 import org.onetwo.common.spring.ftl.FtlUtils;
 import org.onetwo.common.spring.ftl.TemplateParser;
 import org.onetwo.dbm.exception.FileNamedQueryException;
@@ -13,9 +14,9 @@ public class FragmentTemplateParser implements TemplateHashModel {
 	
 	private final TemplateParser parser;
 	private final ParserContext parserContext;
-	private final DbmNamedQueryInfo query;
+	private final NamedQueryInfo query;
 	
-	public FragmentTemplateParser(TemplateParser parser, ParserContext parserContext, DbmNamedQueryInfo query) {
+	public FragmentTemplateParser(TemplateParser parser, ParserContext parserContext, NamedQueryInfo query) {
 		super();
 		this.parser = parser;
 		this.parserContext = parserContext;
@@ -24,7 +25,7 @@ public class FragmentTemplateParser implements TemplateHashModel {
 	
 	private boolean isNamespaceScope(String key){
 //		return key.startsWith(AbstractPropertiesManager.NAME_PREFIX);
-		return key.indexOf(DbmNamedQueryInfo.DOT_KEY)!=-1;
+		return key.indexOf(NamedQueryInfo.DOT_KEY)!=-1;
 	}
 	
 	private String getQueryName(String key){
@@ -36,12 +37,12 @@ public class FragmentTemplateParser implements TemplateHashModel {
 	private void checkKeyIfNamespaceScope(String key){
 		String qname = getQueryName(key);
 		String subkey = key.substring(qname.length()+DOT.length());
-		if(!subkey.startsWith(DbmNamedQueryInfo.FRAGMENT_KEY)){
-			throw new FileNamedQueryException("only can access "+DbmNamedQueryInfo.FRAGMENT_KEY+" of query, error key: " + key);
+		if(!subkey.startsWith(NamedQueryInfo.FRAGMENT_KEY)){
+			throw new FileNamedQueryException("only can access "+NamedQueryInfo.FRAGMENT_KEY+" of query, error key: " + key);
 		}
 	}
 	/****
-	 * {@link DbmNamedQueryInfo#getFragment()}
+	 * {@link NamedQueryInfo#getFragment()}
 	 */
 	@Override
 	public TemplateModel get(String key) throws TemplateModelException {

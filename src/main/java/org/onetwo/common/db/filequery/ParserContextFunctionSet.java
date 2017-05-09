@@ -5,8 +5,8 @@ import java.util.Collection;
 import java.util.Date;
 
 import org.onetwo.common.date.DateUtils;
-import org.onetwo.common.db.QueryContextVariable;
 import org.onetwo.common.db.SqlUtils;
+import org.onetwo.common.db.spi.QueryContextVariable;
 import org.onetwo.common.utils.Assert;
 import org.onetwo.common.utils.LangUtils;
 import org.onetwo.common.utils.StringUtils;

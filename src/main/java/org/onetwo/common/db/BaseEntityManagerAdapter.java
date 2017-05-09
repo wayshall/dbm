@@ -6,7 +6,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.onetwo.common.db.builder.QueryBuilder;
-import org.onetwo.common.db.filequery.spi.SqlParamterPostfixFunctionRegistry;
+import org.onetwo.common.db.spi.QueryWrapper;
+import org.onetwo.common.db.spi.SqlParamterPostfixFunctionRegistry;
 import org.onetwo.common.db.sql.SequenceNameManager;
 import org.onetwo.common.db.sqlext.SelectExtQuery;
 import org.onetwo.common.exception.BaseException;
@@ -47,7 +48,7 @@ public abstract class BaseEntityManagerAdapter implements InnerBaseEntityManager
 		String sql = getSequenceNameManager().getSequenceSql(sequenceName, null);
 		Long id = null;
 			try {
-				DbmQueryWrapper dq = this.createQuery(getSequenceNameManager().getCreateSequence(sequenceName), null);
+				QueryWrapper dq = this.createQuery(getSequenceNameManager().getCreateSequence(sequenceName), null);
 				dq.executeUpdate();
 				
 				dq = this.createQuery(sql, null);
@@ -152,8 +153,8 @@ public abstract class BaseEntityManagerAdapter implements InnerBaseEntityManager
 		page.setResult(datalist);
 	}
 	
-	protected DbmQueryWrapper createQuery(SelectExtQuery extQuery){
-		DbmQueryWrapper q = null;
+	protected QueryWrapper createQuery(SelectExtQuery extQuery){
+		QueryWrapper q = null;
 		q = this.createQuery(extQuery.getSql(), extQuery.getParamsValue().asMap());
 		if(extQuery.needSetRange()){
 			q.setLimited(extQuery.getFirstResult(), extQuery.getMaxResults());

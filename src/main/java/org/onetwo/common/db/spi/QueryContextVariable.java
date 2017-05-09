@@ -1,4 +1,4 @@
-package org.onetwo.common.db;
+package org.onetwo.common.db.spi;
 
 public interface QueryContextVariable {
 	

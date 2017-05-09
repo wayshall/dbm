@@ -3,13 +3,14 @@ package org.onetwo.common.db.filequery;
 import java.util.List;
 import java.util.Optional;
 
-import org.onetwo.common.db.DbmQueryWrapper;
 import org.onetwo.common.db.ParsedSqlContext;
 import org.onetwo.common.db.dquery.NamedQueryInvokeContext;
 import org.onetwo.common.db.filequery.func.SqlFunctionDialet;
-import org.onetwo.common.db.filequery.spi.FileNamedQueryFactory;
-import org.onetwo.common.db.filequery.spi.FileNamedSqlGenerator;
-import org.onetwo.common.db.filequery.spi.NamedSqlFileManager;
+import org.onetwo.common.db.spi.NamedQueryInfo;
+import org.onetwo.common.db.spi.QueryWrapper;
+import org.onetwo.common.db.spi.FileNamedQueryFactory;
+import org.onetwo.common.db.spi.FileNamedSqlGenerator;
+import org.onetwo.common.db.spi.NamedSqlFileManager;
 import org.onetwo.common.utils.LangUtils;
 
 abstract public class AbstractFileNamedQueryFactory implements FileNamedQueryFactory {
@@ -33,7 +34,7 @@ abstract public class AbstractFileNamedQueryFactory implements FileNamedQueryFac
 
 	@Override
 	public <E> E findOne(NamedQueryInvokeContext invokeContex) {
-		DbmQueryWrapper jq = this.createQuery(invokeContex);
+		QueryWrapper jq = this.createQuery(invokeContex);
 		E entity = null;
 		List<E> list = jq.getResultList();
 		if(LangUtils.hasElement(list))
@@ -48,16 +49,16 @@ abstract public class AbstractFileNamedQueryFactory implements FileNamedQueryFac
 	}*/
 
 //	@Override
-	public DbmNamedQueryInfo getNamedQueryInfo(NamedQueryInvokeContext invokeContex) {
+	public NamedQueryInfo getNamedQueryInfo(NamedQueryInvokeContext invokeContex) {
 		String qname = invokeContex.getQueryName();
-		DbmNamedQueryInfo queryInfo = sqlFileManager.getNamedQueryInfo(qname);
+		NamedQueryInfo queryInfo = sqlFileManager.getNamedQueryInfo(qname);
 		return queryInfo;
 	}
 	
 //	@Override
 	public FileNamedSqlGenerator createFileNamedSqlGenerator(NamedQueryInvokeContext invokeContext) {
 		Optional<SqlFunctionDialet> sqlFunctionDialet = invokeContext.getQueryProvideManager().getSqlFunctionDialet();
-		DbmNamedQueryInfo nameInfo = getNamedQueryInfo(invokeContext);
+		NamedQueryInfo nameInfo = getNamedQueryInfo(invokeContext);
 		ParserContext parserContext = ParserContext.create(nameInfo);
 		FileNamedSqlGenerator g = new DefaultFileNamedSqlGenerator(parserContext, false, sqlFileManager.getSqlStatmentParser(), invokeContext.getParsedParams(), sqlFunctionDialet);
 		return g;

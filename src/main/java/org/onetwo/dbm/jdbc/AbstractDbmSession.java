@@ -42,9 +42,9 @@ abstract public class AbstractDbmSession implements DbmSessionImplementor {
 		}*/
 	}
 
-	protected DbmJdbcOperations createDbmJdbcOperations(DataSource dataSource) {
+	/*protected DbmJdbcOperations createDbmJdbcOperations(DataSource dataSource) {
 		return new DbmJdbcTemplate(dataSource);
-	}
+	}*/
 
 	public final DataSource getDataSource() {
 		return dataSource;

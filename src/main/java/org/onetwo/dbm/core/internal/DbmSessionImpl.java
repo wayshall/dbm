@@ -6,11 +6,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import javax.sql.DataSource;
-
 import org.onetwo.common.date.DateUtils;
 import org.onetwo.common.db.DbmQueryValue;
-import org.onetwo.common.db.DbmQueryWrapper;
+import org.onetwo.common.db.spi.QueryWrapper;
 import org.onetwo.common.db.sql.DynamicQuery;
 import org.onetwo.common.db.sql.SequenceNameManager;
 import org.onetwo.common.db.sqlext.SQLSymbolManager;
@@ -124,11 +122,11 @@ public class DbmSessionImpl extends AbstractDbmSession implements DbmSessionEven
 		return transaction;
 	}
 
-	@Override
+	/*@Override
 	protected DbmJdbcOperations createDbmJdbcOperations(DataSource dataSource) {
 //		return new DbmJdbcTemplate(dataSource, getServiceRegistry().getJdbcParameterSetter());
 		throw new UnsupportedOperationException();
-	}
+	}*/
 
 	/*@Override
 	protected NamedJdbcTemplate createNamedJdbcTemplate(DataSource dataSource) {
@@ -509,8 +507,8 @@ public class DbmSessionImpl extends AbstractDbmSession implements DbmSessionEven
 		return q;
 	}
 	
-	public DbmQueryWrapper createAsDataQuery(SelectExtQuery extQuery){
-		DbmQueryWrapper q = null;
+	public QueryWrapper createAsDataQuery(SelectExtQuery extQuery){
+		QueryWrapper q = null;
 		/*if(extQuery.isSqlQuery()){
 			q = this.createAsDataQuery(extQuery.getSql(), extQuery.getEntityClass());
 			q.setParameters((List)extQuery.getParamsValue().getValues());
@@ -528,14 +526,14 @@ public class DbmSessionImpl extends AbstractDbmSession implements DbmSessionEven
 		return q;
 	}
 	
-	public DbmQueryWrapper createAsDataQuery(String sqlString, Class entityClass) {
+	public QueryWrapper createAsDataQuery(String sqlString, Class entityClass) {
 		DbmQuery jq = createDbmQuery(sqlString, entityClass);
-		DbmQueryWrapper query = new DbmQueryWrapperImpl(jq);
+		QueryWrapper query = new DbmQueryWrapperImpl(jq);
 		return query;
 	}
 	
-	public DbmQueryWrapper createAsDataQuery(String sql, Map<String, Object> values){
-		DbmQueryWrapper q = createAsDataQuery(sql, (Class)null);
+	public QueryWrapper createAsDataQuery(String sql, Map<String, Object> values){
+		QueryWrapper q = createAsDataQuery(sql, (Class)null);
 		q.setParameters(values);
 		return q;
 	}

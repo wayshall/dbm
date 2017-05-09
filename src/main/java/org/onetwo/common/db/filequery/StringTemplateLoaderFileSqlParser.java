@@ -3,7 +3,9 @@ package org.onetwo.common.db.filequery;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.onetwo.common.db.filequery.spi.DbmNamedQueryFileListener;
+import org.onetwo.common.db.spi.NamedQueryFile;
+import org.onetwo.common.db.spi.NamedQueryInfo;
+import org.onetwo.common.db.spi.NamedQueryFileListener;
 import org.onetwo.common.propconf.ResourceAdapter;
 import org.onetwo.common.spring.ftl.AbstractFreemarkerTemplateConfigurer;
 import org.onetwo.common.spring.ftl.DateRangeDirective;
@@ -15,7 +17,7 @@ import freemarker.cache.StringTemplateLoader;
 import freemarker.cache.TemplateLoader;
 import freemarker.template.Configuration;
 
-public class StringTemplateLoaderFileSqlParser extends AbstractFreemarkerTemplateConfigurer implements TemplateParser, DbmNamedQueryFileListener {
+public class StringTemplateLoaderFileSqlParser extends AbstractFreemarkerTemplateConfigurer implements TemplateParser, NamedQueryFileListener {
 
 //	public static final String QUERY_POSTFIX = ".query";//for ftl
 	
@@ -45,9 +47,9 @@ public class StringTemplateLoaderFileSqlParser extends AbstractFreemarkerTemplat
 
 
 	@Override
-	public void afterBuild(Map<String, DbmNamedQueryFile> namespaceInfos, ResourceAdapter<?>... sqlfileArray) {
+	public void afterBuild(Map<String, NamedQueryFile> namespaceInfos, ResourceAdapter<?>... sqlfileArray) {
 		this.initialize();
-		for(DbmNamedQueryFile namespace : namespaceInfos.values()){
+		for(NamedQueryFile namespace : namespaceInfos.values()){
 			this.putTemplateByNamespaceInfo(namespace);
 		}
 	}
@@ -56,7 +58,7 @@ public class StringTemplateLoaderFileSqlParser extends AbstractFreemarkerTemplat
 
 
 	@Override
-	public void afterReload(ResourceAdapter<?> file, DbmNamedQueryFile namepsaceInfo) {
+	public void afterReload(ResourceAdapter<?> file, NamedQueryFile namepsaceInfo) {
 		this.putTemplateByNamespaceInfo(namepsaceInfo);
 	}
 
@@ -67,8 +69,8 @@ public class StringTemplateLoaderFileSqlParser extends AbstractFreemarkerTemplat
 		this.initialize();
 	}*/
 	
-	private void putTemplateByNamespaceInfo(DbmNamedQueryFile namespace){
-		for(DbmNamedQueryInfo info : namespace.getNamedProperties()){
+	private void putTemplateByNamespaceInfo(NamedQueryFile namespace){
+		for(NamedQueryInfo info : namespace.getNamedProperties()){
 			if(logger.isInfoEnabled()){
 				logger.info("put query template: {}", info.getFullName());
 			}

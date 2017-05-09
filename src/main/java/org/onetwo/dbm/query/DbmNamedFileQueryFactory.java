@@ -2,11 +2,11 @@ package org.onetwo.dbm.query;
 
 import java.util.List;
 
-import org.onetwo.common.db.DbmQueryWrapper;
 import org.onetwo.common.db.dquery.NamedQueryInvokeContext;
 import org.onetwo.common.db.filequery.AbstractFileNamedQueryFactory;
-import org.onetwo.common.db.filequery.DbmNamedQueryInfo;
 import org.onetwo.common.db.filequery.DbmNamedSqlFileManager;
+import org.onetwo.common.db.spi.NamedQueryInfo;
+import org.onetwo.common.db.spi.QueryWrapper;
 import org.onetwo.common.utils.Assert;
 import org.onetwo.common.utils.Page;
 import org.springframework.jdbc.core.RowMapper;
@@ -34,7 +34,7 @@ public class DbmNamedFileQueryFactory extends AbstractFileNamedQueryFactory {
 		Assert.notNull(invokeContext);
 
 		invokeContext.setParser(getSqlFileManager().getSqlStatmentParser());
-		DbmNamedQueryInfo nameInfo = getNamedQueryInfo(invokeContext);
+		NamedQueryInfo nameInfo = getNamedQueryInfo(invokeContext);
 		DbmFileQueryWrapperImpl jq = new DbmFileQueryWrapperImpl(invokeContext.getQueryProvideManager(), nameInfo, count, invokeContext);
 
 		jq.setQueryAttributes(invokeContext.getParsedParams());
@@ -44,14 +44,14 @@ public class DbmNamedFileQueryFactory extends AbstractFileNamedQueryFactory {
 	
 	@Override
 	public <T> List<T> findList(NamedQueryInvokeContext invokeContext) {
-		DbmQueryWrapper jq = this.createQuery(invokeContext);
+		QueryWrapper jq = this.createQuery(invokeContext);
 		return jq.getResultList();
 	}
 
 
 	@Override
 	public <T> T findUnique(NamedQueryInvokeContext invokeContext) {
-		DbmQueryWrapper jq = this.createQuery(invokeContext);
+		QueryWrapper jq = this.createQuery(invokeContext);
 		return jq.getSingleResult();
 	}
 
@@ -59,7 +59,7 @@ public class DbmNamedFileQueryFactory extends AbstractFileNamedQueryFactory {
 	@Override
 	public <T> Page<T> findPage(Page<T> page, NamedQueryInvokeContext invokeContext) {
 		if(page.isAutoCount()){
-			DbmQueryWrapper jq = this.createCountQuery(invokeContext);
+			QueryWrapper jq = this.createCountQuery(invokeContext);
 			Long total = jq.getSingleResult();
 			total = (total==null?0:total);
 			page.setTotalCount(total);
@@ -72,7 +72,7 @@ public class DbmNamedFileQueryFactory extends AbstractFileNamedQueryFactory {
 				page.setResult(datalist);
 			}
 		}else{
-			DbmQueryWrapper jq = this.createQuery(invokeContext);
+			QueryWrapper jq = this.createQuery(invokeContext);
 			jq.setPageParameter(page);
 			List<T> datalist = jq.getResultList();
 			page.setResult(datalist);

@@ -1,8 +1,7 @@
-package org.onetwo.common.db.filequery.spi;
+package org.onetwo.common.db.spi;
 
 import java.util.List;
 
-import org.onetwo.common.db.DbmQueryWrapper;
 import org.onetwo.common.db.ParsedSqlContext;
 import org.onetwo.common.db.dquery.NamedQueryInvokeContext;
 import org.onetwo.common.utils.Page;
@@ -25,7 +24,7 @@ public interface FileNamedQueryFactory {
 	 */
 	public NamedSqlFileManager getNamedSqlFileManager();
 
-	public DbmQueryWrapper createQuery(NamedQueryInvokeContext invokeContext);
+	public QueryWrapper createQuery(NamedQueryInvokeContext invokeContext);
 	
 	
 	public ParsedSqlContext parseNamedQuery(NamedQueryInvokeContext invokeContext);
@@ -33,7 +32,7 @@ public interface FileNamedQueryFactory {
 	
 //	public DataQuery createQuery(JFishNamedFileQueryInfo nameInfo, PlaceHolder type, Object... args);
 
-	public DbmQueryWrapper createCountQuery(NamedQueryInvokeContext invokeContext);
+	public QueryWrapper createCountQuery(NamedQueryInvokeContext invokeContext);
 
 	public <T> List<T> findList(NamedQueryInvokeContext invokeContext);
 

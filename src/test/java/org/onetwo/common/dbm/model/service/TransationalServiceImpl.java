@@ -1,6 +1,6 @@
 package org.onetwo.common.dbm.model.service;
 
-import org.onetwo.common.db.BaseEntityManager;
+import org.onetwo.common.db.spi.BaseEntityManager;
 import org.onetwo.common.dbm.model.entity.UserAutoidEntity;
 import org.onetwo.common.dbm.model.entity.UserAutoidEntity.UserStatus;
 import org.springframework.beans.factory.annotation.Autowired;

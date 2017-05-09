@@ -11,6 +11,8 @@ import java.util.stream.Stream;
 
 import org.onetwo.common.db.builder.QueryBuilder;
 import org.onetwo.common.db.builder.Querys;
+import org.onetwo.common.db.spi.BaseEntityManager;
+import org.onetwo.common.db.spi.CrudEntityManager;
 import org.onetwo.common.log.JFishLoggerFactory;
 import org.onetwo.common.reflect.ReflectUtils;
 import org.onetwo.common.spring.Springs;
