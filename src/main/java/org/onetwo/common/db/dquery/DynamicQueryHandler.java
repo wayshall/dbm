@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
 import javax.sql.DataSource;
@@ -57,7 +58,8 @@ public class DynamicQueryHandler implements InvocationHandler {
 		this.em = em;
 		this.methodCache = methodCache;
 		
-		this.dbmJdbcOperations = em.getSessionFactory().getServiceRegistry().getDbmJdbcOperations();
+//		this.dbmJdbcOperations = em.getSessionFactory().getServiceRegistry().getDbmJdbcOperations();
+		this.dbmJdbcOperations = em.getDbmJdbcOperations();
 		this.proxyObject = Proxy.newProxyInstance(ClassUtils.getDefaultClassLoader(), proxiedInterfaces, this);
 		
 	}
@@ -86,8 +88,11 @@ public class DynamicQueryHandler implements InvocationHandler {
 	}
 	
 	private Object invokeWithInterceptor(Object proxy, DynamicMethod dmethod, Object[] args){
-		DbmInterceptorManager interceptorManager = em.getSessionFactory().getInterceptorManager();
-		Collection<DbmInterceptor> interceptors = interceptorManager.getDbmSessionInterceptors(InterceptorType.REPOSITORY);
+		Optional<DbmInterceptorManager> interceptorManager = em.getDbmInterceptorManager();
+		if(!interceptorManager.isPresent()){
+			return invokeMethod(proxy, dmethod, args);
+		}
+		Collection<DbmInterceptor> interceptors = interceptorManager.get().getDbmSessionInterceptors(InterceptorType.REPOSITORY);
 		DbmInterceptorChain chain = new RepositoryDbmInterceptorChain(proxy, dmethod, args, interceptors, ()->invokeMethod(proxy, dmethod, args));
 		return chain.invoke();
 	}
@@ -203,7 +208,8 @@ public class DynamicQueryHandler implements InvocationHandler {
 		
 		BeanWrapper paramsContextBean = SpringUtils.newBeanMapWrapper(invokeContext.getParsedParams());
 		List<Map<String, Object>> batchValues = LangUtils.newArrayList(batchParameter.size());
-		SqlParamterPostfixFunctionRegistry sqlFunc = em.getSessionFactory().getServiceRegistry().getSqlParamterPostfixFunctionRegistry();
+//		SqlParamterPostfixFunctionRegistry sqlFunc = em.getSessionFactory().getServiceRegistry().getSqlParamterPostfixFunctionRegistry();
+		SqlParamterPostfixFunctionRegistry sqlFunc = em.getSqlParamterPostfixFunctionRegistry();
 		ParsedSqlWrapper sqlWrapper = ParsedSqlUtils.parseSql(sv.getParsedSql(), sqlFunc);
 		for(Object val : batchParameter){
 			Map<String, Object> paramValueMap = new HashMap<String, Object>();

@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.onetwo.common.db.ParsedSqlContext;
+import org.onetwo.common.db.filequery.func.SqlFunctionDialet;
 import org.onetwo.common.db.filequery.spi.FileNamedSqlGenerator;
 import org.onetwo.common.db.sql.DynamicQuery;
 import org.onetwo.common.db.sql.DynamicQueryFactory;
@@ -11,7 +12,6 @@ import org.onetwo.common.db.sqlext.ExtQueryUtils;
 import org.onetwo.common.log.JFishLoggerFactory;
 import org.onetwo.common.spring.ftl.TemplateParser;
 import org.onetwo.common.utils.LangUtils;
-import org.onetwo.dbm.dialet.DBDialect;
 import org.slf4j.Logger;
 import org.springframework.util.Assert;
 
@@ -33,12 +33,12 @@ public class DefaultFileNamedSqlGenerator implements FileNamedSqlGenerator {
 	private String[] desFields;
 
 	private Map<Object, Object> params;
-	private final DBDialect dbDialect;
+	private final SqlFunctionDialet sqlFunctionDialet;
 	
 	
 	
 	public DefaultFileNamedSqlGenerator(ParserContext parserContext, boolean countQuery,
-			TemplateParser parser, Map<Object, Object> params, DBDialect dbDialect) {
+			TemplateParser parser, Map<Object, Object> params, SqlFunctionDialet sqlFunctionDialet) {
 		super();
 		this.info = parserContext.getQueryInfo();
 		this.countQuery = countQuery;
@@ -48,13 +48,13 @@ public class DefaultFileNamedSqlGenerator implements FileNamedSqlGenerator {
 			this.parserContext = (ParserContext)this.params.get(JNamedQueryKey.ParserContext);
 		}*/
 		this.parserContext = parserContext;
-		this.dbDialect = dbDialect;
+		this.sqlFunctionDialet = sqlFunctionDialet;
 	}
 
 	public DefaultFileNamedSqlGenerator(boolean countQuery,
 			TemplateParser parser, ParserContext parserContext,
 			Class<?> resultClass, String[] ascFields, String[] desFields,
-			Map<Object, Object> params, DBDialect dbDialect) {
+			Map<Object, Object> params, SqlFunctionDialet sqlFunctionDialet) {
 		super();
 		this.info = parserContext.getQueryInfo();
 		this.countQuery = countQuery;
@@ -64,7 +64,7 @@ public class DefaultFileNamedSqlGenerator implements FileNamedSqlGenerator {
 		this.ascFields = ascFields;
 		this.desFields = desFields;
 		this.params = LangUtils.emptyIfNull(params);
-		this.dbDialect = dbDialect;
+		this.sqlFunctionDialet = sqlFunctionDialet;
 	}
 
 	@Override
@@ -89,7 +89,7 @@ public class DefaultFileNamedSqlGenerator implements FileNamedSqlGenerator {
 				parserContext = ParserContext.create();
 			}
 */			
-			this.parserContext.put(ParserContext.CONTEXT_KEY, dbDialect.getSqlFunctionDialet());
+			this.parserContext.put(ParserContext.CONTEXT_KEY, sqlFunctionDialet);
 			this.parserContext.putAll(params);
 			FragmentTemplateParser attrParser = new FragmentTemplateParser(parser, parserContext, info);
 			this.parserContext.put(ParserContext.PARSER_ACCESS_KEY, attrParser);

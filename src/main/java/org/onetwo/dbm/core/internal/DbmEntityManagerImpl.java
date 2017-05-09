@@ -5,6 +5,7 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 import javax.sql.DataSource;
 
@@ -16,7 +17,9 @@ import org.onetwo.common.db.EntityManagerProvider;
 import org.onetwo.common.db.builder.QueryBuilder;
 import org.onetwo.common.db.builder.Querys;
 import org.onetwo.common.db.filequery.DbmNamedSqlFileManager;
+import org.onetwo.common.db.filequery.func.SqlFunctionDialet;
 import org.onetwo.common.db.filequery.spi.FileNamedQueryFactory;
+import org.onetwo.common.db.filequery.spi.SqlParamterPostfixFunctionRegistry;
 import org.onetwo.common.db.sql.SequenceNameManager;
 import org.onetwo.common.db.sqlext.SQLSymbolManager;
 import org.onetwo.common.db.sqlext.SelectExtQuery;
@@ -28,6 +31,7 @@ import org.onetwo.dbm.core.spi.DbmEntityManager;
 import org.onetwo.dbm.core.spi.DbmSessionFactory;
 import org.onetwo.dbm.core.spi.DbmSessionImplementor;
 import org.onetwo.dbm.exception.EntityNotFoundException;
+import org.onetwo.dbm.jdbc.DbmJdbcOperations;
 import org.onetwo.dbm.jdbc.mapper.RowMapperFactory;
 import org.onetwo.dbm.query.DbmNamedFileQueryFactory;
 import org.onetwo.dbm.query.DbmQuery;
@@ -367,6 +371,26 @@ public class DbmEntityManagerImpl extends BaseEntityManagerAdapter implements Db
 	@Override
 	public RowMapperFactory getRowMapperFactory() {
 		return this.sessionFactory.getRowMapperFactory();
+	}
+	
+	@Override
+	public SqlParamterPostfixFunctionRegistry getSqlParamterPostfixFunctionRegistry(){
+		return this.sessionFactory.getServiceRegistry().getSqlParamterPostfixFunctionRegistry();
+	}
+
+	@Override
+	public SqlFunctionDialet getSqlFunctionDialet() {
+		return getSessionFactory().getDialect().getSqlFunctionDialet();
+	}
+
+	@Override
+	public DbmJdbcOperations getDbmJdbcOperations() {
+		return getSessionFactory().getServiceRegistry().getDbmJdbcOperations();
+	}
+
+	@Override
+	public Optional<DbmInterceptorManager> getDbmInterceptorManager() {
+		return Optional.of(getSessionFactory().getInterceptorManager());
 	}
 
 }

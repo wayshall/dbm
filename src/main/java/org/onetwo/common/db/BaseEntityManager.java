@@ -9,6 +9,7 @@ import org.onetwo.common.db.builder.QueryBuilder;
 import org.onetwo.common.db.filequery.spi.QueryProvideManager;
 import org.onetwo.common.db.sqlext.SQLSymbolManager;
 import org.onetwo.common.utils.Page;
+import org.onetwo.dbm.core.spi.DbmSessionFactory;
 
 /****
  * 通用的实体查询接口
@@ -114,5 +115,7 @@ public interface BaseEntityManager extends QueryProvideManager {
 	public SQLSymbolManager getSQLSymbolManager();
 	
 	public <T> T narrowAs(Class<T> entityManagerClass);
+	
+	public DbmSessionFactory getSessionFactory();
 
 }

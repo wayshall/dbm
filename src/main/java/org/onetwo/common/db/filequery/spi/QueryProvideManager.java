@@ -1,28 +1,40 @@
 package org.onetwo.common.db.filequery.spi;
 
+import java.util.Optional;
+
 import javax.sql.DataSource;
 
 import org.onetwo.common.db.DataBase;
 import org.onetwo.common.db.DbmQueryWrapper;
-import org.onetwo.dbm.core.spi.DbmSessionFactory;
+import org.onetwo.common.db.filequery.func.SqlFunctionDialet;
+import org.onetwo.dbm.core.internal.DbmInterceptorManager;
+import org.onetwo.dbm.jdbc.DbmJdbcOperations;
 import org.onetwo.dbm.jdbc.mapper.RowMapperFactory;
 
 public interface QueryProvideManager {
 
-	public DbmQueryWrapper createSQLQuery(String sqlString, Class<?> entityClass);
-//	public DbmQueryWrapper createQuery(String sqlString);
-	public FileNamedQueryFactory getFileNamedQueryManager();
+	DbmQueryWrapper createSQLQuery(String sqlString, Class<?> entityClass);
+//	DbmQueryWrapper createQuery(String sqlString);
+	FileNamedQueryFactory getFileNamedQueryManager();
 	
-//	public SqlParamterPostfixFunctionRegistry getSqlParamterPostfixFunctionRegistry();
 	
-	public DataBase getDataBase();
+	DataBase getDataBase();
 	
-	public DataSource getDataSource();
+	DataSource getDataSource();
 	
-//	public DbmTypeMapping getSqlTypeMapping();
+//	DbmTypeMapping getSqlTypeMapping();
 
-	public RowMapperFactory getRowMapperFactory();
+	RowMapperFactory getRowMapperFactory();
 
-	public DbmSessionFactory getSessionFactory();
-//	public <T> T getRawManagerObject(Class<T> rawClass);
+//	DbmSessionFactory getSessionFactory();
+//	<T> T getRawManagerObject(Class<T> rawClass);
+
+	
+	
+	SqlParamterPostfixFunctionRegistry getSqlParamterPostfixFunctionRegistry();
+	SqlFunctionDialet getSqlFunctionDialet();
+	DbmJdbcOperations getDbmJdbcOperations();
+//	DataBase getDataBase();
+	
+	Optional<DbmInterceptorManager> getDbmInterceptorManager();
 }

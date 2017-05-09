@@ -9,6 +9,7 @@ import org.onetwo.common.db.DbmQueryWrapper;
 import org.onetwo.common.db.ParsedSqlContext;
 import org.onetwo.common.db.filequery.ParsedSqlUtils.ParsedSqlWrapper;
 import org.onetwo.common.db.filequery.ParsedSqlUtils.ParsedSqlWrapper.SqlParamterMeta;
+import org.onetwo.common.db.filequery.func.SqlFunctionDialet;
 import org.onetwo.common.db.filequery.spi.FileNamedSqlGenerator;
 import org.onetwo.common.db.filequery.spi.QueryProvideManager;
 import org.onetwo.common.db.filequery.spi.SqlParamterPostfixFunctionRegistry;
@@ -20,7 +21,6 @@ import org.onetwo.common.utils.ArrayUtils;
 import org.onetwo.common.utils.Assert;
 import org.onetwo.common.utils.CUtils;
 import org.onetwo.common.utils.LangUtils;
-import org.onetwo.dbm.dialet.DBDialect;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.jdbc.core.RowMapper;
 
@@ -75,9 +75,9 @@ public class DefaultFileQueryWrapper extends AbstractDbmQueryWrapper implements 
 		if(dataQuery!=null){
 			return dataQuery;
 		}
-		DBDialect dbDialect = baseEntityManager.getSessionFactory().getDialect();
+		SqlFunctionDialet sqlFunction = baseEntityManager.getSqlFunctionDialet();
 		FileNamedSqlGenerator sqlGen = new DefaultFileNamedSqlGenerator(countQuery, parser, parserContext, 
-																		resultClass, ascFields, desFields, params, dbDialect);
+																		resultClass, ascFields, desFields, params, sqlFunction);
 		ParsedSqlContext sqlAndValues = sqlGen.generatSql();
 		if(sqlAndValues.isListValue()){
 			DbmQueryWrapper dataQuery = createDataQuery(sqlAndValues.getParsedSql(), resultClass);
@@ -93,7 +93,7 @@ public class DefaultFileQueryWrapper extends AbstractDbmQueryWrapper implements 
 		String parsedSql = sqlAndValues.getParsedSql();
 		DbmQueryWrapper dataQuery = createDataQuery(parsedSql, resultClass);
 		
-		SqlParamterPostfixFunctionRegistry sqlFunc = baseEntityManager.getSessionFactory().getServiceRegistry().getSqlParamterPostfixFunctionRegistry();
+		SqlParamterPostfixFunctionRegistry sqlFunc = baseEntityManager.getSqlParamterPostfixFunctionRegistry();
 		ParsedSqlWrapper sqlWrapper = ParsedSqlUtils.parseSql(parsedSql, sqlFunc);
 		BeanWrapper paramBean = SpringUtils.newBeanMapWrapper(sqlAndValues.asMap());
 		for(SqlParamterMeta parameter : sqlWrapper.getParameters()){
