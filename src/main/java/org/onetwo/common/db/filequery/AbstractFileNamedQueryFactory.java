@@ -1,8 +1,10 @@
 package org.onetwo.common.db.filequery;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.onetwo.common.db.DbmQueryWrapper;
+import org.onetwo.common.db.ParsedSqlContext;
 import org.onetwo.common.db.dquery.NamedQueryInvokeContext;
 import org.onetwo.common.db.filequery.func.SqlFunctionDialet;
 import org.onetwo.common.db.filequery.spi.FileNamedQueryFactory;
@@ -45,15 +47,16 @@ abstract public class AbstractFileNamedQueryFactory implements FileNamedQueryFac
 		return queryInfo;
 	}*/
 
-	@Override
+//	@Override
 	public DbmNamedQueryInfo getNamedQueryInfo(NamedQueryInvokeContext invokeContex) {
 		String qname = invokeContex.getQueryName();
 		DbmNamedQueryInfo queryInfo = sqlFileManager.getNamedQueryInfo(qname);
 		return queryInfo;
 	}
-	@Override
+	
+//	@Override
 	public FileNamedSqlGenerator createFileNamedSqlGenerator(NamedQueryInvokeContext invokeContext) {
-		SqlFunctionDialet sqlFunctionDialet = invokeContext.getQueryProvideManager().getSqlFunctionDialet();
+		Optional<SqlFunctionDialet> sqlFunctionDialet = invokeContext.getQueryProvideManager().getSqlFunctionDialet();
 		DbmNamedQueryInfo nameInfo = getNamedQueryInfo(invokeContext);
 		ParserContext parserContext = ParserContext.create(nameInfo);
 		FileNamedSqlGenerator g = new DefaultFileNamedSqlGenerator(parserContext, false, sqlFileManager.getSqlStatmentParser(), invokeContext.getParsedParams(), sqlFunctionDialet);
@@ -68,6 +71,14 @@ abstract public class AbstractFileNamedQueryFactory implements FileNamedQueryFac
 	public void setQueryProvideManager(QueryProvideManager queryProvideManager) {
 		this.queryProvideManager = queryProvideManager;
 	}*/
+
+	@Override
+	public ParsedSqlContext parseNamedQuery(NamedQueryInvokeContext invokeContext) {
+		FileNamedSqlGenerator sqlGen = createFileNamedSqlGenerator(invokeContext);
+		ParsedSqlContext parsedSqlContext = sqlGen.generatSql();
+		return parsedSqlContext;
+	}
+
 
 	public DbmNamedSqlFileManager getSqlFileManager() {
 		return sqlFileManager;

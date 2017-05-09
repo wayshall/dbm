@@ -1,6 +1,7 @@
 package org.onetwo.common.db.filequery;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.Map.Entry;
 
 import org.onetwo.common.db.ParsedSqlContext;
@@ -33,12 +34,12 @@ public class DefaultFileNamedSqlGenerator implements FileNamedSqlGenerator {
 	private String[] desFields;
 
 	private Map<Object, Object> params;
-	private final SqlFunctionDialet sqlFunctionDialet;
+	private final Optional<SqlFunctionDialet> sqlFunctionDialet;
 	
 	
 	
 	public DefaultFileNamedSqlGenerator(ParserContext parserContext, boolean countQuery,
-			TemplateParser parser, Map<Object, Object> params, SqlFunctionDialet sqlFunctionDialet) {
+			TemplateParser parser, Map<Object, Object> params, Optional<SqlFunctionDialet> sqlFunctionDialet) {
 		super();
 		this.info = parserContext.getQueryInfo();
 		this.countQuery = countQuery;
@@ -54,7 +55,7 @@ public class DefaultFileNamedSqlGenerator implements FileNamedSqlGenerator {
 	public DefaultFileNamedSqlGenerator(boolean countQuery,
 			TemplateParser parser, ParserContext parserContext,
 			Class<?> resultClass, String[] ascFields, String[] desFields,
-			Map<Object, Object> params, SqlFunctionDialet sqlFunctionDialet) {
+			Map<Object, Object> params, Optional<SqlFunctionDialet> sqlFunctionDialet) {
 		super();
 		this.info = parserContext.getQueryInfo();
 		this.countQuery = countQuery;
@@ -89,7 +90,7 @@ public class DefaultFileNamedSqlGenerator implements FileNamedSqlGenerator {
 				parserContext = ParserContext.create();
 			}
 */			
-			this.parserContext.put(ParserContext.CONTEXT_KEY, sqlFunctionDialet);
+			this.sqlFunctionDialet.ifPresent(func->parserContext.put(ParserContext.CONTEXT_KEY, sqlFunctionDialet));
 			this.parserContext.putAll(params);
 			FragmentTemplateParser attrParser = new FragmentTemplateParser(parser, parserContext, info);
 			this.parserContext.put(ParserContext.PARSER_ACCESS_KEY, attrParser);

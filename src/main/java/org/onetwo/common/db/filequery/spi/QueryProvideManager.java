@@ -4,7 +4,6 @@ import java.util.Optional;
 
 import javax.sql.DataSource;
 
-import org.onetwo.common.db.DataBase;
 import org.onetwo.common.db.DbmQueryWrapper;
 import org.onetwo.common.db.filequery.func.SqlFunctionDialet;
 import org.onetwo.dbm.core.internal.DbmInterceptorManager;
@@ -13,18 +12,17 @@ import org.onetwo.dbm.jdbc.mapper.RowMapperFactory;
 
 public interface QueryProvideManager {
 
-	DbmQueryWrapper createSQLQuery(String sqlString, Class<?> entityClass);
+	DbmQueryWrapper createQuery(CreateQueryCmd createQueryCmd);
 //	DbmQueryWrapper createQuery(String sqlString);
 	FileNamedQueryFactory getFileNamedQueryManager();
 	
 	
-	DataBase getDataBase();
+//	DataBase getDataBase();
 	
 	DataSource getDataSource();
 	
 //	DbmTypeMapping getSqlTypeMapping();
 
-	RowMapperFactory getRowMapperFactory();
 
 //	DbmSessionFactory getSessionFactory();
 //	<T> T getRawManagerObject(Class<T> rawClass);
@@ -32,9 +30,16 @@ public interface QueryProvideManager {
 	
 	
 	SqlParamterPostfixFunctionRegistry getSqlParamterPostfixFunctionRegistry();
-	SqlFunctionDialet getSqlFunctionDialet();
+	
+	/***
+	 * only for batch operation
+	 * @author wayshall
+	 * @return
+	 */
 	DbmJdbcOperations getDbmJdbcOperations();
 //	DataBase getDataBase();
-	
+
+	Optional<RowMapperFactory> getRowMapperFactory();
+	Optional<SqlFunctionDialet> getSqlFunctionDialet();
 	Optional<DbmInterceptorManager> getDbmInterceptorManager();
 }

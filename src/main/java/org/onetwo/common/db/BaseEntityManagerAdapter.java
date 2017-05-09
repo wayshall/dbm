@@ -47,10 +47,10 @@ public abstract class BaseEntityManagerAdapter implements InnerBaseEntityManager
 		String sql = getSequenceNameManager().getSequenceSql(sequenceName, null);
 		Long id = null;
 			try {
-				DbmQueryWrapper dq = this.createSQLQuery(getSequenceNameManager().getCreateSequence(sequenceName), null);
+				DbmQueryWrapper dq = this.createQuery(getSequenceNameManager().getCreateSequence(sequenceName), null);
 				dq.executeUpdate();
 				
-				dq = this.createSQLQuery(sql, null);
+				dq = this.createQuery(sql, null);
 				id = ((Number)dq.getSingleResult()).longValue();
 			} catch (Exception ne) {
 				ne.printStackTrace();

@@ -1,11 +1,15 @@
 package org.onetwo.dbm.query;
 
+import java.util.Optional;
+
 import org.onetwo.common.db.DbmQueryWrapper;
 import org.onetwo.common.db.dquery.NamedQueryInvokeContext;
-import org.onetwo.common.db.filequery.DefaultFileQueryWrapper;
 import org.onetwo.common.db.filequery.DbmNamedQueryInfo;
+import org.onetwo.common.db.filequery.DefaultFileQueryWrapper;
+import org.onetwo.common.db.filequery.spi.CreateQueryCmd;
 import org.onetwo.common.db.filequery.spi.QueryProvideManager;
 import org.onetwo.common.utils.Assert;
+import org.onetwo.dbm.jdbc.mapper.RowMapperFactory;
 
 public class DbmFileQueryWrapperImpl extends DefaultFileQueryWrapper {
 
@@ -19,10 +23,13 @@ public class DbmFileQueryWrapperImpl extends DefaultFileQueryWrapper {
 		
 	}
 	
-	protected DbmQueryWrapper createDataQuery(String sql, Class<?> mappedClass){
-		DbmQueryWrapper dataQuery = this.baseEntityManager.createSQLQuery(sql, mappedClass);
+	protected DbmQueryWrapper createDataQuery(CreateQueryCmd createQueryCmd){
+		DbmQueryWrapper dataQuery = this.baseEntityManager.createQuery(createQueryCmd);
 		if(!countQuery){
-			dataQuery.setRowMapper(baseEntityManager.getRowMapperFactory().createRowMapper(invokeContext));
+			Optional<RowMapperFactory> rmfOpt = baseEntityManager.getRowMapperFactory();
+			rmfOpt.ifPresent(rfm->{
+				dataQuery.setRowMapper(rfm.createRowMapper(invokeContext));
+			});
 		}
 		return dataQuery;
 	}

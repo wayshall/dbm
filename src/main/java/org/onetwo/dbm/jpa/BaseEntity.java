@@ -18,30 +18,30 @@ abstract public class BaseEntity implements TimeRecordableEntity{
  
 	private static final long serialVersionUID = 122579169646461421L;
 
-	protected Date createTime;
-	
-	protected Date lastUpdateTime;
-
-	@Column(name="CREATE_TIME")
+	@Column(name="CREATE_AT")
 	@Temporal(TemporalType.TIMESTAMP)
+	protected Date createAt;
+
+	@Column(name="UPDATE_AT")
+	@Temporal(TemporalType.TIMESTAMP)
+	protected Date updateAt;
+
 	@XmlJavaTypeAdapter(DateAdapter.class)
 	public Date getCreateAt() {
-		return createTime;
+		return createAt;
 	}
 
 	public void setCreateAt(Date createTime) {
-		this.createTime = createTime;
+		this.createAt = createTime;
 	}
 
-	@Column(name="LAST_UPDATE_TIME")
-	@Temporal(TemporalType.TIMESTAMP)
 	@XmlJavaTypeAdapter(DateAdapter.class)
 	public Date getUpdateAt() {
-		return lastUpdateTime;
+		return updateAt;
 	}
 
 	public void setUpdateAt(Date lastUpdateTime) {
-		this.lastUpdateTime = lastUpdateTime;
+		this.updateAt = lastUpdateTime;
 	}
 
 }

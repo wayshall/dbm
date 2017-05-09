@@ -18,6 +18,7 @@ import org.onetwo.common.db.builder.QueryBuilder;
 import org.onetwo.common.db.builder.Querys;
 import org.onetwo.common.db.filequery.DbmNamedSqlFileManager;
 import org.onetwo.common.db.filequery.func.SqlFunctionDialet;
+import org.onetwo.common.db.filequery.spi.CreateQueryCmd;
 import org.onetwo.common.db.filequery.spi.FileNamedQueryFactory;
 import org.onetwo.common.db.filequery.spi.SqlParamterPostfixFunctionRegistry;
 import org.onetwo.common.db.sql.SequenceNameManager;
@@ -77,7 +78,7 @@ public class DbmEntityManagerImpl extends BaseEntityManagerAdapter implements Db
 	}*/
 
 
-	@Override
+//	@Override
 	public DataBase getDataBase() {
 		return sessionFactory.getDialect().getDbmeta().getDataBase();
 	}
@@ -186,8 +187,8 @@ public class DbmEntityManagerImpl extends BaseEntityManagerAdapter implements Db
 	}
 
 	@Override
-	public DbmQueryWrapper createSQLQuery(String sqlString, Class<?> entityClass) {
-		DbmQuery jq = getCurrentSession().createDbmQuery(sqlString, entityClass);
+	public DbmQueryWrapper createQuery(CreateQueryCmd createQueryCmd) {
+		DbmQuery jq = getCurrentSession().createDbmQuery(createQueryCmd.getSql(), createQueryCmd.getMappedClass());
 		DbmQueryWrapper query = new DbmQueryWrapperImpl(jq);
 		return query;
 	}
@@ -248,7 +249,7 @@ public class DbmEntityManagerImpl extends BaseEntityManagerAdapter implements Db
 		String sql = getSequenceNameManager().getSequenceSql(sequenceName);
 		Long id = null;
 		try {
-			DbmQueryWrapper dq = this.createSQLQuery(sql, null);
+			DbmQueryWrapper dq = this.createQuery(sql, null);
 			id = ((Number)dq.getSingleResult()).longValue();
 //			logger.info("createSequences id : "+id);
 		} catch (Exception e) {
@@ -369,8 +370,9 @@ public class DbmEntityManagerImpl extends BaseEntityManagerAdapter implements Db
 
 
 	@Override
-	public RowMapperFactory getRowMapperFactory() {
-		return this.sessionFactory.getRowMapperFactory();
+	public Optional<RowMapperFactory> getRowMapperFactory() {
+		RowMapperFactory rmf = this.sessionFactory.getRowMapperFactory();
+		return Optional.ofNullable(rmf);
 	}
 	
 	@Override
@@ -379,8 +381,9 @@ public class DbmEntityManagerImpl extends BaseEntityManagerAdapter implements Db
 	}
 
 	@Override
-	public SqlFunctionDialet getSqlFunctionDialet() {
-		return getSessionFactory().getDialect().getSqlFunctionDialet();
+	public Optional<SqlFunctionDialet> getSqlFunctionDialet() {
+		SqlFunctionDialet sqlFunc = getSessionFactory().getDialect().getSqlFunctionDialet();
+		return Optional.ofNullable(sqlFunc);
 	}
 
 	@Override

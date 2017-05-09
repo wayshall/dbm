@@ -18,7 +18,6 @@ import org.onetwo.common.db.ParsedSqlContext;
 import org.onetwo.common.db.filequery.ParsedSqlUtils;
 import org.onetwo.common.db.filequery.ParsedSqlUtils.ParsedSqlWrapper;
 import org.onetwo.common.db.filequery.ParsedSqlUtils.ParsedSqlWrapper.SqlParamterMeta;
-import org.onetwo.common.db.filequery.spi.FileNamedSqlGenerator;
 import org.onetwo.common.db.filequery.spi.QueryProvideManager;
 import org.onetwo.common.db.filequery.spi.SqlParamterPostfixFunctionRegistry;
 import org.onetwo.common.exception.BaseException;
@@ -191,8 +190,9 @@ public class DynamicQueryHandler implements InvocationHandler {
 			batchParameter = (Collection<?>)args[0];
 		}*/
 		
-		FileNamedSqlGenerator sqlGen = em.getFileNamedQueryManager().createFileNamedSqlGenerator(invokeContext);
-		ParsedSqlContext sv = sqlGen.generatSql();
+		/*FileNamedSqlGenerator sqlGen = em.getFileNamedQueryManager().createFileNamedSqlGenerator(invokeContext);
+		ParsedSqlContext sv = sqlGen.generatSql();*/
+		ParsedSqlContext sv = em.getFileNamedQueryManager().parseNamedQuery(invokeContext);
 //		JdbcDao jdao = this.jdao;
 		DbmJdbcOperations dbmJdbcTemplate = this.dbmJdbcOperations;
 		if(dbmJdbcTemplate==null){

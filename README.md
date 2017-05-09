@@ -6,6 +6,7 @@
 ## 目录
 - [特色](https://github.com/wayshall/dbm#特色)
 - [示例项目](https://github.com/wayshall/dbm#示例项目)
+- [JDK版本要求](https://github.com/wayshall/dbm#JDK版本要求)
 - [maven配置](https://github.com/wayshall/dbm#maven)
 - [一行代码启用](https://github.com/wayshall/dbm#一行代码启用)
 - [实体映射](https://github.com/wayshall/dbm#实体映射)
@@ -36,6 +37,10 @@
 ## 示例项目   
 单独使用dbm的示例项目
 [boot-dbm-sample](https://github.com/wayshall/boot-dbm-sample)
+
+
+## JDK版本要求
+1.8+
 
 ## maven
 当前snapshot版本：4.5.2-SNAPSHOT

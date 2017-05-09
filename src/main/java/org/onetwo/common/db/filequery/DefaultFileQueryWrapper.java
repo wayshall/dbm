@@ -2,6 +2,7 @@ package org.onetwo.common.db.filequery;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Map.Entry;
 
 import org.onetwo.common.db.AbstractDbmQueryWrapper;
@@ -10,6 +11,7 @@ import org.onetwo.common.db.ParsedSqlContext;
 import org.onetwo.common.db.filequery.ParsedSqlUtils.ParsedSqlWrapper;
 import org.onetwo.common.db.filequery.ParsedSqlUtils.ParsedSqlWrapper.SqlParamterMeta;
 import org.onetwo.common.db.filequery.func.SqlFunctionDialet;
+import org.onetwo.common.db.filequery.spi.CreateQueryCmd;
 import org.onetwo.common.db.filequery.spi.FileNamedSqlGenerator;
 import org.onetwo.common.db.filequery.spi.QueryProvideManager;
 import org.onetwo.common.db.filequery.spi.SqlParamterPostfixFunctionRegistry;
@@ -66,8 +68,8 @@ public class DefaultFileQueryWrapper extends AbstractDbmQueryWrapper implements 
 //	abstract protected DataQuery createDataQuery(String sql, Class<?> mappedClass);
 
 	
-	protected DbmQueryWrapper createDataQuery(String sql, Class<?> mappedClass){
-		DbmQueryWrapper dataQuery = this.baseEntityManager.createSQLQuery(sql, mappedClass);
+	protected DbmQueryWrapper createDataQuery(CreateQueryCmd createQueryCmd){
+		DbmQueryWrapper dataQuery = this.baseEntityManager.createQuery(createQueryCmd);
 		return dataQuery;
 	}
 	
@@ -75,12 +77,13 @@ public class DefaultFileQueryWrapper extends AbstractDbmQueryWrapper implements 
 		if(dataQuery!=null){
 			return dataQuery;
 		}
-		SqlFunctionDialet sqlFunction = baseEntityManager.getSqlFunctionDialet();
+		Optional<SqlFunctionDialet> sqlFunction = baseEntityManager.getSqlFunctionDialet();
 		FileNamedSqlGenerator sqlGen = new DefaultFileNamedSqlGenerator(countQuery, parser, parserContext, 
 																		resultClass, ascFields, desFields, params, sqlFunction);
 		ParsedSqlContext sqlAndValues = sqlGen.generatSql();
 		if(sqlAndValues.isListValue()){
-			DbmQueryWrapper dataQuery = createDataQuery(sqlAndValues.getParsedSql(), resultClass);
+			CreateQueryCmd createQueryCmd = new CreateQueryCmd(sqlAndValues.getParsedSql(), resultClass, info.isNativeSql());
+			DbmQueryWrapper dataQuery = createDataQuery(createQueryCmd);
 			int position = 0;
 			for(Object value : sqlAndValues.asList()){
 				dataQuery.setParameter(position++, value);
@@ -91,7 +94,8 @@ public class DefaultFileQueryWrapper extends AbstractDbmQueryWrapper implements 
 		}
 
 		String parsedSql = sqlAndValues.getParsedSql();
-		DbmQueryWrapper dataQuery = createDataQuery(parsedSql, resultClass);
+		CreateQueryCmd createQueryCmd = new CreateQueryCmd(parsedSql, resultClass, info.isNativeSql());
+		DbmQueryWrapper dataQuery = createDataQuery(createQueryCmd);
 		
 		SqlParamterPostfixFunctionRegistry sqlFunc = baseEntityManager.getSqlParamterPostfixFunctionRegistry();
 		ParsedSqlWrapper sqlWrapper = ParsedSqlUtils.parseSql(parsedSql, sqlFunc);
