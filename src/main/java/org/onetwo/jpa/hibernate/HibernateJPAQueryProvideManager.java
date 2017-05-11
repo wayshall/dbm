@@ -1,6 +1,5 @@
 package org.onetwo.jpa.hibernate;
 
-import java.util.List;
 import java.util.Optional;
 
 import javax.persistence.EntityManager;
@@ -12,24 +11,22 @@ import org.onetwo.common.db.filequery.DbmNamedSqlFileManager;
 import org.onetwo.common.db.filequery.SqlParamterPostfixFunctions;
 import org.onetwo.common.db.filequery.func.SqlFunctionDialet;
 import org.onetwo.common.db.spi.CreateQueryCmd;
-import org.onetwo.common.db.spi.QueryWrapper;
 import org.onetwo.common.db.spi.FileNamedQueryFactory;
 import org.onetwo.common.db.spi.QueryProvideManager;
+import org.onetwo.common.db.spi.QueryWrapper;
 import org.onetwo.common.db.spi.SqlParamterPostfixFunctionRegistry;
-import org.onetwo.dbm.core.internal.DbmInterceptorManager;
-import org.onetwo.dbm.jdbc.DbmJdbcOperations;
-import org.onetwo.dbm.jdbc.DbmJdbcTemplate;
-import org.onetwo.dbm.jdbc.mapper.RowMapperFactory;
 import org.onetwo.dbm.query.DbmNamedFileQueryFactory;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 /**
  * @author wayshall
  * <br/>
  */
-public class HibernateQueryProvideManager implements QueryProvideManager {
+public class HibernateJPAQueryProvideManager implements QueryProvideManager {
 
 	private DataSource dataSource;
-	private DbmJdbcOperations dbmJdbcOperations;
+	private NamedParameterJdbcOperations jdbcOperations;
 	private SqlParamterPostfixFunctionRegistry sqlParamterPostfixFunctionRegistry = new SqlParamterPostfixFunctions();
 	private DbmNamedFileQueryFactory dbmNamedFileQueryFactory;
 	
@@ -37,11 +34,10 @@ public class HibernateQueryProvideManager implements QueryProvideManager {
 	private EntityManager entityManager;
 	
 	
-	public HibernateQueryProvideManager(DataSource dataSource) {
+	public HibernateJPAQueryProvideManager(DataSource dataSource) {
 		super();
 		this.dataSource = dataSource;
-		
-		this.dbmJdbcOperations = new DbmJdbcTemplate(dataSource);
+		this.jdbcOperations = new NamedParameterJdbcTemplate(dataSource);
 		DbmNamedSqlFileManager sqlFileManager = DbmNamedSqlFileManager.createNamedSqlFileManager(true);
 		dbmNamedFileQueryFactory = new DbmNamedFileQueryFactory(sqlFileManager);
 	}
@@ -51,16 +47,21 @@ public class HibernateQueryProvideManager implements QueryProvideManager {
 		if(createQueryCmd.isNativeSql()){
 			SQLQuery sqlQuery = entityManager.createNativeQuery(createQueryCmd.getSql()).unwrap(SQLQuery.class);
 			sqlQuery.setResultTransformer(new RowToBeanTransformer(createQueryCmd.getMappedClass()));
-			List<?> datas = sqlQuery.list();
+			HibernateDbmQueryWrapper wrapper = new HibernateDbmQueryWrapper(sqlQuery);
+			return wrapper;
 		}else{
 			throw new UnsupportedOperationException("Unsupported not native sql");
 		}
-		return null;
 	}
 
 	@Override
 	public FileNamedQueryFactory getFileNamedQueryManager() {
 		return dbmNamedFileQueryFactory;
+	}
+
+	@Override
+	public NamedParameterJdbcOperations getJdbcOperations() {
+		return jdbcOperations;
 	}
 
 	@Override
@@ -77,6 +78,5 @@ public class HibernateQueryProvideManager implements QueryProvideManager {
 	public Optional<SqlFunctionDialet> getSqlFunctionDialet() {
 		return Optional.empty();
 	}
-
 
 }

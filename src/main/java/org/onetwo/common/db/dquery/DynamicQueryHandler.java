@@ -60,7 +60,7 @@ public class DynamicQueryHandler implements InvocationHandler {
 		this.methodCache = methodCache;
 		
 //		this.dbmJdbcOperations = em.getSessionFactory().getServiceRegistry().getDbmJdbcOperations();
-		this.jdbcOperations = em.getDbmJdbcOperations();
+		this.jdbcOperations = em.getJdbcOperations();
 		this.proxyObject = Proxy.newProxyInstance(ClassUtils.getDefaultClassLoader(), proxiedInterfaces, this);
 		Assert.notNull(jdbcOperations);
 	}

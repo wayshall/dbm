@@ -7,7 +7,6 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.onetwo.common.db.dquery.DynamicMethod;
 import org.onetwo.common.db.dquery.DynamicQueryObjectRegister;
 import org.onetwo.common.db.dquery.annotation.DbmRepository;
-import org.onetwo.common.db.dquery.annotation.QueryRepository;
 import org.onetwo.common.log.JFishLoggerFactory;
 import org.onetwo.common.reflect.ReflectUtils;
 import org.onetwo.common.spring.SpringUtils;
@@ -59,8 +58,7 @@ public class AnnotationScanBasicDynamicQueryObjectRegister implements DynamicQue
 		}
 		logger.info("start to register dao bean ....");
 		Collection<Class<?>> dbmRepositoryClasses = resourcesScanner.scan((metadataReader, res, index)->{
-			if(metadataReader.getAnnotationMetadata().hasAnnotation(DbmRepository.class.getName()) ||
-					metadataReader.getAnnotationMetadata().hasAnnotation(QueryRepository.class.getName())	){
+			if( metadataReader.getAnnotationMetadata().hasAnnotation(DbmRepository.class.getName()) ){
 				Class<?> cls = ReflectUtils.loadClass(metadataReader.getClassMetadata().getClassName(), false);
 				return cls;
 			}

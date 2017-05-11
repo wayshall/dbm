@@ -7,7 +7,6 @@ import javax.sql.DataSource;
 
 import org.apache.commons.lang3.StringUtils;
 import org.onetwo.common.db.dquery.annotation.DbmRepository;
-import org.onetwo.common.db.dquery.annotation.QueryRepository;
 import org.onetwo.common.db.filequery.DbmNamedSqlFileManager;
 import org.onetwo.common.db.spi.NamedQueryFile;
 import org.onetwo.common.db.spi.NamedSqlFileManager;
@@ -40,9 +39,6 @@ public class JDKDynamicProxyCreator implements InitializingBean, ApplicationCont
 	private Object targetObject;
 	private ResourceAdapter<?> sqlFile;
 
-//	private DbmJdbcOperations dbmJdbcOperations;
-//	private JFishNamedSqlFileManager namedSqlFileManager;
-//	private QueryProvideManager queryProvideManager;
 	private String beanName;
 	
 	public JDKDynamicProxyCreator(Class<?> interfaceClass, LoadingCache<Method, DynamicMethod> methodCache) {
@@ -51,52 +47,24 @@ public class JDKDynamicProxyCreator implements InitializingBean, ApplicationCont
 		this.methodCache = methodCache;
 	}
 	
-	@SuppressWarnings("deprecation")
 	private Optional<DbmRepositoryAttrs> findDbmRepositoryAttrs(){
 		DbmRepository dbmRepository = this.interfaceClass.getAnnotation(DbmRepository.class);
 		if(dbmRepository==null){
-			QueryRepository queryRepository = this.interfaceClass.getAnnotation(QueryRepository.class);
+			/*QueryRepository queryRepository = this.interfaceClass.getAnnotation(QueryRepository.class);
 			if(queryRepository==null){
 				return Optional.empty();
 			}
 			DbmRepositoryAttrs attrs = new DbmRepositoryAttrs(queryRepository.provideManager(), queryRepository.dataSource());
-			return Optional.of(attrs);
-//			return Optional.empty();
+			return Optional.of(attrs);*/
+			return Optional.empty();
 		}
-		DbmRepositoryAttrs attrs = new DbmRepositoryAttrs(dbmRepository.provideManager(), dbmRepository.dataSource());
+		DbmRepositoryAttrs attrs = new DbmRepositoryAttrs(dbmRepository.provideManager(), dbmRepository.provideManagerClass(), dbmRepository.dataSource());
 		return Optional.of(attrs);
 	}
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		/*if(namedSqlFileManager==null){
-			namedSqlFileManager = SpringUtils.getBean(applicationContext, JFishNamedSqlFileManager.class);
-		}*/
-		/*if(dbmJdbcOperations==null){
-			dbmJdbcOperations = SpringUtils.getBean(applicationContext, DbmJdbcOperations.class);
-		}*/
-		
-		QueryProvideManager queryProvideManager;
-		Optional<DbmRepositoryAttrs> dbmRepositoryAttrs = findDbmRepositoryAttrs();
-		if(!dbmRepositoryAttrs.isPresent()){
-			queryProvideManager = SpringUtils.getBean(applicationContext, QueryProvideManager.class);
-		}else{
-			DbmRepositoryAttrs attrs = dbmRepositoryAttrs.get();
-			if(StringUtils.isNotBlank(attrs.provideManager())){
-				queryProvideManager = SpringUtils.getBean(applicationContext, attrs.provideManager());
-			}else if(StringUtils.isNotBlank(attrs.dataSource())){
-				DataSource dataSource = SpringUtils.getBean(applicationContext, attrs.dataSource());
-				if(dataSource==null){
-					throw new DbmException("no dataSource found: " + attrs.dataSource());
-				}
-				queryProvideManager = Dbms.obtainBaseEntityManager(dataSource);
-			}else{
-				queryProvideManager = SpringUtils.getBean(applicationContext, QueryProvideManager.class);
-			}
-		}
-		if(queryProvideManager==null){
-			throw new FileNamedQueryException("no QueryProvideManager found!");
-		}
+		QueryProvideManager queryProvideManager = findQueryProvideManager();
 		
 		NamedSqlFileManager namedSqlFileManager = (DbmNamedSqlFileManager)queryProvideManager.getFileNamedQueryManager().getNamedSqlFileManager();
 		Assert.notNull(namedSqlFileManager);
@@ -113,8 +81,36 @@ public class JDKDynamicProxyCreator implements InitializingBean, ApplicationCont
 		targetObject = new DynamicQueryHandler(queryProvideManager, methodCache, interfaceClass).getQueryObject();
 	}
 	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	protected DbmSqlFileResource<?> getSqlFile(DataSource dataSource){
 		return new DbmSqlFileResource(sqlFile, interfaceClass);
+	}
+	
+	private QueryProvideManager findQueryProvideManager(){
+		QueryProvideManager queryProvideManager;
+		Optional<DbmRepositoryAttrs> dbmRepositoryAttrs = findDbmRepositoryAttrs();
+		if(!dbmRepositoryAttrs.isPresent()){
+			queryProvideManager = SpringUtils.getBean(applicationContext, QueryProvideManager.class);
+		}else{
+			DbmRepositoryAttrs attrs = dbmRepositoryAttrs.get();
+			if(StringUtils.isNotBlank(attrs.provideManager())){
+				queryProvideManager = SpringUtils.getBean(applicationContext, attrs.provideManager());
+			}else if(attrs.hasProvideManagerClass()){
+				queryProvideManager = SpringUtils.getBean(applicationContext, attrs.getProvideManagerClass());
+			}else if(StringUtils.isNotBlank(attrs.dataSource())){
+				DataSource dataSource = SpringUtils.getBean(applicationContext, attrs.dataSource());
+				if(dataSource==null){
+					throw new DbmException("no DataSource found: " + attrs.dataSource());
+				}
+				queryProvideManager = Dbms.obtainBaseEntityManager(dataSource);
+			}else{
+				queryProvideManager = SpringUtils.getBean(applicationContext, QueryProvideManager.class);
+			}
+		}
+		if(queryProvideManager==null){
+			throw new FileNamedQueryException("no QueryProvideManager found!");
+		}
+		return queryProvideManager;
 	}
 
 	@Override
@@ -151,18 +147,33 @@ public class JDKDynamicProxyCreator implements InitializingBean, ApplicationCont
 	
 	static class DbmRepositoryAttrs {
 		final private String provideManager;
+		final private Class<? extends QueryProvideManager> provideManagerClass;
 		final private String dataSource;
 		
-		public DbmRepositoryAttrs(String provideManager, String dataSource) {
+		public DbmRepositoryAttrs(String provideManager, Class<? extends QueryProvideManager> provideManagerClass, String dataSource) {
 			super();
 			this.provideManager = provideManager;
+			this.provideManagerClass = provideManagerClass;
 			this.dataSource = dataSource;
+		}
+		
+		public DbmRepositoryAttrs(String provideManager, String dataSource) {
+			this(provideManager, null, dataSource);
 		}
 		public String provideManager() {
 			return provideManager;
 		}
 		public String dataSource() {
 			return dataSource;
+		}
+		
+		public boolean hasProvideManagerClass(){
+			return provideManagerClass!=null && provideManagerClass!=QueryProvideManager.class;
+		}
+
+		@SuppressWarnings("unchecked")
+		public <T extends QueryProvideManager> Class<T> getProvideManagerClass() {
+			return (Class<T>)provideManagerClass;
 		}
 	}
 	

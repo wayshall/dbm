@@ -107,18 +107,18 @@
         <optional>true</optional>
 	</dependency>
     
-	<dependency>
-	  <groupId>javax.persistence</groupId>
-	  <artifactId>com.springsource.javax.persistence</artifactId>
-	</dependency>
-    
+    <dependency>
+       <groupId>org.hibernate.javax.persistence</groupId>
+       <artifactId>hibernate-jpa-2.1-api</artifactId>
+    </dependency>
+        
     <dependency>
         <groupId>org.hibernate</groupId>
         <artifactId>hibernate-validator</artifactId>
     </dependency>
     
     <dependency>
-       <groupId>javassist</groupId>
+       <groupId>org.javassist</groupId>
        <artifactId>javassist</artifactId>
        <optional>true</optional>
     </dependency>
@@ -133,21 +133,18 @@
 	<dependency>
 	   <groupId>org.hibernate</groupId>
 	   <artifactId>hibernate-core</artifactId>
-	   <version>5.2.8.Final</version>
        <optional>true</optional>
 	</dependency>
 	
 	<dependency>
 	   <groupId>org.hibernate</groupId>
 	   <artifactId>hibernate-entitymanager</artifactId>
-	   <version>5.2.8.Final</version>
        <optional>true</optional>
 	</dependency>
 	
 	<dependency>
 	   <groupId>org.springframework.data</groupId>
 	   <artifactId>spring-data-jpa</artifactId>
-	   <version>1.9.4.RELEASE</version>
        <optional>true</optional>
 	</dependency>
 		

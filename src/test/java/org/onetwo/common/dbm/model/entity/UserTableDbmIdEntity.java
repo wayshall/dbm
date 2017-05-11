@@ -1,12 +1,11 @@
 package org.onetwo.common.dbm.model.entity;
 
-import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.Table;
 
 import org.hibernate.validator.constraints.Length;
+import org.onetwo.dbm.annotation.DbmEntity;
 import org.onetwo.dbm.annotation.DbmIdGenerator;
 import org.onetwo.dbm.core.BaseModel;
 import org.onetwo.dbm.core.spi.DbmSessionImplementor;
@@ -17,8 +16,9 @@ import org.onetwo.dbm.id.SnowflakeIdGenerator;
  * @author wayshall
  * <br/>
  */
-@Entity
-@Table(name="TEST_USER")
+//@Entity
+//@Table(name="TEST_USER")
+@DbmEntity(table="TEST_USER")
 public class UserTableDbmIdEntity extends BaseModel<UserTableDbmIdEntity, Long> {
 
 	@Id  

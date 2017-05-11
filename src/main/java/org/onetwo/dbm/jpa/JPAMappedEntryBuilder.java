@@ -123,6 +123,10 @@ public class JPAMappedEntryBuilder extends DbmMappedEntryBuilder {
 	
 	@Override
 	protected DbmMappedEntry createDbmMappedEntry(AnnotationInfo annotationInfo) {
+		Entity entity = annotationInfo.getAnnotation(Entity.class);
+		if(entity==null){
+			return super.createDbmMappedEntry(annotationInfo);
+		}
 		TableInfo tableInfo = newTableInfo(annotationInfo);
 		DbmMappedEntryImpl entry = new DbmMappedEntryImpl(annotationInfo, tableInfo, serviceRegistry);
 		entry.setSqlBuilderFactory(this.getDialect().getSqlBuilderFactory());
@@ -137,6 +141,9 @@ public class JPAMappedEntryBuilder extends DbmMappedEntryBuilder {
 	@Override
 	protected String buildTableName(AnnotationInfo annotationInfo){
 		Table table = (Table) annotationInfo.getAnnotation(Table.class);
+		if(table==null){
+			return super.buildTableName(annotationInfo);
+		}
 		String tname = table.name();
 		return tname;
 	}

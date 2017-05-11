@@ -387,7 +387,7 @@ public class DbmEntityManagerImpl extends BaseEntityManagerAdapter implements Db
 	}
 
 	@Override
-	public NamedParameterJdbcOperations getDbmJdbcOperations() {
+	public NamedParameterJdbcOperations getJdbcOperations() {
 		return getSessionFactory().getServiceRegistry().getDbmJdbcOperations().getDbmNamedJdbcOperations();
 	}
 

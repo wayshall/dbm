@@ -12,9 +12,15 @@ import org.springframework.jdbc.core.RowMapper;
  * @author wayshall
  * <br/>
  */
-public class HibernateDbmQueryWrapper<E> extends AbstractQueryWrapper implements QueryWrapper {
+@SuppressWarnings({ "unchecked" })
+public class HibernateDbmQueryWrapper extends AbstractQueryWrapper implements QueryWrapper {
 	
-	private SQLQuery<E> sqlQuery;
+	final private SQLQuery sqlQuery;
+
+	public HibernateDbmQueryWrapper(SQLQuery sqlQuery) {
+		super();
+		this.sqlQuery = sqlQuery;
+	}
 
 	@Override
 	public int executeUpdate() {
@@ -23,14 +29,12 @@ public class HibernateDbmQueryWrapper<E> extends AbstractQueryWrapper implements
 
 	@Override
 	public <T> List<T> getResultList() {
-		// TODO Auto-generated method stub
-		return null;
+		return sqlQuery.list();
 	}
 
 	@Override
 	public <T> T getSingleResult() {
-		// TODO Auto-generated method stub
-		return null;
+		return (T)sqlQuery.uniqueResult();
 	}
 
 	@Override
@@ -47,8 +51,8 @@ public class HibernateDbmQueryWrapper<E> extends AbstractQueryWrapper implements
 
 	@Override
 	public QueryWrapper setParameter(int position, Object value) {
-		// TODO Auto-generated method stub
-		return null;
+		sqlQuery.setParameter(position, value);
+		return this;
 	}
 
 	@Override
@@ -80,7 +84,5 @@ public class HibernateDbmQueryWrapper<E> extends AbstractQueryWrapper implements
 	public void setRowMapper(RowMapper<?> rowMapper) {
 		throw new UnsupportedOperationException();
 	}
-	
-	
 
 }

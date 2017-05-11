@@ -6,7 +6,6 @@ import java.util.Optional;
 import org.onetwo.dbm.annotation.DbmInterceptorFilter.InterceptorType;
 import org.onetwo.dbm.core.DbmJdbcOperationType;
 import org.onetwo.dbm.core.DbmJdbcOperationType.DatabaseOperationType;
-import org.onetwo.dbm.core.internal.AbstractDbmInterceptorChain;
 
 public interface DbmInterceptorChain {
 	
@@ -27,9 +26,9 @@ public interface DbmInterceptorChain {
 	Optional<DbmJdbcOperationType> getJdbcOperationType();
 	Optional<DatabaseOperationType> getDatabaseOperationType();
 
-	AbstractDbmInterceptorChain addInterceptorToHead(DbmInterceptor...interceptors);
+	DbmInterceptorChain addInterceptorToHead(DbmInterceptor...interceptors);
 	
-	AbstractDbmInterceptorChain addInterceptorToTail(DbmInterceptor...interceptors);
+	DbmInterceptorChain addInterceptorToTail(DbmInterceptor...interceptors);
 	
-	AbstractDbmInterceptorChain addInterceptor(DbmInterceptor...interceptors);
+	DbmInterceptorChain addInterceptor(DbmInterceptor...interceptors);
 }

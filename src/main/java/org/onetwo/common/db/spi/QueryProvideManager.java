@@ -33,7 +33,7 @@ public interface QueryProvideManager {
 	 * @author wayshall
 	 * @return
 	 */
-	NamedParameterJdbcOperations getDbmJdbcOperations();
+	NamedParameterJdbcOperations getJdbcOperations();
 //	DataBase getDataBase();
 
 	Optional<SqlFunctionDialet> getSqlFunctionDialet();
