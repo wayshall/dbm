@@ -41,6 +41,8 @@ public class JDKDynamicProxyCreator implements InitializingBean, ApplicationCont
 
 	private String beanName;
 	
+	private Class<? extends QueryProvideManager> defaultQueryProvideManagerClass = QueryProvideManager.class;
+	
 	public JDKDynamicProxyCreator(Class<?> interfaceClass, LoadingCache<Method, DynamicMethod> methodCache) {
 		super();
 		this.interfaceClass = interfaceClass;
@@ -64,6 +66,8 @@ public class JDKDynamicProxyCreator implements InitializingBean, ApplicationCont
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
+		Assert.notNull(defaultQueryProvideManagerClass);
+		
 		QueryProvideManager queryProvideManager = findQueryProvideManager();
 		
 		NamedSqlFileManager namedSqlFileManager = (DbmNamedSqlFileManager)queryProvideManager.getFileNamedQueryManager().getNamedSqlFileManager();
@@ -90,7 +94,7 @@ public class JDKDynamicProxyCreator implements InitializingBean, ApplicationCont
 		QueryProvideManager queryProvideManager;
 		Optional<DbmRepositoryAttrs> dbmRepositoryAttrs = findDbmRepositoryAttrs();
 		if(!dbmRepositoryAttrs.isPresent()){
-			queryProvideManager = SpringUtils.getBean(applicationContext, QueryProvideManager.class);
+			queryProvideManager = SpringUtils.getBean(applicationContext, defaultQueryProvideManagerClass);
 		}else{
 			DbmRepositoryAttrs attrs = dbmRepositoryAttrs.get();
 			if(StringUtils.isNotBlank(attrs.provideManager())){
@@ -104,7 +108,7 @@ public class JDKDynamicProxyCreator implements InitializingBean, ApplicationCont
 				}
 				queryProvideManager = Dbms.obtainBaseEntityManager(dataSource);
 			}else{
-				queryProvideManager = SpringUtils.getBean(applicationContext, QueryProvideManager.class);
+				queryProvideManager = SpringUtils.getBean(applicationContext, defaultQueryProvideManagerClass);
 			}
 		}
 		if(queryProvideManager==null){
@@ -145,6 +149,10 @@ public class JDKDynamicProxyCreator implements InitializingBean, ApplicationCont
 		this.queryProvideManager = queryProvideManager;
 	}*/
 	
+	final public void setDefaultQueryProvideManagerClass(Class<? extends QueryProvideManager> defaultQueryProvideManagerClass) {
+		this.defaultQueryProvideManagerClass = defaultQueryProvideManagerClass;
+	}
+
 	static class DbmRepositoryAttrs {
 		final private String provideManager;
 		final private Class<? extends QueryProvideManager> provideManagerClass;

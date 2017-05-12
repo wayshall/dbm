@@ -5,6 +5,7 @@ import java.util.Collections;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.onetwo.common.db.dquery.repostory.AnnotationScanBasicDynamicQueryObjectRegister;
+import org.onetwo.common.db.spi.QueryProvideManager;
 import org.onetwo.common.log.JFishLoggerFactory;
 import org.onetwo.common.spring.SpringUtils;
 import org.onetwo.common.spring.utils.ResourcesScanner;
@@ -42,6 +43,8 @@ public class RichModelAndQueryObjectScanTrigger implements BeanFactoryPostProces
 	
 	private boolean enableRichModel = true;
 	
+	private Class<? extends QueryProvideManager> defaultQueryProvideManagerClass;
+	
 	public RichModelAndQueryObjectScanTrigger(BeanDefinitionRegistry registry) {
 		this.registry = registry;
 	}
@@ -50,12 +53,18 @@ public class RichModelAndQueryObjectScanTrigger implements BeanFactoryPostProces
 		this.registry = SpringUtils.getBeanDefinitionRegistry(applicationContext);
 	}
 
+	public void setDefaultQueryProvideManagerClass(Class<? extends QueryProvideManager> defaultQueryProvideManagerClass) {
+		this.defaultQueryProvideManagerClass = defaultQueryProvideManagerClass;
+	}
+
 	public void setPackagesToScan(String[] packagesToScan) {
 		this.packagesToScan = packagesToScan;
 	}
 
 	@Override
 	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
+//		BeanDefinitionRegistry registry = SpringUtils.getBeanDefinitionRegistry(beanFactory);
+		
 		Collection<String> packs = DbmUtils.getAllDbmPackageNames(beanFactory);
 		
 		if(this.packagesToScan!=null){
@@ -78,6 +87,7 @@ public class RichModelAndQueryObjectScanTrigger implements BeanFactoryPostProces
 			}
 			
 			AnnotationScanBasicDynamicQueryObjectRegister register = new AnnotationScanBasicDynamicQueryObjectRegister(registry);
+			register.setDefaultQueryProvideManagerClass(defaultQueryProvideManagerClass);
 			register.setPackagesToScan(packagesToScan);
 			register.registerQueryBeans();
 		}

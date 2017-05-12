@@ -26,6 +26,7 @@ import org.onetwo.common.reflect.ReflectUtils;
 import org.onetwo.common.utils.JFishProperty;
 import org.onetwo.common.utils.LangUtils;
 import org.onetwo.common.utils.StringUtils;
+import org.onetwo.dbm.annotation.DbmEntity;
 import org.onetwo.dbm.core.spi.DbmInnerServiceRegistry;
 import org.onetwo.dbm.exception.DbmException;
 import org.onetwo.dbm.id.StrategyType;
@@ -45,6 +46,11 @@ import org.onetwo.dbm.mapping.version.VersionableType;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.classreading.MetadataReader;
 
+/****
+ * 使用jpa注解，并且兼容dbm本身的注解
+ * @author wayshall
+ *
+ */
 public class JPAMappedEntryBuilder extends DbmMappedEntryBuilder {
 	
 	private static final Map<Class<?>, VersionableType<? extends Object>> versionTypes;
@@ -101,10 +107,10 @@ public class JPAMappedEntryBuilder extends DbmMappedEntryBuilder {
 		if(MetadataReader.class.isInstance(entity)){
 			MetadataReader metadataReader = (MetadataReader) entity;
 			AnnotationMetadata am = metadataReader.getAnnotationMetadata();
-			return am.hasAnnotation(Entity.class.getName());
+			return am.hasAnnotation(Entity.class.getName()) || am.hasAnnotation(DbmEntity.class.getName());
 		}else{
 			Class<?> entityClass = ReflectUtils.getObjectClass(entity);
-			return entityClass.getAnnotation(Entity.class)!=null;
+			return entityClass.getAnnotation(Entity.class)!=null || entityClass.getAnnotation(DbmEntity.class)!=null;
 		}
 	}
 	

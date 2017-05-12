@@ -7,10 +7,12 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.onetwo.common.db.dquery.DynamicMethod;
 import org.onetwo.common.db.dquery.DynamicQueryObjectRegister;
 import org.onetwo.common.db.dquery.annotation.DbmRepository;
+import org.onetwo.common.db.spi.QueryProvideManager;
 import org.onetwo.common.log.JFishLoggerFactory;
 import org.onetwo.common.reflect.ReflectUtils;
 import org.onetwo.common.spring.SpringUtils;
 import org.onetwo.common.spring.utils.JFishResourcesScanner;
+import org.onetwo.dbm.spring.DynamicQueryObjectRegisterConfigration;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
@@ -39,12 +41,18 @@ public class AnnotationScanBasicDynamicQueryObjectRegister implements DynamicQue
 //	private ApplicationContext applicationContext;
 	private String[] packagesToScan;
 	
+	private Class<? extends QueryProvideManager> defaultQueryProvideManagerClass;
+	
 	public AnnotationScanBasicDynamicQueryObjectRegister(BeanDefinitionRegistry registry) {
 		this.registry = registry;
 	}
 
 	public AnnotationScanBasicDynamicQueryObjectRegister(ApplicationContext applicationContext) {
 		this.registry = SpringUtils.getBeanDefinitionRegistry(applicationContext);
+	}
+
+	public void setDefaultQueryProvideManagerClass(Class<? extends QueryProvideManager> defaultQueryProvideManagerClass) {
+		this.defaultQueryProvideManagerClass = defaultQueryProvideManagerClass;
 	}
 
 	public void setPackagesToScan(String[] packagesToScan) {
@@ -76,6 +84,9 @@ public class AnnotationScanBasicDynamicQueryObjectRegister implements DynamicQue
 					.setScope(BeanDefinition.SCOPE_SINGLETON)
 //					.setRole(BeanDefinition.ROLE_APPLICATION)
 					.getBeanDefinition();
+			if(defaultQueryProvideManagerClass!=null){
+				beandef.setAttribute(DynamicQueryObjectRegisterConfigration.ATTR_DEFAULT_QUERY_PROVIDE_MANAGER_CLASS, defaultQueryProvideManagerClass);
+			}
 			registry.registerBeanDefinition(className, beandef);
 			logger.info("register dao bean: {} ", className);
 		}

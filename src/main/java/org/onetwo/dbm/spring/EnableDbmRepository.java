@@ -6,25 +6,14 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.onetwo.common.db.spi.QueryProvideManager;
 import org.springframework.context.annotation.Import;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 @Documented
-@Import({DbmSpringConfiguration.class})
-@EnableDbmRepository
-public @interface EnableDbm {
+@Import({DynamicQueryObjectRegisterConfigration.class})
+public @interface EnableDbmRepository {
 	
-	/****
-	 * dataSource bean name
-	 * @return
-	 */
-	String value() default "";
-	/****
-	 * package to scan model and repository
-	 * @return
-	 */
-	String[] packagesToScan() default {};
-	
-	boolean enableRichModel() default true;
+	Class<? extends QueryProvideManager> defaultQueryProvideManagerClass() default QueryProvideManager.class;
 }

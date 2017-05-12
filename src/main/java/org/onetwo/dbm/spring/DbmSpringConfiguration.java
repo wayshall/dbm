@@ -52,15 +52,6 @@ public class DbmSpringConfiguration implements ApplicationContextAware, Initiali
 
 	@Override
 	public void setImportMetadata(AnnotationMetadata importMetadata) {
-		/*Map<String, Object> annotationAttributes = importMetadata.getAnnotationAttributes(EnableDbm.class.getName());
-		AnnotationAttributes attrs = AnnotationAttributes.fromMap(annotationAttributes);
-		if(attrs==null){
-			return ;
-		}
-		String[] packagesToScan = attrs.getStringArray("packagesToScan");
-		if(ArrayUtils.isEmpty(packagesToScan)){
-			packageNames.addAll(DbmUtils.scanEnableDbmPackages(applicationContext));
-		}*/
 		if(importMetadata!=null){
 			Map<String, Object> annotationAttributes = importMetadata.getAnnotationAttributes(EnableDbm.class.getName());
 			if(annotationAttributes!=null){

@@ -235,7 +235,7 @@ public class MutilMappedEntryManager implements MappedEntryBuilder, MappedEntryM
 				return entry;
 			}
 		}
-		throw new NoMappedEntryException("jfish orm unsupported the type["+ReflectUtils.getObjectClass(object)+"] as a entity");
+		throw new NoMappedEntryException("dbm unsupported the type["+ReflectUtils.getObjectClass(object)+"] as a entity");
 //		return entry;
 	}
 	

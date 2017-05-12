@@ -182,9 +182,10 @@ public class SimpleDbmInnerServiceRegistry implements DbmInnerServiceRegistry {
 //			this.mappedEntryManager.initialize();
 			
 			List<MappedEntryBuilder> builders = LangUtils.newArrayList();
-			MappedEntryBuilder builder = new DbmMappedEntryBuilder(this);
+			MappedEntryBuilder builder = null;
+			/*MappedEntryBuilder builder = new DbmMappedEntryBuilder(this);
 			builder.initialize();
-			builders.add(builder);
+			builders.add(builder);*/
 			
 			builder = new JPAMappedEntryBuilder(this);
 			builder.initialize();
