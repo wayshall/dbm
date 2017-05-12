@@ -8,6 +8,8 @@ import java.util.Map;
 import javax.sql.DataSource;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.onetwo.dbm.jdbc.internal.SpringStatementParameterSetter;
+import org.onetwo.dbm.jdbc.spi.JdbcStatementParameterSetter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;

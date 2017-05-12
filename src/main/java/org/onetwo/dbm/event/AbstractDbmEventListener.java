@@ -9,7 +9,7 @@ import org.onetwo.common.utils.CUtils;
 import org.onetwo.common.utils.LangUtils;
 import org.onetwo.common.utils.MathUtils;
 import org.onetwo.dbm.exception.DbmException;
-import org.onetwo.dbm.jdbc.SimpleArgsPreparedStatementCreator;
+import org.onetwo.dbm.jdbc.internal.SimpleArgsPreparedStatementCreator;
 import org.onetwo.dbm.mapping.DbmConfig;
 import org.onetwo.dbm.mapping.DbmMappedEntryMeta;
 import org.onetwo.dbm.mapping.DbmMappedField;

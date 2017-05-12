@@ -7,7 +7,7 @@ import org.onetwo.common.utils.LangUtils;
 import org.onetwo.dbm.exception.DbmException;
 import org.onetwo.dbm.exception.EntityInsertException;
 import org.onetwo.dbm.id.IdentifierGenerator;
-import org.onetwo.dbm.jdbc.SimpleArgsPreparedStatementCreator;
+import org.onetwo.dbm.jdbc.internal.SimpleArgsPreparedStatementCreator;
 import org.onetwo.dbm.mapping.DbmMappedEntry;
 import org.onetwo.dbm.mapping.JdbcStatementContext;
 import org.springframework.jdbc.support.GeneratedKeyHolder;

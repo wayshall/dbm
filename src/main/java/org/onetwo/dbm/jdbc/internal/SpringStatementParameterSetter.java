@@ -1,8 +1,9 @@
-package org.onetwo.dbm.jdbc;
+package org.onetwo.dbm.jdbc.internal;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
+import org.onetwo.dbm.jdbc.spi.JdbcStatementParameterSetter;
 import org.onetwo.dbm.utils.DbmUtils;
 import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.core.SqlParameterValue;

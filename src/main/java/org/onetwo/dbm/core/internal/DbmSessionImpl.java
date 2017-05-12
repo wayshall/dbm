@@ -34,7 +34,7 @@ import org.onetwo.dbm.event.DbmSessionEventSource;
 import org.onetwo.dbm.event.DbmUpdateEvent;
 import org.onetwo.dbm.exception.DbmException;
 import org.onetwo.dbm.jdbc.AbstractDbmSession;
-import org.onetwo.dbm.jdbc.DbmJdbcOperations;
+import org.onetwo.dbm.jdbc.spi.DbmJdbcOperations;
 import org.onetwo.dbm.mapping.DbmConfig;
 import org.onetwo.dbm.mapping.MappedEntryManager;
 import org.onetwo.dbm.query.DbmQuery;

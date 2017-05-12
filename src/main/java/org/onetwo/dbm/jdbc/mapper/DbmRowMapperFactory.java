@@ -9,7 +9,7 @@ import org.onetwo.common.utils.Assert;
 import org.onetwo.dbm.annotation.DbmResultMapping;
 import org.onetwo.dbm.annotation.DbmRowMapper;
 import org.onetwo.dbm.exception.DbmException;
-import org.onetwo.dbm.jdbc.JdbcResultSetGetter;
+import org.onetwo.dbm.jdbc.spi.JdbcResultSetGetter;
 import org.onetwo.dbm.mapping.DbmMappedEntry;
 import org.onetwo.dbm.mapping.MappedEntryManager;
 import org.springframework.jdbc.core.RowMapper;

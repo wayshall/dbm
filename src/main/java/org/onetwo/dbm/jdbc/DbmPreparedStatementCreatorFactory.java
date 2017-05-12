@@ -13,6 +13,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import org.onetwo.dbm.jdbc.spi.JdbcStatementParameterSetter;
+import org.onetwo.dbm.jdbc.spi.SqlParametersProvider;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.core.ParameterDisposer;
 import org.springframework.jdbc.core.PreparedStatementCreator;

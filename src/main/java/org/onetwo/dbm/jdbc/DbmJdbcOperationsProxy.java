@@ -20,6 +20,8 @@ import org.onetwo.dbm.core.internal.AbstractDbmInterceptorChain.JdbcDbmIntercept
 import org.onetwo.dbm.core.internal.DbmInterceptorManager;
 import org.onetwo.dbm.core.spi.DbmInterceptor;
 import org.onetwo.dbm.core.spi.DbmInterceptorChain;
+import org.onetwo.dbm.jdbc.internal.DbmJdbcTemplate;
+import org.onetwo.dbm.jdbc.internal.SimpleArgsPreparedStatementCreator;
 import org.onetwo.dbm.utils.DbmUtils;
 import org.slf4j.Logger;
 import org.springframework.jdbc.core.PreparedStatementSetter;

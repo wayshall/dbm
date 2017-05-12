@@ -14,7 +14,7 @@ import org.onetwo.common.utils.Page;
 import org.onetwo.dbm.annotation.DbmJdbcOperationMark;
 import org.onetwo.dbm.core.DbmJdbcOperationType;
 import org.onetwo.dbm.dialet.DBDialect;
-import org.onetwo.dbm.jdbc.DbmJdbcOperations;
+import org.onetwo.dbm.jdbc.spi.DbmJdbcOperations;
 import org.onetwo.dbm.mapping.DbmConfig;
 import org.onetwo.dbm.mapping.MappedEntryManager;
 import org.springframework.jdbc.core.ResultSetExtractor;

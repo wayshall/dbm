@@ -1,4 +1,4 @@
-package org.onetwo.dbm.jdbc;
+package org.onetwo.dbm.jdbc.spi;
 
 import java.util.Collection;
 import java.util.List;
@@ -8,6 +8,9 @@ import javax.sql.DataSource;
 
 import org.onetwo.dbm.annotation.DbmJdbcOperationMark;
 import org.onetwo.dbm.core.DbmJdbcOperationType;
+import org.onetwo.dbm.jdbc.AroundPreparedStatementExecute;
+import org.onetwo.dbm.jdbc.DbmNamedJdbcTemplate;
+import org.onetwo.dbm.jdbc.internal.SimpleArgsPreparedStatementCreator;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowMapper;

@@ -1,4 +1,4 @@
-package org.onetwo.dbm.jdbc;
+package org.onetwo.dbm.jdbc.internal;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.onetwo.common.utils.LangUtils;
+import org.onetwo.dbm.jdbc.spi.SqlParametersProvider;
 import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.SqlProvider;
 import org.springframework.util.Assert;

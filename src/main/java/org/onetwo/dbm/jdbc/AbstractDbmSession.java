@@ -7,6 +7,7 @@ import javax.sql.DataSource;
 
 import org.onetwo.common.log.JFishLoggerFactory;
 import org.onetwo.dbm.core.spi.DbmSessionImplementor;
+import org.onetwo.dbm.jdbc.spi.DbmJdbcOperations;
 import org.slf4j.Logger;
 import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.jdbc.datasource.DataSourceUtils;

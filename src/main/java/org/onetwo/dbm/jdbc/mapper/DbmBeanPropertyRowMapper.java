@@ -9,8 +9,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.onetwo.common.log.JFishLoggerFactory;
-import org.onetwo.dbm.jdbc.JdbcResultSetGetter;
 import org.onetwo.dbm.jdbc.JdbcUtils;
+import org.onetwo.dbm.jdbc.spi.JdbcResultSetGetter;
 import org.onetwo.dbm.utils.DbmUtils;
 import org.slf4j.Logger;
 import org.springframework.beans.BeanUtils;

@@ -1,10 +1,12 @@
-package org.onetwo.dbm.jdbc;
+package org.onetwo.dbm.jdbc.internal;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
 
+import org.onetwo.dbm.jdbc.spi.JdbcStatementParameterSetter;
+import org.onetwo.dbm.jdbc.spi.SqlParametersProvider;
 import org.springframework.jdbc.core.ArgumentPreparedStatementSetter;
 
 public class DbmArgumentPreparedStatementSetter extends ArgumentPreparedStatementSetter implements SqlParametersProvider {

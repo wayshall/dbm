@@ -24,7 +24,8 @@ import com.google.common.collect.Sets;
  * @author weishao zeng
  * <br/>
  */
-public class RowToBeanTransformer extends AliasedTupleSubsetResultTransformer {
+@SuppressWarnings("serial")
+public class HibernateRowToBeanTransformer extends AliasedTupleSubsetResultTransformer {
 	private static final FormattingConversionService conversionService;
 	
 	static {
@@ -37,7 +38,6 @@ public class RowToBeanTransformer extends AliasedTupleSubsetResultTransformer {
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -3068449276325782557L;
 	private final Class<?> resultClass;
 	private boolean isInitialized;
 	private String[] aliases;
@@ -46,10 +46,10 @@ public class RowToBeanTransformer extends AliasedTupleSubsetResultTransformer {
 
 	private boolean tupleResult;
 
-	public RowToBeanTransformer(Class<?> resultClass) {
+	public HibernateRowToBeanTransformer(Class<?> resultClass) {
 		this(resultClass, true);
 	}
-	public RowToBeanTransformer(Class<?> resultClass, boolean checkAlias) {
+	public HibernateRowToBeanTransformer(Class<?> resultClass, boolean checkAlias) {
 		if ( resultClass == null ) {
 			throw new IllegalArgumentException( "resultClass cannot be null" );
 		}
@@ -179,7 +179,7 @@ public class RowToBeanTransformer extends AliasedTupleSubsetResultTransformer {
 			return false;
 		}
 
-		RowToBeanTransformer that = ( RowToBeanTransformer ) o;
+		HibernateRowToBeanTransformer that = ( HibernateRowToBeanTransformer ) o;
 
 		if ( ! resultClass.equals( that.resultClass ) ) {
 			return false;

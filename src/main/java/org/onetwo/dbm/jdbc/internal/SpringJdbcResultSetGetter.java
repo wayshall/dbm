@@ -1,10 +1,11 @@
-package org.onetwo.dbm.jdbc;
+package org.onetwo.dbm.jdbc.internal;
 
 import java.beans.PropertyDescriptor;
 import java.sql.SQLException;
 
 import org.onetwo.common.convert.Types;
 import org.onetwo.dbm.exception.DbmException;
+import org.onetwo.dbm.jdbc.spi.JdbcResultSetGetter;
 import org.onetwo.dbm.mapping.DbmMappedField;
 import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.jdbc.support.rowset.ResultSetWrappingSqlRowSet;

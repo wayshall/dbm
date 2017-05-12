@@ -1,4 +1,4 @@
-package org.onetwo.dbm.jdbc;
+package org.onetwo.dbm.jdbc.spi;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;

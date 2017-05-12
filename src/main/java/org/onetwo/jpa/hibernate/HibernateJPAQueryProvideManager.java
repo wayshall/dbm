@@ -46,7 +46,7 @@ public class HibernateJPAQueryProvideManager implements QueryProvideManager {
 	public QueryWrapper createQuery(CreateQueryCmd createQueryCmd) {
 		if(createQueryCmd.isNativeSql()){
 			SQLQuery sqlQuery = entityManager.createNativeQuery(createQueryCmd.getSql()).unwrap(SQLQuery.class);
-			sqlQuery.setResultTransformer(new RowToBeanTransformer(createQueryCmd.getMappedClass()));
+			sqlQuery.setResultTransformer(new HibernateRowToBeanTransformer(createQueryCmd.getMappedClass()));
 			HibernateDbmQueryWrapper wrapper = new HibernateDbmQueryWrapper(sqlQuery);
 			return wrapper;
 		}else{
