@@ -96,7 +96,7 @@ public class UserEntity {
 	 * @return
 	 */
 	@Id
-	@Column(name="ID")
+//	@Column(name="ID")
 	public Long getId() {
 		return this.id;
 	}
@@ -109,7 +109,8 @@ public class UserEntity {
 	 * 
 	 * @return
 	 */
-	@Column(name="USER_NAME")
+	//hibernate 使用了统一的命名策略后 不能再使用@Column注解自定义
+//	@Column(name="USER_NAME")
 	public String getUserName() {
 		return this.userName;
 	}
@@ -122,7 +123,7 @@ public class UserEntity {
 	 * 
 	 * @return
 	 */
-	@Column(name="NICK_NAME")
+//	@Column(name="NICK_NAME")
 	public String getNickName() {
 		return this.nickName;
 	}
@@ -135,7 +136,7 @@ public class UserEntity {
 	 * 
 	 * @return
 	 */
-	@Column(name="EMAIL")
+//	@Column(name="EMAIL")
 	public String getEmail() {
 		return this.email;
 	}
@@ -148,7 +149,7 @@ public class UserEntity {
 	 * 
 	 * @return
 	 */
-	@Column(name="MOBILE")
+//	@Column(name="MOBILE")
 	public String getMobile() {
 		return this.mobile;
 	}
@@ -161,7 +162,7 @@ public class UserEntity {
 	 * 
 	 * @return
 	 */
-	@Column(name="GENDER")
+//	@Column(name="GENDER")
 	public Integer getGender() {
 		return this.gender;
 	}
@@ -175,7 +176,7 @@ public class UserEntity {
 	 * @return
 	 */
 	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name="BIRTHDAY")
+//	@Column(name="BIRTHDAY")
 	@DateTimeFormat(pattern="yyyy-MM-dd")
 	public Date getBirthday() {
 		return this.birthday;
@@ -185,7 +186,7 @@ public class UserEntity {
 		this.birthday = birthday;
 	}
 
-	@Column(name="PASSWORD")
+//	@Column(name="PASSWORD")
 	public String getPassword() {
 		return password;
 	}

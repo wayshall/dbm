@@ -16,4 +16,13 @@ import org.springframework.context.annotation.Import;
 public @interface EnableDbmRepository {
 	
 	Class<? extends QueryProvideManager> defaultQueryProvideManagerClass() default QueryProvideManager.class;
+	
+	boolean autoRegister() default false;
+	
+	/****
+	 * package to scan
+	 * @author wayshall
+	 * @return
+	 */
+	String[] value() default {};
 }

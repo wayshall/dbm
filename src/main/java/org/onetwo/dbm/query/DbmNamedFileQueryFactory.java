@@ -21,15 +21,15 @@ public class DbmNamedFileQueryFactory extends AbstractFileNamedQueryFactory {
 
 
 	@Override
-	public DbmQueryWrapperImpl createQuery(NamedQueryInvokeContext invokeContext){
+	public QueryWrapper createQuery(NamedQueryInvokeContext invokeContext){
 		return createDataQuery(false, invokeContext);
 	}
 	
-	public DbmQueryWrapperImpl createCountQuery(NamedQueryInvokeContext invokeContext){
+	public QueryWrapper createCountQuery(NamedQueryInvokeContext invokeContext){
 		return createDataQuery(true, invokeContext);
 	}
 
-	public DbmQueryWrapperImpl createDataQuery(boolean count, NamedQueryInvokeContext invokeContext){
+	public QueryWrapper createDataQuery(boolean count, NamedQueryInvokeContext invokeContext){
 //		public JFishDataQuery createDataQuery(boolean count, String queryName, PlaceHolder type, Object... args){
 		Assert.notNull(invokeContext);
 
@@ -39,7 +39,7 @@ public class DbmNamedFileQueryFactory extends AbstractFileNamedQueryFactory {
 
 		jq.setQueryAttributes(invokeContext.getParsedParams());
 //		jq.setRowMapper(rowMapper);
-		return jq.getRawQuery(DbmQueryWrapperImpl.class);
+		return jq.getRawQuery(QueryWrapper.class);
 	}
 	
 	@Override
@@ -85,7 +85,7 @@ public class DbmNamedFileQueryFactory extends AbstractFileNamedQueryFactory {
 //	@Override
 	public <T> Page<T> findPage(Page<T> page, NamedQueryInvokeContext invokeContext, RowMapper<T> rowMapper) {
 		if(page.isAutoCount()){
-			DbmQueryWrapperImpl jq = this.createCountQuery(invokeContext);
+			QueryWrapper jq = this.createCountQuery(invokeContext);
 			Long total = jq.getSingleResult();
 			page.setTotalCount(total);
 			if(total!=null && total>0){
@@ -93,14 +93,14 @@ public class DbmNamedFileQueryFactory extends AbstractFileNamedQueryFactory {
 				/*jq.setFirstResult(page.getFirst()-1);
 				jq.setMaxResults(page.getPageSize());*/
 				jq.setPageParameter(page);
-				jq.getJfishQuery().setRowMapper(rowMapper);
+				jq.setRowMapper(rowMapper);
 				List<T> datalist = jq.getResultList();
 				page.setResult(datalist);
 			}
 		}else{
-			DbmQueryWrapperImpl jq = this.createQuery(invokeContext);
+			QueryWrapper jq = this.createQuery(invokeContext);
 			jq.setPageParameter(page);
-			jq.getJfishQuery().setRowMapper(rowMapper);
+			jq.setRowMapper(rowMapper);
 			List<T> datalist = jq.getResultList();
 			page.setResult(datalist);
 		}

@@ -42,6 +42,7 @@ public class AnnotationScanBasicDynamicQueryObjectRegister implements DynamicQue
 	private String[] packagesToScan;
 	
 	private Class<? extends QueryProvideManager> defaultQueryProvideManagerClass;
+	private boolean registerDefaultQueryProvideManager;
 	
 	public AnnotationScanBasicDynamicQueryObjectRegister(BeanDefinitionRegistry registry) {
 		this.registry = registry;
@@ -55,11 +56,22 @@ public class AnnotationScanBasicDynamicQueryObjectRegister implements DynamicQue
 		this.defaultQueryProvideManagerClass = defaultQueryProvideManagerClass;
 	}
 
+	public void setRegisterDefaultQueryProvideManager(boolean registerDefaultQueryProvideManager) {
+		this.registerDefaultQueryProvideManager = registerDefaultQueryProvideManager;
+	}
+
 	public void setPackagesToScan(String[] packagesToScan) {
 		this.packagesToScan = packagesToScan;
 	}
 
 	public boolean registerQueryBeans() {
+		if(registerDefaultQueryProvideManager && !this.defaultQueryProvideManagerClass.isInterface()){
+			BeanDefinition beandef = BeanDefinitionBuilder.rootBeanDefinition(defaultQueryProvideManagerClass)
+					.setScope(BeanDefinition.SCOPE_SINGLETON)
+					.getBeanDefinition();
+			registry.registerBeanDefinition(defaultQueryProvideManagerClass.getName(), beandef);
+			logger.info("auto register defaultQueryProvideManagerClass:{}", this.defaultQueryProvideManagerClass);
+		}
 		if(ArrayUtils.isEmpty(packagesToScan)){
 			logger.info("no packages config to scan for DbmRepository ....");
 			return false;

@@ -2,8 +2,8 @@ package org.onetwo.common.db.dquery;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.stream.Stream;
 
-import org.apache.commons.lang3.ArrayUtils;
 import org.onetwo.common.db.dquery.repostory.AnnotationScanBasicDynamicQueryObjectRegister;
 import org.onetwo.common.db.spi.QueryProvideManager;
 import org.onetwo.common.log.JFishLoggerFactory;
@@ -16,6 +16,7 @@ import org.onetwo.dbm.richmodel.RichModel;
 import org.onetwo.dbm.richmodel.RichModelCheckProcessor;
 import org.onetwo.dbm.richmodel.RichModelEnhanceProcessor;
 import org.onetwo.dbm.spring.EnableDbm;
+import org.onetwo.dbm.spring.EnableDbmRepository;
 import org.onetwo.dbm.utils.DbmUtils;
 import org.slf4j.Logger;
 import org.springframework.beans.BeansException;
@@ -42,19 +43,25 @@ public class RichModelAndQueryObjectScanTrigger implements BeanFactoryPostProces
 	private String[] packagesToScan;
 	
 	private boolean enableRichModel = true;
+	private AnnotationScanBasicDynamicQueryObjectRegister register;
 	
-	private Class<? extends QueryProvideManager> defaultQueryProvideManagerClass;
+//	private Class<? extends QueryProvideManager> defaultQueryProvideManagerClass;
 	
 	public RichModelAndQueryObjectScanTrigger(BeanDefinitionRegistry registry) {
 		this.registry = registry;
+		this.register = new AnnotationScanBasicDynamicQueryObjectRegister(this.registry);
 	}
 
 	public RichModelAndQueryObjectScanTrigger(ApplicationContext applicationContext) {
-		this.registry = SpringUtils.getBeanDefinitionRegistry(applicationContext);
+		this(SpringUtils.getBeanDefinitionRegistry(applicationContext));
 	}
 
+	public void setRegisterDefaultQueryProvideManager(boolean registerDefaultQueryProvideManager) {
+		this.register.setRegisterDefaultQueryProvideManager(registerDefaultQueryProvideManager);
+	}
+	
 	public void setDefaultQueryProvideManagerClass(Class<? extends QueryProvideManager> defaultQueryProvideManagerClass) {
-		this.defaultQueryProvideManagerClass = defaultQueryProvideManagerClass;
+		register.setDefaultQueryProvideManagerClass(defaultQueryProvideManagerClass);
 	}
 
 	public void setPackagesToScan(String[] packagesToScan) {
@@ -70,25 +77,34 @@ public class RichModelAndQueryObjectScanTrigger implements BeanFactoryPostProces
 		if(this.packagesToScan!=null){
 			Collections.addAll(packs, this.packagesToScan);
 		}
-		this.packagesToScan = packs.toArray(new String[0]);
 
-		SpringUtils.scanAnnotationPackages(beanFactory, EnableDbm.class, (beanDef, beanClass)->{
+		SpringUtils.scanAnnotation(beanFactory, EnableDbm.class, (beanDef, beanClass)->{
 			if(logger.isInfoEnabled()){
 				logger.info("found EnableDbm class: {}", beanClass);
 			}
 			EnableDbm enableDbm = beanClass.getAnnotation(EnableDbm.class);
-			enableRichModel = enableDbm.enableRichModel();
+			if(enableDbm!=null){
+				enableRichModel = enableDbm.enableRichModel();
+			}
 		});
 		
-		if(ArrayUtils.isNotEmpty(packagesToScan)){
-			
+		SpringUtils.scanAnnotation(beanFactory, EnableDbmRepository.class, (beanDef, beanClass)->{
+			if(logger.isInfoEnabled()){
+				logger.info("found EnableDbmRepository class: {}", beanClass);
+			}
+			EnableDbmRepository enableDbmRepository = beanClass.getAnnotation(EnableDbmRepository.class);
+			if(enableDbmRepository!=null){
+				register.setDefaultQueryProvideManagerClass(enableDbmRepository.defaultQueryProvideManagerClass());
+				register.setRegisterDefaultQueryProvideManager(enableDbmRepository.autoRegister());
+				Stream.of(enableDbmRepository.value()).forEach(p->packs.add(p));
+			}
+		});
+
+		if(!packs.isEmpty()){
 			if(enableRichModel){
 				this.enhanceRichModel();
 			}
-			
-			AnnotationScanBasicDynamicQueryObjectRegister register = new AnnotationScanBasicDynamicQueryObjectRegister(registry);
-			register.setDefaultQueryProvideManagerClass(defaultQueryProvideManagerClass);
-			register.setPackagesToScan(packagesToScan);
+			register.setPackagesToScan(packs.toArray(new String[0]));
 			register.registerQueryBeans();
 		}
 	}

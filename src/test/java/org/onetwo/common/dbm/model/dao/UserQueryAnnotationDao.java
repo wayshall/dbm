@@ -14,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @DbmRepository
 @Transactional
-public interface UserQueryConfigDao {
+public interface UserQueryAnnotationDao {
 	
 	@Query("insert into test_user (id, email, gender, mobile, nick_name, password, status, user_name) "
 			+ " values (:id, :email, :gender, :mobile, :nickName, :password, :status, :userName)")

@@ -1,16 +1,21 @@
-package org.onetwo.common.base;
+package org.onetwo.common.hibernate;
 
 import java.util.Properties;
 
+import javax.annotation.Resource;
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
 import org.junit.Test;
 import org.onetwo.common.dbm.PackageInfo;
 import org.onetwo.common.ds.DatasourceFactoryBean;
+import org.onetwo.common.hibernate.HibernateBaseTest.HibernateTestConfig;
 import org.onetwo.common.spring.config.JFishProfile;
+import org.onetwo.common.spring.config.JFishProfiles;
 import org.onetwo.common.spring.config.JFishPropertyPlaceholder;
 import org.onetwo.common.spring.test.SpringBaseJUnitTestCase;
+import org.onetwo.dbm.spring.EnableDbmRepository;
+import org.onetwo.jpa.hibernate.HibernateJPAQueryProvideManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,6 +27,8 @@ import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaDialect;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.support.AnnotationConfigContextLoader;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
@@ -29,6 +36,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
  * @author wayshall
  * <br/>
  */
+@ContextConfiguration(loader=AnnotationConfigContextLoader.class, classes=HibernateTestConfig.class)
 @ActiveProfiles("dev")
 public class HibernateBaseTest extends SpringBaseJUnitTestCase {
 	
@@ -41,10 +49,16 @@ public class HibernateBaseTest extends SpringBaseJUnitTestCase {
 	@JFishProfile
 	@EnableTransactionManagement
 	@EnableJpaRepositories(basePackageClasses=PackageInfo.class)
+	@EnableDbmRepository(value="org.onetwo.common.hibernate.dao", 
+						defaultQueryProvideManagerClass=HibernateJPAQueryProvideManager.class,
+						autoRegister=true)
 	public static class HibernateTestConfig {
 
 		@Autowired
 		private JFishPropertyPlaceholder configHolder;
+		
+		public HibernateTestConfig(){
+		}
 		
 		@Bean
 		public LocalContainerEntityManagerFactoryBean entityManagerFactory(DataSource dataSource) {
@@ -54,7 +68,15 @@ public class HibernateBaseTest extends SpringBaseJUnitTestCase {
 			JpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
 			em.setJpaVendorAdapter(vendorAdapter);
 			
-			Properties props = configHolder.getPropertiesWraper().getPropertiesStartWith("hibernate.", false);
+//			Properties props = configHolder.getPropertiesWraper().getPropertiesStartWith("hibernate.", false);
+			Properties props = new Properties();
+			props.setProperty("hibernate.dialect", "org.hibernate.dialect.MySQL5InnoDBDialect");
+			props.setProperty("hibernate.format_sql", "true");
+			props.setProperty("hibernate.hbm2ddl.auto", "update");
+			props.setProperty("hibernate.show_sql", "true");
+			props.setProperty("hibernate.cache.region.factory_class", "org.hibernate.cache.internal.NoCachingRegionFactory");
+			props.setProperty("hibernate.physical_naming_strategy", "org.onetwo.jpa.hibernate.ImprovedPhysicalNamingStrategy");
+			props.setProperty("hibernate.implicit_naming_strategy", "org.hibernate.boot.model.naming.ImplicitNamingStrategyLegacyHbmImpl");
 			em.setJpaProperties(props);
 			return em;
 		}

@@ -1,14 +1,12 @@
-package org.onetwo.common.dbm;
+package org.onetwo.common.hibernate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
 
 import org.junit.Test;
-import org.onetwo.common.base.DbmBaseTest;
-import org.onetwo.common.db.spi.BaseEntityManager;
-import org.onetwo.common.dbm.model.dao.UserQueryAnnotationDao;
 import org.onetwo.common.dbm.model.entity.UserEntity;
+import org.onetwo.common.hibernate.dao.UserQueryHibernateDao;
 import org.onetwo.common.utils.LangOps;
 import org.onetwo.common.utils.Page;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,15 +15,12 @@ import org.springframework.beans.factory.annotation.Autowired;
  * @author wayshall
  * <br/>
  */
-public class QueryConfigTest extends DbmBaseTest {
-	public static final String USER_NAME_PREFIX = "query_config_";
+public class UserQueryHibernateDaoTest extends HibernateBaseTest {
+	public static final String USER_NAME_PREFIX = "UserQueryHibernateDao_";
 	
 	@Autowired
-	private UserQueryAnnotationDao userQueryConfigDao;
-	@Autowired
-	private BaseEntityManager baseEntityManager;
-	
-	
+	private UserQueryHibernateDao userQueryHibernateDao;
+
 	private UserEntity createUser(int index){
 		UserEntity user = new UserEntity();
 		user.setUserName(USER_NAME_PREFIX+index);
@@ -37,26 +32,25 @@ public class QueryConfigTest extends DbmBaseTest {
 	}
 	
 	@Test
-	public void testSaveAndFind(){
-		baseEntityManager.removeAll(UserEntity.class);
-		
+	public void test(){
 		final int count = 100;
 		List<UserEntity> users = LangOps.ntimesMap(count, i->{
 			return createUser(i);
 		});
-		int res = userQueryConfigDao.batchSaveUsers(users);
+		int res = userQueryHibernateDao.batchSaveUsers(users);
 		assertThat(res).isEqualTo(count);
 		
+
 		users = LangOps.ntimesMap(count, i->{
 			UserEntity user = new UserEntity();
 			user.setId(Integer.valueOf(count+i).longValue());
 			user.setUserName("another query test"+i);
 			return user;
 		});
-		res = userQueryConfigDao.batchSaveUsers(users);
+		res = userQueryHibernateDao.batchSaveUsers(users);
 		assertThat(res).isEqualTo(count);
 		
-		Page<UserEntity> page = userQueryConfigDao.findUserPage(Page.create(1, UserEntity.class).noLimited(), USER_NAME_PREFIX);
+		Page<UserEntity> page = userQueryHibernateDao.findUserPage(Page.create(1, UserEntity.class).noLimited(), USER_NAME_PREFIX);
 		assertThat(page.getSize()).isEqualTo(count);
 	}
 

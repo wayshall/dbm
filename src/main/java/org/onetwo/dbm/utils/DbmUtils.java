@@ -1,6 +1,7 @@
 package org.onetwo.dbm.utils;
 
 import java.beans.PropertyDescriptor;
+import java.lang.annotation.Annotation;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -16,6 +17,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import javax.persistence.EnumType;
@@ -234,7 +236,7 @@ final public class DbmUtils {
 	}
 	public static List<String> scanEnableDbmPackages(ListableBeanFactory beanFactory){
 		List<String> packageNames = new ArrayList<String>();
-		SpringUtils.scanAnnotationPackages(beanFactory, EnableDbm.class, (beanDef, beanClass)->{
+		SpringUtils.scanAnnotation(beanFactory, EnableDbm.class, (beanDef, beanClass)->{
 			EnableDbm enableDbm = beanClass.getAnnotation(EnableDbm.class);
 			if(enableDbm==null){
 				return ;
@@ -258,13 +260,35 @@ final public class DbmUtils {
 		return scanDbmPackages(bf);
 	}
 	public static List<String> scanDbmPackages(ListableBeanFactory beanFactory){
-		List<String> packageNames = new ArrayList<String>();
+		return scanAnnotationPackages(beanFactory, DbmPackages.class, dbmPackages->dbmPackages.value());
+		/*List<String> packageNames = new ArrayList<String>();
 		SpringUtils.scanAnnotationPackages(beanFactory, DbmPackages.class, (beanDef, beanClass)->{
 			DbmPackages dbmPackages = beanClass.getAnnotation(DbmPackages.class);
 			if(dbmPackages==null){
 				return ;
 			}
 			String[] modelPacks = dbmPackages.value();
+			if(ArrayUtils.isNotEmpty(modelPacks)){
+				for(String pack : modelPacks){
+					packageNames.add(pack);
+				}
+			}else{
+				String packageName = beanClass.getPackage().getName();
+				packageNames.add(packageName);
+			}
+		});
+		return packageNames;*/
+	}
+	public static <T extends Annotation> List<String> scanAnnotationPackages(ListableBeanFactory beanFactory, 
+																		Class<T> annoClass,
+																		Function<T, String[]> packageExtractor){
+		List<String> packageNames = new ArrayList<String>();
+		SpringUtils.scanAnnotation(beanFactory, annoClass, (beanDef, beanClass)->{
+			T annoInst = beanClass.getAnnotation(annoClass);
+			if(annoInst==null){
+				return ;
+			}
+			String[] modelPacks = packageExtractor.apply(annoInst);
 			if(ArrayUtils.isNotEmpty(modelPacks)){
 				for(String pack : modelPacks){
 					packageNames.add(pack);
