@@ -9,7 +9,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.Resource;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 
 import org.junit.FixMethodOrder;
 import org.junit.Test;
@@ -24,22 +25,21 @@ import org.onetwo.common.dbm.model.vo.DepartmentVO;
 import org.onetwo.common.hibernate.HibernateBaseTest;
 import org.onetwo.common.reflect.ReflectUtils;
 import org.onetwo.common.utils.LangOps;
-import org.onetwo.dbm.core.spi.DbmEntityManager;
+import org.onetwo.jpa.hibernate.SpecificationQuerys;
 import org.springframework.beans.factory.annotation.Autowired;
 
 //@Rollback(false)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-public class HibernateNestedMappingTest extends HibernateBaseTest {a
+public class HibernateNestedMappingTest extends HibernateBaseTest {
 
-	@Resource
-	private DbmEntityManager dbmEntityManager;
 	@Autowired
 	private CompanyDao companyDao;
+	@PersistenceContext
+	EntityManager entityManager;
+	@Autowired
+	CompanyJpaRepository companyJpaRepository;
 	
 	public void clear(){
-		dbmEntityManager.removeAll(EmployeeEntity.class);
-		dbmEntityManager.removeAll(DepartmentEntity.class);
-		dbmEntityManager.removeAll(CompanyEntity.class);
 	}
 	
 	@Test
@@ -51,7 +51,9 @@ public class HibernateNestedMappingTest extends HibernateBaseTest {a
 		});
 //		dbmEntityManager.save(companies);
 		
-		List<CompanyEntity> dbcompanies = dbmEntityManager.findAll(CompanyEntity.class);
+		
+		List<CompanyEntity> dbcompanies = SpecificationQuerys.from(CompanyEntity.class)
+																.getList(companyJpaRepository);
 		assertThat(dbcompanies.size()).isEqualTo(companies.size());
 		Collection<String> names = ReflectUtils.getProperties(companies, "name");
 		Collection<String> dbnames = ReflectUtils.getProperties(dbcompanies, "name");
@@ -177,7 +179,7 @@ public class HibernateNestedMappingTest extends HibernateBaseTest {a
 		company.setName("测试公司-"+index);
 		company.setEmployeeNumber(employeeNumber);
 		company.setDescription("一个测试公司-"+index);
-		dbmEntityManager.save(company);
+		entityManager.persist(company);
 		
 		LangOps.ntimesMap(10, i->{
 			return createDepartment(company.getId(), i);
@@ -190,11 +192,11 @@ public class HibernateNestedMappingTest extends HibernateBaseTest {a
 		department.setName("部门-"+index);
 		department.setEmployeeNumber(10);
 		department.setCompanyId(companyId);
-		dbmEntityManager.save(department);
+		entityManager.persist(department);
 		List<EmployeeEntity> employees = LangOps.ntimesMap(10, i->{
 			return createEmployee(department.getId(), i);
 		});
-		dbmEntityManager.saves(employees);
+		entityManager.persist(employees);a
 		return department;
 	}
 	

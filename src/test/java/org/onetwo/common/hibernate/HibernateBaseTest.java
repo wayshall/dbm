@@ -2,16 +2,15 @@ package org.onetwo.common.hibernate;
 
 import java.util.Properties;
 
-import javax.annotation.Resource;
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
 import org.junit.Test;
-import org.onetwo.common.dbm.PackageInfo;
+import org.onetwo.common.dbm.model.dao.CompanyDao;
 import org.onetwo.common.ds.DatasourceFactoryBean;
 import org.onetwo.common.hibernate.HibernateBaseTest.HibernateTestConfig;
+import org.onetwo.common.hibernate.dao.CompanyJpaRepository;
 import org.onetwo.common.spring.config.JFishProfile;
-import org.onetwo.common.spring.config.JFishProfiles;
 import org.onetwo.common.spring.config.JFishPropertyPlaceholder;
 import org.onetwo.common.spring.test.SpringBaseJUnitTestCase;
 import org.onetwo.dbm.spring.EnableDbmRepository;
@@ -48,9 +47,10 @@ public class HibernateBaseTest extends SpringBaseJUnitTestCase {
 	@Configuration
 	@JFishProfile
 	@EnableTransactionManagement
-	@EnableJpaRepositories(basePackageClasses=PackageInfo.class)
+	@EnableJpaRepositories(basePackageClasses=CompanyJpaRepository.class)
 	@EnableDbmRepository(value="org.onetwo.common.hibernate.dao", 
-						defaultQueryProvideManagerClass=HibernateJPAQueryProvideManager.class,
+						defaultQueryProviderClass=HibernateJPAQueryProvideManager.class,
+						basePackageClasses=CompanyDao.class,
 						autoRegister=true)
 	public static class HibernateTestConfig {
 

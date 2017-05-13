@@ -94,9 +94,12 @@ public class RichModelAndQueryObjectScanTrigger implements BeanFactoryPostProces
 			}
 			EnableDbmRepository enableDbmRepository = beanClass.getAnnotation(EnableDbmRepository.class);
 			if(enableDbmRepository!=null){
-				register.setDefaultQueryProvideManagerClass(enableDbmRepository.defaultQueryProvideManagerClass());
+				register.setDefaultQueryProvideManagerClass(enableDbmRepository.defaultQueryProviderClass());
 				register.setRegisterDefaultQueryProvideManager(enableDbmRepository.autoRegister());
 				Stream.of(enableDbmRepository.value()).forEach(p->packs.add(p));
+				Stream.of(enableDbmRepository.basePackageClasses()).forEach(p->{
+					packs.add(p.getPackage().getName());
+				});
 			}
 		});
 

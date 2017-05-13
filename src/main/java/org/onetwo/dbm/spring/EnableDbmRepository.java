@@ -15,7 +15,7 @@ import org.springframework.context.annotation.Import;
 @Import({DynamicQueryObjectRegisterConfigration.class})
 public @interface EnableDbmRepository {
 	
-	Class<? extends QueryProvideManager> defaultQueryProvideManagerClass() default QueryProvideManager.class;
+	Class<? extends QueryProvideManager> defaultQueryProviderClass() default QueryProvideManager.class;
 	
 	boolean autoRegister() default false;
 	
@@ -25,4 +25,6 @@ public @interface EnableDbmRepository {
 	 * @return
 	 */
 	String[] value() default {};
+	
+	Class<?>[] basePackageClasses() default {};
 }
