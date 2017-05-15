@@ -49,7 +49,7 @@ public class HibernateJPAQueryProvideManager implements QueryProvideManager {
 	public QueryWrapper createQuery(CreateQueryCmd createQueryCmd) {
 		if(createQueryCmd.isNativeSql()){
 			SQLQuery sqlQuery = entityManager.createNativeQuery(createQueryCmd.getSql()).unwrap(SQLQuery.class);
-			sqlQuery.setResultTransformer(new HibernateRowToBeanTransformer(createQueryCmd.getMappedClass()));
+			sqlQuery.setResultTransformer(new HibernateRowToBeanTransformer(createQueryCmd.getMappedClass()));a
 			HibernateDbmQueryWrapper wrapper = new HibernateDbmQueryWrapper(sqlQuery);
 			return wrapper;
 		}else{
@@ -91,6 +91,7 @@ public class HibernateJPAQueryProvideManager implements QueryProvideManager {
 		@Override
 		protected QueryWrapper newQueryWrapperInstance(NamedQueryInfo nameInfo, boolean count, NamedQueryInvokeContext invokeContext) {
 			return new DbmFileQueryWrapperImpl(nameInfo, count, invokeContext);
+			return new HiberanteFileQueryWrapperImpl(nameInfo, count, invokeContext);
 		}
 		
 	}
