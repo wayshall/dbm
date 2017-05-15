@@ -11,10 +11,10 @@ import org.onetwo.common.db.filequery.ParsedSqlUtils.ParsedSqlWrapper;
 import org.onetwo.common.db.filequery.ParsedSqlUtils.ParsedSqlWrapper.SqlParamterMeta;
 import org.onetwo.common.db.filequery.func.SqlFunctionDialet;
 import org.onetwo.common.db.spi.CreateQueryCmd;
-import org.onetwo.common.db.spi.NamedQueryInfo;
-import org.onetwo.common.db.spi.QueryWrapper;
 import org.onetwo.common.db.spi.FileNamedSqlGenerator;
+import org.onetwo.common.db.spi.NamedQueryInfo;
 import org.onetwo.common.db.spi.QueryProvideManager;
+import org.onetwo.common.db.spi.QueryWrapper;
 import org.onetwo.common.db.spi.SqlParamterPostfixFunctionRegistry;
 import org.onetwo.common.db.sql.QueryOrderByable;
 import org.onetwo.common.db.sqlext.ExtQueryUtils;
@@ -24,10 +24,15 @@ import org.onetwo.common.utils.ArrayUtils;
 import org.onetwo.common.utils.Assert;
 import org.onetwo.common.utils.CUtils;
 import org.onetwo.common.utils.LangUtils;
-import org.onetwo.dbm.core.spi.DbmEntityManager;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.jdbc.core.RowMapper;
 
+/***
+ * 基于文件命名查询的QueryWrapper
+ * 对基于文件创建和orm相关QueryWrapper的过程的包装
+ * @author wayshall
+ *
+ */
 public class DefaultFileQueryWrapper extends AbstractQueryWrapper implements QueryOrderByable {
 
 //	private DynamicQuery query;
@@ -171,6 +176,7 @@ public class DefaultFileQueryWrapper extends AbstractQueryWrapper implements Que
 		return this;
 	}
 
+	@Override
 	public QueryWrapper setParameters(Map<String, Object> params) {
 		for(Entry<String, Object> entry : params.entrySet()){
 			setParameter(entry.getKey(), entry.getValue());
@@ -270,8 +276,9 @@ public class DefaultFileQueryWrapper extends AbstractQueryWrapper implements Que
 		return (T)dataQuery;
 	}
 	@Override
-	public QueryWrapper setQueryConfig(Map<String, Object> configs) {
-		return null;
+	public QueryWrapper setQueryConfig(Map<Object, Object> configs) {
+		setQueryAttributes(params);
+		return this;
 	}
 
 	/*public void setParserContext(ParserContext parserContext) {
@@ -281,13 +288,6 @@ public class DefaultFileQueryWrapper extends AbstractQueryWrapper implements Que
 	final public ParserContext getParserContext() {
 		return parserContext;
 	}*/
-	
-	public Optional<DbmEntityManager> getDbmEntityManager(){
-		if(DbmEntityManager.class.isInstance(baseEntityManager)){
-			return Optional.of((DbmEntityManager)baseEntityManager);
-		}
-		return Optional.empty();
-	}
 
 	@Override
 	public void setRowMapper(RowMapper<?> rowMapper) {

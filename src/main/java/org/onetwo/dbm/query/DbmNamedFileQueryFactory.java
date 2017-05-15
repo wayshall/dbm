@@ -35,11 +35,15 @@ public class DbmNamedFileQueryFactory extends AbstractFileNamedQueryFactory {
 
 		invokeContext.setParser(getSqlFileManager().getSqlStatmentParser());
 		NamedQueryInfo nameInfo = getNamedQueryInfo(invokeContext);
-		DbmFileQueryWrapperImpl jq = new DbmFileQueryWrapperImpl(invokeContext.getQueryProvideManager(), nameInfo, count, invokeContext);
+		QueryWrapper jq = newQueryWrapperInstance(nameInfo, count, invokeContext);
 
-		jq.setQueryAttributes(invokeContext.getParsedParams());
+		jq.setQueryConfig(invokeContext.getParsedParams());
 //		jq.setRowMapper(rowMapper);
 		return jq.getRawQuery(QueryWrapper.class);
+	}
+	
+	protected QueryWrapper newQueryWrapperInstance(NamedQueryInfo nameInfo, boolean count, NamedQueryInvokeContext invokeContext) {
+		return new DbmFileQueryWrapperImpl(nameInfo, count, invokeContext);
 	}
 	
 	@Override

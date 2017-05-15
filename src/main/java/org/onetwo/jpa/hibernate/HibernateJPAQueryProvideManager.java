@@ -7,14 +7,17 @@ import javax.persistence.PersistenceContext;
 import javax.sql.DataSource;
 
 import org.hibernate.SQLQuery;
+import org.onetwo.common.db.dquery.NamedQueryInvokeContext;
 import org.onetwo.common.db.filequery.DbmNamedSqlFileManager;
 import org.onetwo.common.db.filequery.SqlParamterPostfixFunctions;
 import org.onetwo.common.db.filequery.func.SqlFunctionDialet;
 import org.onetwo.common.db.spi.CreateQueryCmd;
 import org.onetwo.common.db.spi.FileNamedQueryFactory;
+import org.onetwo.common.db.spi.NamedQueryInfo;
 import org.onetwo.common.db.spi.QueryProvideManager;
 import org.onetwo.common.db.spi.QueryWrapper;
 import org.onetwo.common.db.spi.SqlParamterPostfixFunctionRegistry;
+import org.onetwo.dbm.query.DbmFileQueryWrapperImpl;
 import org.onetwo.dbm.query.DbmNamedFileQueryFactory;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -39,7 +42,7 @@ public class HibernateJPAQueryProvideManager implements QueryProvideManager {
 		this.dataSource = dataSource;
 		this.jdbcOperations = new NamedParameterJdbcTemplate(dataSource);
 		DbmNamedSqlFileManager sqlFileManager = DbmNamedSqlFileManager.createNamedSqlFileManager(true);
-		dbmNamedFileQueryFactory = new DbmNamedFileQueryFactory(sqlFileManager);
+		dbmNamedFileQueryFactory = new HibernateNamedFileQueryFactory(sqlFileManager);
 	}
 
 	@Override
@@ -79,4 +82,16 @@ public class HibernateJPAQueryProvideManager implements QueryProvideManager {
 		return Optional.empty();
 	}
 
+	static class HibernateNamedFileQueryFactory extends DbmNamedFileQueryFactory {
+
+		public HibernateNamedFileQueryFactory(DbmNamedSqlFileManager sqlFileManager) {
+			super(sqlFileManager);
+		}
+
+		@Override
+		protected QueryWrapper newQueryWrapperInstance(NamedQueryInfo nameInfo, boolean count, NamedQueryInvokeContext invokeContext) {
+			return new DbmFileQueryWrapperImpl(nameInfo, count, invokeContext);
+		}
+		
+	}
 }

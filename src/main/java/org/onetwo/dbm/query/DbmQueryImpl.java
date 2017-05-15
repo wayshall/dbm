@@ -113,8 +113,8 @@ public class DbmQueryImpl implements DbmQuery {
 	}
 	
 	public <T> List<T> getResultList(RowMapper<T> rowMapper){
-		String fname = this.getClass().getSimpleName()+".getResultList";
-		UtilTimerStack.push(fname);
+//		String fname = this.getClass().getSimpleName()+".getResultList";
+//		UtilTimerStack.push(fname);
 		
 		List<T> result = null;
 		String sql = getSqlString();
@@ -126,7 +126,7 @@ public class DbmQueryImpl implements DbmQuery {
 			result = this.dbmSessionImplementor.findList(params);
 		}
 		
-		UtilTimerStack.pop(fname);
+//		UtilTimerStack.pop(fname);
 		return result;
 	}
 	

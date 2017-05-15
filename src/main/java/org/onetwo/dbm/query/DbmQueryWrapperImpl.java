@@ -91,11 +91,6 @@ public class DbmQueryWrapperImpl extends AbstractQueryWrapper {
 		return clazz.cast(dbmQuery);
 	}
 
-	@Override
-	public QueryWrapper setQueryConfig(Map<String, Object> configs) {
-		return this;
-	}
-
 	public DbmQuery getJfishQuery() {
 		return dbmQuery;
 	}

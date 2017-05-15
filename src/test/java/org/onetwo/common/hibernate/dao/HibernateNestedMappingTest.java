@@ -38,8 +38,18 @@ public class HibernateNestedMappingTest extends HibernateBaseTest {
 	EntityManager entityManager;
 	@Autowired
 	CompanyJpaRepository companyJpaRepository;
+	@Autowired
+	DepartmentJpaRepository departmentJpaRepository;
+	@Autowired
+	EmployeeJpaRepository employeeJpaRepository;
 	
 	public void clear(){
+		/*dbmEntityManager.removeAll(EmployeeEntity.class);
+		dbmEntityManager.removeAll(DepartmentEntity.class);
+		dbmEntityManager.removeAll(CompanyEntity.class);*/
+		employeeJpaRepository.deleteAll();
+		departmentJpaRepository.deleteAll();
+		companyJpaRepository.deleteAll();
 	}
 	
 	@Test
@@ -196,7 +206,10 @@ public class HibernateNestedMappingTest extends HibernateBaseTest {
 		List<EmployeeEntity> employees = LangOps.ntimesMap(10, i->{
 			return createEmployee(department.getId(), i);
 		});
-		entityManager.persist(employees);a
+//		entityManager.persist(employees);
+		employees.forEach(e->{
+			entityManager.persist(e);
+		});
 		return department;
 	}
 	

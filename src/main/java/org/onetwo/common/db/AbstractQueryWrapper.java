@@ -53,4 +53,8 @@ abstract public class AbstractQueryWrapper implements QueryWrapper{
 		return this;
 	}
 
+	@Override
+	public QueryWrapper setQueryConfig(Map<Object, Object> configs) {
+		return this;
+	}
 }

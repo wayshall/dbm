@@ -18,9 +18,9 @@ import com.google.common.collect.Maps;
  * <br/>
  */
 @SuppressWarnings({ "rawtypes", "serial" })
-public class HibernateNestedBeanMapper<T> extends AbstractNestedBeanMapper<T> implements ResultTransformer {
+public class HibernateNestedBeanTransformer<T> extends AbstractNestedBeanMapper<T> implements ResultTransformer {
 
-	public HibernateNestedBeanMapper(Class<T> mappedClass, DbmResultMapping dbmResultMapping) {
+	public HibernateNestedBeanTransformer(Class<T> mappedClass, DbmResultMapping dbmResultMapping) {
 		super(mappedClass, dbmResultMapping);
 	}
 

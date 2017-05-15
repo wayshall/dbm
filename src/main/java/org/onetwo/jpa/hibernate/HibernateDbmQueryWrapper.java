@@ -75,7 +75,7 @@ public class HibernateDbmQueryWrapper extends AbstractQueryWrapper implements Qu
 	}
 
 	@Override
-	public QueryWrapper setQueryConfig(Map<String, Object> configs) {
+	public QueryWrapper setQueryConfig(Map<Object, Object> configs) {
 		logger.info("ingore set query config");
 		return this;
 	}

@@ -8,6 +8,7 @@ import org.onetwo.common.utils.Page;
 
 /****
  * 基于文件的命名查询工厂
+ * 各个createQuery方法最终调用 {@linkplain QueryProvideManager#createQuery}
  * @author wayshall
  *
  */

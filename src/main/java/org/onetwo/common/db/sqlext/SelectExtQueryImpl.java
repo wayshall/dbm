@@ -36,7 +36,7 @@ public class SelectExtQueryImpl extends AbstractExtQuery implements SelectExtQue
 
 	private String countValue;
 	
-	private Map<String, Object> queryConfig;
+	private Map<Object, Object> queryConfig;
 	
 	/****
 	 * 是否缓存查询对象，避免重复解释，暂时没实现
@@ -525,7 +525,7 @@ public class SelectExtQueryImpl extends AbstractExtQuery implements SelectExtQue
 		this.subQuery = subQuery;
 	}
 
-	public Map<String, Object> getQueryConfig() {
+	public Map<Object, Object> getQueryConfig() {
 		if(queryConfig==null){
 			return Collections.EMPTY_MAP;
 		}

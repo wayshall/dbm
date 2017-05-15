@@ -21,7 +21,6 @@ import org.onetwo.dbm.core.spi.DbmTransaction;
 import org.onetwo.dbm.dialet.DBDialect;
 import org.onetwo.dbm.dialet.DefaultDatabaseDialetManager;
 import org.onetwo.dbm.exception.DbmException;
-import org.onetwo.dbm.jdbc.mapper.JdbcDaoRowMapperFactory;
 import org.onetwo.dbm.jdbc.mapper.RowMapperFactory;
 import org.onetwo.dbm.mapping.DbmConfig;
 import org.onetwo.dbm.mapping.MappedEntryManager;
@@ -130,9 +129,7 @@ public class DbmSessionFactoryImpl implements InitializingBean, DbmSessionFactor
 			mappedEntryManager.scanPackages(packagesToScan);
 		}
 
-		if(this.rowMapperFactory==null){
-			this.rowMapperFactory = new JdbcDaoRowMapperFactory();
-		}
+		Assert.notNull(rowMapperFactory);
 		this.interceptorManager = serviceRegistry.getInterceptorManager();
 	}
 	

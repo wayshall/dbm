@@ -35,7 +35,7 @@ public interface QueryWrapper {
 	
 	public <T> T getRawQuery(Class<T> clazz);
 	
-	public QueryWrapper setQueryConfig(Map<String, Object> configs);
+	public QueryWrapper setQueryConfig(Map<Object, Object> configs);
 	
 //	public DataQuery setFlushMode(FlushModeType flushMode);
 	
@@ -44,4 +44,5 @@ public interface QueryWrapper {
 	public void setCacheable(boolean cacheable);*/
 	
 	public void setRowMapper(RowMapper<?> rowMapper);
+
 }

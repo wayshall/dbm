@@ -13,7 +13,7 @@ public interface SelectExtQuery extends ExtQuery {
 	public void setMaxResults(Integer maxResults);
 	
 //	public boolean isIgnoreQuery();
-	public Map<String, Object> getQueryConfig();
+	public Map<Object, Object> getQueryConfig();
 	public String getCountSql();
 	
 
