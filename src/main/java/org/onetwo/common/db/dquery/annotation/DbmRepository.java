@@ -20,8 +20,8 @@ public @interface DbmRepository {
 	 * QueryProvideManager beanName
 	 * @return
 	 */
-	String provideManager() default "";
-	Class<? extends QueryProvideManager> provideManagerClass() default QueryProvideManager.class;
+	String queryProviderName() default "";
+	Class<? extends QueryProvideManager> queryProviderClass() default QueryProvideManager.class;
 	String dataSource() default "";
 	
 	

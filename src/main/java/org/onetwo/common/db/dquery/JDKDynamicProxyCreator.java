@@ -60,7 +60,7 @@ public class JDKDynamicProxyCreator implements InitializingBean, ApplicationCont
 			return Optional.of(attrs);*/
 			return Optional.empty();
 		}
-		DbmRepositoryAttrs attrs = new DbmRepositoryAttrs(dbmRepository.provideManager(), dbmRepository.provideManagerClass(), dbmRepository.dataSource());
+		DbmRepositoryAttrs attrs = new DbmRepositoryAttrs(dbmRepository.queryProviderName(), dbmRepository.queryProviderClass(), dbmRepository.dataSource());
 		return Optional.of(attrs);
 	}
 

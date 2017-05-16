@@ -15,6 +15,7 @@
 - [CrudEntityManager接口](https://github.com/wayshall/dbm#crudentitymanager接口)
 - [DbmRepository查询接口](https://github.com/wayshall/dbm#dbmrepository查询接口)
 - [DbmRepository查询接口的多数据源支持](https://github.com/wayshall/dbm#dbmrepository查询接口的多数据源支持)
+- [DbmRepository查询接口对其它orm框架的兼容](https://github.com/wayshall/dbm#DbmRepository查询接口对其它orm框架的兼容)
 - [查询映射](https://github.com/wayshall/dbm#查询映射)
 - [复杂的嵌套查询映射](https://github.com/wayshall/dbm#复杂的嵌套查询映射)
 - [批量插入](https://github.com/wayshall/dbm#批量插入)
@@ -479,6 +480,20 @@ public interface Datasource1Dao {
 public interface Datasource2Dao {
 }
 ```
+
+## DbmRepository查询接口对其它orm框架的兼容
+其它orm框架可以通过实现QueryProvideManager接口，然后通过@DbmRepository注解的queryProviderName或queryProviderClass属性指定特定的QueryProvideManager实现类。从而让DbmRepository查询接口使用其它orm框架，避免不同orm框架共存带来的一些副作用。   
+
+dbm内置支持了JPA（Hibernate）实现的QueryProvideManager。   
+但一个一个地把DbmRepository接口设置成相同的实现的QueryProvideManager实现的是不明智，只是没有意义的重复劳动，所以dbm另外提供了@EnableDbmRepository注解，单独激活和配置DbmRepository默认的QueryProvideManager。
+```Java
+@EnableDbmRepository(value="org.onetwo.common.hibernate.dao", 
+						defaultQueryProviderClass=HibernateJPAQueryProvideManager.class,
+						autoRegister=true)
+	public static class HibernateTestConfig {
+}
+```
+
 
 ## 查询映射
 DbmRepository的查询映射无需任何xml配置，只需要遵循规则即可：   

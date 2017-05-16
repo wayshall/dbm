@@ -65,7 +65,9 @@ public class AnnotationScanBasicDynamicQueryObjectRegister implements DynamicQue
 	}
 
 	public boolean registerQueryBeans() {
-		if(registerDefaultQueryProvideManager && !this.defaultQueryProvideManagerClass.isInterface()){
+		if(registerDefaultQueryProvideManager && 
+				!this.defaultQueryProvideManagerClass.isInterface() && 
+				!registry.containsBeanDefinition(defaultQueryProvideManagerClass.getName())){
 			BeanDefinition beandef = BeanDefinitionBuilder.rootBeanDefinition(defaultQueryProvideManagerClass)
 					.setScope(BeanDefinition.SCOPE_SINGLETON)
 					.getBeanDefinition();
