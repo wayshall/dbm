@@ -5,17 +5,14 @@ import java.util.Properties;
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
-import org.junit.Test;
 import org.onetwo.common.dbm.model.dao.CompanyDao;
 import org.onetwo.common.ds.DatasourceFactoryBean;
 import org.onetwo.common.hibernate.HibernateBaseTest.HibernateTestConfig;
 import org.onetwo.common.hibernate.dao.CompanyJpaRepository;
 import org.onetwo.common.spring.config.JFishProfile;
-import org.onetwo.common.spring.config.JFishPropertyPlaceholder;
 import org.onetwo.common.spring.test.SpringBaseJUnitTestCase;
 import org.onetwo.dbm.spring.EnableDbmRepository;
 import org.onetwo.jpa.hibernate.HibernateJPAQueryProvideManager;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor;
@@ -38,11 +35,6 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @ContextConfiguration(loader=AnnotationConfigContextLoader.class, classes=HibernateTestConfig.class)
 @ActiveProfiles("dev")
 public class HibernateBaseTest extends SpringBaseJUnitTestCase {
-	
-	@Test
-	public void testEmpty(){
-	}
-	
 	
 	@Configuration
 	@JFishProfile
