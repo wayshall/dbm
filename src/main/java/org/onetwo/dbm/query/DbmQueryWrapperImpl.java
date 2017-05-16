@@ -100,4 +100,9 @@ public class DbmQueryWrapperImpl extends AbstractQueryWrapper {
 		this.dbmQuery.setRowMapper(rowMapper);
 	}
 
+	@Override
+	public <T> T unwarp(Class<T> clazz) {
+		return clazz.cast(dbmQuery);
+	}
+
 }

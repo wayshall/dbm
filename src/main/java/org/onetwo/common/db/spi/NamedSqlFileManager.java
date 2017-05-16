@@ -3,6 +3,7 @@ package org.onetwo.common.db.spi;
 import java.util.Collection;
 
 import org.onetwo.common.propconf.ResourceAdapter;
+import org.onetwo.common.spring.ftl.TemplateParser;
 
 public interface NamedSqlFileManager {
 
@@ -16,4 +17,7 @@ public interface NamedSqlFileManager {
 	public NamedQueryFile getNamespaceProperties(String namespace);
 	public boolean containsNamespace(String namespace);
 	public Collection<NamedQueryFile> getAllNamespaceProperties();
+	
+	public TemplateParser getSqlStatmentParser();
+	
 }

@@ -7,6 +7,7 @@ import java.util.Optional;
 
 import org.onetwo.common.db.AbstractQueryWrapper;
 import org.onetwo.common.db.ParsedSqlContext;
+import org.onetwo.common.db.dquery.NamedQueryInvokeContext;
 import org.onetwo.common.db.filequery.ParsedSqlUtils.ParsedSqlWrapper;
 import org.onetwo.common.db.filequery.ParsedSqlUtils.ParsedSqlWrapper.SqlParamterMeta;
 import org.onetwo.common.db.filequery.func.SqlFunctionDialet;
@@ -27,6 +28,8 @@ import org.onetwo.common.utils.LangUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.jdbc.core.RowMapper;
 
+import com.google.common.collect.Maps;
+
 /***
  * 基于文件命名查询的QueryWrapper
  * 对基于文件创建和orm相关QueryWrapper的过程的包装
@@ -35,10 +38,9 @@ import org.springframework.jdbc.core.RowMapper;
  */
 public class DefaultFileQueryWrapper extends AbstractQueryWrapper implements QueryOrderByable {
 
-//	private DynamicQuery query;
-//	private JFishNamedFileQueryInfo info;
-	protected QueryProvideManager baseEntityManager;
-	private QueryWrapper dataQuery;
+	final protected NamedQueryInvokeContext invokeContext;
+	protected QueryProvideManager queryProvideManager;
+	protected QueryWrapper dataQuery;
 	
 	protected boolean countQuery;
 
@@ -46,7 +48,7 @@ public class DefaultFileQueryWrapper extends AbstractQueryWrapper implements Que
 	private Map<Object, Object> params = LangUtils.newHashMap();
 	private int firstRecord = -1;
 	private int maxRecords;
-	private Class<?> resultClass;
+	protected Class<?> resultClass;
 	
 	protected NamedQueryInfo info;
 	private TemplateParser parser;
@@ -55,18 +57,18 @@ public class DefaultFileQueryWrapper extends AbstractQueryWrapper implements Que
 	private String[] ascFields;
 	private String[] desFields;
 
-	public DefaultFileQueryWrapper(QueryProvideManager baseEntityManager, NamedQueryInfo info, boolean count, TemplateParser parser) {
-		Assert.notNull(baseEntityManager);
-		this.baseEntityManager = baseEntityManager;
+	public DefaultFileQueryWrapper(NamedQueryInvokeContext invokeContext, boolean count) {
+		Assert.notNull(invokeContext);
+		Assert.notNull(invokeContext.getQueryProvideManager());
+		this.invokeContext = invokeContext;
+		this.queryProvideManager = invokeContext.getQueryProvideManager();
 		this.countQuery = count;
-		this.parser = parser;
+		this.parser = queryProvideManager.getFileNamedQueryManager().getNamedSqlFileManager().getSqlStatmentParser();
 		
-		this.info = info;
-//		this.resultClass = countQuery?Long.class:info.getMappedEntityClass();
+		this.info = invokeContext.getNamedQueryInfo();
+		this.resultClass = invokeContext.getDynamicMethod().getComponentClass();
 		if(countQuery){
-			this.resultClass = LangUtils.isIntegralType(info.getMappedEntityClass())?info.getMappedEntityClass():Long.class;
-		}else{
-			this.resultClass = info.getMappedEntityClass();
+			this.resultClass = LangUtils.isIntegralType(resultClass)?resultClass:Long.class;
 		}
 		this.parserContext = ParserContext.create(info);
 	}
@@ -76,58 +78,69 @@ public class DefaultFileQueryWrapper extends AbstractQueryWrapper implements Que
 
 	
 	protected QueryWrapper createDataQuery(CreateQueryCmd createQueryCmd){
-		QueryWrapper dataQuery = this.baseEntityManager.createQuery(createQueryCmd);
+		QueryWrapper dataQuery = this.queryProvideManager.createQuery(createQueryCmd);
 		return dataQuery;
+	}
+	
+	protected ParsedSqlContext createParsedSqlContext(){
+		Optional<SqlFunctionDialet> sqlFunction = queryProvideManager.getSqlFunctionDialet();
+		FileNamedSqlGenerator sqlGen = new DefaultFileNamedSqlGenerator(countQuery, parser, parserContext, 
+																		resultClass, ascFields, desFields, params, sqlFunction);
+		ParsedSqlContext sqlAndValues = sqlGen.generatSql();
+		return sqlAndValues;
 	}
 	
 	protected QueryWrapper createDataQueryIfNecessarry(){
 		if(dataQuery!=null){
 			return dataQuery;
 		}
-		Optional<SqlFunctionDialet> sqlFunction = baseEntityManager.getSqlFunctionDialet();
-		FileNamedSqlGenerator sqlGen = new DefaultFileNamedSqlGenerator(countQuery, parser, parserContext, 
-																		resultClass, ascFields, desFields, params, sqlFunction);
-		ParsedSqlContext sqlAndValues = sqlGen.generatSql();
-		if(sqlAndValues.isListValue()){
-			CreateQueryCmd createQueryCmd = new CreateQueryCmd(sqlAndValues.getParsedSql(), resultClass, info.isNativeSql());
-			QueryWrapper dataQuery = createDataQuery(createQueryCmd);
-			int position = 0;
-			for(Object value : sqlAndValues.asList()){
-				dataQuery.setParameter(position++, value);
-			}
-			setLimitResult();
-			this.dataQuery = dataQuery;
-			return dataQuery;
-		}
 
-		String parsedSql = sqlAndValues.getParsedSql();
-		CreateQueryCmd createQueryCmd = new CreateQueryCmd(parsedSql, resultClass, info.isNativeSql());
+		//add interceptor for sqlAndValues?
+		ParsedSqlContext sqlAndValues = createParsedSqlContext();
+		
+		CreateQueryCmd createQueryCmd = new CreateQueryCmd(sqlAndValues.getParsedSql(), resultClass, info.isNativeSql());
 		QueryWrapper dataQuery = createDataQuery(createQueryCmd);
 		
-		SqlParamterPostfixFunctionRegistry sqlFunc = baseEntityManager.getSqlParamterPostfixFunctionRegistry();
-		ParsedSqlWrapper sqlWrapper = ParsedSqlUtils.parseSql(parsedSql, sqlFunc);
+		if(sqlAndValues.isListValue()){
+			doIndexParameters(dataQuery, sqlAndValues.asList());
+		}else{
+			Map<String, Object> params = processNamedParameters(sqlAndValues);
+			dataQuery.setParameters(params);
+			setLimitResult(dataQuery);
+		}
+
+		this.dataQuery = dataQuery;
+		return dataQuery;
+	}
+	
+	protected void doIndexParameters(QueryWrapper dataQuery, List<Object> values){
+		int position = 0;
+		for(Object value : values){
+			dataQuery.setParameter(position++, value);
+		}
+		setLimitResult(dataQuery);
+	}
+	
+	protected Map<String, Object> processNamedParameters(ParsedSqlContext sqlAndValues){
+		Map<String, Object> params = Maps.newLinkedHashMap();
+		SqlParamterPostfixFunctionRegistry sqlFunc = queryProvideManager.getSqlParamterPostfixFunctionRegistry();
+		ParsedSqlWrapper sqlWrapper = ParsedSqlUtils.parseSql(sqlAndValues.getParsedSql(), sqlFunc);
 		BeanWrapper paramBean = SpringUtils.newBeanMapWrapper(sqlAndValues.asMap());
 		for(SqlParamterMeta parameter : sqlWrapper.getParameters()){
 			if(!paramBean.isReadableProperty(parameter.getProperty()))
 				continue;
-			/*Object value = paramBean.getPropertyValue(parameterName);
-			if(parameter.hasFunction()){
-				value = ReflectUtils.invokeMethod(parameter.getFunction(), SqlParamterFunctions.getInstance(), value);
-			}*/
 			Object pvalue = parameter.getParamterValue(paramBean);
 			if(pvalue!=null && info.getQueryConfig().isLikeQueryField(parameter.getName())){
 				pvalue = ExtQueryUtils.getLikeString(pvalue.toString());
 			}
 			//wrap pvalue
-			dataQuery.setParameter(parameter.getName(), pvalue);
+//			dataQuery.setParameter(parameter.getName(), pvalue);
+			params.put(parameter.getName(), pvalue);
 		}
-		
-		setLimitResult();
-
-		this.dataQuery = dataQuery;
-		return dataQuery;
+		return params;
 	}
-	private void setLimitResult(){
+	
+	final protected void setLimitResult(QueryWrapper dataQuery){
 		if(firstRecord>0)
 			dataQuery.setFirstResult(firstRecord);
 		if(maxRecords>0)
@@ -201,8 +214,9 @@ public class DefaultFileQueryWrapper extends AbstractQueryWrapper implements Que
 			}
 		}
 	}
-
-	private void processQueryKey(JNamedQueryKey qkey, Object value){
+	
+	@Override
+	protected void processQueryKey(JNamedQueryKey qkey, Object value){
 		switch (qkey) {
 			case ResultClass:
 				if(!countQuery)
@@ -221,10 +235,6 @@ public class DefaultFileQueryWrapper extends AbstractQueryWrapper implements Que
 			default:
 				break;
 		}
-		
-//		if(JNamedQueryKey.ResultClass.equals(qkey) && !countQuery){//count qyery 忽略
-//			setResultClass((Class<?>)value);
-//		}
 	}
 	
 	public QueryWrapper setParameters(List<Object> params) {
@@ -277,7 +287,7 @@ public class DefaultFileQueryWrapper extends AbstractQueryWrapper implements Que
 	}
 	@Override
 	public QueryWrapper setQueryConfig(Map<Object, Object> configs) {
-		setQueryAttributes(params);
+		setQueryAttributes(configs);
 		return this;
 	}
 
@@ -294,4 +304,8 @@ public class DefaultFileQueryWrapper extends AbstractQueryWrapper implements Que
 		this.dataQuery.setRowMapper(rowMapper);
 	}
 
+	@Override
+	public <T> T unwarp(Class<T> clazz) {
+		return clazz.cast(dataQuery);
+	}
 }

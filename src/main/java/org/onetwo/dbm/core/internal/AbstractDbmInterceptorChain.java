@@ -11,15 +11,15 @@ import java.util.function.Supplier;
 
 import org.onetwo.common.annotation.AnnotationUtils;
 import org.onetwo.common.db.dquery.DynamicMethod;
-import org.onetwo.common.exception.BaseException;
+import org.onetwo.common.db.dquery.MethodDynamicQueryInvokeContext;
 import org.onetwo.common.utils.LangUtils;
 import org.onetwo.dbm.annotation.DbmInterceptorFilter.InterceptorType;
 import org.onetwo.dbm.annotation.DbmJdbcOperationMark;
-import org.onetwo.dbm.core.DbmJdbcOperationType;
-import org.onetwo.dbm.core.DbmJdbcOperationType.DatabaseOperationType;
-import org.onetwo.dbm.core.spi.DbmInterceptor;
-import org.onetwo.dbm.core.spi.DbmInterceptorChain;
 import org.onetwo.dbm.exception.DbmException;
+import org.onetwo.dbm.jdbc.spi.DbmInterceptor;
+import org.onetwo.dbm.jdbc.spi.DbmInterceptorChain;
+import org.onetwo.dbm.jdbc.spi.DbmJdbcOperationType;
+import org.onetwo.dbm.jdbc.spi.DbmJdbcOperationType.DatabaseOperationType;
 import org.springframework.core.NestedRuntimeException;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 
@@ -203,11 +203,11 @@ abstract public class AbstractDbmInterceptorChain implements DbmInterceptorChain
 	
 	
 	public static class RepositoryDbmInterceptorChain extends AbstractDbmInterceptorChain {
-		private DynamicMethod dynamicMethod;
+		final private MethodDynamicQueryInvokeContext invokeContext;
 
-		public RepositoryDbmInterceptorChain(Object targetObject, DynamicMethod dynamicMethod, Object[] targetArgs, Collection<DbmInterceptor> interceptors, Supplier<Object> actualInvoker) {
-			super(targetObject, dynamicMethod.getMethod(), targetArgs, interceptors, actualInvoker);
-			this.dynamicMethod = dynamicMethod;
+		public RepositoryDbmInterceptorChain(Object targetObject, MethodDynamicQueryInvokeContext invokeContext, Collection<DbmInterceptor> interceptors, Supplier<Object> actualInvoker) {
+			super(targetObject, invokeContext.getDynamicMethod().getMethod(), invokeContext.getParameterValues(), interceptors, actualInvoker);
+			this.invokeContext = invokeContext;
 			this.setType(InterceptorType.REPOSITORY);
 		}
 
@@ -219,6 +219,7 @@ abstract public class AbstractDbmInterceptorChain implements DbmInterceptorChain
 		@Override
 		public Optional<DatabaseOperationType> getDatabaseOperationType() {
 			DatabaseOperationType type = null;
+			DynamicMethod dynamicMethod = invokeContext.getDynamicMethod();
 			if(dynamicMethod.isBatch()){
 				type = DatabaseOperationType.BATCH;
 			}else if(dynamicMethod.isExecuteUpdate()){

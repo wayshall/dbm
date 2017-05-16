@@ -106,7 +106,7 @@ public class JDKDynamicProxyCreator implements InitializingBean, ApplicationCont
 				if(dataSource==null){
 					throw new DbmException("no DataSource found: " + attrs.dataSource());
 				}
-				queryProvideManager = Dbms.obtainBaseEntityManager(dataSource);
+				queryProvideManager = (QueryProvideManager)Dbms.obtainBaseEntityManager(dataSource);
 			}else{
 				queryProvideManager = SpringUtils.getBean(applicationContext, defaultQueryProvideManagerClass);
 			}

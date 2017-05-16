@@ -1,4 +1,4 @@
-package org.onetwo.dbm.core;
+package org.onetwo.dbm.jdbc.spi;
 
 public enum DbmJdbcOperationType {
 

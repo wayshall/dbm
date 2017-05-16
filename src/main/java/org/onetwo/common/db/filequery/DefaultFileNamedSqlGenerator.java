@@ -88,10 +88,6 @@ public class DefaultFileNamedSqlGenerator implements FileNamedSqlGenerator {
 			
 		}else if(info.getParserType()==FileSqlParserType.TEMPLATE){
 			Assert.notNull(parserContext);
-/*			if(parserContext==null){
-				parserContext = ParserContext.create();
-			}
-*/			
 			this.sqlFunctionDialet.ifPresent(func->parserContext.put(ParserContext.CONTEXT_KEY, sqlFunctionDialet));
 			this.parserContext.putAll(params);
 			FragmentTemplateParser attrParser = new FragmentTemplateParser(parser, parserContext, info);

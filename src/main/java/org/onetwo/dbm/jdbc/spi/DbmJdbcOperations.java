@@ -7,7 +7,6 @@ import java.util.Map;
 import javax.sql.DataSource;
 
 import org.onetwo.dbm.annotation.DbmJdbcOperationMark;
-import org.onetwo.dbm.core.DbmJdbcOperationType;
 import org.onetwo.dbm.jdbc.AroundPreparedStatementExecute;
 import org.onetwo.dbm.jdbc.DbmNamedJdbcTemplate;
 import org.onetwo.dbm.jdbc.internal.SimpleArgsPreparedStatementCreator;

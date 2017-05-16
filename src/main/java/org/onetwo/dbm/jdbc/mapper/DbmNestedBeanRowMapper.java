@@ -21,12 +21,6 @@ public class DbmNestedBeanRowMapper<T> extends AbstractNestedBeanMapper<T> imple
 	public DbmNestedBeanRowMapper(JdbcResultSetGetter jdbcResultSetGetter, Class<T> mappedClass, DbmResultMapping dbmResultMapping) {
 		super(mappedClass, dbmResultMapping);
 		this.jdbcResultSetGetter = jdbcResultSetGetter;
-		if(jdbcResultSetGetter!=null){
-			ClassMapperContext context = new ClassMapperContext(dbmResultMapping);
-			ResultClassMapper resultClassMapper = new RootResultClassMapper(context, dbmResultMapping.idField(), dbmResultMapping.columnPrefix(), mappedClass);
-			resultClassMapper.initialize();
-			this.resultClassMapper = resultClassMapper;
-		}
 	}
 
 	@SuppressWarnings("unchecked")

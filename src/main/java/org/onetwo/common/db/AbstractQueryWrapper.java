@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.onetwo.common.db.filequery.JNamedQueryKey;
 import org.onetwo.common.db.spi.QueryWrapper;
 import org.onetwo.common.log.JFishLoggerFactory;
 import org.onetwo.common.utils.Assert;
@@ -34,6 +35,24 @@ abstract public class AbstractQueryWrapper implements QueryWrapper{
 	}
 	
 
+	public void setQueryAttributes(Map<Object, Object> params) {
+		Object key;
+		for(Entry<Object, Object> entry : params.entrySet()){
+			key = entry.getKey();
+			if(String.class.isInstance(key)){
+				setParameter(key.toString(), entry.getValue());
+			}else if(Integer.class.isInstance(key)){
+				setParameter((Integer)key, entry.getValue());
+			}else if(JNamedQueryKey.class.isInstance(key)){
+				this.processQueryKey((JNamedQueryKey)key, entry.getValue());
+			}
+		}
+	}
+	
+
+	protected void processQueryKey(JNamedQueryKey qkey, Object value){
+	}
+	
 	@Override
 	public QueryWrapper setParameters(List<Object> params) {
 		Assert.notNull(params);

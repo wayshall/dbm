@@ -54,8 +54,8 @@ public class HibernateBaseTest extends SpringBaseJUnitTestCase {
 						autoRegister=true)
 	public static class HibernateTestConfig {
 
-		@Autowired
-		private JFishPropertyPlaceholder configHolder;
+		/*@Autowired
+		private JFishPropertyPlaceholder configHolder;*/
 		
 		public HibernateTestConfig(){
 		}

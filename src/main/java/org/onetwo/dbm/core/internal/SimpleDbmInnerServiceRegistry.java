@@ -20,7 +20,6 @@ import org.onetwo.common.spring.SpringUtils;
 import org.onetwo.common.utils.LangUtils;
 import org.onetwo.dbm.core.Jsr303EntityValidator;
 import org.onetwo.dbm.core.spi.DbmInnerServiceRegistry;
-import org.onetwo.dbm.core.spi.DbmInterceptor;
 import org.onetwo.dbm.core.spi.DbmSessionFactory;
 import org.onetwo.dbm.dialet.AbstractDBDialect.DBMeta;
 import org.onetwo.dbm.dialet.DBDialect;
@@ -35,13 +34,13 @@ import org.onetwo.dbm.jdbc.internal.SpringJdbcResultSetGetter;
 import org.onetwo.dbm.jdbc.internal.SpringStatementParameterSetter;
 import org.onetwo.dbm.jdbc.mapper.DbmRowMapperFactory;
 import org.onetwo.dbm.jdbc.mapper.RowMapperFactory;
+import org.onetwo.dbm.jdbc.spi.DbmInterceptor;
 import org.onetwo.dbm.jdbc.spi.DbmJdbcOperations;
 import org.onetwo.dbm.jdbc.spi.JdbcResultSetGetter;
 import org.onetwo.dbm.jdbc.spi.JdbcStatementParameterSetter;
 import org.onetwo.dbm.jpa.JPAMappedEntryBuilder;
 import org.onetwo.dbm.jpa.JPASequenceNameManager;
 import org.onetwo.dbm.mapping.DbmConfig;
-import org.onetwo.dbm.mapping.DbmMappedEntryBuilder;
 import org.onetwo.dbm.mapping.DbmTypeMapping;
 import org.onetwo.dbm.mapping.DefaultDbmConfig;
 import org.onetwo.dbm.mapping.EntityValidator;
@@ -215,7 +214,7 @@ public class SimpleDbmInnerServiceRegistry implements DbmInnerServiceRegistry {
 			interceptors = Lists.newArrayList();
 		}
 		//add
-		if(this.interceptorManager==null){
+		this.interceptorManager = initializeComponent(interceptorManager, DbmInterceptorManager.class, ()->{
 			List<DbmInterceptor> interceptors = Lists.newArrayList();
 			interceptors.add(new SessionCacheInterceptor(context.getSessionFactory()));
 			if(this.interceptors!=null){
@@ -224,8 +223,9 @@ public class SimpleDbmInnerServiceRegistry implements DbmInnerServiceRegistry {
 			DbmInterceptorManager interceptorManager = new DbmInterceptorManager();
 			interceptorManager.setInterceptors(ImmutableList.copyOf(interceptors));
 			interceptorManager.afterPropertiesSet();
-			this.interceptorManager = interceptorManager;
-		}
+			return interceptorManager;
+		});
+		
 		if(this.dbmJdbcOperations==null){
 			DbmJdbcTemplate jdbcTemplate = new DbmJdbcTemplate(dataSource, getJdbcParameterSetter());
 //			jdbcTemplate.afterPropertiesSet();

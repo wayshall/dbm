@@ -5,9 +5,9 @@ import java.util.Collections;
 import java.util.Map;
 
 import org.onetwo.common.db.dquery.annotation.BatchObject;
+import org.onetwo.common.db.spi.NamedQueryInfo;
 import org.onetwo.common.db.spi.QueryProvideManager;
 import org.onetwo.common.exception.BaseException;
-import org.onetwo.common.spring.ftl.TemplateParser;
 import org.onetwo.common.utils.LangUtils;
 import org.springframework.util.Assert;
 
@@ -16,8 +16,9 @@ public class MethodDynamicQueryInvokeContext implements NamedQueryInvokeContext 
 	final private DynamicMethod dynamicMethod;
 	final private Object[] parameterValues;
 	final private Map<Object, Object> parsedParams;
-	private TemplateParser parser;
+//	private TemplateParser parser;
 	final private QueryProvideManager queryProvideManager;
+	private NamedQueryInfo namedQueryInfo;
 	
 	public MethodDynamicQueryInvokeContext(QueryProvideManager manager, DynamicMethod dynamicMethod, Object[] parameterValues) {
 		super();
@@ -28,6 +29,14 @@ public class MethodDynamicQueryInvokeContext implements NamedQueryInvokeContext 
 		Map<Object, Object> methodParams = dynamicMethod.toMapByArgs(parameterValues);
 		this.parsedParams = Collections.unmodifiableMap(methodParams);
 		this.queryProvideManager = manager;
+	}
+
+	public NamedQueryInfo getNamedQueryInfo() {
+		return namedQueryInfo;
+	}
+
+	void setNamedQueryInfo(NamedQueryInfo namedQueryInfo) {
+		this.namedQueryInfo = namedQueryInfo;
 	}
 
 	@Override
@@ -43,7 +52,6 @@ public class MethodDynamicQueryInvokeContext implements NamedQueryInvokeContext 
 			return queryName + "(" + dispatcher+")";
 		}
 		return queryName;
-//		return dynamicMethod.getQueryName();
 	}
 	
 	/*public boolean matcher(JFishNamedFileQueryInfo queryInfo){
@@ -82,12 +90,4 @@ public class MethodDynamicQueryInvokeContext implements NamedQueryInvokeContext 
 		return parsedParams;
 	}
 
-	public TemplateParser getParser() {
-		return parser;
-	}
-
-	public void setParser(TemplateParser parser) {
-		this.parser = parser;
-	}
-	
 }

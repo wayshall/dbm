@@ -18,10 +18,10 @@ import org.onetwo.common.utils.StringUtils;
 import org.onetwo.dbm.annotation.DbmInterceptorFilter.InterceptorType;
 import org.onetwo.dbm.core.internal.AbstractDbmInterceptorChain.JdbcDbmInterceptorChain;
 import org.onetwo.dbm.core.internal.DbmInterceptorManager;
-import org.onetwo.dbm.core.spi.DbmInterceptor;
-import org.onetwo.dbm.core.spi.DbmInterceptorChain;
 import org.onetwo.dbm.jdbc.internal.DbmJdbcTemplate;
 import org.onetwo.dbm.jdbc.internal.SimpleArgsPreparedStatementCreator;
+import org.onetwo.dbm.jdbc.spi.DbmInterceptor;
+import org.onetwo.dbm.jdbc.spi.DbmInterceptorChain;
 import org.onetwo.dbm.utils.DbmUtils;
 import org.slf4j.Logger;
 import org.springframework.jdbc.core.PreparedStatementSetter;
@@ -51,7 +51,7 @@ public class DbmJdbcOperationsProxy {
 	@Around("org.onetwo.dbm.jdbc.DbmPointcut.jdbcTemplate()")
 	public Object invoke(ProceedingJoinPoint pjp) throws Throwable{
 		MethodSignature ms = (MethodSignature)pjp.getSignature();
-		Collection<DbmInterceptor> inters = interceptorManager.getDbmSessionInterceptors(InterceptorType.JDBC);
+		Collection<DbmInterceptor> inters = interceptorManager.getInterceptors(InterceptorType.JDBC);
 		DbmInterceptorChain chain = new JdbcDbmInterceptorChain(dbmJdbcTemplate, ms.getMethod(), pjp.getArgs(), inters);
 		return chain.invoke();
 	}

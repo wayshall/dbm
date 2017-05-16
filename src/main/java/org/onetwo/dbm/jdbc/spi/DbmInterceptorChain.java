@@ -1,11 +1,10 @@
-package org.onetwo.dbm.core.spi;
+package org.onetwo.dbm.jdbc.spi;
 
 import java.lang.reflect.Method;
 import java.util.Optional;
 
 import org.onetwo.dbm.annotation.DbmInterceptorFilter.InterceptorType;
-import org.onetwo.dbm.core.DbmJdbcOperationType;
-import org.onetwo.dbm.core.DbmJdbcOperationType.DatabaseOperationType;
+import org.onetwo.dbm.jdbc.spi.DbmJdbcOperationType.DatabaseOperationType;
 
 public interface DbmInterceptorChain {
 	

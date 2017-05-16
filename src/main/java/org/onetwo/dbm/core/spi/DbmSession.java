@@ -9,8 +9,8 @@ import org.onetwo.common.db.DbmQueryValue;
 import org.onetwo.common.db.sql.DynamicQuery;
 import org.onetwo.common.utils.Page;
 import org.onetwo.dbm.annotation.DbmJdbcOperationMark;
-import org.onetwo.dbm.core.DbmJdbcOperationType;
 import org.onetwo.dbm.core.internal.SessionTransactionType;
+import org.onetwo.dbm.jdbc.spi.DbmJdbcOperationType;
 import org.onetwo.dbm.query.DbmQuery;
 import org.springframework.transaction.TransactionDefinition;
 

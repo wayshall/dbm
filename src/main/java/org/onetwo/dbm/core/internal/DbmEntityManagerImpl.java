@@ -2,6 +2,7 @@ package org.onetwo.dbm.core.internal;
 
 import java.io.Serializable;
 import java.sql.SQLException;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -19,6 +20,7 @@ import org.onetwo.common.db.filequery.DbmNamedSqlFileManager;
 import org.onetwo.common.db.filequery.func.SqlFunctionDialet;
 import org.onetwo.common.db.spi.CreateQueryCmd;
 import org.onetwo.common.db.spi.FileNamedQueryFactory;
+import org.onetwo.common.db.spi.QueryProvideManager;
 import org.onetwo.common.db.spi.QueryWrapper;
 import org.onetwo.common.db.spi.SqlParamterPostfixFunctionRegistry;
 import org.onetwo.common.db.sql.SequenceNameManager;
@@ -28,11 +30,13 @@ import org.onetwo.common.exception.ServiceException;
 import org.onetwo.common.reflect.ReflectUtils;
 import org.onetwo.common.utils.CUtils;
 import org.onetwo.common.utils.Page;
+import org.onetwo.dbm.annotation.DbmInterceptorFilter.InterceptorType;
 import org.onetwo.dbm.core.spi.DbmEntityManager;
 import org.onetwo.dbm.core.spi.DbmSessionFactory;
 import org.onetwo.dbm.core.spi.DbmSessionImplementor;
 import org.onetwo.dbm.exception.EntityNotFoundException;
 import org.onetwo.dbm.jdbc.mapper.RowMapperFactory;
+import org.onetwo.dbm.jdbc.spi.DbmInterceptor;
 import org.onetwo.dbm.query.DbmNamedFileQueryFactory;
 import org.onetwo.dbm.query.DbmQuery;
 import org.onetwo.dbm.query.DbmQueryWrapperImpl;
@@ -41,7 +45,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
 
 //@SuppressWarnings({"rawtypes", "unchecked"})
-public class DbmEntityManagerImpl extends BaseEntityManagerAdapter implements DbmEntityManager, InitializingBean , DisposableBean {
+public class DbmEntityManagerImpl extends BaseEntityManagerAdapter implements QueryProvideManager, DbmEntityManager, InitializingBean , DisposableBean {
 
 	private DbmSessionFactory sessionFactory;
 //	private EntityManagerOperationImpl entityManagerWraper;
@@ -71,14 +75,12 @@ public class DbmEntityManagerImpl extends BaseEntityManagerAdapter implements Db
 //		throwIfEffectiveCountError("update", 1, rs);
 	}
 
+	@Override
+	public Collection<DbmInterceptor> getRepositoryInterceptors() {
+		return getDbmInterceptorManager().getInterceptors(InterceptorType.REPOSITORY);
+	}
 
-	/*@Override
-	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-		this.applicationContext = applicationContext;
-	}*/
-
-
-//	@Override
+	//	@Override
 	public DataBase getDataBase() {
 		return sessionFactory.getDialect().getDbmeta().getDataBase();
 	}

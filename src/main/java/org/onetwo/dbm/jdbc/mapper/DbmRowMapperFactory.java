@@ -79,10 +79,10 @@ public class DbmRowMapperFactory extends JdbcDaoRowMapperFactory {
 	@Override
 	public RowMapper<?> createRowMapper(NamedQueryInvokeContext invokeContext) {
 		DynamicMethod dmethod = invokeContext.getDynamicMethod();
-		DbmResultMapping dbmCascadeResult = dmethod.getMethod().getAnnotation(DbmResultMapping.class);
-		if(dbmCascadeResult==null){
+		if(!dmethod.isAnnotationPresent(DbmResultMapping.class)){
 			return super.createRowMapper(invokeContext);
 		}
+		DbmResultMapping dbmCascadeResult = dmethod.getMethod().getAnnotation(DbmResultMapping.class);
 		DbmNestedBeanRowMapper<?> rowMapper = new DbmNestedBeanRowMapper<>(jdbcResultSetGetter, dmethod.getComponentClass(), dbmCascadeResult);
 		return rowMapper;
 	}

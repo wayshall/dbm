@@ -8,8 +8,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.onetwo.common.db.spi.NamedQueryFile;
-import org.onetwo.common.db.spi.NamedQueryInfo;
 import org.onetwo.common.db.spi.NamedQueryFileListener;
+import org.onetwo.common.db.spi.NamedQueryInfo;
 import org.onetwo.common.db.spi.NamedQueryInfoParser;
 import org.onetwo.common.db.spi.NamedSqlFileManager;
 import org.onetwo.common.exception.BaseException;
@@ -28,7 +28,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 
-public class BaseNamedSqlFileManager implements NamedSqlFileManager {
+abstract public class BaseNamedSqlFileManager implements NamedSqlFileManager {
 
 	
 	/*public static final String COMMENT = "--";

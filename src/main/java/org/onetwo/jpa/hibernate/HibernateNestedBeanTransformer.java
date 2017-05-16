@@ -20,6 +20,8 @@ import com.google.common.collect.Maps;
 @SuppressWarnings({ "rawtypes", "serial" })
 public class HibernateNestedBeanTransformer<T> extends AbstractNestedBeanMapper<T> implements ResultTransformer {
 
+	private Map<String, Integer> names;
+	
 	public HibernateNestedBeanTransformer(Class<T> mappedClass, DbmResultMapping dbmResultMapping) {
 		super(mappedClass, dbmResultMapping);
 	}
@@ -28,13 +30,21 @@ public class HibernateNestedBeanTransformer<T> extends AbstractNestedBeanMapper<
 	public Object transformTuple(Object[] tuple, String[] aliases) {
 		Assert.state(this.mappedClass != null, "Mapped class was not specified");
 		
+		Map<String, Integer> names = initNames(aliases);
+		ColumnValueGetter columnValueGetter = new HibernateColumnValueGetter(tuple);
+		Object mappedObject = this.resultClassMapper.mapResult(names, columnValueGetter);
+		return mappedObject;
+	}
+	
+	private Map<String, Integer> initNames(String[] aliases){
+		if(names!=null){
+			return names;
+		}
 		Map<String, Integer> names = Maps.newHashMapWithExpectedSize(aliases.length);
 		for (int i = 0; i < aliases.length; i++) {
 			names.put(aliases[i], i);
 		}
-		ColumnValueGetter columnValueGetter = new HibernateColumnValueGetter(tuple);
-		Object mappedObject = this.resultClassMapper.mapResult(names, columnValueGetter);
-		return mappedObject;
+		return names;	
 	}
 
 	@Override

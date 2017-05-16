@@ -9,7 +9,7 @@ import org.onetwo.common.annotation.AnnotationUtils;
 import org.onetwo.common.utils.map.CollectionMap;
 import org.onetwo.dbm.annotation.DbmInterceptorFilter;
 import org.onetwo.dbm.annotation.DbmInterceptorFilter.InterceptorType;
-import org.onetwo.dbm.core.spi.DbmInterceptor;
+import org.onetwo.dbm.jdbc.spi.DbmInterceptor;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.Ordered;
@@ -26,7 +26,7 @@ public class DbmInterceptorManager implements InitializingBean {
 	private CollectionMap<InterceptorType, DbmInterceptor> typeInterceptors = CollectionMap.newListMap();
 
 	@Override
-	public void afterPropertiesSet() throws Exception {
+	public void afterPropertiesSet() {
 //		this.dbmInterceptors = SpringUtils.getBeans(applicationContext, DbmInterceptor.class);
 		if(this.interceptors==null){
 			this.interceptors = Collections.emptyList();
@@ -47,7 +47,7 @@ public class DbmInterceptorManager implements InitializingBean {
 		}
 	}
 	
-	public Collection<DbmInterceptor> getDbmSessionInterceptors(InterceptorType type){
+	public Collection<DbmInterceptor> getInterceptors(InterceptorType type){
 		Collection<DbmInterceptor> inters = typeInterceptors.get(type);
 		if(inters==null){
 			inters = ImmutableList.of();
@@ -59,27 +59,4 @@ public class DbmInterceptorManager implements InitializingBean {
 		this.interceptors = interceptors;
 	}
 	
-	/*public Object invokeChain(InterceptorType type, Object target, Method method, Object... args){
-		Collection<DbmInterceptor> inters = getDbmSessionInterceptors(type);
-		DbmInterceptorChain chain = createChain(type, inters, target, method, args);
-		return chain.invoke();
-	}*/
-	
-	/*public DbmInterceptorChain createChain(InterceptorType type, Supplier<Object> actualInvoker, Object target, Method method, Object... args){
-		Collection<DbmInterceptor> inters = getDbmSessionInterceptors(type);
-		DbmInterceptorChain chain = createChain(type, inters, target, method, args);
-		return chain;
-	}
-	
-	public DbmInterceptorChain createChain(InterceptorType type, Supplier<Object> actualInvoker){
-		Collection<DbmInterceptor> inters = getDbmSessionInterceptors(type);
-		DbmInterceptorChain chain = new AbstractDbmInterceptorChain(type, inters, actualInvoker);
-		return chain;
-	}
-	
-	public DbmInterceptorChain createChain(InterceptorType type, Collection<DbmInterceptor> interceptors, Object target, Method method, Object... args){
-		DbmInterceptorChain chain = new AbstractDbmInterceptorChain(type, target, method, args, interceptors);
-		return chain;
-	}*/
-
 }

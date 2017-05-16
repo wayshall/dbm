@@ -18,7 +18,7 @@ import org.onetwo.dbm.core.spi.DbmSessionFactory;
  * @author way
  *
  */
-public interface BaseEntityManager extends QueryProvideManager {
+public interface BaseEntityManager {
 
 	public <T> T load(Class<T> entityClass, Serializable id);
 	

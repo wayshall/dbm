@@ -8,10 +8,10 @@ import org.aopalliance.intercept.MethodInvocation;
 import org.onetwo.dbm.annotation.DbmInterceptorFilter.InterceptorType;
 import org.onetwo.dbm.annotation.DbmJdbcOperationMark;
 import org.onetwo.dbm.core.internal.AbstractDbmInterceptorChain.SessionDbmInterceptorChain;
-import org.onetwo.dbm.core.spi.DbmInterceptor;
-import org.onetwo.dbm.core.spi.DbmInterceptorChain;
 import org.onetwo.dbm.core.spi.DbmSession;
 import org.onetwo.dbm.core.spi.DbmTransaction;
+import org.onetwo.dbm.jdbc.spi.DbmInterceptor;
+import org.onetwo.dbm.jdbc.spi.DbmInterceptorChain;
 import org.onetwo.dbm.utils.DbmUtils;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.aop.support.annotation.AnnotationMatchingPointcut;
@@ -36,7 +36,7 @@ public class DbmSessionTransactionAdvisor extends DefaultPointcutAdvisor {
 
 		@Override
 		public Object invoke(MethodInvocation invocation) throws Throwable {
-			Collection<DbmInterceptor> inters = interceptorManager.getDbmSessionInterceptors(InterceptorType.SESSION);
+			Collection<DbmInterceptor> inters = interceptorManager.getInterceptors(InterceptorType.SESSION);
 			DbmInterceptorChain chain = new SessionDbmInterceptorChain(session, invocation.getMethod(), invocation.getArguments(), inters);
 			if(session.getTransactionType()==SessionTransactionType.PROXY){
 				return invokeWithTransaction(chain);

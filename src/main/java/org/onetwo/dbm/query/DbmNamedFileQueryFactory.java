@@ -5,7 +5,6 @@ import java.util.List;
 import org.onetwo.common.db.dquery.NamedQueryInvokeContext;
 import org.onetwo.common.db.filequery.AbstractFileNamedQueryFactory;
 import org.onetwo.common.db.filequery.DbmNamedSqlFileManager;
-import org.onetwo.common.db.spi.NamedQueryInfo;
 import org.onetwo.common.db.spi.QueryWrapper;
 import org.onetwo.common.utils.Assert;
 import org.onetwo.common.utils.Page;
@@ -32,18 +31,14 @@ public class DbmNamedFileQueryFactory extends AbstractFileNamedQueryFactory {
 	public QueryWrapper createDataQuery(boolean count, NamedQueryInvokeContext invokeContext){
 //		public JFishDataQuery createDataQuery(boolean count, String queryName, PlaceHolder type, Object... args){
 		Assert.notNull(invokeContext);
-
-		invokeContext.setParser(getSqlFileManager().getSqlStatmentParser());
-		NamedQueryInfo nameInfo = getNamedQueryInfo(invokeContext);
-		QueryWrapper jq = newQueryWrapperInstance(nameInfo, count, invokeContext);
-
+		QueryWrapper jq = newQueryWrapperInstance(count, invokeContext);
 		jq.setQueryConfig(invokeContext.getParsedParams());
 //		jq.setRowMapper(rowMapper);
 		return jq.getRawQuery(QueryWrapper.class);
 	}
 	
-	protected QueryWrapper newQueryWrapperInstance(NamedQueryInfo nameInfo, boolean count, NamedQueryInvokeContext invokeContext) {
-		return new DbmFileQueryWrapperImpl(nameInfo, count, invokeContext);
+	protected QueryWrapper newQueryWrapperInstance(boolean count, NamedQueryInvokeContext invokeContext) {
+		return new DbmFileQueryWrapperImpl(invokeContext, count);
 	}
 	
 	@Override

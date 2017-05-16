@@ -1,7 +1,6 @@
 package org.onetwo.jpa.hibernate;
 
 import java.util.List;
-import java.util.Map;
 
 import org.hibernate.SQLQuery;
 import org.onetwo.common.db.AbstractQueryWrapper;
@@ -75,14 +74,12 @@ public class HibernateDbmQueryWrapper extends AbstractQueryWrapper implements Qu
 	}
 
 	@Override
-	public QueryWrapper setQueryConfig(Map<Object, Object> configs) {
-		logger.info("ingore set query config");
-		return this;
-	}
-
-	@Override
 	public void setRowMapper(RowMapper<?> rowMapper) {
 		throw new UnsupportedOperationException();
+	}
+	@Override
+	public <T> T unwarp(Class<T> clazz) {
+		return clazz.cast(sqlQuery);
 	}
 
 }

@@ -6,11 +6,10 @@ import java.util.Optional;
 import org.onetwo.common.db.ParsedSqlContext;
 import org.onetwo.common.db.dquery.NamedQueryInvokeContext;
 import org.onetwo.common.db.filequery.func.SqlFunctionDialet;
-import org.onetwo.common.db.spi.NamedQueryInfo;
-import org.onetwo.common.db.spi.QueryWrapper;
 import org.onetwo.common.db.spi.FileNamedQueryFactory;
 import org.onetwo.common.db.spi.FileNamedSqlGenerator;
 import org.onetwo.common.db.spi.NamedSqlFileManager;
+import org.onetwo.common.db.spi.QueryWrapper;
 import org.onetwo.common.utils.LangUtils;
 
 abstract public class AbstractFileNamedQueryFactory implements FileNamedQueryFactory {
@@ -49,17 +48,12 @@ abstract public class AbstractFileNamedQueryFactory implements FileNamedQueryFac
 	}*/
 
 //	@Override
-	public NamedQueryInfo getNamedQueryInfo(NamedQueryInvokeContext invokeContex) {
-		String qname = invokeContex.getQueryName();
-		NamedQueryInfo queryInfo = sqlFileManager.getNamedQueryInfo(qname);
-		return queryInfo;
-	}
 	
 //	@Override
 	public FileNamedSqlGenerator createFileNamedSqlGenerator(NamedQueryInvokeContext invokeContext) {
 		Optional<SqlFunctionDialet> sqlFunctionDialet = invokeContext.getQueryProvideManager().getSqlFunctionDialet();
-		NamedQueryInfo nameInfo = getNamedQueryInfo(invokeContext);
-		ParserContext parserContext = ParserContext.create(nameInfo);
+//		NamedQueryInfo nameInfo = getNamedQueryInfo(invokeContext);
+		ParserContext parserContext = ParserContext.create(invokeContext.getNamedQueryInfo());
 		FileNamedSqlGenerator g = new DefaultFileNamedSqlGenerator(parserContext, false, sqlFileManager.getSqlStatmentParser(), invokeContext.getParsedParams(), sqlFunctionDialet);
 		return g;
 	}

@@ -1,5 +1,6 @@
 package org.onetwo.common.db.dquery;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.ParameterizedType;
@@ -105,6 +106,9 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 		LangUtils.println("resultClass: ${0}, componentClass:${1}", resultClass, compClass);
 	}
 	
+	public final boolean isAnnotationPresent(Class<? extends Annotation> annoClass){
+		return this.method.getAnnotation(annoClass)!=null;
+	}
 	private DynamicMethodParameter findPagePrarameter(){
 		return parameters.stream()
 				.filter(p->p.getParameterType()==Page.class)

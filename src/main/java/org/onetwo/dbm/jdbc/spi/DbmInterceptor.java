@@ -1,4 +1,4 @@
-package org.onetwo.dbm.core.spi;
+package org.onetwo.dbm.jdbc.spi;
 
 public interface DbmInterceptor {
 	

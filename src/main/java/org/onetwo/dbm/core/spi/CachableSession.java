@@ -1,5 +1,7 @@
 package org.onetwo.dbm.core.spi;
 
+import org.onetwo.dbm.jdbc.spi.DbmInterceptorChain;
+
 
 
 public interface CachableSession extends DbmSession {

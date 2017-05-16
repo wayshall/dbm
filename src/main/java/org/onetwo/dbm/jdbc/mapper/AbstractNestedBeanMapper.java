@@ -57,6 +57,11 @@ abstract public class AbstractNestedBeanMapper<T> {
 	public AbstractNestedBeanMapper(Class<T> mappedClass, DbmResultMapping dbmResultMapping) {
 		this.mappedClass = mappedClass;
 		this.dbmResultMapping = dbmResultMapping;
+
+		ClassMapperContext context = new ClassMapperContext(dbmResultMapping);
+		ResultClassMapper resultClassMapper = new RootResultClassMapper(context, dbmResultMapping.idField(), dbmResultMapping.columnPrefix(), mappedClass);
+		resultClassMapper.initialize();
+		this.resultClassMapper = resultClassMapper;
 	}
 	
 	protected static BeanWrapper createBeanWrapper(Object mappedObject) {

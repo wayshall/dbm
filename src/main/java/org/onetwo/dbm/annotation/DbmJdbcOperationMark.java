@@ -5,7 +5,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.onetwo.dbm.core.DbmJdbcOperationType;
+import org.onetwo.dbm.jdbc.spi.DbmJdbcOperationType;
 
 /*****
  * 标记session操作db相关方法

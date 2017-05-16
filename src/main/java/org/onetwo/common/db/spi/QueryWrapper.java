@@ -44,5 +44,7 @@ public interface QueryWrapper {
 	public void setCacheable(boolean cacheable);*/
 	
 	public void setRowMapper(RowMapper<?> rowMapper);
+	
+	public <T> T unwarp(Class<T> clazz);
 
 }
