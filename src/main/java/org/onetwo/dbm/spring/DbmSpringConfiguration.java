@@ -108,7 +108,7 @@ public class DbmSpringConfiguration implements ApplicationContextAware, Initiali
 		this.dbmConfig.onEnableDbmAttributes(enableDbmAttributes);
 		return this.dbmConfig;
 	}
-	
+
 	@Bean
 	@Autowired
 	public DbmEntityManager dbmEntityManager(DbmSessionFactory sessionFactory) {

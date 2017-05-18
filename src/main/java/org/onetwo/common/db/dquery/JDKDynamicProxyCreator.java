@@ -14,6 +14,7 @@ import org.onetwo.common.db.spi.QueryProvideManager;
 import org.onetwo.common.log.JFishLoggerFactory;
 import org.onetwo.common.propconf.ResourceAdapter;
 import org.onetwo.common.spring.SpringUtils;
+import org.onetwo.dbm.core.spi.DbmEntityManager;
 import org.onetwo.dbm.exception.DbmException;
 import org.onetwo.dbm.exception.FileNamedQueryException;
 import org.onetwo.dbm.utils.Dbms;
@@ -41,7 +42,7 @@ public class JDKDynamicProxyCreator implements InitializingBean, ApplicationCont
 
 	private String beanName;
 	
-	private Class<? extends QueryProvideManager> defaultQueryProvideManagerClass = QueryProvideManager.class;
+	private Class<?> defaultQueryProvideManagerClass = DbmEntityManager.class;
 	
 	public JDKDynamicProxyCreator(Class<?> interfaceClass, LoadingCache<Method, DynamicMethod> methodCache) {
 		super();
@@ -90,17 +91,25 @@ public class JDKDynamicProxyCreator implements InitializingBean, ApplicationCont
 		return new DbmSqlFileResource(sqlFile, interfaceClass);
 	}
 	
+	protected QueryProvideManager findQueryProvideManagerByClass(Class<?> clazz){
+		Object bean = SpringUtils.getBean(applicationContext, clazz);
+		if(!QueryProvideManager.class.isInstance(bean)){
+			throw new DbmException("the query provide manager is not a QueryProvideManager : " + clazz);
+		}
+		return (QueryProvideManager) bean;
+	}
+	
 	private QueryProvideManager findQueryProvideManager(){
 		QueryProvideManager queryProvideManager;
 		Optional<DbmRepositoryAttrs> dbmRepositoryAttrs = findDbmRepositoryAttrs();
 		if(!dbmRepositoryAttrs.isPresent()){
-			queryProvideManager = SpringUtils.getBean(applicationContext, defaultQueryProvideManagerClass);
+			queryProvideManager = findQueryProvideManagerByClass(defaultQueryProvideManagerClass);
 		}else{
 			DbmRepositoryAttrs attrs = dbmRepositoryAttrs.get();
 			if(StringUtils.isNotBlank(attrs.provideManager())){
 				queryProvideManager = SpringUtils.getBean(applicationContext, attrs.provideManager());
 			}else if(attrs.hasProvideManagerClass()){
-				queryProvideManager = SpringUtils.getBean(applicationContext, attrs.getProvideManagerClass());
+				queryProvideManager = findQueryProvideManagerByClass(attrs.getProvideManagerClass());
 			}else if(StringUtils.isNotBlank(attrs.dataSource())){
 				DataSource dataSource = SpringUtils.getBean(applicationContext, attrs.dataSource());
 				if(dataSource==null){
@@ -108,7 +117,7 @@ public class JDKDynamicProxyCreator implements InitializingBean, ApplicationCont
 				}
 				queryProvideManager = (QueryProvideManager)Dbms.obtainBaseEntityManager(dataSource);
 			}else{
-				queryProvideManager = SpringUtils.getBean(applicationContext, defaultQueryProvideManagerClass);
+				queryProvideManager = findQueryProvideManagerByClass(defaultQueryProvideManagerClass);
 			}
 		}
 		if(queryProvideManager==null){
@@ -155,10 +164,10 @@ public class JDKDynamicProxyCreator implements InitializingBean, ApplicationCont
 
 	static class DbmRepositoryAttrs {
 		final private String provideManager;
-		final private Class<? extends QueryProvideManager> provideManagerClass;
+		final private Class<?> provideManagerClass;
 		final private String dataSource;
 		
-		public DbmRepositoryAttrs(String provideManager, Class<? extends QueryProvideManager> provideManagerClass, String dataSource) {
+		public DbmRepositoryAttrs(String provideManager, Class<?> provideManagerClass, String dataSource) {
 			super();
 			this.provideManager = provideManager;
 			this.provideManagerClass = provideManagerClass;
@@ -180,7 +189,7 @@ public class JDKDynamicProxyCreator implements InitializingBean, ApplicationCont
 		}
 
 		@SuppressWarnings("unchecked")
-		public <T extends QueryProvideManager> Class<T> getProvideManagerClass() {
+		public <T> Class<T> getProvideManagerClass() {
 			return (Class<T>)provideManagerClass;
 		}
 	}

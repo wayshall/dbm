@@ -25,6 +25,7 @@ public class AnnotationBasicJDKDynamicProxyCreator extends JDKDynamicProxyCreato
 		super(interfaceClass, methodCache);
 	}
 
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
 	protected DbmSqlFileResource<?> getSqlFile(DataSource dataSource) {
 		Class<?> repostoryClass = this.interfaceClass;

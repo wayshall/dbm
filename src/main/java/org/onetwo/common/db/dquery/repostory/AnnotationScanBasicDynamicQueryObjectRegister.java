@@ -41,7 +41,7 @@ public class AnnotationScanBasicDynamicQueryObjectRegister implements DynamicQue
 //	private ApplicationContext applicationContext;
 	private String[] packagesToScan;
 	
-	private Class<? extends QueryProvideManager> defaultQueryProvideManagerClass;
+	private Class<?> defaultQueryProvideManagerClass;
 	private boolean registerDefaultQueryProvideManager;
 	
 	public AnnotationScanBasicDynamicQueryObjectRegister(BeanDefinitionRegistry registry) {
@@ -52,7 +52,7 @@ public class AnnotationScanBasicDynamicQueryObjectRegister implements DynamicQue
 		this.registry = SpringUtils.getBeanDefinitionRegistry(applicationContext);
 	}
 
-	public void setDefaultQueryProvideManagerClass(Class<? extends QueryProvideManager> defaultQueryProvideManagerClass) {
+	public void setDefaultQueryProvideManagerClass(Class<?> defaultQueryProvideManagerClass) {
 		this.defaultQueryProvideManagerClass = defaultQueryProvideManagerClass;
 	}
 

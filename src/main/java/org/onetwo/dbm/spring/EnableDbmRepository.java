@@ -6,7 +6,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.onetwo.common.db.spi.QueryProvideManager;
+import org.onetwo.dbm.core.spi.DbmEntityManager;
 import org.springframework.context.annotation.Import;
 
 @Retention(RetentionPolicy.RUNTIME)
@@ -15,7 +15,7 @@ import org.springframework.context.annotation.Import;
 @Import({DynamicQueryObjectRegisterConfigration.class})
 public @interface EnableDbmRepository {
 	
-	Class<? extends QueryProvideManager> defaultQueryProviderClass() default QueryProvideManager.class;
+	Class<?> defaultQueryProviderClass() default DbmEntityManager.class;
 	
 	boolean autoRegister() default false;
 	
