@@ -11,8 +11,8 @@ import org.springframework.context.annotation.Import;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 @Documented
-@Import({DbmSpringConfiguration.class})
-@EnableDbmRepository
+@Import({EnableDbmSelector.class})
+//@EnableDbmRepository
 public @interface EnableDbm {
 	
 	/****
@@ -27,4 +27,11 @@ public @interface EnableDbm {
 	String[] packagesToScan() default {};
 	
 	boolean enableRichModel() default true;
+	
+	/***
+	 * 是否启用扫描带有注解 @DbmRepository 的类作为dbm的查询接口，并自动注册到容器
+	 * @author wayshall
+	 * @return
+	 */
+	boolean enableDbmRepository() default true;
 }
