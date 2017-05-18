@@ -15,7 +15,7 @@
 - [CrudEntityManager接口](https://github.com/wayshall/dbm#crudentitymanager接口)
 - [DbmRepository查询接口](https://github.com/wayshall/dbm#dbmrepository查询接口)
 - [DbmRepository查询接口的多数据源支持](https://github.com/wayshall/dbm#dbmrepository查询接口的多数据源支持)
-- [DbmRepository查询接口对其它orm框架的兼容](https://github.com/wayshall/dbm#DbmRepository查询接口对其它orm框架的兼容)
+- [DbmRepository查询接口对其它orm框架的兼容](https://github.com/wayshall/dbm#dbmrepository查询接口对其它orm框架的兼容)
 - [查询映射](https://github.com/wayshall/dbm#查询映射)
 - [复杂的嵌套查询映射](https://github.com/wayshall/dbm#复杂的嵌套查询映射)
 - [批量插入](https://github.com/wayshall/dbm#批量插入)
