@@ -116,7 +116,7 @@ java的字段名使用驼峰的命名风格，而数据库使用下划线的风�
 - 注意：为了保持简单和轻量级，dbm的实体映射只支持单表，不支持多表级联映射。复杂的查询和映射请使用[DbmRepository查询接口](https://github.com/wayshall/dbm#dbmrepository查询接口)
 
 ## id策略
-dbm支持jpa的几种id策略注解：
+dbm支持jpa的GenerationType的id策略，此外还提供了通过@DbmIdGenerator自定义的策略：
 - GenerationType.IDENTITY   
   使用数据库本身的自增策略
 - GenerationType.SEQUENCE   
@@ -176,14 +176,15 @@ public class UserEntity implements Serializable {
 ```
 
 ### DbmIdGenerator
+比如使用了dbm集成的snowflake策略，下面的配置使用了默认配置的snowflake，如果需要配置不同的datacenter和machine，建议自己实现CustomIdGenerator接口。
 ```Java
 @Entity
 @Table(name="t_user")
 public class UserEntity implements Serializable {
 
 	@Id  
-	@GeneratedValue(strategy = GenerationType.AUTO, generator="myIdGenerator") 
-	@DbmIdGenerator(name="myIdGenerator", generatorClass=MyIdGenerator.class)
+	@GeneratedValue(strategy = GenerationType.AUTO, generator="snowflake") 
+	@DbmIdGenerator(name="snowflake", generatorClass=SnowflakeGenerator.class)
 	protected Long id;
 }
 ```
