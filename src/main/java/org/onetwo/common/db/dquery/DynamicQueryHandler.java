@@ -47,6 +47,7 @@ public class DynamicQueryHandler implements InvocationHandler {
 	private QueryProvideManager em;
 	private Object proxyObject;
 	private NamedParameterJdbcOperations jdbcOperations;
+	private Class<?>[] proxiedInterfaces;
 	
 	public DynamicQueryHandler(QueryProvideManager em, LoadingCache<Method, DynamicMethod> methodCache, Class<?>... proxiedInterfaces){
 		this.em = em;
@@ -54,7 +55,7 @@ public class DynamicQueryHandler implements InvocationHandler {
 		
 //		this.dbmJdbcOperations = em.getSessionFactory().getServiceRegistry().getDbmJdbcOperations();
 		this.jdbcOperations = em.getJdbcOperations();
-		this.proxyObject = Proxy.newProxyInstance(ClassUtils.getDefaultClassLoader(), proxiedInterfaces, this);
+		this.proxiedInterfaces = proxiedInterfaces;
 		Assert.notNull(jdbcOperations);
 	}
 	
@@ -271,7 +272,12 @@ public class DynamicQueryHandler implements InvocationHandler {
 	}
 
 	public Object getQueryObject(){
-		return this.proxyObject;
+		Object qb = this.proxyObject;
+		if(qb==null){
+			qb = Proxy.newProxyInstance(ClassUtils.getDefaultClassLoader(), proxiedInterfaces, this);
+			this.proxyObject = qb;
+		}
+		return qb;
 	}
 
 }

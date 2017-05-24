@@ -664,7 +664,7 @@ public class DbmSampleApplication {
 }  
 ```    
 
-若使用jfish的项目，因为用了spring boot的autoconfig，可以使用@DbmPackages注解配置
+若以为某种原因没有使用@EnableDbm方式来启用dbm，则可以使用@DbmPackages注解配置
 ```Java   
 @Configuration
 @DbmPackages({"org.onetwo4j.sample.model"})

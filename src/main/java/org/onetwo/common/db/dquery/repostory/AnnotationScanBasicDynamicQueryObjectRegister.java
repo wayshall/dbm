@@ -7,7 +7,6 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.onetwo.common.db.dquery.DynamicMethod;
 import org.onetwo.common.db.dquery.DynamicQueryObjectRegister;
 import org.onetwo.common.db.dquery.annotation.DbmRepository;
-import org.onetwo.common.db.spi.QueryProvideManager;
 import org.onetwo.common.log.JFishLoggerFactory;
 import org.onetwo.common.reflect.ReflectUtils;
 import org.onetwo.common.spring.SpringUtils;
