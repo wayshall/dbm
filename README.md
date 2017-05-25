@@ -18,7 +18,7 @@
 - [DbmRepository查询接口对其它orm框架的兼容](https://github.com/wayshall/dbm#dbmrepository查询接口对其它orm框架的兼容)
 - [查询映射](https://github.com/wayshall/dbm#查询映射)
 - [复杂的嵌套查询映射](https://github.com/wayshall/dbm#复杂的嵌套查询映射)
-- [自定义实现DbmRepository查询接口](https://github.com/wayshall/dbm#自定义实现DbmRepository查询接口)
+- [自定义实现DbmRepository查询接口](https://github.com/wayshall/dbm#自定义实现dbmrepository查询接口)
 - [批量插入](https://github.com/wayshall/dbm#批量插入)
 - [充血模型支持](https://github.com/wayshall/dbm#充血模型支持)
 
