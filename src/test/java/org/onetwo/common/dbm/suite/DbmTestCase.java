@@ -6,6 +6,7 @@ import org.junit.runners.Suite.SuiteClasses;
 import org.onetwo.common.base.DbmSessionCacheTest;
 import org.onetwo.common.dbm.BaseCrudEntityManagerTest;
 import org.onetwo.common.dbm.BatchInsertTest;
+import org.onetwo.common.dbm.CustomDaoTest;
 import org.onetwo.common.dbm.DbmDaoTest;
 import org.onetwo.common.dbm.DbmEntityManagerTest;
 import org.onetwo.common.dbm.DbmNestedMappingTest;
@@ -26,7 +27,8 @@ import org.onetwo.common.dbm.UserTableIdEntityTest;
 	DbmSessionCacheTest.class,
 	UserTableIdEntityTest.class,
 	UserDbmIdEntityTest.class,
-	QueryConfigTest.class
+	QueryConfigTest.class,
+	CustomDaoTest.class
 //	RichModelTest.class
 })
 public class DbmTestCase {

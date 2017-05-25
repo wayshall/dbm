@@ -20,7 +20,7 @@ public class JDKProxyDynamicQueryHandler extends AbstractDynamicQueryHandler imp
 	public Object getQueryObject(){
 		Object qb = this.proxyObject;
 		if(qb==null){
-			qb = Proxy.newProxyInstance(ClassUtils.getDefaultClassLoader(), proxiedInterfaces, this);
+			qb = Proxy.newProxyInstance(ClassUtils.getDefaultClassLoader(), this.proxyInterfaces.toArray(new Class<?>[0]), this);
 			this.proxyObject = qb;
 		}
 		return qb;

@@ -633,6 +633,60 @@ left join
 List<CompanyVO> companies = companyDao.findNestedCompanies();
 ```
 
+## 自定义实现DbmRepository查询接口
+dbm的Repository查询接口采用了流行的只有接口没有实现类的风格，但有时你需要的查询，可能不只是写一条sql查询出来即可的，尽管你可以把这种逻辑处理定义到Service，但你又觉得这些是数据处理逻辑并不属于Service，并且你希望把这种实现也挂载到已经存在的Repository查询接口，没问题，dbm支持这种做法。
+比如，你已经有了一个名叫UserDao的Repository查询接口，然后你可以自顶一个CustomerUserDao接口：
+```Java
+public interface CustomUserDao {
+	
+	int batchInsert(List<UserTableIdEntity> users);
+
+}
+
+```
+在同一个包路径下，你需要写一个CustomUserDao的实现类，实现类的命名规则是：自定义接口类名+Impl，即：CustomUserDaoImpl：
+```Java
+@Component
+public class CustomUserDaoImpl implements CustomUserDao {
+	@Autowired
+	private BaseEntityManager baseEntityManager;
+
+	@Override
+	public int batchInsert(List<UserTableIdEntity> users) {
+		Collection<UserTableIdEntity> dbusers = baseEntityManager.saves(users);
+		return dbusers.size();
+	}
+
+}
+```
+然后再让UserDao继承你的扩展接口：
+```Java
+@DbmRepository
+public interface UserDao extends CustomUserDao {
+	
+	List<UserTableIdEntity> findByUserNameLike(String userName);
+
+}
+
+```
+这样，当你注入Userdao，并调用batchInsert方法时，实际调用的就会是CustomUserDaoImpl的batchInsert方法了：
+```Java
+public class CustomDaoTest {
+	
+	@Autowired
+	private UserDao userDao;
+	
+	@Test
+	public void test(){
+		int total = 100;
+		List<UserTableIdEntity> users = createUsers(total);
+		int res = this.userDao.batchInsert(users);
+		assertThat(res).isEqualTo(total);
+	}
+
+}
+```
+
 ## 批量插入
 在mybatis里，批量插入非常麻烦，我见过有些人甚至使用for循环生成value语句来批量插入的，这种方法插入的数据量如果很大，生成的sql语句以吨计，如果用jdbc接口执行这条语句，系统必挂无疑。   
 实际上，jdbc很多年就提供批量插入的接口，在dbm里，使用批量接口很简单。   

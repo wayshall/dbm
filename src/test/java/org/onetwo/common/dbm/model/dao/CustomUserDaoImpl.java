@@ -22,6 +22,5 @@ public class CustomUserDaoImpl implements CustomUserDao {
 		Collection<UserTableIdEntity> dbusers = baseEntityManager.saves(users);
 		return dbusers.size();
 	}
-	
 
 }
