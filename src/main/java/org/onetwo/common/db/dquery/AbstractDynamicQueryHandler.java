@@ -1,8 +1,8 @@
 package org.onetwo.common.db.dquery;
 
-import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -14,6 +14,7 @@ import org.onetwo.common.db.ParsedSqlContext;
 import org.onetwo.common.db.filequery.ParsedSqlUtils;
 import org.onetwo.common.db.filequery.ParsedSqlUtils.ParsedSqlWrapper;
 import org.onetwo.common.db.filequery.ParsedSqlUtils.ParsedSqlWrapper.SqlParamterMeta;
+import org.onetwo.common.db.spi.DynamicQueryHandler;
 import org.onetwo.common.db.spi.NamedQueryInfo;
 import org.onetwo.common.db.spi.QueryProvideManager;
 import org.onetwo.common.db.spi.QueryWrapper;
@@ -23,7 +24,6 @@ import org.onetwo.common.log.JFishLoggerFactory;
 import org.onetwo.common.profiling.TimeCounter;
 import org.onetwo.common.spring.SpringUtils;
 import org.onetwo.common.utils.CUtils;
-import org.onetwo.common.utils.ClassUtils;
 import org.onetwo.common.utils.LangUtils;
 import org.onetwo.common.utils.MathUtils;
 import org.onetwo.common.utils.Page;
@@ -39,26 +39,25 @@ import org.springframework.util.Assert;
 
 import com.google.common.cache.LoadingCache;
 
-public class DynamicQueryHandler implements InvocationHandler {
+abstract public class AbstractDynamicQueryHandler implements DynamicQueryHandler  {
 	
 	protected Logger logger = JFishLoggerFactory.getLogger(this.getClass());
 
 	private LoadingCache<Method, DynamicMethod> methodCache;
 	private QueryProvideManager em;
-	private Object proxyObject;
+//	private Object proxyObject;
 	private NamedParameterJdbcOperations jdbcOperations;
-	private Class<?>[] proxiedInterfaces;
+	final protected List<Class<?>> proxyInterfaces = new ArrayList<Class<?>>();
 	
-	public DynamicQueryHandler(QueryProvideManager em, LoadingCache<Method, DynamicMethod> methodCache, Class<?>... proxiedInterfaces){
+	public AbstractDynamicQueryHandler(QueryProvideManager em, LoadingCache<Method, DynamicMethod> methodCache, Class<?>... proxiedInterfaces){
 		this.em = em;
 		this.methodCache = methodCache;
 		
 //		this.dbmJdbcOperations = em.getSessionFactory().getServiceRegistry().getDbmJdbcOperations();
 		this.jdbcOperations = em.getJdbcOperations();
-		this.proxiedInterfaces = proxiedInterfaces;
+		this.proxyInterfaces.addAll(Arrays.asList(proxiedInterfaces));
 		Assert.notNull(jdbcOperations);
 	}
-	
 
 	/*private Optional<DbmEntityManager> getDbmEntityManager(){
 		if(DbmEntityManager.class.isInstance(em)){
@@ -73,6 +72,7 @@ public class DynamicQueryHandler implements InvocationHandler {
 		return queryInfo;
 	}
 
+//	@Override
 	@Override
 	public Object invoke(Object proxy, Method method, Object[] args) {
 		if(Object.class  == method.getDeclaringClass()) {
@@ -271,13 +271,7 @@ public class DynamicQueryHandler implements InvocationHandler {
 		}
 	}
 
-	public Object getQueryObject(){
-		Object qb = this.proxyObject;
-		if(qb==null){
-			qb = Proxy.newProxyInstance(ClassUtils.getDefaultClassLoader(), proxiedInterfaces, this);
-			this.proxyObject = qb;
-		}
-		return qb;
-	}
+	@Override
+	abstract public Object getQueryObject();
 
 }

@@ -28,7 +28,7 @@ import org.springframework.util.Assert;
 
 import com.google.common.cache.LoadingCache;
 
-public class JDKDynamicProxyCreator implements InitializingBean, ApplicationContextAware, FactoryBean<Object>, BeanNameAware {
+public class DynamicQueryHandlerProxyCreator implements InitializingBean, ApplicationContextAware, FactoryBean<Object>, BeanNameAware {
 	
 	public static final String ATTR_SQL_FILE = "sqlFile";
 
@@ -44,7 +44,7 @@ public class JDKDynamicProxyCreator implements InitializingBean, ApplicationCont
 	
 	private Class<?> defaultQueryProvideManagerClass = DbmEntityManager.class;
 	
-	public JDKDynamicProxyCreator(Class<?> interfaceClass, LoadingCache<Method, DynamicMethod> methodCache) {
+	public DynamicQueryHandlerProxyCreator(Class<?> interfaceClass, LoadingCache<Method, DynamicMethod> methodCache) {
 		super();
 		this.interfaceClass = interfaceClass;
 		this.methodCache = methodCache;
@@ -83,7 +83,8 @@ public class JDKDynamicProxyCreator implements InitializingBean, ApplicationCont
 		if(!interfaceClass.getName().equals(queryFile.getNamespace())){
 			throw new FileNamedQueryException("namespace error:  interface->" + interfaceClass+", namespace->"+queryFile.getNamespace());
 		}
-		targetObject = new DynamicQueryHandler(queryProvideManager, methodCache, interfaceClass).getQueryObject();
+//		targetObject = new DynamicQueryHandler(queryProvideManager, methodCache, interfaceClass).getQueryObject();
+		targetObject = new SpringProxyDynamicQueryHandler(queryProvideManager, methodCache, interfaceClass).getQueryObject();
 	}
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })

@@ -2,10 +2,12 @@ package org.onetwo.common.dbm.model.dao;
 
 import java.util.List;
 
-import org.onetwo.common.dbm.model.entity.UserEntity;
+import org.onetwo.common.db.dquery.annotation.DbmRepository;
+import org.onetwo.common.dbm.model.entity.UserTableIdEntity;
 
-public interface UserDao {
+@DbmRepository
+public interface UserDao extends CustomUserDao {
 	
-	public int batchInsert(List<UserEntity> users);
+	List<UserTableIdEntity> findByUserNameLike(String userName);
 
 }

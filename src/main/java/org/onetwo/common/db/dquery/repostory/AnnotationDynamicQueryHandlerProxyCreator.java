@@ -7,7 +7,7 @@ import javax.sql.DataSource;
 import org.onetwo.common.db.DataBase;
 import org.onetwo.common.db.dquery.DbmSqlFileResource;
 import org.onetwo.common.db.dquery.DynamicMethod;
-import org.onetwo.common.db.dquery.JDKDynamicProxyCreator;
+import org.onetwo.common.db.dquery.DynamicQueryHandlerProxyCreator;
 import org.onetwo.common.db.filequery.SpringBasedSqlFileScanner;
 import org.onetwo.common.db.spi.SqlFileScanner;
 import org.onetwo.common.spring.utils.SpringResourceAdapterImpl;
@@ -17,11 +17,11 @@ import org.springframework.util.ClassUtils;
 
 import com.google.common.cache.LoadingCache;
 
-public class AnnotationBasicJDKDynamicProxyCreator extends JDKDynamicProxyCreator {
+public class AnnotationDynamicQueryHandlerProxyCreator extends DynamicQueryHandlerProxyCreator {
 
 	private SqlFileScanner sqlFileScanner = new SpringBasedSqlFileScanner(ClassUtils.getDefaultClassLoader());
 	
-	public AnnotationBasicJDKDynamicProxyCreator(Class<?> interfaceClass, LoadingCache<Method, DynamicMethod> methodCache) {
+	public AnnotationDynamicQueryHandlerProxyCreator(Class<?> interfaceClass, LoadingCache<Method, DynamicMethod> methodCache) {
 		super(interfaceClass, methodCache);
 	}
 

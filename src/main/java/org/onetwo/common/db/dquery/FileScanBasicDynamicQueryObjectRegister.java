@@ -66,10 +66,10 @@ public class FileScanBasicDynamicQueryObjectRegister implements DynamicQueryObje
 				continue;
 			}
 			final Class<?> interfaceClass = ReflectUtils.loadClass(className);
-			BeanDefinition beandef = BeanDefinitionBuilder.rootBeanDefinition(JDKDynamicProxyCreator.class)
+			BeanDefinition beandef = BeanDefinitionBuilder.rootBeanDefinition(DynamicQueryHandlerProxyCreator.class)
 								.addConstructorArgValue(interfaceClass)
 								.addConstructorArgValue(methodCache)
-								.addPropertyValue(JDKDynamicProxyCreator.ATTR_SQL_FILE, f.getValue())
+								.addPropertyValue(DynamicQueryHandlerProxyCreator.ATTR_SQL_FILE, f.getValue())
 								.setScope(BeanDefinition.SCOPE_SINGLETON)
 //								.setRole(BeanDefinition.ROLE_APPLICATION)
 								.getBeanDefinition();

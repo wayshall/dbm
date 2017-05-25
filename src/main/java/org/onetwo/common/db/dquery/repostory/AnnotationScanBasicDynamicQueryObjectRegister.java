@@ -91,7 +91,7 @@ public class AnnotationScanBasicDynamicQueryObjectRegister implements DynamicQue
 			if(registry.containsBeanDefinition(className)){
 				continue;
 			}
-			BeanDefinition beandef = BeanDefinitionBuilder.rootBeanDefinition(AnnotationBasicJDKDynamicProxyCreator.class)
+			BeanDefinition beandef = BeanDefinitionBuilder.rootBeanDefinition(AnnotationDynamicQueryHandlerProxyCreator.class)
 					.addConstructorArgValue(repositoryClass)
 					.addConstructorArgValue(methodCache)
 					.setScope(BeanDefinition.SCOPE_SINGLETON)
