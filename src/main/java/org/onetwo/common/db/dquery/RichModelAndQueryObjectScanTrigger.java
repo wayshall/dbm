@@ -20,8 +20,7 @@ import org.onetwo.dbm.spring.EnableDbmRepository;
 import org.onetwo.dbm.utils.DbmUtils;
 import org.slf4j.Logger;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
-import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.Resource;
@@ -34,7 +33,7 @@ import org.springframework.util.ClassUtils;
  * @author way
  *
  */
-public class RichModelAndQueryObjectScanTrigger implements BeanFactoryPostProcessor {
+public class RichModelAndQueryObjectScanTrigger /*implements BeanFactoryPostProcessor*/ {
 	protected final Logger logger = JFishLoggerFactory.getLogger(this.getClass());
 
 	private final ResourcesScanner scanner = ResourcesScanner.CLASS_CANNER;
@@ -68,10 +67,13 @@ public class RichModelAndQueryObjectScanTrigger implements BeanFactoryPostProces
 		this.packagesToScan = packagesToScan;
 	}
 
-	@Override
+	/*@Override
 	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
+		this.scanAndRegisterBeans(beanFactory);
+	}*/
+	
+	public void scanAndRegisterBeans(ListableBeanFactory beanFactory) throws BeansException {
 //		BeanDefinitionRegistry registry = SpringUtils.getBeanDefinitionRegistry(beanFactory);
-		
 		Collection<String> packs = DbmUtils.getAllDbmPackageNames(beanFactory);
 		
 		if(this.packagesToScan!=null){
