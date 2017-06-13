@@ -20,9 +20,10 @@ import org.onetwo.common.dbm.model.service.UserAutoidServiceImpl;
 import org.onetwo.common.profiling.TimeCounter;
 import org.onetwo.common.utils.LangUtils;
 import org.onetwo.dbm.core.spi.DbmEntityManager;
+import org.springframework.transaction.annotation.Transactional;
 
 //@TransactionConfiguration(defaultRollback=true)
-//@Transactional
+@Transactional
 public class DbmDaoTest extends DbmBaseTest {
 	
 	@Resource

@@ -104,8 +104,9 @@ public class DbmSessionImpl extends AbstractDbmSession implements DbmSessionEven
 	}
 	
 	public DbmTransaction beginTransaction(TransactionDefinition definition) {
-		if(this.transactionType==SessionTransactionType.CONTEXT_MANAGED || 
-				this.transactionType==SessionTransactionType.PROXY){
+		if(this.transactionType==SessionTransactionType.CONTEXT_MANAGED 
+//				|| this.transactionType==SessionTransactionType.PROXY
+			){
 			throw new DbmException("the dbm session["+id+"] cannot start transaction manul, because it's transactional type is: " + this.transactionType);
 		}
 		if(transaction!=null){

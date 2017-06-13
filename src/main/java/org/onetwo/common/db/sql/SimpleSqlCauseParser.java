@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.onetwo.common.exception.BaseException;
-import org.onetwo.common.profiling.UtilTimerStack;
+import org.onetwo.common.profiling.TimeProfileStack;
 import org.onetwo.common.utils.Assert;
 import org.onetwo.common.utils.LangUtils;
 import org.onetwo.common.utils.SToken;
@@ -97,8 +97,8 @@ public class SimpleSqlCauseParser implements SqlCauseParser {
 	public List<SToken> _parseSql(String originalSql) {
 		Assert.hasText(originalSql);
 		
-		if(UtilTimerStack.isActive()){
-			UtilTimerStack.push("parseSql");
+		if(TimeProfileStack.isActive()){
+			TimeProfileStack.push("parseSql");
 		}
 		
 		StringSpliter sg = StringSpliter.wrap(originalSql, null, getRetainSeperators());
@@ -138,8 +138,8 @@ public class SimpleSqlCauseParser implements SqlCauseParser {
 		}
 		
 
-		if(UtilTimerStack.isActive()){
-			UtilTimerStack.pop("parseSql");
+		if(TimeProfileStack.isActive()){
+			TimeProfileStack.pop("parseSql");
 		}
 		
 //		LangUtils.println("conditions size:"+conditions.size());

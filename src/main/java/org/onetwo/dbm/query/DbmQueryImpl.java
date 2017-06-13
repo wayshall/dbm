@@ -6,7 +6,7 @@ import java.util.Map.Entry;
 
 import org.onetwo.common.db.DbmQueryValue;
 import org.onetwo.common.log.JFishLoggerFactory;
-import org.onetwo.common.profiling.UtilTimerStack;
+import org.onetwo.common.profiling.TimeProfileStack;
 import org.onetwo.common.utils.Assert;
 import org.onetwo.dbm.core.spi.DbmSessionImplementor;
 import org.onetwo.dbm.dialet.DBDialect;
@@ -136,7 +136,7 @@ public class DbmQueryImpl implements DbmQuery {
 		if(isLimitedQuery()){
 			sql = dbDialect.getLimitStringWithNamed(sqlString, FIRST_RESULT_NAME, MAX_RESULT_NAME);
 		}
-		if(UtilTimerStack.isActive()){
+		if(TimeProfileStack.isActive()){
 			this.logger.info("sql:"+sql);
 		}
 		return sql;
@@ -159,7 +159,7 @@ public class DbmQueryImpl implements DbmQuery {
 		
 		this.dbDialect.addLimitedValue(parameters, FIRST_RESULT_NAME, firstResult, MAX_RESULT_NAME, maxResults);
 		
-		if(UtilTimerStack.isActive()){
+		if(TimeProfileStack.isActive()){
 			this.logger.info("params"+parameters.getValues());
 		}
 		

@@ -149,7 +149,7 @@ public class DbmSessionFactoryImpl implements InitializingBean, DbmSessionFactor
 	public Optional<DbmSession> getCurrentSession(){
 		DbmSessionResourceHolder sessionHolder = (DbmSessionResourceHolder)TransactionSynchronizationManager.getResource(this);
 		if(sessionHolder!=null && sessionHolder.isSynchronizedWithTransaction() 
-				&& DataSourceUtils.isConnectionTransactional(sessionHolder.getConnection(), dataSource)){//multip ds
+				&& DataSourceUtils.isConnectionTransactional(sessionHolder.getConnection(), dataSource)){//return false if multip ds
 			return Optional.of(sessionHolder.getSession());
 		}
 		return Optional.empty();
@@ -177,10 +177,12 @@ public class DbmSessionFactoryImpl implements InitializingBean, DbmSessionFactor
 		}
 		if(!TransactionSynchronizationManager.isSynchronizationActive()){
 			throw new DbmException("no transaction synchronization in current thread!");
+//			TransactionSynchronizationManager.initSynchronization();
 		}
 		
 		if(TransactionSynchronizationManager.isActualTransactionActive()){//transaction exists in current thread
 			if(DbmTransactionSupports.currentTransactionInfo()==null){//can not get transaction info from thread
+				//虽然获取不到，但实际上外部有事务管理器存在的，依然设置为CONTEXT_MANAGED
 				DbmSessionImpl session = createDbmSession(null);
 				session.setTransactionType(SessionTransactionType.CONTEXT_MANAGED);
 				session.setDebug(getDataBaseConfig().isLogSql());

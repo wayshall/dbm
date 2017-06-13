@@ -57,7 +57,7 @@ public class SpringProxyDynamicQueryHandler extends AbstractDynamicQueryHandler 
 	public Object getQueryObject(){
 		Object qb = this.proxyObject;
 		if(qb==null){
-			qb = Proxys.ofInterfaces(proxyInterfaces, this);
+			qb = Proxys.interceptInterfaces(proxyInterfaces, this);
 			
 			if(!mixinInterfaces.isEmpty()){
 				qb = mixinFactory.of(qb, mixinInterfaces.toArray(new Class<?>[0]));

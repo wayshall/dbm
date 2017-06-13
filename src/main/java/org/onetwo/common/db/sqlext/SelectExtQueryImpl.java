@@ -11,7 +11,7 @@ import java.util.Set;
 
 import org.onetwo.common.db.RawSqlWrapper;
 import org.onetwo.common.exception.BaseException;
-import org.onetwo.common.profiling.UtilTimerStack;
+import org.onetwo.common.profiling.TimeProfileStack;
 import org.onetwo.common.utils.Assert;
 import org.onetwo.common.utils.CUtils;
 import org.onetwo.common.utils.LangUtils;
