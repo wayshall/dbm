@@ -19,7 +19,7 @@ public class EnableDbmSelector extends AbstractImportSelector<EnableDbm> {
 		classNames.add(DbmSpringConfiguration.class.getName());
 		boolean enableDbmRepository = attributes.getBoolean("enableDbmRepository");
 		if(enableDbmRepository){
-			classNames.add(DynamicQueryObjectRegisterConfigration.class.getName());
+			classNames.add(DbmRepositoryRegistarOfEnableDbm.class.getName());
 		}
 		return classNames;
 	}

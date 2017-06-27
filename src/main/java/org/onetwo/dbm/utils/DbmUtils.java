@@ -27,7 +27,6 @@ import javax.sql.DataSource;
 import org.apache.commons.lang3.ArrayUtils;
 import org.onetwo.common.convert.Types;
 import org.onetwo.common.date.Dates;
-import org.onetwo.common.db.dquery.annotation.DbmPackages;
 import org.onetwo.common.log.JFishLoggerFactory;
 import org.onetwo.common.reflect.Intro;
 import org.onetwo.common.reflect.ReflectUtils;
@@ -226,7 +225,7 @@ final public class DbmUtils {
 	public static Collection<String> getAllDbmPackageNames(ListableBeanFactory beanFactory){
 		Collection<String> packageNames = new HashSet<>();
 		packageNames.addAll(scanEnableDbmPackages(beanFactory));
-		packageNames.addAll(scanDbmPackages(beanFactory));
+//		packageNames.addAll(scanDbmPackages(beanFactory));
 		return packageNames;
 	}
 	
@@ -255,30 +254,13 @@ final public class DbmUtils {
 		});
 		return packageNames;
 	}
-	public static List<String> scanDbmPackages(ApplicationContext applicationContext){
+	/*public static List<String> scanDbmPackages(ApplicationContext applicationContext){
 		ListableBeanFactory bf = (ListableBeanFactory)applicationContext.getAutowireCapableBeanFactory();
 		return scanDbmPackages(bf);
 	}
 	public static List<String> scanDbmPackages(ListableBeanFactory beanFactory){
 		return scanAnnotationPackages(beanFactory, DbmPackages.class, dbmPackages->dbmPackages.value());
-		/*List<String> packageNames = new ArrayList<String>();
-		SpringUtils.scanAnnotationPackages(beanFactory, DbmPackages.class, (beanDef, beanClass)->{
-			DbmPackages dbmPackages = beanClass.getAnnotation(DbmPackages.class);
-			if(dbmPackages==null){
-				return ;
-			}
-			String[] modelPacks = dbmPackages.value();
-			if(ArrayUtils.isNotEmpty(modelPacks)){
-				for(String pack : modelPacks){
-					packageNames.add(pack);
-				}
-			}else{
-				String packageName = beanClass.getPackage().getName();
-				packageNames.add(packageName);
-			}
-		});
-		return packageNames;*/
-	}
+	}*/
 	public static <T extends Annotation> List<String> scanAnnotationPackages(ListableBeanFactory beanFactory, 
 																		Class<T> annoClass,
 																		Function<T, String[]> packageExtractor){

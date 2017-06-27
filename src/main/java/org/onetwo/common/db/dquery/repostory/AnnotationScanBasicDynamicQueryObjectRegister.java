@@ -11,7 +11,7 @@ import org.onetwo.common.log.JFishLoggerFactory;
 import org.onetwo.common.reflect.ReflectUtils;
 import org.onetwo.common.spring.SpringUtils;
 import org.onetwo.common.spring.utils.JFishResourcesScanner;
-import org.onetwo.dbm.spring.DynamicQueryObjectRegisterConfigration;
+import org.onetwo.dbm.spring.DbmRepositoryRegistarOfEnableDbm;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
@@ -98,7 +98,7 @@ public class AnnotationScanBasicDynamicQueryObjectRegister implements DynamicQue
 //					.setRole(BeanDefinition.ROLE_APPLICATION)
 					.getBeanDefinition();
 			if(defaultQueryProvideManagerClass!=null){
-				beandef.setAttribute(DynamicQueryObjectRegisterConfigration.ATTR_DEFAULT_QUERY_PROVIDE_MANAGER_CLASS, defaultQueryProvideManagerClass);
+				beandef.setAttribute(DbmRepositoryRegistarOfEnableDbm.ATTR_DEFAULT_QUERY_PROVIDE_MANAGER_CLASS, defaultQueryProvideManagerClass);
 			}
 			registry.registerBeanDefinition(className, beandef);
 			logger.info("register dao bean: {} ", className);

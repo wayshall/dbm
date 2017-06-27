@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Import;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 @Documented
-@Import({DynamicQueryObjectRegisterConfigration.class})
+@Import({DbmRepositoryRegistarOfEnableDbmRepository.class})
 public @interface EnableDbmRepository {
 	
 	Class<?> defaultQueryProviderClass() default DbmEntityManager.class;

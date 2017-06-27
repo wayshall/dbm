@@ -2,6 +2,7 @@ package org.onetwo.common.db.dquery;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.stream.Stream;
 
 import org.onetwo.common.db.dquery.repostory.AnnotationScanBasicDynamicQueryObjectRegister;
@@ -15,14 +16,12 @@ import org.onetwo.dbm.richmodel.PackageScanedProcessor;
 import org.onetwo.dbm.richmodel.RichModel;
 import org.onetwo.dbm.richmodel.RichModelCheckProcessor;
 import org.onetwo.dbm.richmodel.RichModelEnhanceProcessor;
-import org.onetwo.dbm.spring.EnableDbm;
-import org.onetwo.dbm.spring.EnableDbmRepository;
-import org.onetwo.dbm.utils.DbmUtils;
 import org.slf4j.Logger;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.context.ApplicationContext;
+import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.io.Resource;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.util.ClassUtils;
@@ -43,6 +42,7 @@ public class RichModelAndQueryObjectScanTrigger /*implements BeanFactoryPostProc
 	
 	private boolean enableRichModel = true;
 	private AnnotationScanBasicDynamicQueryObjectRegister register;
+	private AnnotationAttributes enableDbmRepositoryAttributes;
 	
 //	private Class<? extends QueryProvideManager> defaultQueryProvideManagerClass;
 	
@@ -72,15 +72,25 @@ public class RichModelAndQueryObjectScanTrigger /*implements BeanFactoryPostProc
 		this.scanAndRegisterBeans(beanFactory);
 	}*/
 	
+	public void setEnableDbmRepositoryAttributes(
+			AnnotationAttributes enableDbmRepositoryAttributes) {
+		this.enableDbmRepositoryAttributes = enableDbmRepositoryAttributes;
+	}
+
+	public void setEnableRichModel(boolean enableRichModel) {
+		this.enableRichModel = enableRichModel;
+	}
+
 	public void scanAndRegisterBeans(ListableBeanFactory beanFactory) throws BeansException {
 //		BeanDefinitionRegistry registry = SpringUtils.getBeanDefinitionRegistry(beanFactory);
-		Collection<String> packs = DbmUtils.getAllDbmPackageNames(beanFactory);
+//		Collection<String> packs = DbmUtils.getAllDbmPackageNames(beanFactory);
+		Collection<String> packs = new HashSet<String>();
 		
 		if(this.packagesToScan!=null){
 			Collections.addAll(packs, this.packagesToScan);
 		}
 
-		SpringUtils.scanAnnotation(beanFactory, EnableDbm.class, (beanDef, beanClass)->{
+		/*SpringUtils.scanAnnotation(beanFactory, EnableDbm.class, (beanDef, beanClass)->{
 			if(logger.isInfoEnabled()){
 				logger.info("found EnableDbm class: {}", beanClass);
 			}
@@ -88,9 +98,9 @@ public class RichModelAndQueryObjectScanTrigger /*implements BeanFactoryPostProc
 			if(enableDbm!=null){
 				enableRichModel = enableDbm.enableRichModel();
 			}
-		});
+		});*/
 		
-		SpringUtils.scanAnnotation(beanFactory, EnableDbmRepository.class, (beanDef, beanClass)->{
+		/*SpringUtils.scanAnnotation(beanFactory, EnableDbmRepository.class, (beanDef, beanClass)->{
 			if(logger.isInfoEnabled()){
 				logger.info("found EnableDbmRepository class: {}", beanClass);
 			}
@@ -103,11 +113,19 @@ public class RichModelAndQueryObjectScanTrigger /*implements BeanFactoryPostProc
 					packs.add(p.getPackage().getName());
 				});
 			}
-		});
+		});*/
+		if(enableDbmRepositoryAttributes!=null){
+			register.setDefaultQueryProvideManagerClass(enableDbmRepositoryAttributes.getClass("defaultQueryProviderClass"));
+			register.setRegisterDefaultQueryProvideManager(enableDbmRepositoryAttributes.getBoolean("autoRegister"));
+			Stream.of(enableDbmRepositoryAttributes.getStringArray("value")).forEach(p->packs.add(p));
+			Stream.of(enableDbmRepositoryAttributes.getClassArray("basePackageClasses")).forEach(p->{
+				packs.add(p.getPackage().getName());
+			});
+		}
 
 		if(!packs.isEmpty()){
 			if(enableRichModel){
-				this.enhanceRichModel();
+				this.enhanceRichModel(packs.toArray(new String[0]));
 			}
 			register.setPackagesToScan(packs.toArray(new String[0]));
 			register.registerQueryBeans();
@@ -115,9 +133,9 @@ public class RichModelAndQueryObjectScanTrigger /*implements BeanFactoryPostProc
 	}
 	
 
-	protected void enhanceRichModel(){
+	protected void enhanceRichModel(String...packs){
 		PackageScanedProcessor processor = null;
-		Collection<ScanedClassContext> richModels = this.scanRichModelClasses();
+		Collection<ScanedClassContext> richModels = this.scanRichModelClasses(packs);
 		if(ClassUtils.isPresent("javassist.ClassPool", null)){
 			processor = new RichModelEnhanceProcessor();
 		}else{
@@ -125,7 +143,7 @@ public class RichModelAndQueryObjectScanTrigger /*implements BeanFactoryPostProc
 		}
 		processor.processClasses(richModels);
 	}
-	protected Collection<ScanedClassContext> scanRichModelClasses(){
+	protected Collection<ScanedClassContext> scanRichModelClasses(String...packs){
 		Collection<ScanedClassContext> entryClassNameList = scanner.scan(new ScanResourcesCallback<ScanedClassContext>() {
 
 			@Override
@@ -138,7 +156,7 @@ public class RichModelAndQueryObjectScanTrigger /*implements BeanFactoryPostProc
 				return null;
 			}
 
-		}, packagesToScan);
+		}, packs);
 		return entryClassNameList;
 	}
 	
