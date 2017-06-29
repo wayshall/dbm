@@ -6,7 +6,7 @@
 ## 目录
 - [特色](https://github.com/wayshall/dbm#特色)
 - [示例项目](https://github.com/wayshall/dbm#示例项目)
-- [JDK版本要求](https://github.com/wayshall/dbm#JDK版本要求)
+- [要求](https://github.com/wayshall/dbm#要求)
 - [maven配置](https://github.com/wayshall/dbm#maven)
 - [一行代码启用](https://github.com/wayshall/dbm#一行代码启用)
 - [实体映射](https://github.com/wayshall/dbm#实体映射)
@@ -41,11 +41,12 @@
 [boot-dbm-sample](https://github.com/wayshall/boot-dbm-sample)
 
 
-## JDK版本要求
-1.8+
+## 要求
+JDK 1.8+
+spring 4.0+
 
 ## maven
-当前snapshot版本：4.6.0-SNAPSHOT
+当前snapshot版本：4.6.1-SNAPSHOT
 
 若使用snapshot版本，请添加snapshotRepository仓储：
 ```xml
@@ -64,7 +65,7 @@
 <dependency>
     <groupId>org.onetwo4j</groupId>
     <artifactId>onetwo-dbm</artifactId>
-    <version>4.6.0-SNAPSHOT</version>
+    <version>4.6.1-SNAPSHOT</version>
 </dependency>
 
 ```
@@ -690,7 +691,7 @@ public class CustomDaoTest {
 
 ## 批量插入
 在mybatis里，批量插入非常麻烦，我见过有些人甚至使用for循环生成value语句来批量插入的，这种方法插入的数据量如果很大，生成的sql语句以吨计，如果用jdbc接口执行这条语句，系统必挂无疑。   
-实际上，jdbc很多年就提供批量插入的接口，在dbm里，使用批量接口很简单。   
+在dbm里，使用批量接口很简单。   
 定义接口：   
 ```java   
 
