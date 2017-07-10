@@ -22,6 +22,11 @@
 - [批量插入](https://github.com/wayshall/dbm#批量插入)
 - [充血模型支持](https://github.com/wayshall/dbm#充血模型支持)
 
+## 捐赠
+如果你觉得这个项目帮到了你，请用支付宝打赏一杯咖啡吧~~~   
+
+![支付宝](doc/alipay2.jpg)
+
 
 ## 特色
 - 基本的实体增删改查（单表）不需要生成样板代码和sql文件。
