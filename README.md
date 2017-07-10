@@ -4,28 +4,24 @@
 交流群：  604158262
 
 ## 目录
-- [特色](https://github.com/wayshall/dbm#特色)
-- [示例项目](https://github.com/wayshall/dbm#示例项目)
-- [要求](https://github.com/wayshall/dbm#要求)
-- [maven配置](https://github.com/wayshall/dbm#maven)
-- [一行代码启用](https://github.com/wayshall/dbm#一行代码启用)
-- [实体映射](https://github.com/wayshall/dbm#实体映射)
-- [id策略](https://github.com/wayshall/dbm#id策略)
-- [BaseEntityManager接口](https://github.com/wayshall/dbm#baseentitymanager接口)
-- [CrudEntityManager接口](https://github.com/wayshall/dbm#crudentitymanager接口)
-- [DbmRepository查询接口](https://github.com/wayshall/dbm#dbmrepository查询接口)
-- [DbmRepository查询接口的多数据源支持](https://github.com/wayshall/dbm#dbmrepository查询接口的多数据源支持)
-- [DbmRepository查询接口对其它orm框架的兼容](https://github.com/wayshall/dbm#dbmrepository查询接口对其它orm框架的兼容)
-- [查询映射](https://github.com/wayshall/dbm#查询映射)
-- [复杂的嵌套查询映射](https://github.com/wayshall/dbm#复杂的嵌套查询映射)
-- [自定义实现DbmRepository查询接口](https://github.com/wayshall/dbm#自定义实现dbmrepository查询接口)
-- [批量插入](https://github.com/wayshall/dbm#批量插入)
-- [充血模型支持](https://github.com/wayshall/dbm#充血模型支持)
-
-## 捐赠
-如果你觉得这个项目帮到了你，请用支付宝打赏一杯咖啡吧~~~   
-
-![支付宝](doc/alipay2.jpg)
+- [特色](#特色)
+- [示例项目](#示例项目)
+- [要求](#要求)
+- [maven配置](#maven)
+- [一行代码启用](#一行代码启用)
+- [实体映射](#实体映射)
+- [id策略](#id策略)
+- [BaseEntityManager接口](#baseentitymanager接口)
+- [CrudEntityManager接口](#crudentitymanager接口)
+- [DbmRepository查询接口](#dbmrepository查询接口)
+- [DbmRepository查询接口的多数据源支持](#dbmrepository查询接口的多数据源支持)
+- [DbmRepository查询接口对其它orm框架的兼容](#dbmrepository查询接口对其它orm框架的兼容)
+- [查询映射](#查询映射)
+- [复杂的嵌套查询映射](#复杂的嵌套查询映射)
+- [自定义实现DbmRepository查询接口](#自定义实现dbmrepository查询接口)
+- [批量插入](#批量插入)
+- [充血模型支持](#充血模型支持)
+- [捐赠](#捐赠)
 
 
 ## 特色
@@ -755,4 +751,11 @@ List<User> users = User.findList("userName", userName, K.IF_NULL, IfNull.Ignore)
    
 ```
 
-### 待续。。。
+## 待续。。。
+
+
+
+## 捐赠
+如果你觉得这个项目帮到了你，请用支付宝打赏一杯咖啡吧~~~   
+
+![支付宝](doc/alipay2.jpg)
