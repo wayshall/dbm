@@ -12,6 +12,8 @@ import org.onetwo.common.db.sqlext.ExtQueryUtils;
 import org.onetwo.common.db.sqlext.SQLSymbolManager.FieldOP;
 import org.onetwo.common.utils.func.Closure;
 
+
+@SuppressWarnings("unchecked")
 public class DefaultWhereCauseBuilderField extends WhereCauseBuilderField {
 	
 	private String[] fields;
@@ -57,13 +59,13 @@ public class DefaultWhereCauseBuilderField extends WhereCauseBuilderField {
 	 * @param values
 	 * @return
 	 */
-	public WhereCauseBuilder equalTo(Object... values) {
+	public <T> WhereCauseBuilder equalTo(T... values) {
 		return this.doWhenPredicate(()->{
 			this.op = FieldOP.eq;
 			this.values = values;
 		});
 	}
-	public WhereCauseBuilder is(Object... values) {
+	public <T> WhereCauseBuilder is(T... values) {
 		return equalTo(values);
 	}
 	
@@ -89,7 +91,7 @@ public class DefaultWhereCauseBuilderField extends WhereCauseBuilderField {
 	 * @param values
 	 * @return
 	 */
-	public WhereCauseBuilder notEqualTo(Object... values) {
+	public <T> WhereCauseBuilder notEqualTo(T... values) {
 		return this.doWhenPredicate(()->{
 			this.op = FieldOP.neq;
 			this.values = values;
@@ -101,7 +103,7 @@ public class DefaultWhereCauseBuilderField extends WhereCauseBuilderField {
 	 * @param values
 	 * @return
 	 */
-	public WhereCauseBuilder greaterThan(Object... values) {
+	public <T> WhereCauseBuilder greaterThan(T... values) {
 		return this.doWhenPredicate(()->{
 			this.op = FieldOP.gt;
 			this.values = values;
@@ -113,9 +115,9 @@ public class DefaultWhereCauseBuilderField extends WhereCauseBuilderField {
 		return queryBuilder;*/
 	}
 	
-	public WhereCauseBuilder in(Object... values) {
+	public <T> WhereCauseBuilder in(T... values) {
 		return this.doWhenPredicate(()->{
-			this.op = FieldOP.gt;
+			this.op = FieldOP.in;
 			this.values = values;
 		});
 		/*
@@ -125,7 +127,7 @@ public class DefaultWhereCauseBuilderField extends WhereCauseBuilderField {
 		return queryBuilder;*/
 	}
 	
-	public WhereCauseBuilder notIn(Object... values) {
+	public <T> WhereCauseBuilder notIn(T... values) {
 		return this.doWhenPredicate(()->{
 			this.op = FieldOP.not_in;
 			this.values = values;
@@ -154,7 +156,7 @@ public class DefaultWhereCauseBuilderField extends WhereCauseBuilderField {
 	 * @param values
 	 * @return
 	 */
-	public WhereCauseBuilder greaterEqual(Object... values) {
+	public <T> WhereCauseBuilder greaterEqual(T... values) {
 		return this.doWhenPredicate(()->{
 			this.op = FieldOP.ge;
 			this.values = values;
@@ -171,7 +173,7 @@ public class DefaultWhereCauseBuilderField extends WhereCauseBuilderField {
 	 * @param values
 	 * @return
 	 */
-	public WhereCauseBuilder lessThan(Object... values) {
+	public <T> WhereCauseBuilder lessThan(T... values) {
 		return this.doWhenPredicate(()->{
 			this.op = FieldOP.lt;
 			this.values = values;
@@ -188,7 +190,7 @@ public class DefaultWhereCauseBuilderField extends WhereCauseBuilderField {
 	 * @param values
 	 * @return
 	 */
-	public WhereCauseBuilder lessEqual(Object... values) {
+	public <T> WhereCauseBuilder lessEqual(T... values) {
 		return this.doWhenPredicate(()->{
 			this.op = FieldOP.le;
 			this.values = values;

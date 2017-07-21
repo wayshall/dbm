@@ -10,6 +10,11 @@ import org.springframework.jdbc.core.SqlParameterValue;
 import org.springframework.jdbc.core.SqlTypeValue;
 import org.springframework.jdbc.core.StatementCreatorUtils;
 
+/***
+ * TODO: 设置参数时，如果是枚举类型会有问题，是否做枚举类型自动转？
+ * @author wayshall
+ *
+ */
 public class SpringStatementParameterSetter implements JdbcStatementParameterSetter {
 
 	@Override

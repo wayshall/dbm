@@ -153,7 +153,7 @@ public abstract class ExtQueryUtils {
 		if(SqlUtils.isDruidPresent()){
 			return DruidUtils.toCountSql(sql, countValue);
 		}
-		
+
 		String[] tokens = StringUtils.split(sql.toLowerCase(), " ");
 		
 		int groupIndex = ArrayUtils.indexOf(tokens, "group");
@@ -172,8 +172,12 @@ public abstract class ExtQueryUtils {
 		
 		String countField = "*";
 		String hql = sql;
-		if(ArrayUtils.contains(tokens, "from"))
-			hql = StringUtils.substringAfter(hql, "from ");
+		int fromIndex = ArrayUtils.indexOf(tokens, "from");
+		if(fromIndex!=-1){
+//			hql = StringUtils.substringAfter(hql, "from");
+			String[] rawTokens = StringUtils.split(sql, " ");
+			hql = StringUtils.join(ArrayUtils.subarray(rawTokens, fromIndex+1, tokens.length), " ");
+		}
 		int orderByIndex = ArrayUtils.indexOf(tokens, "order");
 		if(orderByIndex!=-1 && tokens.length>(orderByIndex+1) && "by".equals(tokens[orderByIndex+1]))
 			hql = StringUtils.substringBefore(hql, " order by ");

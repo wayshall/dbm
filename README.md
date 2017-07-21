@@ -434,7 +434,7 @@ from
     outer_user usr
 ```
 
-- in条件可以传入List类型的值，会自动解释为多个in参数
+- in条件可以传入 Collection 类型的值，会自动解释为多个in参数
 DbmRepository接口：   
 ```Java
 @DbmRepository
@@ -457,6 +457,8 @@ where
 	usr.user_name in ( :userNames )
 
 ```
+注意：必须是Collection类型，不支持数组类型。
+
 - dbm默认会注入一些辅助函数以便在sql文件中调用，可通过_func前缀引用，比如${_func.dateAs(date, "yyyy-MM-dd")}格式化日期。通过QueryConfig注解扩展在sql文件使用的辅助函数集。
 sql文件：   
 ```sql

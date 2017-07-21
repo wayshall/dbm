@@ -160,7 +160,7 @@ abstract public class AbstractDynamicQueryHandler implements DynamicQueryHandler
 				result = dq.executeUpdate();
 				
 			}else if(Page.class.isAssignableFrom(resultClass)){
-				Page<?> page = (Page<?>)args[dmethod.getPageParamter().getParameterIndex()];
+				Page<?> page = dmethod.getPageParamter(args);
 				result = em.getFileNamedQueryManager().findPage(page, invokeContext);
 				
 			}else if(Collection.class.isAssignableFrom(resultClass)){

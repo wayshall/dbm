@@ -171,8 +171,8 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 		return new DynamicMethodParameterJ8(method, parameterIndex, parameter);
 	}
 	
-	public DynamicMethodParameter getPageParamter() {
-		return pageParamter;
+	public Page<?> getPageParamter(Object[] args) {
+		return (Page<?>)args[pageParamter.getParameterIndex()];
 	}
 
 	protected boolean judgeBatchUpdateFromParameterObjects(List<DynamicMethodParameter> mparameters){
