@@ -27,6 +27,9 @@ abstract public class AbstractMappedField implements DbmMappedField{
 	
 	private String name;
 	private String label;
+	/***
+	 * 是否@Id标识的主键
+	 */
 	private boolean identify;
 //	private PropertyDescriptor property;
 	private BaseColumnInfo column;
