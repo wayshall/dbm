@@ -3,8 +3,8 @@
 <#assign dataFormName="dataForm"/>
 <#assign datagridName="dataGrid"/>
 
-<#assign modulePath="/${_globalConfig.getModuleName()}/${_tableContext.propertyName}"/>
-<#assign pagePath="/${_globalConfig.getModuleName()}/${_tableContext.tableNameWithoutPrefix?replace('_', '-')}"/>
+<#assign modulePath="${_globalConfig.requestModulePath}/${_tableContext.propertyName}"/>
+<#assign pagePath="${_globalConfig.requestModulePath}/${_tableContext.tableNameWithoutPrefix?replace('_', '-')}"/>
 
 <${'@'}extends parent="easyui-js.html">
     

@@ -82,6 +82,27 @@ public class GlobalConfig {
 		return javaBasePackage;
 	}
 
+	public String getJavaModulePackage() {
+		String mpackage = javaBasePackage;
+		if(StringUtils.isNotBlank(moduleName)){
+			mpackage += "." + moduleName;
+		}
+		return mpackage;
+	}
+
+	public String getRequestModulePath() {
+		String mpackage = "";
+		if(StringUtils.isNotBlank(moduleName)){
+			mpackage += "/" + moduleName;
+		}
+		return mpackage;
+	}
+
+	public String getJavaLocalPackage(String localPackage) {
+		String mpackage = getJavaModulePackage();
+		return mpackage + "." + localPackage;
+	}
+
 	public GlobalConfig javaBasePackage(String javaBasePackage) {
 		this.javaBasePackage = javaBasePackage;
 		return this;

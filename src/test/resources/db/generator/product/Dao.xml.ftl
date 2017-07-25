@@ -1,8 +1,12 @@
 <#assign requestPath="/${_globalConfig.getModuleName()}/${_tableContext.className}"/>
 <#assign pagePath="/${_globalConfig.getModuleName()}/${_tableContext.tableNameWithoutPrefix}"/>
-<#assign entityPackage="${_globalConfig.getJavaBasePackage()}.${_globalConfig.getModuleName()}.entity"/>
+
+<#assign servicePackage="${_globalConfig.javaModulePackage}.service"/>
+<#assign serviceImplPackage="${_globalConfig.javaModulePackage}.impl.service"/>
+<#assign daoPackage="${_globalConfig.javaModulePackage}.dao"/>
+<#assign entityPackage="${_globalConfig.javaModulePackage}.entity"/>
+
 <#assign mapperPackage="${_globalConfig.getJavaBasePackage()}.${_globalConfig.getModuleName()}.mapper"/>
-<#assign daoPackage="${_globalConfig.getJavaBasePackage()}.${_globalConfig.getModuleName()}.dao"/>
 <#assign daoClassName="${_tableContext.className}Dao"/>
 <#assign daoPropertyName="${_tableContext.propertyName}Dao"/>
 <#assign entityClassName="${_tableContext.className}ExtEntity"/>

@@ -49,6 +49,9 @@ public class DbmUpdateEventListener extends UpdateEventListener {
 				count = this.updateSingleEntity(false, es, entry, entity);
 			}
 		}
+		if(count==0){
+			logger.warn("dmb update count is 0, it may be wrong!");
+		}
 		event.setUpdateCount(count);
 	}
 

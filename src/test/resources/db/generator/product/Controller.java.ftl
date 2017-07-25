@@ -1,7 +1,11 @@
-<#assign requestPath="/${_globalConfig.getModuleName()}/${_tableContext.propertyName}"/>
-<#assign pagePath="/${_globalConfig.getModuleName()}/${_tableContext.tableNameWithoutPrefix?replace('_', '-')}"/>
+<#assign requestPath="${_globalConfig.requestModulePath}/${_tableContext.propertyName}"/>
+<#assign pagePath="${_globalConfig.requestModulePath}/${_tableContext.tableNameWithoutPrefix?replace('_', '-')}"/>
 
-<#assign servicePackage="${_globalConfig.getJavaBasePackage()}.${_globalConfig.getModuleName()}.service"/>
+<#assign servicePackage="${_globalConfig.javaModulePackage}.service"/>
+<#assign serviceImplPackage="${_globalConfig.javaModulePackage}.service.impl"/>
+<#assign daoPackage="${_globalConfig.javaModulePackage}.dao"/>
+<#assign entityPackage="${_globalConfig.javaModulePackage}.entity"/>
+
 <#assign serviceImplClassName="${_tableContext.className}ServiceImpl"/>
 <#assign serviceImplPropertyName="${_tableContext.propertyName}ServiceImpl"/>
 <#assign mapperClassName="${_tableContext.className}Mapper"/>
@@ -10,15 +14,16 @@
 <#assign idType="${table.primaryKey.javaType.simpleName}"/>
 
 
-package ${_globalConfig.getJavaBasePackage()}.${_globalConfig.getModuleName()}.${_tableContext.localPackage};
+package ${_globalConfig.getJavaLocalPackage(_tableContext.localPackage)};
 
 import org.onetwo.boot.core.web.controller.AbstractBaseController;
 import org.onetwo.boot.core.web.controller.DateInitBinder;
 import org.onetwo.common.utils.Page;
+import org.onetwo.easyui.EasyDataGrid;
+import org.onetwo.easyui.PageRequest;
 import org.onetwo.ext.permission.api.annotation.ByPermissionClass;
 import org.onetwo.common.utils.map.MappableMap;
 import org.onetwo.easyui.EasyModel;
-import org.onetwo.easyui.EasyPage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -33,8 +38,8 @@ import org.onetwo.plugins.admin.utils.WebConstant.ValidGroup.ValidAnyTime;
 import org.onetwo.plugins.admin.utils.WebConstant.ValidGroup.ValidWhenEdit;
 import org.onetwo.plugins.admin.utils.WebConstant.ValidGroup.ValidWhenNew;
 
-import ${_globalConfig.getJavaBasePackage()}.${_globalConfig.getModuleName()}.entity.${_tableContext.className};
-import ${_globalConfig.getJavaBasePackage()}.${_globalConfig.getModuleName()}.service.impl.${serviceImplClassName};
+import ${entityPackage}.${_tableContext.className};
+import ${serviceImplPackage}.${serviceImplClassName};
 
 @Controller
 @RequestMapping("${requestPath}")
@@ -46,9 +51,9 @@ public class ${_tableContext.className}Controller extends AbstractBaseController
     
     @ByPermissionClass(${_tableContext.className}Mgr.class)
     @RequestMapping(method=RequestMethod.GET)
-    public ModelAndView index(Page<${_tableContext.className}> page, ${_tableContext.className} ${_tableContext.propertyName}){
+    public ModelAndView index(PageRequest pageRequest, ${_tableContext.className} ${_tableContext.propertyName}){
         return responsePageOrData("${pagePath}-index", ()->{
-                    ${serviceImplPropertyName}.findPage(page, ${_tableContext.propertyName});
+                    Page<${_tableContext.className}> page = ${serviceImplPropertyName}.findPage(pageRequest.toPageObject(), ${_tableContext.propertyName});
                     return EasyDataGrid.create(page);
                 });
     }

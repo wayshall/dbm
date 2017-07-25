@@ -1,7 +1,11 @@
 <#assign requestPath="/${_globalConfig.getModuleName()}/${_tableContext.className}"/>
 <#assign pagePath="/${_globalConfig.getModuleName()}/${_tableContext.tableNameWithoutPrefix}"/>
 
-<#assign daoPackage="${_globalConfig.getJavaBasePackage()}.${_globalConfig.getModuleName()}.dao"/>
+<#assign servicePackage="${_globalConfig.javaModulePackage}.service"/>
+<#assign serviceImplPackage="${_globalConfig.javaModulePackage}.impl.service"/>
+<#assign daoPackage="${_globalConfig.javaModulePackage}.dao"/>
+<#assign entityPackage="${_globalConfig.javaModulePackage}.entity"/>
+
 <#assign daoClassName="${_tableContext.className}Dao"/>
 <#assign daoPropertyName="${_tableContext.propertyName}Dao"/>
 <#assign entityClassName="${_tableContext.className}ExtEntity"/>
@@ -12,8 +16,8 @@ package ${daoPackage};
 
 import java.util.List;
 
-import ${_globalConfig.getJavaBasePackage()}.${_globalConfig.getModuleName()}.entity.${entityClassName};
-import ${_globalConfig.getJavaBasePackage()}.${_globalConfig.getModuleName()}.entity.${_tableContext.className}Example;
+import ${entityPackage}.${entityClassName};
+import ${entityPackage}.${_tableContext.className}Example;
 
 
 public interface ${daoClassName} {

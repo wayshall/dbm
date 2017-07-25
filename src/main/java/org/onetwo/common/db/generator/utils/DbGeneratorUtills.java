@@ -12,6 +12,16 @@ import com.google.common.collect.Maps;
 
 public class DbGeneratorUtills {
 	
+	/****
+	 * sample:
+	 * 字典类型: SEX
+	 * 男: SEX_MALE
+	 * 女: SEX_FEMALE
+	 * 
+	 * @author wayshall
+	 * @param comment
+	 * @return
+	 */
 	public static Map<String, String> parse(String comment){
 		Map<String, String> commentInfo = Maps.newHashMap();
 		if(StringUtils.isBlank(comment))

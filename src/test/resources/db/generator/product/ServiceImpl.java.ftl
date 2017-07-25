@@ -1,7 +1,11 @@
 <#assign requestPath="/${_globalConfig.getModuleName()}/${_tableContext.className}"/>
 <#assign pagePath="/${_globalConfig.getModuleName()}/${_tableContext.tableNameWithoutPrefix}"/>
 
-<#assign servicePackage="${_globalConfig.getJavaBasePackage()}.${_globalConfig.getModuleName()}.${_tableContext.localPackage}"/>
+<#assign servicePackage="${_globalConfig.javaModulePackage}.service"/>
+<#assign serviceImplPackage="${_globalConfig.javaModulePackage}.impl.service"/>
+<#assign daoPackage="${_globalConfig.javaModulePackage}.dao"/>
+<#assign entityPackage="${_globalConfig.javaModulePackage}.entity"/>
+
 <#assign serviceImplClassName="${_tableContext.className}ServiceImpl"/>
 <#assign serviceImplPropertyName="${_tableContext.propertyName}ServiceImpl"/>
 <#assign mapperClassName="${_tableContext.className}Mapper"/>
@@ -9,18 +13,18 @@
 <#assign idName="${table.primaryKey.javaName}"/>
 <#assign idType="${table.primaryKey.javaType.simpleName}"/>
 
-package ${servicePackage};
+package ${_globalConfig.getJavaLocalPackage(_tableContext.localPackage)};
 
 import java.util.Collection;
 
-import org.onetwo.common.db.BaseEntityManager;
+import org.onetwo.common.db.spi.BaseEntityManager;
 import org.onetwo.common.db.builder.Querys;
 import org.onetwo.common.utils.Page;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import ${_globalConfig.getJavaBasePackage()}.${_globalConfig.getModuleName()}.entity.${_tableContext.className};
+import ${entityPackage}.${_tableContext.className};
 
 @Service
 @Transactional
@@ -29,14 +33,14 @@ public class ${serviceImplClassName} {
     @Autowired
     private BaseEntityManager baseEntityManager;
     
-    public void findPage(Page<${_tableContext.className}> page, ${_tableContext.className} ${_tableContext.propertyName}){
-        Querys.from(baseEntityManager, ${_tableContext.className}.class)
-        		.where()
-        		.addFields(${_tableContext.propertyName})
-        		.ignoreIfNull()
-        		.end()
-        		.toQuery()
-        		.page(page);
+    public Page<${_tableContext.className}> findPage(Page<${_tableContext.className}> page, ${_tableContext.className} ${_tableContext.propertyName}){
+        return Querys.from(baseEntityManager, ${_tableContext.className}.class)
+                	.where()
+            		  .addFields(${_tableContext.propertyName})
+            		  .ignoreIfNull()
+            		.end()
+            		.toQuery()
+            		.page(page);
     }
     
     public void save(${_tableContext.className} entity) {
