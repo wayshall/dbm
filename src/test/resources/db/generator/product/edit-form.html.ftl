@@ -19,7 +19,7 @@
 </div>
 
 <div id="dlg-buttons">
-    <a href="#" class="easyui-linkbutton" iconCls="icon-ok" onclick="saveData();">保存</a>
+    <a href="#" class="easyui-linkbutton c6" iconCls="icon-ok" onclick="saveData();">保存</a>
     <a href="#" class="easyui-linkbutton" iconCls="icon-cancel" onclick="cancel();">取消</a>
 </div>
 <script type="text/javascript">

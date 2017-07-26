@@ -73,7 +73,7 @@
                 $('#addDataDialog').dialog('open').dialog('setTitle', '新增');
 
 				$('#${dataFormName}').form('reset');
-                var url = '${'$'}{siteConfig.baseURL}${modulePath}.json';
+                var url = reqUrl;
                 $('#${dataFormName}').attr('action', url);
                 $('#${dataFormName}').find('input[name="_method"]').val('');
            }
@@ -105,9 +105,12 @@
             iconCls:'icon-remove',
             handler:helper.deleteHandler({
                         datagrid: '#${datagridName}',
-                        url: '${'$'}{siteConfig.baseURL}${modulePath}.json',
+                        url: reqUrl,
                         idField: '${table.primaryKey.javaName}',
-                        paramIdName: '${table.primaryKey.javaName}s'
+                        paramIdName: '${table.primaryKey.javaName}s',
+                        params: {
+                            _method: 'put'
+                        }
                     })
         }
         
