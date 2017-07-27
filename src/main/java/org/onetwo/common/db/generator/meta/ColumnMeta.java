@@ -50,6 +50,10 @@ public class ColumnMeta {
 		}
 	}
 	
+	public String getCommentName() {
+		return commentName;
+	}
+
 	public boolean isDictType(){
 		//<#elseif column.commentsInfo['字典类型']??>
 		return this.commentsInfo.containsKey("字典类型");
@@ -57,6 +61,14 @@ public class ColumnMeta {
 	
 	public boolean isFileType(){
 		return this.commentsInfo.containsKey("文件类型");
+	}
+	
+	public boolean isEmailType(){
+		return this.commentsInfo.containsKey("email类型");
+	}
+	
+	public boolean isUrlType(){
+		return this.commentsInfo.containsKey("url类型");
 	}
 	
 	public boolean isAssociationType(){
