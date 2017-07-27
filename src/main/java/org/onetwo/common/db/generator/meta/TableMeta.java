@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.onetwo.common.utils.Assert;
 import org.onetwo.common.utils.CUtils;
@@ -13,6 +14,7 @@ import org.onetwo.common.utils.map.CaseInsensitiveMap;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableMap;
+
 
 public class TableMeta {
 
@@ -31,6 +33,13 @@ public class TableMeta {
 		Assert.hasText(name, "table name must has text");
 		this.name = name;
 		this.comment = comment;
+	}
+	
+	public List<ColumnMeta> getAssociationTypeColumns(){
+		return columnMap.values()
+						.stream()
+						.filter(col->col.isAssociationType())
+						.collect(Collectors.toList());
 	}
 	
 	public String getShortName(){

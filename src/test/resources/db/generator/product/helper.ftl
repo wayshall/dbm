@@ -9,7 +9,7 @@
                 <#assign requiredValue = column.nullable?string('false', 'true')/>
             </#if><#t>
                 <tr>
-                    <td>${(column.comments[0])!''}:</td>
+                    <td>${(column.commentName)!''}:</td>
                     <td>
                       <#if column.mapping.isNumberType()==true>
                         <input class="easyui-numberbox ${fieldClass}" type="text" name="${column.javaName}" 
@@ -37,7 +37,7 @@
                                              editable:false,
                                              data: [{value:'true', text:'是', selected:'true'}, {value:'false', text:'否'}] "/>
                                
-                      <#elseif column.commentsInfo['字典类型']??>
+                      <#elseif column.isDictType()==true>
                         <input class="easyui-combobox ${fieldClass}" name="${column.javaName}" 
                                data-options="required:${requiredValue},
                                               method: 'get',
@@ -46,6 +46,16 @@
                                               loadFilter: helper.addEmptyOptionForComboboxFilter,
                                             </#if><#t>
                                               url: '${'$'}{siteConfig.baseURL}/configmgr/dictionary/combobox/${column.commentsInfo['字典类型']}.json' "/>
+                               
+                      <#elseif column.isFileType()==true>
+                        <input class="easyui-filebox ${fieldClass}" id="${column.javaName}" name="${column.javaName}" 
+                               data-options="required:${requiredValue},
+                                              editable: false,
+                                              buttonText:'选择文件' "/>
+                               
+                      <#elseif column.isAssociationType()==true>
+                        <input class="${fieldClass}" name="${column.javaName}" 
+                               data-options="required:${requiredValue}"/>
                                
                       <#else>
                         <input class="easyui-textbox ${fieldClass}" type="text" name="${column.javaName}" 

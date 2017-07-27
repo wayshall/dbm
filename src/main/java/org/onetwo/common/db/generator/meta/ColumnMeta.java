@@ -1,5 +1,6 @@
 package org.onetwo.common.db.generator.meta;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -7,6 +8,7 @@ import java.util.Map;
 import org.onetwo.common.db.generator.mapping.ColumnMapping;
 import org.onetwo.common.db.generator.utils.DbGeneratorUtills;
 import org.onetwo.common.utils.CUtils;
+import org.onetwo.common.utils.GuavaUtils;
 import org.onetwo.common.utils.StringUtils;
 
 import com.google.common.base.Splitter;
@@ -22,7 +24,9 @@ public class ColumnMeta {
 	
 	protected boolean nullable;
 	private String comment;
+	private List<String> comments;
 	private Map<String, String> commentsInfo = Collections.emptyMap();
+	private String commentName;
 	protected int columnSize;
 	
 
@@ -36,6 +40,27 @@ public class ColumnMeta {
 //		setSqlType(sqlType);
 //		setJavaType(javaType);
 		this.mapping = mapping;
+	}
+	
+	public void init(){
+		this.commentsInfo = DbGeneratorUtills.parse(comment);
+		this.comments = Arrays.asList(GuavaUtils.split(comment, '\n'));
+		if(!comments.isEmpty()){
+			this.commentName = comments.get(0);
+		}
+	}
+	
+	public boolean isDictType(){
+		//<#elseif column.commentsInfo['字典类型']??>
+		return this.commentsInfo.containsKey("字典类型");
+	}
+	
+	public boolean isFileType(){
+		return this.commentsInfo.containsKey("文件类型");
+	}
+	
+	public boolean isAssociationType(){
+		return this.commentsInfo.containsKey("关联类型");
 	}
 
 	public String getName() {
@@ -52,7 +77,7 @@ public class ColumnMeta {
 	}
 	
 	public List<String> getComments() {
-		return CUtils.iterableToList(Splitter.on('\n').trimResults().omitEmptyStrings().split(comment));
+		return comments;
 	}
 	
 	public Map<String, String> getCommentsInfo() {
@@ -70,7 +95,6 @@ public class ColumnMeta {
 
 	public void setComment(String comment) {
 		this.comment = comment;
-		this.commentsInfo = DbGeneratorUtills.parse(comment);
 	}
 
 	public boolean isPrimaryKey() {

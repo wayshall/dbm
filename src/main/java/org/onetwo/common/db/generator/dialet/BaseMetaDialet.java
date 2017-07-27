@@ -119,6 +119,7 @@ abstract public class BaseMetaDialet implements DatabaseMetaDialet {
 				meta.setNullable("yes".equalsIgnoreCase(isNullable));
 				meta.setColumnSize(columnSize);
 				
+				meta.init();
 				table.addColumn(meta);
 				return meta;
 			}

@@ -1,11 +1,12 @@
 <#import "helper.ftl" as helper>
 
 <#assign dataFormName="dataForm"/>
-<#assign datagridName="dataGrid"/>
+<#assign dataGridName="dataGrid"/>
+<#assign addDataDialogName="addDataDialog"/>
 
-<#assign modulePath="/${_globalConfig.getModuleName()}/${_tableContext.tableNameWithoutPrefix}"/>
+<#assign modulePath="${_globalConfig.requestModulePath}/${_tableContext.propertyName}"/>
 <meta charset="UTF-8">
-<div id="addDataDialog" class="easyui-dialog" 
+<div id="${addDataDialogName}" class="easyui-dialog" 
     style="width:50%;height:80%;padding:10px 20px"
     data-options="closed:true, modal:true, buttons:'#dlg-buttons' ">
            填写[${(table.comments[0])!''}]信息<hr/>
@@ -23,19 +24,34 @@
     <a href="#" class="easyui-linkbutton" iconCls="icon-cancel" onclick="cancel();">取消</a>
 </div>
 <script type="text/javascript">
-    $('#addDataDialog').dialog({
+    $('#${addDataDialogName}').dialog({
         width:'50%',
         height:'80%',
         onClose: function(){
-            $('#dataForm').form('reset');
+            $('#${dataFormName}').form('reset');
         }
     })
     
     
     function saveData(){
-        helper.submitEasyForm({dataForm: '#${dataFormName}',dataDialog: '#addDataDialog', datagrid: '#${datagridName}'});
+        helper.submitEasyForm({dataForm: '#${dataFormName}',dataDialog: '#${addDataDialogName}', datagrid: '#${dataGridName}'});
     }
     function cancel(){
-        $('#addDataDialog').dialog('close');
+        $('#${addDataDialogName}').dialog('close');
     }
+    
+    <#list table.associationTypeColumns() as column>
+    $('#${column.javaName}').combogrid({
+        panelWidth:300,
+        method: 'get',
+        url: '${'$'}{siteConfig.baseURL}/${column.javaName}.json?pagination=false',
+        idField:'${(column.commentsInfo['idField'])!'id'}',
+        textField:'${(column.commentsInfo['textField'])!'name'}',
+        mode:'remote',
+        fitColumns:true,
+        columns:[[
+            {field:'${(column.commentsInfo['textField'])!'name'}',title:'${(column.commentName)!''}',align:'left',width:60}
+        ]]
+    });
+    </#list>
 </script>

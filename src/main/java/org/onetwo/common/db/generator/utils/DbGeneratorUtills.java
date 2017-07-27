@@ -14,9 +14,16 @@ public class DbGeneratorUtills {
 	
 	/****
 	 * sample:
+	 * 列名称
 	 * 字典类型: SEX
 	 * 男: SEX_MALE
 	 * 女: SEX_FEMALE
+	 * 
+	 * 文件类型
+	 * 
+	 * 关联类型
+	 * idField: id
+	 * textField: name
 	 * 
 	 * @author wayshall
 	 * @param comment
