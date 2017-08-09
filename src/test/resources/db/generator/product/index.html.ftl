@@ -123,6 +123,7 @@
         fitColumns: true,
         pagination: true,
         singleSelect: false,
+        loadFilter: helper.defaultOnError(),
         url: reqUrl,
         method: 'get',
         pageSize: 20,

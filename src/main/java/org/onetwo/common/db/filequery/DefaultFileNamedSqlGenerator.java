@@ -1,21 +1,19 @@
 package org.onetwo.common.db.filequery;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.Map.Entry;
+import java.util.Optional;
 
 import org.onetwo.common.db.ParsedSqlContext;
 import org.onetwo.common.db.filequery.func.SqlFunctionDialet;
-import org.onetwo.common.db.spi.NamedQueryInfo;
 import org.onetwo.common.db.spi.FileNamedSqlGenerator;
 import org.onetwo.common.db.spi.FileSqlParserType;
+import org.onetwo.common.db.spi.NamedQueryInfo;
 import org.onetwo.common.db.sql.DynamicQuery;
 import org.onetwo.common.db.sql.DynamicQueryFactory;
 import org.onetwo.common.db.sqlext.ExtQueryUtils;
-import org.onetwo.common.log.JFishLoggerFactory;
 import org.onetwo.common.spring.ftl.TemplateParser;
 import org.onetwo.common.utils.LangUtils;
-import org.slf4j.Logger;
 import org.springframework.util.Assert;
 
 /****
@@ -25,7 +23,7 @@ import org.springframework.util.Assert;
  */
 public class DefaultFileNamedSqlGenerator implements FileNamedSqlGenerator {
 	
-	private static final Logger logger = JFishLoggerFactory.getLogger(DefaultFileNamedSqlGenerator.class);
+//	private static final Logger logger = JFishLoggerFactory.getLogger(DefaultFileNamedSqlGenerator.class);
 	protected NamedQueryInfo info;
 	protected boolean countQuery;
 	private TemplateParser parser;
@@ -107,7 +105,6 @@ public class DefaultFileNamedSqlGenerator implements FileNamedSqlGenerator {
 			parsedSql = countQuery?info.getCountSql():info.getSql();
 			sv = new SqlAndValues(true, parsedSql, params);
 		}
-		logger.info("parsed sql : {}", parsedSql);
 
 		return sv;
 	}

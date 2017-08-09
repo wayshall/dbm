@@ -108,6 +108,11 @@ public class DefaultFileQueryWrapper extends AbstractQueryWrapper implements Que
 			dataQuery.setParameters(params);
 			setLimitResult(dataQuery);
 		}
+		
+		if(logger.isInfoEnabled()){
+			logger.info("parsed sql : {}", sqlAndValues.getParsedSql());
+			logger.info("sql params: {}", params);
+		}
 
 		this.dataQuery = dataQuery;
 		return dataQuery;
