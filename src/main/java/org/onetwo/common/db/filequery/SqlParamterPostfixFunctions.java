@@ -10,6 +10,7 @@ import org.onetwo.common.exception.BaseException;
 import org.onetwo.common.utils.JodatimeUtils;
 import org.onetwo.common.utils.LangUtils;
 import org.onetwo.common.utils.StringUtils;
+import org.onetwo.dbm.exception.DbmException;
 
 /*****
  * 自定义sql语句里，命名参数的后缀函数
@@ -59,7 +60,7 @@ public class SqlParamterPostfixFunctions implements SqlParamterPostfixFunctionRe
 			@Override
 			public Object toSqlString(String paramName, Object value) {
 				if(Date.class.isInstance(value)){
-					throw new BaseException(paramName+" is not a date, can not invoke startOfDate");
+					throw new DbmException(paramName+" is not a date, can not invoke startOfDate");
 				}
 				Date date = Types.convertValue(value, Date.class);
 				return JodatimeUtils.atStartOfDate(date);
@@ -70,11 +71,19 @@ public class SqlParamterPostfixFunctions implements SqlParamterPostfixFunctionRe
 			@Override
 			public Object toSqlString(String paramName, Object value) {
 				if(Date.class.isInstance(value)){
-					throw new BaseException(paramName+" is not a date, can not invoke endOfDate");
+					throw new DbmException(paramName+" is not a date, can not invoke endOfDate");
 				}
 				Date date = Types.convertValue(value, Date.class);
 				return JodatimeUtils.atEndOfDate(date);
 			}
+		});
+
+		register(new String[]{"atStartOfNextDate"}, (paramName, value)->{
+			if(Date.class.isInstance(value)){
+				throw new DbmException(paramName+" is not a date, can not invoke atStartOfNextDate");
+			}
+			Date date = Types.convertValue(value, Date.class);
+			return JodatimeUtils.atStartOfDate(date, 1);
 		});
 
 		/*register("inlist", new SqlParamterPostfixFunction(){

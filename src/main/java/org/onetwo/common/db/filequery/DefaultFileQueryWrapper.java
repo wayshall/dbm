@@ -167,6 +167,11 @@ public class DefaultFileQueryWrapper extends AbstractQueryWrapper implements Que
 		return this;
 	}
 
+	@Override
+	public Map<?, Object> getParameters() {
+		return params;
+	}
+
 	public <T> T getSingleResult() {
 		return createDataQueryIfNecessarry().getSingleResult();
 	}

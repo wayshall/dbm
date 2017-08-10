@@ -33,6 +33,8 @@ public interface QueryWrapper {
 	
 	public QueryWrapper setLimited(final Integer first, final Integer size);
 	
+	Map<?, Object> getParameters();
+	
 	public <T> T getRawQuery(Class<T> clazz);
 	
 	public QueryWrapper setQueryConfig(Map<Object, Object> configs);

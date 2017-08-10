@@ -1,10 +1,13 @@
 package org.onetwo.jpa.hibernate;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.hibernate.SQLQuery;
 import org.onetwo.common.db.AbstractQueryWrapper;
 import org.onetwo.common.db.spi.QueryWrapper;
+import org.onetwo.common.reflect.ReflectUtils;
 import org.springframework.jdbc.core.RowMapper;
 
 /**
@@ -80,6 +83,16 @@ public class HibernateDbmQueryWrapper extends AbstractQueryWrapper implements Qu
 	@Override
 	public <T> T unwarp(Class<T> clazz) {
 		return clazz.cast(sqlQuery);
+	}
+
+	@Override
+	public Map<?, Object> getParameters() {
+		try {
+			return (Map<?, Object>)ReflectUtils.invokeMethod("getNamedParams", sqlQuery);
+		} catch (Exception e) {
+			logger.warn("getNamedParams from hibernate sql query error!");
+			return Collections.EMPTY_MAP;
+		}
 	}
 
 }

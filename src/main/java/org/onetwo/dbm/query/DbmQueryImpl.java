@@ -28,7 +28,7 @@ public class DbmQueryImpl implements DbmQuery {
 	private DBDialect dbDialect;
 	private String sqlString;
 //	private Map<String, Object> parameters = new LinkedHashMap<String, Object>();
-	private DbmQueryValue parameters = null;
+	private DbmQueryValue queryValue = null;
 	
 	private Class<?> resultClass;
 	
@@ -44,7 +44,7 @@ public class DbmQueryImpl implements DbmQuery {
 		this.dbDialect = this.dbmSessionImplementor.getDialect();
 		this.sqlString = sqlString;
 		this.resultClass = resultClass;
-		this.parameters = DbmQueryValue.create(null);
+		this.queryValue = DbmQueryValue.create(null);
 	}
 	
 	/**********
@@ -54,7 +54,7 @@ public class DbmQueryImpl implements DbmQuery {
 	public DbmQuery setParameter(Integer index, Object value){
 //		this.checkQueryType(PlaceHolder.POSITION);
 //		createParameterIfNull();
-		this.parameters.setValue(index, value);
+		this.queryValue.setValue(index, value);
 		return this;
 	}
 	
@@ -64,13 +64,13 @@ public class DbmQueryImpl implements DbmQuery {
 	@Override
 	public DbmQuery setParameter(String name, Object value){
 //		createParameterIfNull();
-		this.parameters.setValue(name, value);
+		this.queryValue.setValue(name, value);
 		return this;
 	}
 	
 	public DbmQuery setParameters(Map<String, Object> params){
 //		createParameterIfNull();
-		this.parameters.setValue(params);
+		this.queryValue.setValue(params);
 		return this;
 	}
 	
@@ -147,23 +147,23 @@ public class DbmQueryImpl implements DbmQuery {
 	}
 
 	public DbmQueryValue getActualParameters(String sql) {
-		this.parameters.setResultClass(resultClass);
-		this.parameters.setSql(sql);
+		this.queryValue.setResultClass(resultClass);
+		this.queryValue.setSql(sql);
 		if(!isLimitedQuery()){
-			return this.parameters;
+			return this.queryValue;
 		}
 		/*if(!params.containsKey(FIRST_RESULT_NAME))
 			params.put(FIRST_RESULT_NAME, this.firstResult);
 		if(!params.containsKey(MAX_RESULT_NAME))
 			params.put(MAX_RESULT_NAME, dbDialect.getMaxResults(this.firstResult, maxResults));*/
 		
-		this.dbDialect.addLimitedValue(parameters, FIRST_RESULT_NAME, firstResult, MAX_RESULT_NAME, maxResults);
+		this.dbDialect.addLimitedValue(queryValue, FIRST_RESULT_NAME, firstResult, MAX_RESULT_NAME, maxResults);
 		
 		if(TimeProfileStack.isActive()){
-			this.logger.info("params"+parameters.getValues());
+			this.logger.info("params"+queryValue.getValues());
 		}
 		
-		return this.parameters;
+		return this.queryValue;
 	}
 
 	public boolean isLimitedQuery(){
@@ -235,4 +235,10 @@ public class DbmQueryImpl implements DbmQuery {
 			}
 		}
 	}
+
+	@Override
+	public Map<String, Object> getParameters() {
+		return queryValue.getValues();
+	}
+	
 }

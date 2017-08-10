@@ -105,4 +105,9 @@ public class DbmQueryWrapperImpl extends AbstractQueryWrapper {
 		return clazz.cast(dbmQuery);
 	}
 
+	@Override
+	public Map<String, Object> getParameters() {
+		return dbmQuery.getParameters();
+	}
+
 }

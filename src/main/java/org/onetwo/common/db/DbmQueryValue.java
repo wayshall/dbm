@@ -1,5 +1,6 @@
 package org.onetwo.common.db;
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,7 +28,7 @@ public class DbmQueryValue {
 	}
 
 	public DbmQueryValue setValue(int index, Object value){
-		Map<String, Object> map = getValues();
+		Map<String, Object> map = this.values;
 		map.put(String.valueOf(index), convertValue(value));
 		return this;
 	}
@@ -59,11 +60,10 @@ public class DbmQueryValue {
 	}
 	
 	/*********
-	 * List Or Map
 	 * @return
 	 */
 	public Map<String, Object> getValues(){
-		return values;
+		return Collections.unmodifiableMap(values);
 	}
 
 	/*public PlaceHolder getHolder() {

@@ -7,26 +7,28 @@ import org.springframework.jdbc.core.RowMapper;
 
 public interface DbmQuery {
 
-	public DbmQuery setParameter(Integer index, Object value);
+	DbmQuery setParameter(Integer index, Object value);
 
-	public DbmQuery setParameter(String name, Object value);
+	DbmQuery setParameter(String name, Object value);
 
-	public <T> T getSingleResult();
+	<T> T getSingleResult();
 
-	public <T> List<T> getResultList();
+	<T> List<T> getResultList();
 
-	public DbmQuery setFirstResult(int firstResult);
+	DbmQuery setFirstResult(int firstResult);
 
-	public DbmQuery setMaxResults(int maxResults);
+	DbmQuery setMaxResults(int maxResults);
 	
-	public DbmQuery setResultClass(Class<?> resultClass);
+	DbmQuery setResultClass(Class<?> resultClass);
 	
-	public DbmQuery setParameters(Map<String, Object> params);
+	DbmQuery setParameters(Map<String, Object> params);
 	
-	public DbmQuery setParameters(List<?> params);
+	DbmQuery setParameters(List<?> params);
 	
-	public int executeUpdate();
+	Map<String, Object> getParameters();
 	
-	public void setRowMapper(RowMapper<?> rowMapper);
-	public void setQueryAttributes(Map<Object, Object> params);
+	int executeUpdate();
+	
+	void setRowMapper(RowMapper<?> rowMapper);
+	void setQueryAttributes(Map<Object, Object> params);
 }
