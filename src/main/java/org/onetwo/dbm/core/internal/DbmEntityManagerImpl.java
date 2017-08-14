@@ -284,13 +284,15 @@ public class DbmEntityManagerImpl extends BaseEntityManagerAdapter implements Qu
 	}
 
 	@Override
-	public <T> void findPage(Class<T> entityClass, Page<T> page, Object... properties) {
+	public <T> Page<T> findPage(Class<T> entityClass, Page<T> page, Object... properties) {
 		getCurrentSession().findPageByProperties(entityClass, page, CUtils.asLinkedMap(properties));
+		return page;
 	}
 
 	@Override
-	public <T> void findPageByProperties(Class<T> entityClass, Page<T> page, Map<Object, Object> properties) {
+	public <T> Page<T> findPageByProperties(Class<T> entityClass, Page<T> page, Map<Object, Object> properties) {
 		getCurrentSession().findPageByProperties(entityClass, page, properties);
+		return page;
 	}
 
 	/*public <T> void removeList(Collection<T> entities) {
@@ -307,8 +309,9 @@ public class DbmEntityManagerImpl extends BaseEntityManagerAdapter implements Qu
 		return getCurrentSession().findUnique(queryValue);
 	}
 	
-	public <T> void findPage(Page<T> page, DbmQueryValue squery) {
+	public <T> Page<T> findPage(Page<T> page, DbmQueryValue squery) {
 		getCurrentSession().findPage(page, squery);
+		return page;
 	}
 
 	/****

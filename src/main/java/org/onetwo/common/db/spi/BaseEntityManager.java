@@ -80,13 +80,13 @@ public interface BaseEntityManager {
 	public <T> List<T> selectFieldsToEntity(Class<?> entityClass, Object[] selectFields, Object... properties);
 	
 
-	public <T> void findPage(final Class<T> entityClass, final Page<T> page, Object... properties);
+	public <T> Page<T> findPage(final Class<T> entityClass, final Page<T> page, Object... properties);
 
-	public <T> void findPageByProperties(final Class<T>  entityClass, final Page<T> page, Map<Object, Object> properties);
+	public <T> Page<T> findPageByProperties(final Class<T>  entityClass, final Page<T> page, Map<Object, Object> properties);
 	
-	public <T> void findPage(final Page<T> page, QueryBuilder query);
+	public <T> Page<T> findPage(final Page<T> page, QueryBuilder query);
 	
-	public <T> void findPage(Page<T> page, DbmQueryValue squery);
+	public <T> Page<T> findPage(Page<T> page, DbmQueryValue squery);
 	
 	public void flush();
 	

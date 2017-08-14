@@ -6,6 +6,8 @@
 <#assign daoPackage="${_globalConfig.javaModulePackage}.dao"/>
 <#assign entityPackage="${_globalConfig.javaModulePackage}.entity"/>
 
+<#assign entityClassName="${_tableContext.className}Entity"/>
+<#assign entityClassName2="${_tableContext.className}"/>
 <#assign serviceImplClassName="${_tableContext.className}ServiceImpl"/>
 <#assign serviceImplPropertyName="${_tableContext.propertyName}ServiceImpl"/>
 <#assign mapperClassName="${_tableContext.className}Mapper"/>
@@ -24,7 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import ${entityPackage}.${_tableContext.className};
+import ${entityPackage}.${entityClassName};
 
 @Service
 @Transactional
@@ -33,8 +35,8 @@ public class ${serviceImplClassName} {
     @Autowired
     private BaseEntityManager baseEntityManager;
     
-    public Page<${_tableContext.className}> findPage(Page<${_tableContext.className}> page, ${_tableContext.className} ${_tableContext.propertyName}){
-        return Querys.from(baseEntityManager, ${_tableContext.className}.class)
+    public Page<${entityClassName}> findPage(Page<${entityClassName}> page, ${entityClassName} ${_tableContext.propertyName}){
+        return Querys.from(baseEntityManager, ${entityClassName}.class)
                 	.where()
             		  .addFields(${_tableContext.propertyName})
             		  .ignoreIfNull()
@@ -43,19 +45,19 @@ public class ${serviceImplClassName} {
             		.page(page);
     }
     
-    public void save(${_tableContext.className} entity) {
+    public void save(${entityClassName} entity) {
 		baseEntityManager.persist(entity);
 	}
 
-	public void update(${_tableContext.className} entity) {
+	public void update(${entityClassName} entity) {
 		baseEntityManager.update(entity);
 	}
     
-    public ${_tableContext.className} findById(${idType} id) {
-		return baseEntityManager.findById(${_tableContext.className}.class, id);
+    public ${entityClassName} findById(${idType} id) {
+		return baseEntityManager.findById(${entityClassName}.class, id);
 	}
 
-	public Collection<${_tableContext.className}> removeByIds(${idType}... id) {
-		return baseEntityManager.removeByIds(${_tableContext.className}.class, id);
+	public Collection<${entityClassName}> removeByIds(${idType}... id) {
+		return baseEntityManager.removeByIds(${entityClassName}.class, id);
 	}
 }

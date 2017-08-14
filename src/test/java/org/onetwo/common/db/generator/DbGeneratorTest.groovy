@@ -44,12 +44,12 @@ class DbGeneratorTest extends AbstractJUnit4SpringContextTests {
 	@Test
 	def void testGeneratorCode(){
 		
-		def projectPath =$/G:\mydev\cloudsoft-workspace\sysu-manager/$
-		def javaBasePackage = "com.sysu.manager"
+		def projectPath =$/D:\mydev\java\cloudsoft-workspace\beauty-campus-service\nav-service/$
+		def javaBasePackage = "com.icloudsoft.campus.nav"
 		def moduleName = ""
-		def stripTablePrefix = "sysu_"
+		def stripTablePrefix = "nav_"
 		
-		def dbname = "sysu"
+		def dbname = "campus"
 		def dbusername = "root"
 		def dbpassword = "root"
 		
@@ -58,7 +58,11 @@ class DbGeneratorTest extends AbstractJUnit4SpringContextTests {
 		def resourceDir = "${projectPath}/src/main/resources"
 		def javaSrcDir = "${projectPath}/src/main/java"
 		
+		
 		def basePath = FileUtils.getResourcePath("");
+		def entityTemplate = "${basePath}/db/generator/product/Entity.java.ftl"
+		def controllerTemplate = "${basePath}/db/generator/product/Controller.java.ftl"
+		def serviceImplTemplate = "${basePath}/db/generator/product/ServiceImpl.java.ftl"
 		
 		dataSource = TomcatDataSourceBuilder.newBuilder()
 								.mysql(dbname, dbusername, dbpassword)
@@ -79,13 +83,26 @@ class DbGeneratorTest extends AbstractJUnit4SpringContextTests {
 //																.stripTablePrefix("zyt_estate_")
 															.end()
 														.end()
-														.table("sysu_type")
+														.table("nav_campus")
+															.entityTemplate("entity", entityTemplate)
+															.controllerTemplate("controller", controllerTemplate)
+															.serviceImplTemplate(serviceImplTemplate)
+														.end()
+														.table("nav_spot")
+															.entityTemplate("entity", entityTemplate)
+														.end()
+														.table("nav_spot_type")
+															.entityTemplate("entity", entityTemplate)
+														.end()
+														.table("nav_spot_module")
 //														.table("")
-															.pageTemplate("${basePath}/db/generator/product/index.html.ftl")
+															/*.pageTemplate("${basePath}/db/generator/product/index.html.ftl")
 															.pageTemplate("${basePath}/db/generator/product/edit-form.html.ftl")
 															.controllerTemplate("controller", "${basePath}/db/generator/product/Controller.java.ftl")
-															.serviceImplTemplate("${basePath}/db/generator/product/ServiceImpl.java.ftl")
-															.entityTemplate("entity", "${basePath}/db/generator/product/Entity.java.ftl", ".java")
+															.serviceImplTemplate("${basePath}/db/generator/product/ServiceImpl.java.ftl")*/
+															.entityTemplate(entityTemplate)
+															.controllerTemplate("controller", controllerTemplate)
+															.serviceImplTemplate(serviceImplTemplate)
 															/*.daoTemplate("${basePath}/db/generator/datagrid/Dao.java.ftl")
 															.entityTemplate("${basePath}/db/generator/datagrid/ExtEntity.java.ftl")
 															.mybatisDaoXmlTemplate("${basePath}/db/generator/datagrid/Dao.xml.ftl")*/

@@ -89,8 +89,9 @@ public abstract class BaseEntityManagerAdapter implements InnerBaseEntityManager
 	}
 
 	@Override
-	public <T> void findPage(final Page<T> page, QueryBuilder squery){
+	public <T> Page<T> findPage(final Page<T> page, QueryBuilder squery){
 		findPageByProperties((Class<T>)squery.getEntityClass(), page, squery.getParams());
+		return page;
 	}
 	
 	@Override

@@ -27,18 +27,22 @@ import org.hibernate.validator.constraints.URL;
 import org.onetwo.dbm.jpa.BaseEntity;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 @SuppressWarnings("serial")
 @Entity
 @Table(name="${table.name}")
 @Data
-public class ${entityClassName2} extends BaseEntity  {
+@EqualsAndHashCode(callSuper=true)
+public class ${entityClassName} extends BaseEntity  {
 
-<#list table.columns as column>
-    <#if column.primaryKey>
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
-    </#if>
+    @NotNull
+    private ${table.primaryKey.javaType.simpleName} ${table.primaryKey.propertyName};
+    
+<#list table.columns as column>
+<#if !column.primaryKey && !(column.propertyName!='createAt' || column.propertyName!='updateAt')>
     <#if column.nullable>
     @NotNull
     </#if>
@@ -46,11 +50,13 @@ public class ${entityClassName2} extends BaseEntity  {
     @NotBlank
     @Length(max=${column.columnSize})
     @SafeHtml
-    <#elseif column.mapping.isEmailType()>
+    <#elseif column.isEmailType()>
     @Email
-    <#elseif column.mapping.isUrlType()>
+    <#elseif column.isUrlType()>
     @URL
     </#if>
     private ${column.javaType.simpleName} ${column.propertyName};
+    
+</#if>
 </#list>
 }

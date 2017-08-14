@@ -6,8 +6,10 @@
 <#assign daoPackage="${_globalConfig.javaModulePackage}.dao"/>
 <#assign entityPackage="${_globalConfig.javaModulePackage}.entity"/>
 
+<#assign entityClassName="${_tableContext.className}Entity"/>
+<#assign entityClassName2="${_tableContext.className}"/>
 <#assign serviceImplClassName="${_tableContext.className}ServiceImpl"/>
-<#assign serviceImplPropertyName="${_tableContext.propertyName}ServiceImpl"/>
+<#assign serviceImplPropertyName="${_tableContext.propertyName}Service"/>
 <#assign mapperClassName="${_tableContext.className}Mapper"/>
 <#assign mapperPropertyName="${_tableContext.propertyName}Mapper"/>
 <#assign idName="${table.primaryKey.javaName}"/>
@@ -20,6 +22,7 @@ import org.onetwo.boot.core.web.controller.AbstractBaseController;
 import org.onetwo.boot.core.web.controller.DateInitBinder;
 import org.onetwo.common.utils.Page;
 import org.onetwo.easyui.EasyDataGrid;
+import org.onetwo.easyui.EasyViews.EasyGridView;
 import org.onetwo.easyui.PageRequest;
 import org.onetwo.ext.permission.api.annotation.ByPermissionClass;
 import org.onetwo.common.utils.map.MappableMap;
@@ -38,7 +41,7 @@ import org.onetwo.plugins.admin.utils.WebConstant.ValidGroup.ValidAnyTime;
 import org.onetwo.plugins.admin.utils.WebConstant.ValidGroup.ValidWhenEdit;
 import org.onetwo.plugins.admin.utils.WebConstant.ValidGroup.ValidWhenNew;
 
-import ${entityPackage}.${_tableContext.className};
+import ${entityPackage}.${entityClassName};
 import ${serviceImplPackage}.${serviceImplClassName};
 
 @Controller
@@ -51,16 +54,17 @@ public class ${_tableContext.className}Controller extends AbstractBaseController
     
     @ByPermissionClass(${_tableContext.className}Mgr.class)
     @RequestMapping(method=RequestMethod.GET)
-    public ModelAndView index(PageRequest pageRequest, ${_tableContext.className} ${_tableContext.propertyName}){
+    @XResponseView(value="easyui", wrapper=EasyGridView.class)
+    public ModelAndView index(PageRequest pageRequest, ${entityClassName} ${_tableContext.propertyName}){
         return responsePageOrData("${pagePath}-index", ()->{
-                    Page<${_tableContext.className}> page = ${serviceImplPropertyName}.findPage(pageRequest.toPageObject(), ${_tableContext.propertyName});
-                    return EasyDataGrid.create(page);
+                    Page<${entityClassName}> page = ${serviceImplPropertyName}.findPage(pageRequest.toPageObject(), ${_tableContext.propertyName});
+                    return page;
                 });
     }
     
     @ByPermissionClass(${_tableContext.className}Mgr.Create.class)
     @RequestMapping(method=RequestMethod.POST)
-    public ModelAndView create(@Validated({ValidAnyTime.class, ValidWhenNew.class}) ${_tableContext.className} ${_tableContext.propertyName}, BindingResult br){
+    public ModelAndView create(@Validated({ValidAnyTime.class, ValidWhenNew.class}) ${entityClassName} ${_tableContext.propertyName}, BindingResult br){
     	ValidatorUtils.throwIfHasErrors(br, true);
         ${serviceImplPropertyName}.save(${_tableContext.propertyName});
         return messageMv("保存成功！");
@@ -68,13 +72,13 @@ public class ${_tableContext.className}Controller extends AbstractBaseController
     @ByPermissionClass(${_tableContext.className}Mgr.class)
     @RequestMapping(value="{${idName}}", method=RequestMethod.GET)
     public ModelAndView show(@PathVariable("${idName}") ${idType} ${idName}){
-        ${_tableContext.className} ${_tableContext.propertyName} = ${serviceImplPropertyName}.findById(${idName});
+        ${entityClassName} ${_tableContext.propertyName} = ${serviceImplPropertyName}.findById(${idName});
         return responseData(${_tableContext.propertyName});
     }
     
     @ByPermissionClass(${_tableContext.className}Mgr.Update.class)
     @RequestMapping(value="{${idName}}", method=RequestMethod.PUT)
-    public ModelAndView update(@PathVariable("${idName}") ${idType} ${idName}, @Validated({ValidAnyTime.class, ValidWhenEdit.class}) ${_tableContext.className} ${_tableContext.propertyName}, BindingResult br){
+    public ModelAndView update(@PathVariable("${idName}") ${idType} ${idName}, @Validated({ValidAnyTime.class, ValidWhenEdit.class}) ${entityClassName} ${_tableContext.propertyName}, BindingResult br){
     	ValidatorUtils.throwIfHasErrors(br, true);
         ${_tableContext.propertyName}.set${idName?cap_first}(${idName});
         ${serviceImplPropertyName}.update(${_tableContext.propertyName});
