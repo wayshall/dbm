@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.onetwo.common.db.generator.meta.ColumnMeta;
 import org.onetwo.common.db.generator.utils.DBUtils;
 import org.onetwo.common.utils.LangUtils;
 
@@ -26,12 +27,21 @@ public class ColumnMapping {
 	}
 	private int sqlType = DBUtils.TYPE_UNKNOW;
 	private Class<?> javaType;
+	private ColumnMeta columnMeta;
 
 	private Map<String, Object> attrs = new ColumnAttrMap();
 
 	public ColumnMapping(int sqlType) {
 		super();
 		this.sqlType = sqlType;
+	}
+
+	public ColumnMeta getColumnMeta() {
+		return columnMeta;
+	}
+
+	public void setColumnMeta(ColumnMeta columnMeta) {
+		this.columnMeta = columnMeta;
 	}
 
 	public int getSqlType() {
@@ -85,7 +95,7 @@ public class ColumnMapping {
 	}
 	
 	public boolean isSqlInteger(){
-		return getSqlType()==Types.INTEGER || getSqlType()==Types.BIGINT || getSqlType()==Types.SMALLINT;
+		return getSqlType()==Types.INTEGER || getSqlType()==Types.BIGINT || getSqlType()==Types.SMALLINT || getSqlType()==Types.TINYINT;
 	}
 	
 	public boolean isSqlType(int sqlType){
@@ -93,7 +103,7 @@ public class ColumnMapping {
 	}
 	
 	public boolean isBooleanType(){
-		return getJavaType()==boolean.class || getJavaType()==Boolean.class;
+		return getJavaType()==boolean.class || getJavaType()==Boolean.class || getColumnMeta().getName().toLowerCase().startsWith("is_");
 	}
 
 	@Override

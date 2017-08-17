@@ -40,7 +40,7 @@
         $('#${addDataDialogName}').dialog('close');
     }
     
-    <#list table.associationTypeColumns() as column>
+    <#list table.getAssociationTypeColumns() as column>
     $('#${column.javaName}').combogrid({
         panelWidth:300,
         method: 'get',

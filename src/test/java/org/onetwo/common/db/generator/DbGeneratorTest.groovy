@@ -42,12 +42,66 @@ class DbGeneratorTest extends AbstractJUnit4SpringContextTests {
 	}
 	
 	@Test
+	def void testNav(){
+		
+		def projectPath =$/G:\mydev\cloudsoft-workspace\sysu-manager/$
+		def moduleName = ""
+		
+		def dbname = "sysu"
+		def dbusername = "root"
+		def dbpassword = "root"
+		
+		
+		def pageFileBaseDir = "${projectPath}/src/main/resources/templates"
+		def resourceDir = "${projectPath}/src/main/resources"
+		def javaSrcDir = "${projectPath}/src/main/java"
+		
+		
+		def basePath = FileUtils.getResourcePath("");
+		def entityTemplate = "${basePath}/db/generator/product/Entity.java.ftl"
+		def voTemplate = "${basePath}/db/generator/api/VO.java.ftl"
+		def controllerTemplate = "${basePath}/db/generator/api/Controller.java.ftl"
+		def serviceImplTemplate = "${basePath}/db/generator/api/ServiceImpl.java.ftl"
+		
+		dataSource = TomcatDataSourceBuilder.newBuilder()
+								.mysql(dbname, dbusername, dbpassword)
+								.build();
+		
+		List<GeneratedResult<String>> gr = FtlDbGenerator.newGenerator(dataSource)
+				//										.templateEngine(new FtlEngine())
+														.mysql()
+														.stripTablePrefix("sysu_")
+														//.stripTablePrefix("zyt_estate_")
+														.globalConfig()
+															.pageFileBaseDir(pageFileBaseDir)
+															.resourceDir(resourceDir)
+															.javaSrcDir(javaSrcDir)
+															.javaBasePackage("com.sysu.manager")
+															.moduleName(moduleName)
+															.defaultTableContexts()
+//																.stripTablePrefix("zyt_estate_")
+															.end()
+														.end()
+														.table("sysu_campus")
+															.pageTemplate("${basePath}/db/generator/product/index.html.ftl")
+															.pageTemplate("${basePath}/db/generator/product/edit-form.html.ftl")
+															.controllerTemplate("controller", "${basePath}/db/generator/product/Controller.java.ftl")
+															.serviceImplTemplate("${basePath}/db/generator/product/ServiceImpl.java.ftl")
+															/*.daoTemplate("${basePath}/db/generator/datagrid/Dao.java.ftl")
+															.entityTemplate("${basePath}/db/generator/datagrid/ExtEntity.java.ftl")
+															.mybatisDaoXmlTemplate("${basePath}/db/generator/datagrid/Dao.xml.ftl")*/
+														.end()
+														.generate(LangUtils.asMap());
+		println "gr:${gr}"
+	}
+	
+	//cms
 	def void testGeneratorCode(){
 		
-		def projectPath =$/D:\mydev\java\cloudsoft-workspace\beauty-campus-service\nav-service/$
-		def javaBasePackage = "com.icloudsoft.campus.nav"
+//		def projectPath =$/D:\mydev\java\cloudsoft-workspace\beauty-campus-service\nav-service/$
+		def projectPath =$/D:\mydev\java\cloudsoft-workspace\beauty-campus-service\cms-service/$
+//		def javaBasePackage = "com.icloudsoft.campus.nav"
 		def moduleName = ""
-		def stripTablePrefix = "nav_"
 		
 		def dbname = "campus"
 		def dbusername = "root"
@@ -61,8 +115,9 @@ class DbGeneratorTest extends AbstractJUnit4SpringContextTests {
 		
 		def basePath = FileUtils.getResourcePath("");
 		def entityTemplate = "${basePath}/db/generator/product/Entity.java.ftl"
-		def controllerTemplate = "${basePath}/db/generator/product/Controller.java.ftl"
-		def serviceImplTemplate = "${basePath}/db/generator/product/ServiceImpl.java.ftl"
+		def voTemplate = "${basePath}/db/generator/api/VO.java.ftl"
+		def controllerTemplate = "${basePath}/db/generator/api/Controller.java.ftl"
+		def serviceImplTemplate = "${basePath}/db/generator/api/ServiceImpl.java.ftl"
 		
 		dataSource = TomcatDataSourceBuilder.newBuilder()
 								.mysql(dbname, dbusername, dbpassword)
@@ -71,38 +126,40 @@ class DbGeneratorTest extends AbstractJUnit4SpringContextTests {
 		List<GeneratedResult<String>> gr = FtlDbGenerator.newGenerator(dataSource)
 				//										.templateEngine(new FtlEngine())
 														.mysql()
-														.stripTablePrefix(stripTablePrefix)
+														.stripTablePrefix("cms_")
 														//.stripTablePrefix("zyt_estate_")
 														.globalConfig()
 															.pageFileBaseDir(pageFileBaseDir)
 															.resourceDir(resourceDir)
 															.javaSrcDir(javaSrcDir)
-															.javaBasePackage(javaBasePackage)
+															.javaBasePackage("com.icloudsoft.campus.cms")
 															.moduleName(moduleName)
 															.defaultTableContexts()
 //																.stripTablePrefix("zyt_estate_")
 															.end()
 														.end()
-														.table("nav_campus")
-															.entityTemplate("entity", entityTemplate)
-															.controllerTemplate("controller", controllerTemplate)
-															.serviceImplTemplate(serviceImplTemplate)
-														.end()
-														.table("nav_spot")
+														.table("cms_column")
 															.entityTemplate("entity", entityTemplate)
 														.end()
-														.table("nav_spot_type")
+														.table("cms_comment")
 															.entityTemplate("entity", entityTemplate)
 														.end()
-														.table("nav_spot_module")
+														.table("cms_post")
+															.entityTemplate("entity", entityTemplate)
+														.end()
+														.table("cms_post_detail")
+															.entityTemplate("entity", entityTemplate)
+														.end()
+														.table("cms_post_config")
+															.entityTemplate("entity", entityTemplate)
+														.end()
+														.table("cms_page_view_option")
 //														.table("")
 															/*.pageTemplate("${basePath}/db/generator/product/index.html.ftl")
 															.pageTemplate("${basePath}/db/generator/product/edit-form.html.ftl")
 															.controllerTemplate("controller", "${basePath}/db/generator/product/Controller.java.ftl")
 															.serviceImplTemplate("${basePath}/db/generator/product/ServiceImpl.java.ftl")*/
 															.entityTemplate(entityTemplate)
-															.controllerTemplate("controller", controllerTemplate)
-															.serviceImplTemplate(serviceImplTemplate)
 															/*.daoTemplate("${basePath}/db/generator/datagrid/Dao.java.ftl")
 															.entityTemplate("${basePath}/db/generator/datagrid/ExtEntity.java.ftl")
 															.mybatisDaoXmlTemplate("${basePath}/db/generator/datagrid/Dao.xml.ftl")*/

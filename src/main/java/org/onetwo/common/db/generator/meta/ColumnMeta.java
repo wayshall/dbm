@@ -1,17 +1,16 @@
 package org.onetwo.common.db.generator.meta;
 
+import java.sql.Time;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
 import org.onetwo.common.db.generator.mapping.ColumnMapping;
 import org.onetwo.common.db.generator.utils.DbGeneratorUtills;
-import org.onetwo.common.utils.CUtils;
 import org.onetwo.common.utils.GuavaUtils;
 import org.onetwo.common.utils.StringUtils;
-
-import com.google.common.base.Splitter;
 
 public class ColumnMeta {
 
@@ -40,6 +39,7 @@ public class ColumnMeta {
 //		setSqlType(sqlType);
 //		setJavaType(javaType);
 		this.mapping = mapping;
+		this.mapping.setColumnMeta(this);
 	}
 	
 	public void init(){
@@ -48,6 +48,22 @@ public class ColumnMeta {
 		if(!comments.isEmpty()){
 			this.commentName = comments.get(0);
 		}
+	}
+	
+	public Class<?> getMappingJavaClass(){
+		Class<?> mappingClass = getJavaType();
+		if(mapping.isDateType() || mapping.isSqlTimestamp()){
+			mappingClass = Date.class;
+		}else if(mapping.isSqlDate()){
+			mappingClass = java.sql.Date.class;
+		}else if(mapping.isSqlTime()){
+			mappingClass = Time.class;
+		}else if(mapping.isBooleanType()){
+			mappingClass = Boolean.class;
+		}else if(mapping.isSqlFloat()){
+			mappingClass = Float.class;
+		}
+		return mappingClass;
 	}
 	
 	public String getCommentName() {

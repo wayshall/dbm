@@ -1,21 +1,19 @@
 <#assign requestPath="/${_globalConfig.getModuleName()}/${_tableContext.className}"/>
 <#assign pagePath="/${_globalConfig.getModuleName()}/${_tableContext.tableNameWithoutPrefix}"/>
 
-<#assign entityClassName="${_tableContext.className}Entity"/>
+<#assign entityClassName="${_tableContext.className}VO"/>
 <#assign entityClassName2="${_tableContext.className}"/>
 <#assign idName="${table.primaryKey.javaName}"/>
 <#assign idType="${table.primaryKey.javaType.simpleName}"/>
 
 package ${_tableContext.localFullPackage};
 
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+
 import java.math.BigDecimal;
 import java.util.Date;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
 
 import javax.validation.constraints.NotNull;
 import org.hibernate.validator.constraints.NotBlank;
@@ -24,36 +22,23 @@ import org.hibernate.validator.constraints.SafeHtml;
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.URL;
 
-import org.onetwo.dbm.annotation.DbmIdGenerator;
-import org.onetwo.dbm.id.SnowflakeGenerator;
-import org.onetwo.dbm.jpa.BaseEntity;
-
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 /***
  * ${(table.comments[0])!''}
  */
-@SuppressWarnings("serial")
-@Entity
-@Table(name="${table.name}")
 @Data
-@EqualsAndHashCode(callSuper=true)
-public class ${entityClassName} extends BaseEntity  {
+@ApiModel("${_tableContext.className}")
+public class ${entityClassName} {
 
-    @Id
-    //@GeneratedValue(strategy=GenerationType.IDENTITY)
-    @GeneratedValue(strategy = GenerationType.AUTO, generator="snowflake") 
-    @DbmIdGenerator(name="snowflake", generatorClass=SnowflakeGenerator.class)
-    @NotNull
-    private ${table.primaryKey.javaType.simpleName} ${table.primaryKey.propertyName};
+    private ${table.primaryKey.mappingJavaClass.simpleName} ${table.primaryKey.propertyName};
     
 <#list table.columns as column>
 <#if column.primaryKey == false && !( column.propertyName == 'createAt' || column.propertyName == 'updateAt' ) >
     /***
      * ${(column.comments[0])!''}
      */
-    <#if !column.nullable>
+    <#if column.nullable>
     @NotNull
     </#if>
     <#if column.mapping.isStringType()>
@@ -65,7 +50,8 @@ public class ${entityClassName} extends BaseEntity  {
     <#elseif column.isUrlType()>
     @URL
     </#if>
-    ${column.mappingJavaClass.simpleName} ${column.propertyName};
+    @ApiModelProperty(value="${(column.comments[0])!''}")
+    private ${column.mappingJavaClass.simpleName} ${column.propertyName};
     
 </#if>
 </#list>

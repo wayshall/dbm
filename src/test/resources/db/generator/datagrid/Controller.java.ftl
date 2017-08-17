@@ -25,6 +25,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
+import org.onetwo.plugins.admin.utils.WebConstant.ValidGroup.ValidAnyTime;
+import org.onetwo.plugins.admin.utils.WebConstant.ValidGroup.ValidWhenEdit;
+import org.onetwo.plugins.admin.utils.WebConstant.ValidGroup.ValidWhenNew;
 
 import ${_globalConfig.getJavaBasePackage()}.${_globalConfig.getModuleName()}.entity.${_tableContext.className};
 import ${_globalConfig.getJavaBasePackage()}.${_globalConfig.getModuleName()}.service.${serviceImplClassName};
