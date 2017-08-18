@@ -8,6 +8,7 @@ import org.onetwo.common.date.NiceDate;
 import org.onetwo.common.db.builder.QueryField;
 import org.onetwo.common.db.sqlext.ExtQuery.K.IfNull;
 import org.onetwo.common.exception.ServiceException;
+import org.onetwo.dbm.exception.DbmException;
 
 /****
  * 对in操作符的解释
@@ -57,7 +58,7 @@ public class DateRangeSymbolParser extends CommonSQLSymbolParser implements HqlS
 				endDate = getDate(paramlist.get(1));
 			}
 		} catch (ClassCastException e) {
-			throw new ServiceException("the parameter type of "+symbol+" is error, check it!", e);
+			throw new DbmException("the parameter type of "+symbol+" is error, check it!", e);
 		}
 		
 		field = this.getFieldName(field);

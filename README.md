@@ -223,14 +223,18 @@ BaseEntityManager可直接注入。
 		entityManager.update(user);
 		
 		//fetch by id
-		user = entityManager.findById(UserAutoidEntity.class, userId); 
+		user = entityManager.findById(UserEntity.class, userId); 
 		assertThat(user.getMobile(), is(newMobile));
 		
-		//通过实体属性查找，下面的调用相当于sql条件： where mobile=:mobile and status='NORMAL'
+		//通过实体属性查找，下面的调用相当于sql条件： where mobile='13555555555' and status IN ('NORMAL', 'DELETE') and age>18
 		user = entityManager.findOne(UserAutoidEntity.class, 
 										"mobile", newMobile,
-										"status", UserStatus.NORMAL);
+										"status:in", Arrays.asList(UserStatus.NORMAL, UserStatus.DELETE),
+										"age:>", 18);
 		assertThat(user.getId(), is(userId));
+
+		//下面的调用相当于sql条件： where registerTime>=:date1 and registerTime<:date2
+		entityManager.findList(UserEntity.class, "registerTime:date in", new Object[]{date1, date2})
 		
 		//使用 querys dsl api，效果和上面一样
 		UserAutoidEntity queryUser = Querys.from(entityManager, UserAutoidEntity.class)
@@ -244,7 +248,7 @@ BaseEntityManager可直接注入。
 		
 	}
 ```
-BaseEntityManager对象的find开头的接口，可变参数一般都是按键值对传入，相当于一个Map，键是实体对应的属性，值是对应属性的条件值：   
+BaseEntityManager对象的find开头的接口，可变参数一般都是按键值对传入，相当于一个Map，键是实体对应的属性(+冒号+操作符，可选，不加默认就是=)，值是对应属性的条件值：   
 ```Java
 entityManager.findOne(entityClass, propertyName1, value1, propertyName2, value2......);   
 entityManager.findList(entityClass, propertyName1, value1, propertyName2, value2......);
@@ -281,6 +285,9 @@ select t.* from table t where (t.property_name1=:value1 or t.property_name1=:val
 ```
 property_name3条件被忽略了。
 
+### 操作符
+BaseEntityManager的属性查询支持如下操作符：   
+=, >, <, !=, in, not in, date in, is null, like, not like
 
 
 ## CrudEntityManager接口
