@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.onetwo.common.utils.LangUtils;
@@ -47,6 +48,9 @@ public class SimpleArgsPreparedStatementCreator implements PreparedStatementCrea
 	}
 	
 	public List<?> getSqlParameterList() {
+		if(LangUtils.isEmpty(args)){
+			return Collections.emptyList();
+		}
 		return Arrays.asList(args);
 	}
 }

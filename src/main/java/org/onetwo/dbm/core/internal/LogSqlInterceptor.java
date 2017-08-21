@@ -1,8 +1,8 @@
 package org.onetwo.dbm.core.internal;
 
 import java.util.Map;
-import java.util.Optional;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.onetwo.common.log.JFishLoggerFactory;
 import org.onetwo.common.utils.CUtils;
 import org.onetwo.dbm.annotation.DbmInterceptorFilter;
@@ -36,46 +36,45 @@ public class LogSqlInterceptor implements DbmInterceptor {
 			return chain.invoke();
 		}
 		Object[] args = chain.getTargetArgs();
-		Optional<String> sqlOpt = findSql(args);
-		if(!sqlOpt.isPresent()){
+		Pair<String, Object> sqlParams = findSqlAndParams(args);
+		if(sqlParams==null){
 			return chain.invoke();
 		}
-		Optional<Object> sqlParamsOpt = findSqlParams(args);
-		if(dbmConfig.isLogSql() && logger.isInfoEnabled()){
-			logger.info("dbm sql: {}, sql parameters: {}", sqlOpt.get(), sqlParamsOpt.orElse("<NULL>"));
+		if(logger.isInfoEnabled()){
+			logger.info("dbm sql: {}, sql parameters: {}", sqlParams.getKey(), sqlParams.getValue());
 		}
 		return chain.invoke();
 	}
 	
-	private Optional<String> findSql(Object[] args){
-		for (int i = 0; i < args.length; i++) {
-			Object arg = args[i];
-			if(arg instanceof String){
-				return Optional.ofNullable((String)arg);
-			}else if(arg instanceof SqlProvider){
-				return Optional.ofNullable(((SqlProvider)arg).getSql());
-			}
-		}
-		return Optional.empty();
-	}
-	
-	private Optional<Object> findSqlParams(Object[] args){
+	private Pair<String, Object> findSqlAndParams(Object[] args){
+		String sql = null;
+		Object params = null;
 		for (int i = 0; i < args.length; i++) {
 			Object arg = args[i];
 			if(arg==null){
 				continue;
 			}
-			if(arg instanceof Map){
-				return Optional.of(arg);
+			if(arg instanceof String){
+				sql = (String)arg;
+			}else if(arg instanceof Map){
+				params = arg;
 			}else if(arg.getClass().isArray()){
-				return Optional.of(CUtils.tolist(arg, false));
-			}else if(arg instanceof SqlProvider){
-				return Optional.ofNullable(((SqlParametersProvider)arg).getSqlParameterList());
+				params = CUtils.tolist(arg, false);
+			}else{
+				//if arg is SimpleArgsPreparedStatementCreator
+				if(arg instanceof SqlProvider){
+					sql = ((SqlProvider)arg).getSql();
+				}
+				if(arg instanceof SqlParametersProvider){
+					params = ((SqlParametersProvider)arg).getSqlParameterList();
+				}
 			}
+			
 		}
-		return Optional.empty();
+		if(sql==null){
+			return null;
+		}
+		return Pair.of(sql, params);
 	}
 	
-	
-
 }

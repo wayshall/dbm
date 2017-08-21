@@ -19,6 +19,7 @@ import org.onetwo.common.dbm.UserTableIdEntityTest;
 @SuiteClasses({
 	DbmDaoTest.class,
 	DbmEntityManagerTest.class,
+//	DBCheckerTest.class,
 //	OneBatchInsertTest.class,
 	BatchInsertTest.class,
 	BaseCrudEntityManagerTest.class,
