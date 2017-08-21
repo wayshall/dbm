@@ -12,6 +12,7 @@ import org.onetwo.common.utils.Page;
 public interface UserAutoidDao2 {
 
 	public List<UserAutoidEntity> findUserList(@QueryDispatcher String status);
+	
 	public void findUserPage(Page<UserAutoidEntity> page, String userName);
 
 }

@@ -64,8 +64,8 @@ import com.google.common.collect.Maps;
 public class SimpleDbmInnerServiceRegistry implements DbmInnerServiceRegistry {
 
 	final private static LoadingCache<DbmServiceRegistryCreateContext, SimpleDbmInnerServiceRegistry> SERVICE_REGISTRY_MAPPER = CacheBuilder.newBuilder()
-																						.weakKeys()
-																						.weakValues()
+																						/*.weakKeys()
+																						.weakValues()*/
 																						.build(new CacheLoader<DbmServiceRegistryCreateContext, SimpleDbmInnerServiceRegistry>() {
 
 																							@Override
@@ -217,11 +217,12 @@ public class SimpleDbmInnerServiceRegistry implements DbmInnerServiceRegistry {
 		this.interceptorManager = initializeComponent(interceptorManager, DbmInterceptorManager.class, ()->{
 			List<DbmInterceptor> interceptors = Lists.newArrayList();
 			interceptors.add(new SessionCacheInterceptor(context.getSessionFactory()));
+			interceptors.add(new LogSqlInterceptor(dataBaseConfig));
 			if(this.interceptors!=null){
 				interceptors.addAll(this.interceptors);
 			}
 			DbmInterceptorManager interceptorManager = new DbmInterceptorManager();
-			interceptorManager.setInterceptors(ImmutableList.copyOf(interceptors));
+			interceptorManager.setInterceptors(interceptors);
 			interceptorManager.afterPropertiesSet();
 			return interceptorManager;
 		});

@@ -23,17 +23,19 @@ public class DbmInterceptorManager implements InitializingBean {
 	
 	@Autowired
 	private List<DbmInterceptor> interceptors;
-	private CollectionMap<InterceptorType, DbmInterceptor> typeInterceptors = CollectionMap.newListMap();
+	private CollectionMap<InterceptorType, DbmInterceptor> typeInterceptors = CollectionMap.newLinkedListMap();
 
 	@Override
 	public void afterPropertiesSet() {
 //		this.dbmInterceptors = SpringUtils.getBeans(applicationContext, DbmInterceptor.class);
-		if(this.interceptors==null){
+		List<DbmInterceptor> interceptors = this.interceptors;
+		if(interceptors==null){
 			this.interceptors = Collections.emptyList();
 			return ;
 		}
 		
 		AnnotationAwareOrderComparator.sort(interceptors);
+		this.interceptors = ImmutableList.copyOf(interceptors);
 		
 		for(DbmInterceptor interceptor : this.interceptors){
 			DbmInterceptorFilter filter = AnnotationUtils.findAnnotationWithSupers(interceptor.getClass(), DbmInterceptorFilter.class);
