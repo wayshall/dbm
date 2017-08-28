@@ -7,6 +7,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.onetwo.common.db.dquery.DynamicMethod.DynamicMethodParameter;
@@ -42,6 +43,7 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 //	private final Method method;
 //	private final List<DynamicMethodParameter> parameters;
 	private final Class<?> resultClass;
+	//mapping type
 	private final Class<?> componentClass;
 	private String queryName;
 //	private final ExecuteUpdate executeUpdate;
@@ -63,39 +65,40 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 		//check query swither
 		checkAndFindQuerySwitch(parameters);
 		
-		Class<?> rClass = method.getReturnType();
+		Class<?> returnClass = method.getReturnType();
 		Class<?> compClass = ReflectUtils.getGenricType(method.getGenericReturnType(), 0);
-		if(rClass==void.class){
+		Optional<DynamicMethodParameter> pageParameterOpt = this.findPagePrarameter();
+		if(returnClass==void.class){
 //			DynamicMethodParameter firstParamter = parameters.get(0);
 //			pageParamter = dispatcherParamter!=null?parameters.get(1):parameters.get(0);
-			//如果返回类型为空，看第参数里是否有page对象
-			this.pageParamter = this.findPagePrarameter();
-			rClass = pageParamter.getParameterType();
-			/*if(Page.class != rClass){
-				throw new FileNamedQueryException("["+method.toGenericString()+"] return void type, pelease define the Page object at parameter position : " + pageParamter.getParameterIndex());
-			}*/
-			/*if(pageParamter.getParameterAnnotation(Name.class)==null)//如果page对象没有name注解，移除它
-				this.parameters.remove(0)*/;
-			Type ptype = pageParamter.getGenericParameterType();
-			if(ptype instanceof ParameterizedType){
-				compClass = ReflectUtils.getGenricType(ptype, 0);
+//			this.pageParamter = this.findPagePrarameter();
+			if(pageParameterOpt.isPresent()){
+				this.pageParamter = pageParameterOpt.get();
+				returnClass = pageParamter.getParameterType();
+				//获取page泛型类
+				Type ptype = pageParamter.getGenericParameterType();
+				if(ptype instanceof ParameterizedType){
+					compClass = ReflectUtils.getGenricType(ptype, 0);
+				}
 			}
-		}else{
-			/*parameters.stream().filter(p->p.getParameterType()==Page.class)
-							.findAny()
-							.ifPresent(p->{
-								throw new FileNamedQueryException("define Page Type at the first parameter and return void if you want to pagination: " + method.toGenericString());
-							});*/
-			if(Page.class==rClass){
+		}else if(Page.class==returnClass){
+			this.pageParamter = pageParameterOpt.orElseThrow(()->{
+				return new FileNamedQueryException("no Page type parameter found for paginaton method: " + method.toGenericString());
+			});
+			/*if(Page.class==rClass){
 //				throw new FileNamedQueryException("define Page Type at the first parameter and return void if you want to pagination: " + method.toGenericString());
-				this.pageParamter = findPagePrarameter();
+				this.pageParamter = pageParameterOpt.orElseThrow(()->{
+					return new FileNamedQueryException("no Page type parameter found for paginaton method: " + method.toGenericString());
+				});
 			}else if(QueryWrapper.class==rClass){
 				compClass = null;
-			}
+			}*/
+		}else if(QueryWrapper.class==returnClass){
+			compClass = null;
 		}
 		
 		
-		resultClass = rClass;
+		resultClass = returnClass;
 		if(compClass==Object.class)
 			compClass = resultClass;
 		this.componentClass = compClass;
@@ -106,16 +109,20 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 		LangUtils.println("resultClass: ${0}, componentClass:${1}", resultClass, compClass);
 	}
 	
+	public boolean hasPageParamter() {
+		return pageParamter!=null;
+	}
+
 	public final boolean isAnnotationPresent(Class<? extends Annotation> annoClass){
 		return this.method.getAnnotation(annoClass)!=null;
 	}
-	private DynamicMethodParameter findPagePrarameter(){
+	private Optional<DynamicMethodParameter> findPagePrarameter(){
 		return parameters.stream()
 				.filter(p->p.getParameterType()==Page.class)
 				.findAny()
-				.orElseThrow(()->{
+				/*.orElseThrow(()->{
 					return new FileNamedQueryException("no Page type parameter found for paginaton method: " + method.toGenericString());
-				});
+				})*/;
 	}
 	
 	/***

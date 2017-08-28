@@ -131,7 +131,8 @@ public class UserAutoidServiceImpl implements UserAutoidService {
 			
 			users.add(user);
 		}
-		return this.userAutoidDao.batchInsert2(users, new Date());
+		this.userAutoidDao.batchInsert2(users, new Date());
+		return count;
 	}
 	
 	public void findUserPage(Page<UserAutoidEntity> page, String userName){

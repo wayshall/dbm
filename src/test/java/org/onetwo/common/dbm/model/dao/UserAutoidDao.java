@@ -16,7 +16,7 @@ public interface UserAutoidDao {
 	
 	public int batchInsert(List<UserAutoidEntity> users);
 	
-	public int batchInsert2(@BatchObject List<UserAutoidEntity> users, @Param("allBirthday")Date birthday);
+	public void batchInsert2(@BatchObject List<UserAutoidEntity> users, @Param("allBirthday")Date birthday);
 	
 	
 

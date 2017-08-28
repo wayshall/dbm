@@ -46,7 +46,7 @@ public class ${entityClassName} extends BaseEntity  {
     @GeneratedValue(strategy = GenerationType.AUTO, generator="snowflake") 
     @DbmIdGenerator(name="snowflake", generatorClass=SnowflakeGenerator.class)
     @NotNull
-    private ${table.primaryKey.javaType.simpleName} ${table.primaryKey.propertyName};
+    ${table.primaryKey.javaType.simpleName} ${table.primaryKey.propertyName};
     
 <#list table.columns as column>
 <#if column.primaryKey == false && !( column.propertyName == 'createAt' || column.propertyName == 'updateAt' ) >

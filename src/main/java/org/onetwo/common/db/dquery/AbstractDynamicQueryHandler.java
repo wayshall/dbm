@@ -129,7 +129,7 @@ abstract public class AbstractDynamicQueryHandler implements DynamicQueryHandler
 		try {
 			return methodCache.get(method);
 		} catch (ExecutionException e) {
-			throw new FileNamedQueryException("get dynamic method error", e);
+			throw new FileNamedQueryException("get dynamic method error: " + method.getName(), e);
 //			return newDynamicMethod(method);
 		}
 	}
@@ -159,10 +159,13 @@ abstract public class AbstractDynamicQueryHandler implements DynamicQueryHandler
 				QueryWrapper dq = em.getFileNamedQueryManager().createQuery(invokeContext);
 				result = dq.executeUpdate();
 				
-			}else if(Page.class.isAssignableFrom(resultClass)){
+			}/*else if(Page.class.isAssignableFrom(resultClass)){
 				Page<?> page = dmethod.getPageParamter(args);
 				result = em.getFileNamedQueryManager().findPage(page, invokeContext);
 				
+			}*/else if(dmethod.hasPageParamter()){
+				Page<?> page = dmethod.getPageParamter(args);
+				result = em.getFileNamedQueryManager().findPage(page, invokeContext);
 			}else if(Collection.class.isAssignableFrom(resultClass)){
 				List<?> datalist = em.getFileNamedQueryManager().findList(invokeContext);
 				if(resultClass.isAssignableFrom(datalist.getClass())){
@@ -185,6 +188,10 @@ abstract public class AbstractDynamicQueryHandler implements DynamicQueryHandler
 			}else{
 				result = em.getFileNamedQueryManager().findOne(invokeContext);
 			}
+		}
+		
+		if(dmethod.isReturnVoid()){
+			return null;
 		}
 		
 		return result;
@@ -263,7 +270,9 @@ abstract public class AbstractDynamicQueryHandler implements DynamicQueryHandler
 			logger.debug("===>>> batch insert stop: {}", t.getMessage());
 		}
 		
-		if(dmethod.getResultClass()==int[].class || dmethod.getResultClass()==Integer[].class){
+		if(dmethod.isReturnVoid()){
+			return null;
+		}else if(dmethod.getResultClass()==int[].class || dmethod.getResultClass()==Integer[].class){
 			return counts;
 		}else{
 			int count = MathUtils.sum(counts);
