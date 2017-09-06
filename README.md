@@ -21,6 +21,7 @@
 - [自定义实现DbmRepository查询接口](#自定义实现dbmrepository查询接口)
 - [批量插入](#批量插入)
 - [充血模型支持](#充血模型支持)
+- [参数配置](#参数配置)
 - [捐赠](#捐赠)
 
 
@@ -730,13 +731,6 @@ public class DbmSampleApplication {
 }  
 ```    
 
-若以为某种原因没有使用@EnableDbm方式来启用dbm，则可以使用@DbmPackages注解配置
-```Java   
-@Configuration
-@DbmPackages({"org.onetwo4j.sample.model"})
-public class AppContextConfig {
-}
-```
 ### 2、继承RichModel类
 ```Java
 
@@ -759,6 +753,16 @@ int count = User.count().intValue();
 List<User> users = User.findList("userName", userName, K.IF_NULL, IfNull.Ignore);
    
 ```
+
+## 参数配置
+- logSql：是否打印执行的sql和时间，默认为true；
+- watchSqlFile：是否监视sql文件，如果有修改则重新加载，默认为true；
+- useBatchOptimize：是否使用批量优化save和insert等api的操作，为true并且插入数量超过了设定的阈值，则会把此类api的循环插入优化为jdbc的批量插入，默认为true；
+- useBatchThreshold：批量插入的阈值，调用save和insert等api时，如果传入的集合数量超过了阈值，则自动转为批量插入，否则循环插入，默认为50；
+- processSizePerBatch：批量插入时，每次提交的数量，默认为10000；
+- enableSessionCache：是否启用会话缓存，默认为false；
+
+
 
 ## 待续。。。
 

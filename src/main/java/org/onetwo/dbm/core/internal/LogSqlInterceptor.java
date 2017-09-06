@@ -4,6 +4,7 @@ import java.util.Map;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.onetwo.common.log.JFishLoggerFactory;
+import org.onetwo.common.profiling.TimeCounter;
 import org.onetwo.common.utils.CUtils;
 import org.onetwo.dbm.annotation.DbmInterceptorFilter;
 import org.onetwo.dbm.annotation.DbmInterceptorFilter.InterceptorType;
@@ -43,7 +44,16 @@ public class LogSqlInterceptor implements DbmInterceptor {
 		if(logger.isInfoEnabled()){
 			logger.info("dbm sql: {}, sql parameters: {}", sqlParams.getKey(), sqlParams.getValue());
 		}
-		return chain.invoke();
+		
+		TimeCounter counter = TimeCounter.start("dbm jdbc: ");
+		try {
+			return chain.invoke();
+		}finally{
+			counter.stop(false);
+			if(logger.isInfoEnabled()){
+				logger.info(counter.getMessage());
+			}
+		}
 	}
 	
 	private Pair<String, Object> findSqlAndParams(Object[] args){
