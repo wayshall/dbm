@@ -8,6 +8,7 @@ import org.onetwo.common.db.InnerBaseEntityManager;
 import org.onetwo.common.db.sqlext.ExtQuery;
 import org.onetwo.common.db.sqlext.SQLSymbolManager;
 import org.onetwo.common.db.sqlext.SelectExtQuery;
+import org.onetwo.common.spring.copier.CopyUtils;
 import org.onetwo.common.utils.Page;
 import org.onetwo.dbm.core.spi.DbmEntityManager;
 import org.onetwo.dbm.exception.DbmException;
@@ -60,6 +61,13 @@ public class QueryActionImpl implements QueryAction {
 	public <T> List<T> list(){
 		checkOperation();
 		return baseEntityManager.select(getExtQuery());
+	}
+
+	@Override
+	public <T> List<T> listAs(Class<T> toClass){
+		checkOperation();
+		List<?> datas = baseEntityManager.select(getExtQuery());
+		return CopyUtils.copy(toClass, datas);
 	}
 
 	@Override

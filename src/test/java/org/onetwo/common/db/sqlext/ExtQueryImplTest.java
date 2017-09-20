@@ -201,6 +201,19 @@ public class ExtQueryImplTest {
 		String sql = "select object from Object object where object.startTime >= :object_startTime0 and object.startTime <= :object_startTime1 order by object.id desc ";
 		Assert.assertEquals(sql.trim(), q.getSql().trim());
 	}
+
+	@Test
+	public void testOrderBy(){
+		properties = new LinkedHashMap<Object, Object>();
+		properties.put(K.ASC, "sort");
+		properties.put(K.DESC, "id");
+		ExtQuery q = sqlSymbolManagerFactory.getJPA().createSelectQuery(Object.class, properties);
+		q.build();
+		
+		System.out.println("testOrderBy: " + q.getSql());
+		String sql = "select object from Object object order by object.sort asc, object.id desc";
+		Assert.assertEquals(sql.trim(), q.getSql().trim());
+	}
 	
 
 	@Test

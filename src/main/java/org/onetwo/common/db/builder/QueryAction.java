@@ -8,17 +8,19 @@ import org.springframework.jdbc.core.RowMapper;
 
 public interface QueryAction {
 
-//	public ExtQuery build(Class<?> entityClass, String alias, Map<Object, Object> properties);
+//	ExtQuery build(Class<?> entityClass, String alias, Map<Object, Object> properties);
 	
-	public <T> T unique();
+	<T> T unique();
 	
-	public <T> T one();
+	<T> T one();
 
-	public <T> List<T> list();
+	<T> List<T> list();
 	
-	public <T> Page<T> page(Page<T> page);
+	<T> List<T> listAs(Class<T> toClass);
 	
-	public <T> T extractAs(ResultSetExtractor<T> rse);
+	<T> Page<T> page(Page<T> page);
 	
-	public <T> List<T> listWith(RowMapper<T> rowMapper);
+	<T> T extractAs(ResultSetExtractor<T> rse);
+	
+	<T> List<T> listWith(RowMapper<T> rowMapper);
 }
