@@ -74,6 +74,11 @@ public class DbmEntityManagerImpl extends BaseEntityManagerAdapter implements Qu
 		this.getCurrentSession().update(entity);
 //		throwIfEffectiveCountError("update", 1, rs);
 	}
+	
+	@Override
+	public void dymanicUpdate(Object entity) {
+		this.getCurrentSession().dymanicUpdate(entity);
+	}
 
 	@Override
 	public Collection<DbmInterceptor> getRepositoryInterceptors() {

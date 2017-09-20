@@ -34,6 +34,12 @@ public interface BaseEntityManager {
 	 * @param entity
 	 */
 	public void update(Object entity);
+	/***
+	 * 根据id把实体的非null字段更新到数据库
+	 * @author wayshall
+	 * @param entity
+	 */
+	public void dymanicUpdate(Object entity);
 
 	/****
 	 * 如果实现了ILogicDeleteEntity接口，着逻辑删除
