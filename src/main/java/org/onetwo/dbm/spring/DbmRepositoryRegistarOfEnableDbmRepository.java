@@ -17,8 +17,11 @@ public class DbmRepositoryRegistarOfEnableDbmRepository implements ImportBeanDef
 			throw new IllegalArgumentException(String.format("@%s is not present on importing class '%s' as expected", EnableDbmRepository.class.getSimpleName(), importingClassMetadata.getClassName()));
 		}
 		
+		String useEnableDbmRepositoryClassName = importingClassMetadata.getClassName();
 		RichModelAndQueryObjectScanTrigger register = new RichModelAndQueryObjectScanTrigger(registry);
 		register.setEnableDbmRepositoryAttributes(attributes);
+		register.setUseEnableDbmRepositoryClassName(useEnableDbmRepositoryClassName);
+		
 		register.scanAndRegisterBeans((ListableBeanFactory)registry);
 	}
 

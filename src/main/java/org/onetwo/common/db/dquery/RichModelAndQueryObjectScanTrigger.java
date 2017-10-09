@@ -43,6 +43,7 @@ public class RichModelAndQueryObjectScanTrigger /*implements BeanFactoryPostProc
 	private boolean enableRichModel = true;
 	private AnnotationScanBasicDynamicQueryObjectRegister register;
 	private AnnotationAttributes enableDbmRepositoryAttributes;
+	private String useEnableDbmRepositoryClassName;
 	
 //	private Class<? extends QueryProvideManager> defaultQueryProvideManagerClass;
 	
@@ -117,10 +118,22 @@ public class RichModelAndQueryObjectScanTrigger /*implements BeanFactoryPostProc
 		if(enableDbmRepositoryAttributes!=null){
 			register.setDefaultQueryProvideManagerClass(enableDbmRepositoryAttributes.getClass("defaultQueryProviderClass"));
 			register.setRegisterDefaultQueryProvideManager(enableDbmRepositoryAttributes.getBoolean("autoRegister"));
-			Stream.of(enableDbmRepositoryAttributes.getStringArray("value")).forEach(p->packs.add(p));
+			/*Stream.of(enableDbmRepositoryAttributes.getStringArray("value")).forEach(p->packs.add(p));
 			Stream.of(enableDbmRepositoryAttributes.getClassArray("basePackageClasses")).forEach(p->{
 				packs.add(p.getPackage().getName());
-			});
+			});*/
+			boolean isSpecifyPackages = false;
+			for(String p : enableDbmRepositoryAttributes.getStringArray("value")){
+				packs.add(p);
+				isSpecifyPackages = true;
+			}
+			for(Class<?> p : enableDbmRepositoryAttributes.getClassArray("basePackageClasses")){
+				packs.add(p.getPackage().getName());
+				isSpecifyPackages = true;
+			}
+			if(!isSpecifyPackages && useEnableDbmRepositoryClassName!=null){
+				packs.add(ClassUtils.getPackageName(useEnableDbmRepositoryClassName));
+			}
 		}
 
 		if(!packs.isEmpty()){
@@ -158,6 +171,10 @@ public class RichModelAndQueryObjectScanTrigger /*implements BeanFactoryPostProc
 
 		}, packs);
 		return entryClassNameList;
+	}
+
+	public void setUseEnableDbmRepositoryClassName(String useEnableDbmRepositoryClassName) {
+		this.useEnableDbmRepositoryClassName = useEnableDbmRepositoryClassName;
 	}
 	
 }
