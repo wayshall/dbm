@@ -6,7 +6,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.onetwo.dbm.event.DbmEntityListener;
+import org.onetwo.dbm.mapping.DbmEntityListener;
 @Target({TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface DbmEntityListeners {

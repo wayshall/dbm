@@ -9,7 +9,7 @@ import javax.persistence.Table;
 import org.hibernate.validator.constraints.Length;
 import org.onetwo.dbm.annotation.DbmFieldListeners;
 import org.onetwo.dbm.core.BaseModel;
-import org.onetwo.dbm.event.DbmEntityFieldListenerAdapter;
+import org.onetwo.dbm.mapping.DbmEntityFieldListenerAdapter;
 import org.onetwo.dbm.mapping.DbmMappedField;
 
 /**

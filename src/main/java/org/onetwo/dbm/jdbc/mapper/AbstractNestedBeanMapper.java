@@ -403,7 +403,8 @@ abstract public class AbstractNestedBeanMapper<T> {
 				int index = names.get(actualColumnName);
 				Object idValue = columnValueGetter.getColumnValue(index, idProperty.getPropertyDescriptor());
 				if(idValue==null){
-					throw new DbmException("id column can not be null for specified id field: " + idPropertyName+", columnPrefix:"+columnPrefix);
+//					throw new DbmException("id column can not be null for specified id field: " + idPropertyName+", columnPrefix:"+columnPrefix);
+					return null;
 				}
 				hash = idValue.hashCode();
 				if(datas.containsKey(hash)){

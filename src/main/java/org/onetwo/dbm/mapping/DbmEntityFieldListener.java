@@ -1,6 +1,5 @@
-package org.onetwo.dbm.event;
+package org.onetwo.dbm.mapping;
 
-import org.onetwo.dbm.mapping.DbmMappedField;
 
 
 public interface DbmEntityFieldListener {

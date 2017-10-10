@@ -4,16 +4,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 
 import org.onetwo.common.utils.JFishProperty;
 import org.onetwo.common.utils.LangUtils;
 import org.onetwo.common.utils.StringUtils;
 import org.onetwo.dbm.annotation.DbmFieldListeners;
-import org.onetwo.dbm.event.DbmEntityFieldListener;
+import org.onetwo.dbm.annotation.DbmJsonField;
 import org.onetwo.dbm.event.DbmEventAction;
-import org.onetwo.dbm.exception.DbmException;
 import org.onetwo.dbm.id.StrategyType;
 import org.onetwo.dbm.jpa.GeneratedValueIAttrs;
 import org.onetwo.dbm.mapping.version.VersionableType;
@@ -46,11 +44,28 @@ abstract public class AbstractMappedField implements DbmMappedField{
 	
 	private VersionableType<? extends Object> versionableType;
 	
+	/****
+	 * 实际映射类型
+	 */
+	private Class<?> actualMappingColumnType;
+	final private DbmJsonField jsonFieldAnnotation;
+	
+	private DbmEnumType enumType;
+	
+	private DbmFieldValueConverter fieldValueConverter;
+	
 	public AbstractMappedField(DbmMappedEntry entry, JFishProperty propertyInfo) {
 		super();
 		this.entry = entry;
 		this.propertyInfo = propertyInfo;
 		this.name = propertyInfo.getName();
+		
+		if(propertyInfo.hasAnnotation(Enumerated.class)){
+			Enumerated enumerated = propertyInfo.getAnnotation(Enumerated.class);
+			this.enumType = DbmEnumType.valueOf(enumerated.value().name());
+		}else if(Enum.class.isAssignableFrom(propertyInfo.getType())){
+			this.enumType = DbmEnumType.STRING;
+		}
 		
 		DbmFieldListeners listenersAnntation = propertyInfo.getAnnotation(DbmFieldListeners.class);
 		if(listenersAnntation!=null){
@@ -60,85 +75,51 @@ abstract public class AbstractMappedField implements DbmMappedField{
 				this.fieldListeners = new ArrayList<DbmEntityFieldListener>(entry.getFieldListeners());
 			}
 		}
+
+		CompositedFieldValueConverter compositedConverter = CompositedFieldValueConverter.composited();
+		if(enumType!=null){
+			compositedConverter.addFieldValueConverter(CompositedFieldValueConverter.ENUM_CONVERTER);
+		}
+		this.jsonFieldAnnotation = propertyInfo.getAnnotation(DbmJsonField.class);
+		if(jsonFieldAnnotation != null){
+			compositedConverter.addFieldValueConverter(JsonFieldValueConverter.INSTANCE);
+		}
+		this.fieldValueConverter = compositedConverter;
+		
+		this.obtainActaulMappingType();
+	}
+	
+	private void obtainActaulMappingType(){
+		Class<?> actualType = propertyInfo.getType();
+		if(enumType!=null){
+			actualType = this.enumType.getJavaType();
+		}else if(this.jsonFieldAnnotation !=null ){
+			actualType = String.class;
+		}
+		this.actualMappingColumnType = actualType;
+	}
+
+	public DbmFieldValueConverter getFieldValueConverter() {
+		return fieldValueConverter;
 	}
 
 	public boolean isEnumerated(){
-		return Enum.class.isAssignableFrom(propertyInfo.getType());
+		return enumType!=null;
 	}
-//	abstract public Class getMappedType();
-	
-	/*abstract public Method getReadMethod();
-	
-	abstract protected Method getWriteMethod();*/
 	
 	@Override
 	public void setValue(Object entity, Object value){
-		propertyInfo.setValue(entity, value);
+		Object actaulValue = this.fieldValueConverter.forJava(this, value);;
+		propertyInfo.setValue(entity, actaulValue);
 	}
 	
 	
 	@Override
 	public Object getValue(Object entity){
 		Object value = propertyInfo.getValue(entity);
-		if(isEnumerated() && value!=null){
-			Object actualValue = null;
-			DbmEnumType etype = getEnumType();
-			Enum<?> enumValue = (Enum<?>) value;
-			if(etype==DbmEnumType.ORDINAL){
-				actualValue = enumValue.ordinal();
-			}else if(etype==DbmEnumType.STRING){
-				actualValue = enumValue.name();
-			}else{
-				throw new DbmException("error enum type: " + etype);
-			}
-			return actualValue;
-		}
+		value = this.fieldValueConverter.forStore(this, value);
 		return value;
 	}
-	
-	/*@Override
-	public void setValueFromJdbc(Object entity, Object value){
-//		Object newValue = convertPropertyValue(value);
-		setValue(entity, value);
-	}*/
-	
-
-	/****
-	 * 获取sql参数值
-	 */
-	/*@Override
-	public Object getValueForJdbc(Object entity){
-		return getValue(entity);
-	}*/
-	
-	/*@Override
-	public SqlParameterValue getValueForJdbcAndFireDbmEventAction(Object entity, JFishEventAction eventAction){
-//		Object oldValue = getColumnValue(entity);
-		Object fieldValue = getValue(entity);
-//		Object newValue = null;
-		boolean doListener = false;
-		if(JFishEventAction.insert==eventAction){
-			if(!getFieldListeners().isEmpty()){
-				for(DbmEntityFieldListener fl : getFieldListeners()){
-					fieldValue = fl.beforeFieldInsert(propertyInfo, fieldValue);
-					doListener = true;
-				}
-			}
-		}else if(JFishEventAction.update==eventAction){
-			if(!getFieldListeners().isEmpty()){
-				for(DbmEntityFieldListener fl : getFieldListeners()){
-					fieldValue = fl.beforeFieldUpdate(propertyInfo, fieldValue);
-					doListener = true;
-				}
-			}
-		}
-		if(doListener){
-//			setValueFromJdbc(entity, newValue);
-			setValue(entity, fieldValue);
-		}
-//		return getValueForJdbc(entity);
-		return convertSqlParameterValue(fieldValue);
-	}*/
 	
 	public Object fireDbmEntityFieldEvents(final Object fieldValue, DbmEventAction eventAction){
 //		boolean doListener = false;
@@ -162,23 +143,7 @@ abstract public class AbstractMappedField implements DbmMappedField{
 	}
 	
 	public Class<?> getColumnType(){
-		Class<?> actualType = propertyInfo.getType();
-		if(Enum.class.isAssignableFrom(actualType)){
-			Enumerated enumerated = propertyInfo.getAnnotation(Enumerated.class);
-			if(enumerated!=null){
-				EnumType etype = enumerated.value();
-				if(etype==EnumType.ORDINAL){
-					actualType = int.class;
-				}else if(etype==EnumType.STRING){
-					actualType = String.class;
-				}else{
-					throw new DbmException("error enum type: " + etype);
-				}
-			}else{
-				actualType = String.class;
-			}
-		}
-		return actualType;
+		return actualMappingColumnType;
 	}
 	
 	@Override
@@ -325,8 +290,9 @@ abstract public class AbstractMappedField implements DbmMappedField{
 	public void setVersionableType(VersionableType<? extends Object> versionableType) {
 		this.versionableType = versionableType;
 	}
-
+	
+	@Override
 	public DbmEnumType getEnumType() {
-		throw new UnsupportedOperationException();
+		return enumType;
 	}
 }

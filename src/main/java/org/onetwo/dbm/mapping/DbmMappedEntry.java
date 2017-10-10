@@ -3,8 +3,6 @@ package org.onetwo.dbm.mapping;
 import java.util.List;
 import java.util.Map;
 
-import org.onetwo.dbm.event.DbmEntityFieldListener;
-import org.onetwo.dbm.event.DbmEntityListener;
 import org.onetwo.dbm.id.IdentifierGenerator;
 import org.onetwo.dbm.mapping.SQLBuilderFactory.SqlBuilderType;
 

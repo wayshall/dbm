@@ -1,6 +1,7 @@
 package org.onetwo.common.dbm.model.entity;
 
-import javax.persistence.Column;
+import java.util.List;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -9,6 +10,7 @@ import javax.persistence.Table;
 
 import org.hibernate.validator.constraints.Length;
 import org.onetwo.common.db.spi.CrudEntityManager;
+import org.onetwo.dbm.annotation.DbmJsonField;
 import org.onetwo.dbm.utils.Dbms;
 
 

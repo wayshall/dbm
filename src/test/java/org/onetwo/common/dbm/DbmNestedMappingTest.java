@@ -63,6 +63,8 @@ public class DbmNestedMappingTest extends DbmBaseTest {
 
 	@Test
 	public void testfindWithoutNestedMapping(){
+		this.test1Saves();
+		
 		String name = "测试公司";//测试公司-
 		List<CompanyVO> companies = this.companyDao.findCompaniesByLikeName(name);
 		assertThat(companies.size()).isEqualTo(10);
@@ -85,6 +87,8 @@ public class DbmNestedMappingTest extends DbmBaseTest {
 	
 	@Test
 	public void testfindListWithNestedMapping(){
+		this.test1Saves();
+		
 		List<DepartmentVO> departments = companyDao.findDepartmentsWithComapny();
 		assertThat(departments.size()).isEqualTo(100);
 		departments.stream().forEach(depart->{
@@ -148,6 +152,8 @@ public class DbmNestedMappingTest extends DbmBaseTest {
 
 	@Test
 	public void testfindMapWithNestedMapping(){
+		this.test1Saves();
+		
 		List<CompanyVO> companies = companyDao.findNestedCompaniesWithDepartmentMap();
 		assertThat(companies.size()).isEqualTo(10);
 		companies.stream().forEach(company->{

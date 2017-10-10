@@ -10,6 +10,7 @@ import org.onetwo.common.dbm.CustomDaoTest;
 import org.onetwo.common.dbm.DbmDaoTest;
 import org.onetwo.common.dbm.DbmEntityManagerTest;
 import org.onetwo.common.dbm.DbmNestedMappingTest;
+import org.onetwo.common.dbm.JsonFieldTest;
 import org.onetwo.common.dbm.QueryConfigTest;
 import org.onetwo.common.dbm.TransactionalListenerTest;
 import org.onetwo.common.dbm.UserDbmIdEntityTest;
@@ -29,7 +30,8 @@ import org.onetwo.common.dbm.UserTableIdEntityTest;
 	UserTableIdEntityTest.class,
 	UserDbmIdEntityTest.class,
 	QueryConfigTest.class,
-	CustomDaoTest.class
+	CustomDaoTest.class,
+	JsonFieldTest.class
 //	RichModelTest.class
 })
 public class DbmTestCase {

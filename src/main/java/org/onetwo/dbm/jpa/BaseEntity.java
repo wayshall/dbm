@@ -6,13 +6,9 @@ import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import org.onetwo.common.db.TimeRecordableEntity;
-import org.onetwo.common.xml.jaxb.DateAdapter;
 
-@XmlRootElement
 @MappedSuperclass
 abstract public class BaseEntity implements TimeRecordableEntity{
  
@@ -26,7 +22,7 @@ abstract public class BaseEntity implements TimeRecordableEntity{
 	@Temporal(TemporalType.TIMESTAMP)
 	protected Date updateAt;
 
-	@XmlJavaTypeAdapter(DateAdapter.class)
+//	@XmlJavaTypeAdapter(DateAdapter.class)
 	public Date getCreateAt() {
 		return createAt;
 	}
@@ -35,7 +31,7 @@ abstract public class BaseEntity implements TimeRecordableEntity{
 		this.createAt = createTime;
 	}
 
-	@XmlJavaTypeAdapter(DateAdapter.class)
+//	@XmlJavaTypeAdapter(DateAdapter.class)
 	public Date getUpdateAt() {
 		return updateAt;
 	}

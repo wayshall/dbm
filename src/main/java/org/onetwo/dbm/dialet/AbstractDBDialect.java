@@ -89,7 +89,7 @@ abstract public class AbstractDBDialect implements InnerDBDialet, DBDialect {
 			this.onDefaultDbEventListenerManager(listMg);
 			this.dbmEventListenerManager = listMg;
 		}
-		
+		this.dbmEventListenerManager.freezed();
 		
 		if(sqlBuilderFactory==null){
 			this.sqlBuilderFactory = new DefaultSQLBuilderFactory();

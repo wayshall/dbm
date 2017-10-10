@@ -11,9 +11,12 @@ public class DbmEventListenerManager implements RegisterManager<DbmEventAction, 
 
 //	private Map<JFishEventAction, ?> registerMap = ArrayListMultimap.create();
 	private static final DbmEventListener[] EMPTY_LISTENERS = new DbmEventListener[]{};
-	private CollectionMap<DbmEventAction, DbmEventListener> registerMap = CollectionMap.newListMap();
+	private CollectionMap<DbmEventAction, DbmEventListener> registerMap = CollectionMap.newLinkedListMap();
 	
-
+	public void freezed(){
+		registerMap.freezed();
+	}
+	
 	@Override
 	public CollectionMap<DbmEventAction, DbmEventListener> getRegister() {
 		return registerMap;

@@ -11,6 +11,7 @@ import org.onetwo.common.utils.MathUtils;
 import org.onetwo.dbm.exception.DbmException;
 import org.onetwo.dbm.jdbc.internal.SimpleArgsPreparedStatementCreator;
 import org.onetwo.dbm.mapping.DbmConfig;
+import org.onetwo.dbm.mapping.DbmEntityListener;
 import org.onetwo.dbm.mapping.DbmMappedEntryMeta;
 import org.onetwo.dbm.mapping.DbmMappedField;
 import org.onetwo.dbm.mapping.EntrySQLBuilder;

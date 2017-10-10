@@ -3,7 +3,6 @@ package org.onetwo.dbm.jdbc.internal;
 import java.beans.PropertyDescriptor;
 import java.sql.SQLException;
 
-import org.onetwo.common.convert.Types;
 import org.onetwo.dbm.exception.DbmException;
 import org.onetwo.dbm.jdbc.spi.JdbcResultSetGetter;
 import org.onetwo.dbm.mapping.DbmMappedField;
@@ -32,12 +31,10 @@ public class SpringJdbcResultSetGetter implements JdbcResultSetGetter {
 		} catch (SQLException e) {
 			throw new DbmException("get column value error, index:"+index+", name:"+field.getName(), e);
 		}
-		if(!field.getColumnType().equals(field.getPropertyInfo().getType())){
+		/*if(!field.getColumnType().equals(field.getPropertyInfo().getType())){
 			value = Types.convertValue(value, field.getPropertyInfo().getType());
-		}
+		}*/
 		return value;
 	}
 	
-	
-
 }

@@ -1,4 +1,4 @@
-package org.onetwo.dbm.event;
+package org.onetwo.dbm.mapping;
 
 public interface DbmEntityListener {
 	

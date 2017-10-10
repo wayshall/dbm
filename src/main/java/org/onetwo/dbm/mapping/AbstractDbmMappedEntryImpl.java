@@ -22,8 +22,6 @@ import org.onetwo.dbm.annotation.DbmEntityListeners;
 import org.onetwo.dbm.annotation.DbmFieldListeners;
 import org.onetwo.dbm.annotation.DbmValidatorEnabled;
 import org.onetwo.dbm.core.spi.DbmInnerServiceRegistry;
-import org.onetwo.dbm.event.DbmEntityFieldListener;
-import org.onetwo.dbm.event.DbmEntityListener;
 import org.onetwo.dbm.event.DbmEventAction;
 import org.onetwo.dbm.exception.DbmException;
 import org.onetwo.dbm.id.IdentifierGenerator;
@@ -94,16 +92,15 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 			Class<? extends DbmEntityListener>[] listenerClasses = listenersAnntation.value();
 			entityListeners = LangUtils.newArrayList(listenerClasses.length);
 			for(Class<? extends DbmEntityListener> lcs : listenerClasses){
-				if(lcs==null)
-					continue;
 				DbmEntityListener listener = ReflectUtils.newInstance(lcs);
 				entityListeners.add(listener);
 			}
 		}
 
 		DbmFieldListeners fieldListenersAnntation = annotationInfo.getAnnotation(DbmFieldListeners.class);
-		if(fieldListenersAnntation!=null)
+		if(fieldListenersAnntation!=null){
 			this.fieldListeners = DbmUtils.initDbmEntityFieldListeners(fieldListenersAnntation);
+		}
 		this.enabledEntithyValidator = annotationInfo.hasAnnotation(DbmValidatorEnabled.class);
 		if(enabledEntithyValidator){
 			this.entityValidator = serviceRegistry.getEntityValidator();
