@@ -11,6 +11,7 @@
 - [一行代码启用](#一行代码启用)
 - [实体映射](#实体映射)
 - [id策略](#id策略)
+- [其它特有的映射](#其它特有的映射)
 - [BaseEntityManager接口](#baseentitymanager接口)
 - [CrudEntityManager接口](#crudentitymanager接口)
 - [DbmRepository查询接口](#dbmrepository查询接口)
@@ -193,6 +194,23 @@ public class UserEntity implements Serializable {
 }
 ```
 
+## 其它特有的映射
+
+### json映射
+有时候，我们需要在数据库的某个字段里存储json格式的数据，又想在获取到数据后转为java对象使用，这时你可以使用 @DbmJsonField 注解，这个注解会在保存实体的时候把对象转化为json字符串，然后在取出数据的时候自动把字符串转化为对象。
+示例：
+```Java
+class SimpleEntity {
+	@DbmJsonField
+	private ExtInfo extInfo;
+
+	
+	public static class ExtInfo {
+		String address;
+		List<String> phones;
+	}
+}
+```
 
 
 ## BaseEntityManager接口
