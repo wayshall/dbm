@@ -212,6 +212,14 @@ class SimpleEntity {
 }
 ```
 
+需要添加依赖：
+```xml
+    <dependency>
+      <groupId>org.onetwo4j</groupId>
+      <artifactId>onetwo-jackson</artifactId>
+    </dependency>
+```
+
 
 ## BaseEntityManager接口
 大多数数据库操作都可以通过BaseEntityManager接口来完成。   
