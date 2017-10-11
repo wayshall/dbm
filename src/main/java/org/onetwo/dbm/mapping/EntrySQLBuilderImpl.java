@@ -10,6 +10,7 @@ import org.onetwo.common.utils.Assert;
 import org.onetwo.common.utils.LangUtils;
 import org.onetwo.common.utils.StringUtils;
 import org.onetwo.dbm.dialet.DBDialect;
+import org.onetwo.dbm.exception.DbmException;
 import org.onetwo.dbm.mapping.SQLBuilderFactory.SqlBuilderType;
 
 public class EntrySQLBuilderImpl implements EntrySQLBuilder {
@@ -151,8 +152,12 @@ public class EntrySQLBuilderImpl implements EntrySQLBuilder {
 	}
 	
 	private String buildUpdate(){
-		Assert.notEmpty(fields);
-		Assert.notEmpty(whereCauseFields);
+		if(LangUtils.isEmpty(fields)){
+			throw new DbmException("no update field found!");
+		}
+		if(LangUtils.isEmpty(whereCauseFields)){
+			throw new DbmException("no where field found for update!");
+		}
 //		List<String> fields = sqlBuildable.getFieldNames(entityClass);
 		String update = "";
 		List<String> updateFields = toWhereString(fields, false);
