@@ -21,6 +21,15 @@ import com.google.common.collect.Maps;
  */
 public class DbmGenerator {
 
+	public static DbmGenerator createWithDburl(String dburl, String dbusername, String dbpassword){
+		DataSource dataSource = TomcatDataSourceBuilder.newBuilder()
+														.mysql(null, dbusername, dbpassword)
+														.url(dburl)
+														.build();
+		DbmGenerator generator = new DbmGenerator(new DbGenerator(dataSource, new FtlEngine()));
+		return generator;
+	}
+	
 	public static DbmGenerator mysql(String dbname, String dbusername, String dbpassword){
 		DataSource dataSource = TomcatDataSourceBuilder.newBuilder()
 														.mysql(dbname, dbusername, dbpassword)
@@ -46,6 +55,15 @@ public class DbmGenerator {
 	
 	private Map<String, Object> context = Maps.newHashMap();
 	
+	public DbmGenerator(DbGenerator dbGenerator) {
+		super();
+		this.dbGenerator = dbGenerator;
+	}
+	
+	private DbmGenerator() {
+		super();
+	}
+
 	public DbGenerator dbGenerator() {
 		return dbGenerator;
 	}
@@ -125,7 +143,7 @@ public class DbmGenerator {
 		}
 		
 		public WebadminGenerator generateEntity(){
-			tableGenerator.controllerTemplate(templateName+"/Entity.java.ftl");
+			tableGenerator.entityTemplate(templateName+"/Entity.java.ftl");
 			return this;
 		}
 		
