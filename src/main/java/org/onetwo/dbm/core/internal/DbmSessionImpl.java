@@ -351,7 +351,7 @@ public class DbmSessionImpl extends AbstractDbmSession implements DbmSessionEven
 		try{
 			result = this.dbmJdbcOperations.queryForObject(sql, params, rowMapper);
 		}catch(EmptyResultDataAccessException e){
-			logger.error("findUnique : "+e.getMessage());
+			logger.error("findUnique error: "+e.getMessage());
 		}
 		return result;
 	}

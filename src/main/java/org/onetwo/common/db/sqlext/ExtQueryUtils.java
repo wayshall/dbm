@@ -154,6 +154,8 @@ public abstract class ExtQueryUtils {
 			return DruidUtils.toCountSql(sql, countValue);
 		}
 
+		//不能全部转为小写，因为会改变 命名参数，导致设置jdbc参数值时取不到对应的值而出错:No value supplied for the SQL parameter
+//		sql = sql.toLowerCase();
 		String[] tokens = StringUtils.split(sql.toLowerCase(), " ");
 		
 		int groupIndex = ArrayUtils.indexOf(tokens, "group");
@@ -179,8 +181,10 @@ public abstract class ExtQueryUtils {
 			hql = StringUtils.join(ArrayUtils.subarray(rawTokens, fromIndex+1, tokens.length), " ");
 		}
 		int orderByIndex = ArrayUtils.indexOf(tokens, "order");
-		if(orderByIndex!=-1 && tokens.length>(orderByIndex+1) && "by".equals(tokens[orderByIndex+1]))
+		if(orderByIndex!=-1 && tokens.length>(orderByIndex+1) && "by".equals(tokens[orderByIndex+1])){
+			//bug: 如果sql语句中的order by为大写，则会无法截取
 			hql = StringUtils.substringBefore(hql, " order by ");
+		}
 
 		if(StringUtils.isNotBlank(countValue))
 			countField = countValue;
