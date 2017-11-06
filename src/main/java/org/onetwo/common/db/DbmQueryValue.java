@@ -8,7 +8,7 @@ import java.util.Map;
 import org.onetwo.common.db.sqlext.ExtQueryUtils;
 import org.onetwo.common.utils.CUtils;
 import org.onetwo.common.utils.StringUtils;
-import org.onetwo.dbm.utils.DbmUtils;
+import org.onetwo.dbm.utils.JdbcParamValueConvers;
 
 
 public class DbmQueryValue {
@@ -35,7 +35,7 @@ public class DbmQueryValue {
 	
 
 	private Object convertValue(Object value){
-		return DbmUtils.getActualSqlValue(value);
+		return JdbcParamValueConvers.getActualValue(value);
 //		return ExtQueryUtils.getNameIfEnum(value, value);
 	}
 	

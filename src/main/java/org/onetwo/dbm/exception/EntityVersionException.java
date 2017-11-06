@@ -13,9 +13,4 @@ public class EntityVersionException extends DbmException{
 		super("entity["+entityClass+"] version has changed, id: " + id + ", entity session version: " + currentVersion + ".");
 	}
 
-	
-	protected String getDefaultCode(){
-		return JFishErrorCode.ORM_ERROR;
-	}
-
 }

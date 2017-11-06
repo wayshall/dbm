@@ -31,8 +31,4 @@ public class DbmException extends BaseException{
 		super(cause);
 	}
 	
-	protected String getDefaultCode(){
-		return JFishErrorCode.ORM_ERROR;
-	}
-
 }

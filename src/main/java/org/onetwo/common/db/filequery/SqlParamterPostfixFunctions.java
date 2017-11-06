@@ -36,7 +36,7 @@ public class SqlParamterPostfixFunctions implements SqlParamterPostfixFunctionRe
 	public SqlParamterPostfixFunctions(){
 		register(new String[]{"like", "likeString"}, new SqlParamterPostfixFunction(){
 			@Override
-			public Object toSqlString(String paramName, Object value) {
+			public Object toSqlParameterValue(String paramName, Object value) {
 				return ExtQueryUtils.getLikeString(value.toString());
 			}
 		});
@@ -44,21 +44,21 @@ public class SqlParamterPostfixFunctions implements SqlParamterPostfixFunctionRe
 
 		register(new String[]{"prelike", "preLikeString"}, new SqlParamterPostfixFunction(){
 			@Override
-			public Object toSqlString(String paramName, Object value) {
+			public Object toSqlParameterValue(String paramName, Object value) {
 				return StringUtils.appendStartWith(value.toString(), "%");
 			}
 		});
 
 		register(new String[]{"postlike", "postLikeString"}, new SqlParamterPostfixFunction(){
 			@Override
-			public Object toSqlString(String paramName, Object value) {
+			public Object toSqlParameterValue(String paramName, Object value) {
 				return StringUtils.appendEndWith(value.toString(), "%");
 			}
 		});
 
 		register(new String[]{"atStartOfDate"}, new SqlParamterPostfixFunction(){
 			@Override
-			public Object toSqlString(String paramName, Object value) {
+			public Object toSqlParameterValue(String paramName, Object value) {
 				if(Date.class.isInstance(value)){
 					throw new DbmException(paramName+" is not a date, can not invoke startOfDate");
 				}
@@ -69,7 +69,7 @@ public class SqlParamterPostfixFunctions implements SqlParamterPostfixFunctionRe
 
 		register(new String[]{"atEndOfDate"}, new SqlParamterPostfixFunction(){
 			@Override
-			public Object toSqlString(String paramName, Object value) {
+			public Object toSqlParameterValue(String paramName, Object value) {
 				if(Date.class.isInstance(value)){
 					throw new DbmException(paramName+" is not a date, can not invoke endOfDate");
 				}

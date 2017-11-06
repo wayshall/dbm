@@ -9,6 +9,7 @@ import org.onetwo.common.db.spi.SqlParamterPostfixFunctionRegistry;
 import org.onetwo.common.reflect.ReflectUtils;
 import org.onetwo.common.utils.LangUtils;
 import org.onetwo.common.utils.StringUtils;
+import org.onetwo.dbm.utils.JdbcParamValueConvers;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterUtils;
 import org.springframework.jdbc.core.namedparam.ParsedSql;
@@ -75,11 +76,11 @@ final public class ParsedSqlUtils {
 				return StringUtils.isNotBlank(function);
 			}
 			public Object getParamterValue(BeanWrapper paramBean){
-				Object value = paramBean.getPropertyValue(property);
+				Object value = JdbcParamValueConvers.getParamterValue(paramBean, property);
 				if(hasFunction()){
 //					value = ReflectUtils.invokeMethod(function, SqlParamterPostfixFunctions.getInstance(), value);
 //					value = SqlParamterPostfixFunctions.getInstance().getFunc(function).toSqlString(property, value);
-					value = sqlParamterPostfixFunctions.getFunc(function).toSqlString(property, value);
+					value = sqlParamterPostfixFunctions.getFunc(function).toSqlParameterValue(property, value);
 				}
 				return value;
 			}

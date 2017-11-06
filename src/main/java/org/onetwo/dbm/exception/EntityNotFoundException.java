@@ -25,9 +25,4 @@ public class EntityNotFoundException extends DbmException{
 		super(msg);
 	}
 
-	
-	protected String getDefaultCode(){
-		return JFishErrorCode.ORM_ERROR;
-	}
-
 }

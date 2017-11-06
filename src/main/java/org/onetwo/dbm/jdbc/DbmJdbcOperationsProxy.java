@@ -22,7 +22,7 @@ import org.onetwo.dbm.jdbc.internal.DbmJdbcTemplate;
 import org.onetwo.dbm.jdbc.internal.SimpleArgsPreparedStatementCreator;
 import org.onetwo.dbm.jdbc.spi.DbmInterceptor;
 import org.onetwo.dbm.jdbc.spi.DbmInterceptorChain;
-import org.onetwo.dbm.utils.DbmUtils;
+import org.onetwo.dbm.utils.JdbcParamValueConvers;
 import org.slf4j.Logger;
 import org.springframework.jdbc.core.PreparedStatementSetter;
 import org.springframework.jdbc.core.SqlProvider;
@@ -128,7 +128,7 @@ public class DbmJdbcOperationsProxy {
 				List<?> argList = convertAsList(mArgs);
 				String parseArgSql = holder.parse(sql, index->{
 					Object val = argList.get(index);
-					val = DbmUtils.getActualValue(val);
+					val = JdbcParamValueConvers.getActualValue(val);
 					if(val==null)
 						return "NULL";
 					return LangUtils.isNumberObject(val)?val.toString():"'"+val.toString()+"'";

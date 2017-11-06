@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import javax.persistence.EnumType;
+
 import org.apache.commons.lang3.tuple.Pair;
 import org.onetwo.common.db.dquery.DynamicMethod.DynamicMethodParameter;
 import org.onetwo.common.db.dquery.annotation.AsCountQuery;
@@ -175,7 +177,7 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 	
 	@Override
 	protected DynamicMethodParameter createMethodParameter(Method method, int parameterIndex, Parameter parameter) {
-		return new DynamicMethodParameterJ8(method, parameterIndex, parameter);
+		return new DynamicMethodParameter(method, parameterIndex, parameter);
 	}
 	
 	public Page<?> getPageParamter(Object[] args) {
@@ -209,86 +211,6 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 		return this.parameters.remove(index);
 	}
 	
-	/*private boolean addAndCheckParamValue(Name name, List<Object> values, String pname, Object pvalue){
-		//TODO 参数ifParamNull已过时，将来注释下面这段代码
-		IfNull ifnull = name.ifParamNull();
-		if(pvalue==null){
-			switch (ifnull) {
-				case Ignore:
-					return false;
-				case Throw:
-					throw new BaseException("param["+pname+"]' value must not be null");
-				default:
-					break;
-			}
-		}
-		//end
-		values.add(pname);
-		if(String.class.isInstance(pvalue) && name.isLikeQuery()){
-			values.add(ExtQueryUtils.getLikeString(pvalue.toString()));
-		}else{
-			values.add(pvalue);
-		}
-		return true;
-	}*/
-	
-
-	/*public Object[] toArrayByArgs(Object[] args){
-		Map<Object, Object> map = toMapByArgs(args);
-		return Langs.toArray(map);
-//		return toArrayByArgs2(args, componentClass);
-	}*/
-
-	/*public Object[] toArrayByArgs2(Object[] args, Class<?> componentClass){
-		List<Object> values = LangUtils.newArrayList(parameters.size()*2);
-		
-		Object pvalue = null;
-		ParserContext parserContext = ParserContext.create();
-		for(DynamicMethodParameter mp : parameters){
-			pvalue = args[mp.getParameterIndex()];
-			if(pvalue instanceof ParserContext){
-				parserContext.putAll((ParserContext) pvalue);
-			}else if(mp.hasParameterAnnotation(Name.class)){
-				Name name = mp.getParameterAnnotation(Name.class);
-				if(name.renamedUseIndex()){
-					List<?> listValue = LangUtils.asList(pvalue);
-					int index = 0;
-					//parem0, value0, param1, value1, ...
-					for(Object obj : listValue){
-						if(addAndCheckParamValue(name, values, mp.getParameterName()+index, obj)){
-							index++;
-						}
-					}
-					values.add(mp.getParameterName());
-					values.add(listValue);
-				}else{
-					addAndCheckParamValue(name, values, mp.getParameterName(), pvalue);
-				}
-					
-			}else{
-				values.add(mp.getParameterName());
-				values.add(pvalue);
-			}
-		}
-		
-		QueryConfig queryConfig = method.getAnnotation(QueryConfig.class);
-		if(queryConfig!=null){
-			QueryConfigData config = new QueryConfigData(queryConfig.stateful());
-			config.setLikeQueryFields(Arrays.asList(queryConfig.likeQueryFields()));
-			parserContext.setQueryConfig(config);
-		}else{
-			parserContext.setQueryConfig(QueryConfigData.EMPTY_CONFIG);
-		}
-
-		values.add(JNamedQueryKey.ParserContext);
-		values.add(parserContext);
-		if(componentClass!=null){
-			values.add(JNamedQueryKey.ResultClass);
-			values.add(componentClass);
-		}
-		return values.toArray();
-	}*/
-	
 	private Pair<String, Object> addAndCheckParamValue(Param name, String pname, Object pvalue){
 		//TODO 参数ifParamNull已过时，将来注释下面这段代码
 		/*IfNull ifnull = name.ifParamNull();
@@ -305,16 +227,14 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 		//end
 //		values.add(pname);
 		Object val = null;
+		if(val instanceof Enum){
+			Enum<?> enumValue = (Enum<?>)val;
+			val = name.enumType()==EnumType.ORDINAL?enumValue.ordinal():enumValue.name();
+		}
 		if(String.class.isInstance(pvalue) && name.isLikeQuery()){
 //			values.add(ExtQueryUtils.getLikeString(pvalue.toString()));
 			val = ExtQueryUtils.getLikeString(pvalue.toString());
 		}else{
-//			values.add(pvalue);
-			/*if(pvalue!=null && pvalue.getClass().isArray()){
-				val = LangUtils.asList(pvalue);
-			}else{
-				val = pvalue;
-			}*/
 			val = pvalue;
 		}
 		return Pair.of(pname, val);
@@ -325,13 +245,13 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 //			parserContext.putAll((ParserContext) pvalue);
 		}else */
 		if(mp.hasParameterAnnotation(Param.class)){
-			Param name = mp.getParameterAnnotation(Param.class);
-			if(name.renamedUseIndex()){
+			Param paramMeta = mp.getParameterAnnotation(Param.class);
+			if(paramMeta.renamedUseIndex()){
 				List<?> listValue = LangUtils.asList(pvalue);
 				int index = 0;
 				//parem0, value0, param1, value1, ...
 				for(Object obj : listValue){
-					Pair<String, Object> pair = addAndCheckParamValue(name, mp.getParameterName()+index, obj);
+					Pair<String, Object> pair = addAndCheckParamValue(paramMeta, mp.getParameterName()+index, obj);
 					if(pair!=null){
 						putArg2Map(values, pair.getLeft(), pair.getRight());
 //						if(addAndCheckParamValue(name, values, mp.getParameterName()+index, obj)){
@@ -343,16 +263,7 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 				putArg2Map(values, mp.getParameterName(), listValue);
 				
 			}else{
-//				addAndCheckParamValue(name, values, mp.getParameterName(), pvalue);
-				/*if(mp.hasParameterAnnotation(BatchObject.class)){
-					values.put(BatchObject.class, pvalue);
-				}else{
-					Pair<String, Object> pair = addAndCheckParamValue(name, mp.getParameterName(), pvalue);
-					if(pair!=null){
-						values.put(pair.getValue0(), pair.getValue1());
-					}
-				}*/
-				Pair<String, Object> pair = addAndCheckParamValue(name, mp.getParameterName(), pvalue);
+				Pair<String, Object> pair = addAndCheckParamValue(paramMeta, mp.getParameterName(), pvalue);
 				if(pair!=null){
 					putArg2Map(values, pair.getLeft(), pair.getRight());
 				}
@@ -361,39 +272,25 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 		}else if(mp.hasParameterAnnotation(BatchObject.class)){
 			putArg2Map(values, BatchObject.class, pvalue);
 			
-		}/*else if(mp.hasParameterAnnotation(QuerySwitch.class)){
-			if(mp.getParameterIndex()!=0){
-				throw new FileNamedQueryException("QuerySwitch must be first parameter but actual index is " + (mp.getParameterIndex()+1));
-			}
-			putArg2Map(values, QuerySwitch.class, pvalue);
-			
-		}*/else{
+		}else{
 			/*values.add(mp.getParameterName());
 			values.add(pvalue);*/
 			putArg2Map(values, mp.getParameterName(), pvalue);
 		}
 		
-		/*if(mp.hasParameterAnnotation(QuerySwitch.class)){
-			if(values.containsKey(QuerySwitch.class)){
-				throw new FileNamedQueryException("allows only one QuerySwitch parameter!");
-			}
-			if(mp.getParameterIndex()!=0){
-				throw new FileNamedQueryException("QuerySwitch must be first parameter but actual index is " + (mp.getParameterIndex()+1));
-			}
-			putArg2Map(values, QuerySwitch.class, pvalue);
-			
-		}*/
 	}
 	
 	private void putArg2Map(Map<Object, Object> values, Object key, Object value){
 		if(values.containsKey(key)){
 			throw new IllegalArgumentException("parameter has exist: " + key);
 		}
-		if(value instanceof Enum){
+		//see DbmUtils#getActualValue
+		/*if(value instanceof Enum){
 			values.put(key, ((Enum<?>)value).name());
 		}else{
 			values.put(key, value);
-		}
+		}*/
+		values.put(key, value);
 	}
 	
 	/*protected void buildQueryConfig(ParserContext parserContext){
@@ -485,16 +382,28 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 
 		final protected String[] condidateParameterNames;
 		final protected Param nameAnnotation;
+		final protected String parameterName;
 		
-
-		public DynamicMethodParameter(Method method, int parameterIndex) {
-			this(method, parameterIndex, LangUtils.EMPTY_STRING_ARRAY);
+		public DynamicMethodParameter(Method method, int parameterIndex, Parameter parameter) {
+			this(method, parameterIndex, parameter, LangUtils.EMPTY_STRING_ARRAY);
 		}
-		
-		public DynamicMethodParameter(Method method, int parameterIndex, String[] parameterNamesByMethodName) {
+		public DynamicMethodParameter(Method method, int parameterIndex, Parameter parameter, String[] parameterNamesByMethodName) {
 			super(method, parameterIndex);
 			this.condidateParameterNames = parameterNamesByMethodName;
 			nameAnnotation = getParameterAnnotation(Param.class);
+
+			//参数查找
+			String pname = null;
+			if(nameAnnotation!=null){
+				pname = nameAnnotation.value();
+			}else if(parameter!=null && parameter.isNamePresent()){
+				pname = parameter.getName();
+			}else if(condidateParameterNames.length>getParameterIndex()){
+				pname = StringUtils.uncapitalize(condidateParameterNames[getParameterIndex()]);
+			}else{
+				pname = String.valueOf(getParameterIndex());
+			}
+			this.parameterName = pname;
 		}
 
 		/****
@@ -504,39 +413,9 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 		 * 以上皆否，则通过参数位置作为名称
 		 */
 		public String getParameterName() {
-			Param name = getParameterAnnotation(Param.class);
-			if(name!=null){
-				return name.value();
-			}else if(condidateParameterNames.length>getParameterIndex()){
-				return StringUtils.uncapitalize(condidateParameterNames[getParameterIndex()]);
-			}else{
-				return String.valueOf(getParameterIndex());
-			}
+			return parameterName;
 		}
 		
 	}
 	
-	/***
-	 * for java8
-	 * @author wayshall
-	 *
-	 */
-	protected static class DynamicMethodParameterJ8 extends DynamicMethodParameter {
-
-		public DynamicMethodParameterJ8(Method method, int parameterIndex, Parameter parameter) {
-			super(method, parameterIndex, LangUtils.EMPTY_STRING_ARRAY);
-		}
-
-		@Override
-		public String getParameterName() {
-			Param name = getParameterAnnotation(Param.class);
-			if(name!=null){
-				return name.value();
-			}else if(parameter!=null && parameter.isNamePresent()){
-				return parameter.getName();
-			}else{
-				return String.valueOf(getParameterIndex());
-			}
-		}
-	}
 }

@@ -22,8 +22,4 @@ public class UpdateCountException extends DbmException{
 		return effectiveCount;
 	}
 
-	protected String getDefaultCode(){
-		return JFishErrorCode.ORM_ERROR;
-	}
-
 }

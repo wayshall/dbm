@@ -4,9 +4,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.onetwo.dbm.utils.DbmUtils;
-
-import com.google.common.collect.ImmutableMap;
+import org.onetwo.dbm.utils.JdbcParamValueConvers;
 
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public class ParamValues {
@@ -33,7 +31,7 @@ public class ParamValues {
 	}
 	
 	private Object getActualSqlValue(Object value){
-		return DbmUtils.getActualSqlValue(value);
+		return JdbcParamValueConvers.getActualValue(value);
 	}
 	
 	/*public void directAddValue(Object value){
