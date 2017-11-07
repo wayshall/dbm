@@ -6,6 +6,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Map;
 
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -28,21 +29,25 @@ final public class JdbcParamValueConvers {
 	public static Object getParamterValue(BeanWrapper paramBean, String property){
 		Object value = paramBean.getPropertyValue(property);
 		if(value instanceof Enum){
-			PropertyDescriptor pd = paramBean.getPropertyDescriptor(property);
-			JFishProperty jproperty = new JFishPropertyInfoImpl(pd);
-			Enumerated enumerated = null;
-			if(jproperty.hasAnnotation(Enumerated.class)){
-				enumerated = jproperty.getAnnotation(Enumerated.class);
-			}else{
-				enumerated = jproperty.getCorrespondingJFishProperty()
-										.map(jp->jp.getAnnotation(Enumerated.class))
-										.orElse(null);
-			}
 			Enum<?> enumValue = (Enum<?>)value;
-			if(enumerated!=null){
-				value = enumerated.value()==EnumType.ORDINAL?enumValue.ordinal():enumValue.name();
+			if(!Map.class.isInstance(paramBean.getWrappedInstance()) && paramBean.isReadableProperty(property)){
+				PropertyDescriptor pd = paramBean.getPropertyDescriptor(property);
+				JFishProperty jproperty = new JFishPropertyInfoImpl(pd);
+				Enumerated enumerated = null;
+				if(jproperty.hasAnnotation(Enumerated.class)){
+					enumerated = jproperty.getAnnotation(Enumerated.class);
+				}else{
+					enumerated = jproperty.getCorrespondingJFishProperty()
+											.map(jp->jp.getAnnotation(Enumerated.class))
+											.orElse(null);
+				}
+				if(enumerated!=null){
+					value = enumerated.value()==EnumType.ORDINAL?enumValue.ordinal():enumValue.name();
+				}else{
+					value = enumValue.name();
+				}
 			}else{
-				value = enumValue.name();
+//				value = enumValue.name();
 			}
 		}
 		return value;

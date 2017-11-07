@@ -211,33 +211,24 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 		return this.parameters.remove(index);
 	}
 	
-	private Pair<String, Object> addAndCheckParamValue(Param name, String pname, Object pvalue){
-		//TODO 参数ifParamNull已过时，将来注释下面这段代码
-		/*IfNull ifnull = name.ifParamNull();
-		if(pvalue==null){
-			switch (ifnull) {
-				case Ignore:
-					return null;
-				case Throw:
-					throw new BaseException("param["+pname+"]' value must not be null");
-				default:
-					break;
-			}
-		}*/
-		//end
-//		values.add(pname);
-		Object val = null;
-		if(val instanceof Enum){
-			Enum<?> enumValue = (Enum<?>)val;
-			val = name.enumType()==EnumType.ORDINAL?enumValue.ordinal():enumValue.name();
-		}
-		if(String.class.isInstance(pvalue) && name.isLikeQuery()){
+	private Pair<String, Object> addAndCheckParamValue(Param name, String pname, final Object pvalue){
+//		Object val = convertEnumValue(name, pvalue);
+		Object val = pvalue;
+		if(String.class.isInstance(val) && name.isLikeQuery()){
 //			values.add(ExtQueryUtils.getLikeString(pvalue.toString()));
-			val = ExtQueryUtils.getLikeString(pvalue.toString());
+			val = ExtQueryUtils.getLikeString(val.toString());
 		}else{
 			val = pvalue;
 		}
 		return Pair.of(pname, val);
+	}
+	
+	private Object convertEnumValue(Param name, Object val){
+		if(name!=null && val instanceof Enum){
+			Enum<?> enumValue = (Enum<?>)val;
+			val = name.enumType()==EnumType.ORDINAL?enumValue.ordinal():enumValue.name();
+		}
+		return val;
 	}
 	
 	protected void handleArg(Map<Object, Object> values, DynamicMethodParameter mp, Object pvalue){
@@ -253,34 +244,34 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 				for(Object obj : listValue){
 					Pair<String, Object> pair = addAndCheckParamValue(paramMeta, mp.getParameterName()+index, obj);
 					if(pair!=null){
-						putArg2Map(values, pair.getLeft(), pair.getRight());
+						putArg2Map(values, paramMeta, pair.getLeft(), pair.getRight());
 //						if(addAndCheckParamValue(name, values, mp.getParameterName()+index, obj)){
 						index++;
 					}
 				}
 				/*values.add(mp.getParameterName());
 				values.add(listValue);*/
-				putArg2Map(values, mp.getParameterName(), listValue);
+				putArg2Map(values, paramMeta, mp.getParameterName(), listValue);
 				
 			}else{
 				Pair<String, Object> pair = addAndCheckParamValue(paramMeta, mp.getParameterName(), pvalue);
 				if(pair!=null){
-					putArg2Map(values, pair.getLeft(), pair.getRight());
+					putArg2Map(values, paramMeta, pair.getLeft(), pair.getRight());
 				}
 			}
 				
 		}else if(mp.hasParameterAnnotation(BatchObject.class)){
-			putArg2Map(values, BatchObject.class, pvalue);
+			putArg2Map(values, null, BatchObject.class, pvalue);
 			
 		}else{
 			/*values.add(mp.getParameterName());
 			values.add(pvalue);*/
-			putArg2Map(values, mp.getParameterName(), pvalue);
+			putArg2Map(values, null, mp.getParameterName(), pvalue);
 		}
 		
 	}
 	
-	private void putArg2Map(Map<Object, Object> values, Object key, Object value){
+	private void putArg2Map(Map<Object, Object> values, Param paramMeta, Object key, Object value){
 		if(values.containsKey(key)){
 			throw new IllegalArgumentException("parameter has exist: " + key);
 		}
@@ -290,6 +281,7 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 		}else{
 			values.put(key, value);
 		}*/
+		value = convertEnumValue(paramMeta, value);
 		values.put(key, value);
 	}
 	

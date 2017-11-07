@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
 import org.onetwo.common.convert.Types;
@@ -193,6 +194,8 @@ abstract public class AbstractDynamicQueryHandler implements DynamicQueryHandler
 		
 		if(dmethod.isReturnVoid()){
 			return null;
+		}else if(dmethod.getResultClass()==Optional.class){
+			return Optional.ofNullable(result);
 		}
 		
 		return result;
