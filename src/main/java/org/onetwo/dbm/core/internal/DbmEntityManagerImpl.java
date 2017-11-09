@@ -43,6 +43,7 @@ import org.onetwo.dbm.query.DbmQueryWrapperImpl;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
+import org.springframework.util.Assert;
 
 //@SuppressWarnings({"rawtypes", "unchecked"})
 public class DbmEntityManagerImpl extends BaseEntityManagerAdapter implements QueryProvideManager, DbmEntityManager, InitializingBean , DisposableBean {
@@ -150,8 +151,8 @@ public class DbmEntityManagerImpl extends BaseEntityManagerAdapter implements Qu
 	}
 
 	@Override
-	public void remove(Object entity) {
-		getCurrentSession().delete(entity);
+	public int remove(Object entity) {
+		return getCurrentSession().delete(entity);
 		/*int rs = getDbmDao().delete(entity);
 		int expectsize = LangUtils.size(entity);
 		throwIfEffectiveCountError("remove", expectsize, rs);*/
@@ -164,13 +165,16 @@ public class DbmEntityManagerImpl extends BaseEntityManagerAdapter implements Qu
 
 	@Override
 	public <T> T removeById(Class<T> entityClass, Serializable id) {
+		Assert.notNull(id);
 		T entity = getCurrentSession().findById(entityClass, id);
 		if(entity==null)
 			return null;
-		getCurrentSession().delete(entity);
+//		T entity = load(entityClass, id);
+		int updateCount = getCurrentSession().delete(entity);
 		/*int rs = getDbmDao().delete(entity);
 		throwIfEffectiveCountError("removeById", 1, rs);*/
-		return entity;
+		//如果成功删除，则返回实体，否则返回null
+		return updateCount==1?entity:null;
 	}
 
 	@Override

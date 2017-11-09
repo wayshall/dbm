@@ -213,18 +213,22 @@ public abstract class BaseEntityManagerAdapter implements InnerBaseEntityManager
 		Collection<T> removeds = LangUtils.newArrayList(ids.length);
 		for(Serializable id : ids){
 			T e = removeById(entityClass, id);
-			removeds.add(e);
+			if(e!=null){
+				removeds.add(e);
+			}
 		}
 		return removeds;
 	}
 
 	@Override
-	public <T> void removes(Collection<T> entities) {
+	public <T> int removes(Collection<T> entities) {
 		if(entities==null)
-			return ;
+			return 0;
+		int sum = 0;
 		for(Object entity : entities){
-			this.remove(entity);
+			sum += this.remove(entity);
 		}
+		return sum;
 	}
 
 	@Override

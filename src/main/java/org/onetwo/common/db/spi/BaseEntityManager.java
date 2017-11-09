@@ -46,11 +46,40 @@ public interface BaseEntityManager {
 	 * 否则，物理删除
 	 * @param entity
 	 */
-	public void remove(Object entity);
+	public int remove(Object entity);
 	
-	public <T> void removes(Collection<T> entities);
+	/***
+	 * 返回updateCount
+	 * 注意：某些数据库或版本的jdbc driver，批量删除时，updateCount并不正确
+	 * @author wayshall
+	 * @param entities
+	 * @return
+	 */
+	public <T> int removes(Collection<T> entities);
+	/***
+	 * 实际上是removeById的批量操作，如果removeById返回了null，则不会被放到返回的list里
+	 * 可以根据实际返回的list数量和传入的集合数量是否相等来判断是否全部删除
+	 * @author wayshall
+	 * @param entityClass
+	 * @param id
+	 * @return
+	 */
 	public <T> Collection<T> removeByIds(Class<T> entityClass, Serializable[] id);
+	/***
+	 * 如果updateCount为1，则返回删除实体，否则返回null
+	 * 也就是说，即使实体不存在，也不会抛错。若需要抱错，请根据返回结果是否为null判断
+	 * @author wayshall
+	 * @param entityClass
+	 * @param id
+	 * @return
+	 */
 	public <T> T removeById(Class<T> entityClass, Serializable id);
+	/***
+	 * 返回updateCount
+	 * @author wayshall
+	 * @param entityClass
+	 * @return
+	 */
 	public int removeAll(Class<?> entityClass);
 
 	public <T> List<T> findAll(Class<T> entityClass);

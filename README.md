@@ -508,6 +508,7 @@ where
 
 ```
 
+- 支持Optional类型的返回值
 
 ## DbmRepository查询接口的多数据源支持
 DbmRepository 查询接口还可以通过注解支持绑定不同的数据源，dataSource的值为spring bean的名称：
