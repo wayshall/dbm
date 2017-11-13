@@ -29,6 +29,7 @@ import org.onetwo.dbm.event.DbmExtQueryEvent.ExtQueryType;
 import org.onetwo.dbm.event.DbmFindEvent;
 import org.onetwo.dbm.event.DbmInsertEvent;
 import org.onetwo.dbm.event.DbmInsertOrUpdateEvent;
+import org.onetwo.dbm.event.DbmLockEvent;
 import org.onetwo.dbm.event.DbmSessionEvent;
 import org.onetwo.dbm.event.DbmSessionEventSource;
 import org.onetwo.dbm.event.DbmUpdateEvent;
@@ -40,6 +41,7 @@ import org.onetwo.dbm.mapping.MappedEntryManager;
 import org.onetwo.dbm.query.DbmQuery;
 import org.onetwo.dbm.query.DbmQueryImpl;
 import org.onetwo.dbm.query.DbmQueryWrapperImpl;
+import org.onetwo.dbm.utils.DbmLock;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.ColumnMapRowMapper;
 import org.springframework.jdbc.core.ResultSetExtractor;
@@ -300,6 +302,13 @@ public class DbmSessionImpl extends AbstractDbmSession implements DbmSessionEven
 		return (T)event.getResultObject();
 	}
 	
+	@Override
+	public <T> T lock(Class<T> entityClass, Serializable id, DbmLock lock, Integer timeoutInMillis) {
+		DbmLockEvent event = new DbmLockEvent(id, lock, timeoutInMillis, this);
+		event.setEntityClass(entityClass);
+		this.fireEvents(event);
+		return (T)event.getResultObject();
+	}
 
 	public <T> List<T> findAll(Class<T> entityClass){
 		DbmFindEvent event = new DbmFindEvent(null, this);

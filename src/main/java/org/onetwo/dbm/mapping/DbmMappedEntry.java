@@ -67,6 +67,8 @@ public interface DbmMappedEntry extends DbmMappedEntryMeta {
 	 */
 	public JdbcStatementContext<List<Object[]>> makeFetch(Object objects, boolean isIdentify);
 	
+//	JdbcStatementContext<Object[]> makeLockSelect(Object object, LockInfo lock);
+	
 	public JdbcStatementContext<List<Object[]>> makeInsert(Object entity);
 
 	public JdbcStatementContext<List<Object[]>> makeDelete(Object objects, boolean isIdentify);
@@ -100,7 +102,7 @@ public interface DbmMappedEntry extends DbmMappedEntryMeta {
 	
 	public EntrySQLBuilder createSQLBuilder(SqlBuilderType type);
 	
-	public JdbcStatementContextBuilder createJdbcStatementContextBuilder(SqlBuilderType type);
+//	public JdbcStatementContextBuilder createJdbcStatementContextBuilder(SqlBuilderType type);
 	
 	public List<DbmEntityListener> getEntityListeners();
 	public List<DbmEntityFieldListener> getFieldListeners();

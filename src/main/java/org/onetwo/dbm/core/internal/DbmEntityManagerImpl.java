@@ -40,6 +40,7 @@ import org.onetwo.dbm.jdbc.spi.DbmInterceptor;
 import org.onetwo.dbm.query.DbmNamedFileQueryFactory;
 import org.onetwo.dbm.query.DbmQuery;
 import org.onetwo.dbm.query.DbmQueryWrapperImpl;
+import org.onetwo.dbm.utils.DbmLock;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
@@ -124,6 +125,11 @@ public class DbmEntityManagerImpl extends BaseEntityManagerAdapter implements Qu
 			throw new EntityNotFoundException("找不到数据：" + id);
 		}
 		return entity;
+	}
+	
+	@Override
+	public <T> T lock(Class<T> entityClass, Serializable id, DbmLock lock, Integer timeoutInMillis){
+		return this.getCurrentSession().lock(entityClass, id, lock, timeoutInMillis);
 	}
 
 	@Override

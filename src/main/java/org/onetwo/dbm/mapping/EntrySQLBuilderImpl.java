@@ -44,23 +44,25 @@ public class EntrySQLBuilderImpl implements EntrySQLBuilder {
 	private SqlBuilderType type;
 	
 	private DBDialect dialet;
+//	private LockInfo lock;
 	
-	EntrySQLBuilderImpl(DbmMappedEntryMeta entry, String alias, boolean namedPlaceHoder, SqlBuilderType type){
+	EntrySQLBuilderImpl(DBDialect dialect, DbmMappedEntryMeta entry, String alias, boolean namedPlaceHoder, SqlBuilderType type){
 		this.entry = entry;
 		this.alias = alias;
 		this.namedPlaceHoder = namedPlaceHoder;
 		this.type = type;
 		this.identifyField = entry.getIdentifyField();
 		this.tableName = entry.getTableInfo().getName();
+		this.dialet = dialect;
 	}
 	
 	public DBDialect getDialet() {
 		return dialet;
 	}
 
-	public void setDialet(DBDialect dialet) {
+	/*public void setDialet(DBDialect dialet) {
 		this.dialet = dialet;
-	}
+	}*/
 
 	public String getAlias(){
 		return alias;
@@ -219,6 +221,10 @@ public class EntrySQLBuilderImpl implements EntrySQLBuilder {
 				"selectFields", selectStr, 
 				"whereCause", StringUtils.join(whereColumns, " and ")
 				);
+		/*if(this.lock!=null){
+			String lockSql = this.dialet.getLockSqlString(lock);
+			querySql += " " + lockSql;
+		}*/
 		if(isDebug())
 			LangUtils.println("build query sql : ${0}", querySql);
 		return querySql;
@@ -327,5 +333,9 @@ public class EntrySQLBuilderImpl implements EntrySQLBuilder {
 	public DbmMappedEntryMeta getEntry() {
 		return entry;
 	}
+
+	/*public void setLock(LockInfo lock) {
+		this.lock = lock;
+	}*/
 	
 }

@@ -9,6 +9,7 @@ import org.onetwo.dbm.event.DbmEventListenerManager;
 import org.onetwo.dbm.id.StrategyType;
 import org.onetwo.dbm.mapping.DbmTypeMapping;
 import org.onetwo.dbm.mapping.SQLBuilderFactory;
+import org.onetwo.dbm.utils.DbmLock;
 import org.onetwo.dbm.utils.Initializable;
 
 public interface DBDialect extends Initializable {
@@ -44,4 +45,25 @@ public interface DBDialect extends Initializable {
 	public DbmTypeMapping getTypeMapping();
 	
 	public SqlFunctionDialet getSqlFunctionDialet();
+	
+	public String getLockSqlString(LockInfo lock);
+	
+	public static class LockInfo {
+		public static final int NO_WAIT = 0;
+		public static final int WAIT_FOREVER = -1;
+		
+		private final DbmLock lock;
+		private final int timeoutInMillis;
+		public LockInfo(DbmLock lock, int timeoutInMillis) {
+			super();
+			this.lock = lock;
+			this.timeoutInMillis = timeoutInMillis;
+		}
+		public DbmLock getLock() {
+			return lock;
+		}
+		public int getTimeoutInMillis() {
+			return timeoutInMillis;
+		}
+	}
 }

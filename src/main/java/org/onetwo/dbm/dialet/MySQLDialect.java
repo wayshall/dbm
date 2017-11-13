@@ -27,6 +27,12 @@ public class MySQLDialect extends AbstractDBDialect {
 		}
 		return sb.toString();
 	}
+	
+
+	protected String getReadLockString(int timeoutInMillis) {
+		return " lock in share mode";
+	}
+	
 
 	/*protected DbEventListenerManager createDefaultDbEventListenerManager() {
 		JFishdbEventListenerManager listenerManager = new JFishdbEventListenerManager();

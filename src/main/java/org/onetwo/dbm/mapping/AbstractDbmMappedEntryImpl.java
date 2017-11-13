@@ -73,6 +73,7 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 	
 	private Map<String, IdentifierGenerator<?>> idGenerators = Maps.newHashMap();
 	
+//	private Map<SqlBuilderType, EntrySQLBuilder> entrySQLBuilderMap = Maps.newHashMap();
 	/*public AbstractJFishMappedEntryImpl(AnnotationInfo annotationInfo) {
 		this(annotationInfo, null);
 	}*/
@@ -108,6 +109,10 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 		}
 //		this.buildIdGenerators();
 	}
+	
+	/*protected void putEntrySQLBuilder(SqlBuilderType type, EntrySQLBuilder builder){
+		this.entrySQLBuilderMap.put(type, builder);
+	}*/
 	
 	@Override
 	public void addIdGenerator(IdentifierGenerator<?> idGenerator){
@@ -285,11 +290,11 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 		return sqlb;
 	}
 	
-	public JdbcStatementContextBuilder createJdbcStatementContextBuilder(SqlBuilderType type){
+	/*public JdbcStatementContextBuilder createJdbcStatementContextBuilder(SqlBuilderType type){
 		EntrySQLBuilderImpl sb = sqlBuilderFactory.createQMark(this, this.getTableInfo().getAlias(), type);
 		JdbcStatementContextBuilder sqlb = JdbcStatementContextBuilder.create(null, this, sb);
 		return sqlb;
-	}
+	}*/
 	
 	@Override
 	public DbmMappedEntry addMappedField(AbstractMappedField field){
@@ -390,6 +395,9 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 	abstract protected EntrySQLBuilderImpl getStaticUpdateSqlBuilder();
 	abstract protected EntrySQLBuilderImpl getStaticDeleteSqlBuilder();
 	abstract protected EntrySQLBuilderImpl getStaticFetchSqlBuilder();
+	/*protected EntrySQLBuilderImpl getStaticSelectLockSqlBuilder(){
+		throw new UnsupportedOperationException("getStaticSelectLockSqlBuilder");
+	}*/
 	abstract protected EntrySQLBuilder getStaticFetchAllSqlBuilder();
 	abstract protected EntrySQLBuilder getStaticSelectVersionSqlBuilder();
 	
@@ -435,6 +443,7 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 		JdbcStatementContextBuilder dsb = JdbcStatementContextBuilder.create(DbmEventAction.find, this, getStaticFetchSqlBuilder());
 		
 		if(LangUtils.isMultiple(objects)){
+			//actual not support
 			List<Object> list = LangUtils.asList(objects);
 			for(Object id : list){
 				if(isIdentify)
@@ -455,6 +464,21 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 		JdbcStatementContext<List<Object[]>> kv = SimpleJdbcStatementContext.create(dsb.getSqlBuilder(), dsb.getValue());
 		return kv;
 	}
+	
+
+	/*@Override
+	public JdbcStatementContext<Object[]> makeLockSelect(Object object, LockInfo lock){
+		if(LangUtils.isMultiple(object)){
+			throw new DbmException("can not lock multiple object: " + object.getClass());
+		}
+		JdbcStatementContextBuilder dsb = JdbcStatementContextBuilder.create(DbmEventAction.lock, this, getStaticFetchSqlBuilder());
+		dsb.addCauseValue(object);
+		dsb.build();
+		String sql = dsb.getSqlBuilder().getSql() + this.getd;
+		JdbcStatementContext<Object[]> kv = new SimpleJdbcStatementContext<Object[]>(sql, dsb.getValue().get(0));
+		//SimpleJdbcStatementContext.create(dsb.getSqlBuilder(), dsb.getValue().get(0));
+		return kv;
+	}*/
 	
 	@Override
 	public JdbcStatementContext<List<Object[]>> makeInsert(Object entity){

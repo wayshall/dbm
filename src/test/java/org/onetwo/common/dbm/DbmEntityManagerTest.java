@@ -24,6 +24,7 @@ import org.onetwo.common.utils.JodatimeUtils;
 import org.onetwo.common.utils.LangOps;
 import org.onetwo.common.utils.LangUtils;
 import org.onetwo.common.utils.Page;
+import org.onetwo.dbm.utils.DbmLock;
 
 public class DbmEntityManagerTest extends DbmBaseTest {
 
@@ -99,6 +100,7 @@ public class DbmEntityManagerTest extends DbmBaseTest {
 		Assert.assertEquals(user.getUserName(), quser.getUserName());
 		
 		testUpdate(quser.getId());
+		testLock(quser.getId());
 		testDelete(quser.getId());
 	}
 
@@ -110,6 +112,24 @@ public class DbmEntityManagerTest extends DbmBaseTest {
 		uuser.setId(id);
 		
 		entityManager.save(uuser);
+		UserEntity quser = entityManager.findById(UserEntity.class, user.getId());
+		Assert.assertNotNull(quser);
+		Assert.assertEquals(uuser.getId(), quser.getId());
+		Assert.assertEquals(uuser.getUserName(), quser.getUserName());
+
+		Assert.assertEquals(user.getAge(), quser.getAge());
+		Assert.assertEquals(user.getBirthday().getTime(), quser.getBirthday().getTime());
+	}
+	
+
+	
+	private void testLock(Long id){
+		UserEntity uuser = entityManager.lock(UserEntity.class, user.getId(), DbmLock.PESSIMISTIC_WRITE, null);
+		uuser.setUserName("test-testLock-"+user.getUserName());
+		uuser.setEmail("test-testLock-"+user.getEmail());
+		uuser.setId(id);
+		entityManager.save(uuser);
+
 		UserEntity quser = entityManager.findById(UserEntity.class, user.getId());
 		Assert.assertNotNull(quser);
 		Assert.assertEquals(uuser.getId(), quser.getId());

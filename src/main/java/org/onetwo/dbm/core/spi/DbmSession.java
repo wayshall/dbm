@@ -12,6 +12,7 @@ import org.onetwo.dbm.annotation.DbmJdbcOperationMark;
 import org.onetwo.dbm.core.internal.SessionTransactionType;
 import org.onetwo.dbm.jdbc.spi.DbmJdbcOperationType;
 import org.onetwo.dbm.query.DbmQuery;
+import org.onetwo.dbm.utils.DbmLock;
 import org.springframework.transaction.TransactionDefinition;
 
 public interface DbmSession {
@@ -70,6 +71,9 @@ public interface DbmSession {
 	 */
 	@DbmJdbcOperationMark(type=DbmJdbcOperationType.QUERY)
 	public <T> T findById(Class<T> entityClass, Serializable id);
+
+	@DbmJdbcOperationMark(type=DbmJdbcOperationType.QUERY_FOR_UPDATE)
+	public <T> T lock(Class<T> entityClass, Serializable id, DbmLock lock, Integer timeoutInMillis);
 
 	/***********
 	 * 根据id删除数据库记录

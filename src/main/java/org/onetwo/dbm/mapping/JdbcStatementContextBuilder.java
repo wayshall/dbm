@@ -82,18 +82,19 @@ public class JdbcStatementContextBuilder implements JdbcStatementContext<List<Ob
 	
 	public JdbcStatementContextBuilder addBatch(){
 		Object[] batchValues = null;
-		if(SqlBuilderType.update==getSqlType()){
+		SqlBuilderType sqltype = getSqlType();
+		if(SqlBuilderType.update==sqltype){
 //			this.getColumnValues().addAll(getCauseValues());
 			batchValues = ArrayUtils.addAll(this.columnValues.values().toArray(), causeValues.toArray());
 			
-		}else if(SqlBuilderType.insert==getSqlType()){
+		}else if(SqlBuilderType.insert==sqltype){
 			batchValues = columnValues.values().toArray();
 			
-		}else if(SqlBuilderType.delete==getSqlType()){
+		}else if(SqlBuilderType.delete==sqltype){
 //			this.getColumnValues().addAll(getCauseValues());
 			batchValues = ArrayUtils.addAll(columnValues.values().toArray(), causeValues.toArray());
 			
-		}else if(SqlBuilderType.query==getSqlType()){
+		}else if(SqlBuilderType.query==sqltype){
 //			this.getColumnValues().addAll(getCauseValues());
 			batchValues = ArrayUtils.addAll(columnValues.values().toArray(), causeValues.toArray());
 			
@@ -144,6 +145,10 @@ public class JdbcStatementContextBuilder implements JdbcStatementContext<List<Ob
 		addBatch();
 		return this;
 	}
+	
+	/*public void setLock(LockInfo lock){
+		this.sqlBuilder.setLock(lock);
+	}*/
 
 	public String getSql(){
 		return sqlBuilder.getSql();

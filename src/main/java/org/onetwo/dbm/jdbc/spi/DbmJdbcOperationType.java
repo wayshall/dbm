@@ -3,6 +3,7 @@ package org.onetwo.dbm.jdbc.spi;
 public enum DbmJdbcOperationType {
 
 	QUERY(DatabaseOperationType.QUERY),
+	QUERY_FOR_UPDATE(DatabaseOperationType.QUERY_FOR_UPDATE),
 	UPDATE(DatabaseOperationType.UPDATE),
 	INSERT(DatabaseOperationType.UPDATE),
 	SAVE(DatabaseOperationType.UPDATE),
@@ -23,6 +24,7 @@ public enum DbmJdbcOperationType {
 
 	public static enum DatabaseOperationType {
 		QUERY,
+		QUERY_FOR_UPDATE,
 		UPDATE,
 		BATCH,
 		EXECUTE

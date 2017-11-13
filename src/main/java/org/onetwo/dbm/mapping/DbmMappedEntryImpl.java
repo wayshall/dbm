@@ -21,6 +21,7 @@ public class DbmMappedEntryImpl extends AbstractDbmMappedEntryImpl implements Db
 	/*private EntrySQLBuilderImpl staticSeqSqlBuilder;
 	private EntrySQLBuilderImpl staticCreateSeqSqlBuilder;*/
 	private EntrySQLBuilderImpl staticSelectVersionSqlBuilder;
+//	private EntrySQLBuilderImpl staticSelectLockSqlBuilder;
 	
 	public DbmMappedEntryImpl(AnnotationInfo annotationInfo, TableInfo tableInfo, DbmInnerServiceRegistry serviceRegistry) {
 		super(annotationInfo, tableInfo, serviceRegistry);
@@ -102,33 +103,19 @@ public class DbmMappedEntryImpl extends AbstractDbmMappedEntryImpl implements Db
 		staticSelectVersionSqlBuilder.append(getVersionField());
 		staticSelectVersionSqlBuilder.appendWhere(getIdentifyField());
 		staticSelectVersionSqlBuilder.build();
+		
+
+		/*staticSelectLockSqlBuilder = createSQLBuilder(SqlBuilderType.query);
+		staticSelectLockSqlBuilder.setNamedPlaceHoder(false);
+		staticSelectLockSqlBuilder.append(columns);
+		staticFetchSqlBuilder.appendWhere(getIdentifyField());
+		staticSelectLockSqlBuilder.build();*/
 	}
 	
-	/*
-	@Override
-	public String getStaticInsertSql() {
-		return staticInsertSqlBuilder.getSql();
-	}
-
-	@Override
-	public String getStaticUpdateSql() {
-		return staticUpdateSqlBuilder.getSql();
+	/*public EntrySQLBuilderImpl getStaticSelectLockSqlBuilder() {
+		return staticSelectLockSqlBuilder;
 	}*/
 
-/*	@Override
-	public String getStaticFetchSql() {
-		return staticFetchSqlBuilder.getSql();
-	}*/
-
-	/*@Override
-	public String getStaticSeqSql() {
-		return staticSeqSqlBuilder.getSql();
-	}
-
-	@Override
-	public String getStaticCreateSeqSql() {
-		return staticCreateSeqSqlBuilder.getSql();
-	}*/
 
 	@Override
 	protected EntrySQLBuilderImpl getStaticInsertSqlBuilder() {

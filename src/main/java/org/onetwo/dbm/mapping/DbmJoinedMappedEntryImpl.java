@@ -8,6 +8,7 @@ import org.onetwo.dbm.mapping.SQLBuilderFactory.SqlBuilderType;
 
 /****
  * 连接表映射？
+ * 暂没有用到
  * @author way
  *
  */

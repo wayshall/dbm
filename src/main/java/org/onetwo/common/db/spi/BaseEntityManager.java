@@ -11,6 +11,7 @@ import org.onetwo.common.db.builder.QueryBuilder;
 import org.onetwo.common.db.sqlext.SQLSymbolManager;
 import org.onetwo.common.utils.Page;
 import org.onetwo.dbm.core.spi.DbmSessionFactory;
+import org.onetwo.dbm.utils.DbmLock;
 
 /****
  * 通用的实体查询接口
@@ -23,6 +24,17 @@ public interface BaseEntityManager {
 	public <T> T load(Class<T> entityClass, Serializable id);
 	
 	public <T> T findById(Class<T> entityClass, Serializable id);
+	
+	/***
+	 * 
+	 * @author wayshall
+	 * @param entityClass
+	 * @param id
+	 * @param lock
+	 * @param timeoutInMillis lock forevaer if null
+	 * @return
+	 */
+	public <T> T lock(Class<T> entityClass, Serializable id, DbmLock lock, Integer timeoutInMillis);
 
 	public <T> T save(T entity);
 	public <T> Collection<T> saves(Collection<T> entities);

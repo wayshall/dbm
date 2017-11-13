@@ -105,7 +105,24 @@ public class OracleDialect extends AbstractDBDialect {
 		};
 		return listenerManager;
 	}*/
-	
+
+	protected String getWriteLockString(int timeoutInMillis) {
+		if ( timeoutInMillis == LockInfo.NO_WAIT ) {
+			return " for update nowait";
+		}
+		else if ( timeoutInMillis > 0 ) {
+			// convert to seconds
+			final float seconds = timeoutInMillis / 1000.0f;
+			return " for update wait " + Math.round( seconds );
+		}
+		else {
+			return " for update";
+		}
+	}
+
+	public String getReadLockString(int timeoutInMillis) {
+		return getWriteLockString(timeoutInMillis);
+	}
 	
 
 }

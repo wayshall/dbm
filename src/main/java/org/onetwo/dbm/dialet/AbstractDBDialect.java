@@ -18,11 +18,13 @@ import org.onetwo.dbm.event.DbmExtQueryEventListener;
 import org.onetwo.dbm.event.DbmFindEventListener;
 import org.onetwo.dbm.event.DbmInsertEventListener;
 import org.onetwo.dbm.event.DbmInsertOrUpdateListener;
+import org.onetwo.dbm.event.DbmLockEventListener;
 import org.onetwo.dbm.event.DbmUpdateEventListener;
 import org.onetwo.dbm.id.StrategyType;
 import org.onetwo.dbm.mapping.DbmTypeMapping;
 import org.onetwo.dbm.mapping.DefaultSQLBuilderFactory;
 import org.onetwo.dbm.mapping.SQLBuilderFactory;
+import org.onetwo.dbm.utils.DbmLock;
 
 
 abstract public class AbstractDBDialect implements InnerDBDialet, DBDialect {
@@ -92,7 +94,7 @@ abstract public class AbstractDBDialect implements InnerDBDialet, DBDialect {
 		this.dbmEventListenerManager.freezed();
 		
 		if(sqlBuilderFactory==null){
-			this.sqlBuilderFactory = new DefaultSQLBuilderFactory();
+			this.sqlBuilderFactory = new DefaultSQLBuilderFactory(this);
 		}
 		
 		this.initOtherComponents();
@@ -112,6 +114,7 @@ abstract public class AbstractDBDialect implements InnerDBDialet, DBDialect {
 				.registerListeners(DbmEventAction.update, new DbmUpdateEventListener())
 				.registerListeners(DbmEventAction.delete, new DbmDeleteEventListener())
 				.registerListeners(DbmEventAction.find, new DbmFindEventListener())
+				.registerListeners(DbmEventAction.lock, new DbmLockEventListener())
 				.registerListeners(DbmEventAction.extQuery, new DbmExtQueryEventListener());
 	}
 	
@@ -162,6 +165,28 @@ abstract public class AbstractDBDialect implements InnerDBDialet, DBDialect {
 
 	public DBMeta getDbmeta() {
 		return dbmeta;
+	}
+
+	@Override
+	public String getLockSqlString(LockInfo lockInfo) {
+		DbmLock lockMode = lockInfo.getLock();
+		String sql = "";
+		int timeoutInMillis = lockInfo.getTimeoutInMillis();
+		if(lockMode==DbmLock.PESSIMISTIC_READ){
+			sql = getReadLockString(timeoutInMillis);
+		}else if(lockMode==DbmLock.PESSIMISTIC_WRITE){
+			sql = getWriteLockString(timeoutInMillis);
+		}
+		return sql;
+	}
+	
+
+	protected String getReadLockString(int timeoutInMillis) {
+		return " for update";
+	}
+
+	protected String getWriteLockString(int timeoutInMillis) {
+		return " for update";
 	}
 
 	public void setDbmeta(DBMeta dbmeta) {

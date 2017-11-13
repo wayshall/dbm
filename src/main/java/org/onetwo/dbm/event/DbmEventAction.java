@@ -12,6 +12,7 @@ public enum DbmEventAction {
 	update,
 	delete,
 	find,
+	lock,
 	
 	extQuery,
 	

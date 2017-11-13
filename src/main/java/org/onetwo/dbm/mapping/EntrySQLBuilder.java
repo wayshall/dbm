@@ -13,5 +13,7 @@ public interface EntrySQLBuilder {
 	public DbmMappedEntryMeta getEntry();
 	
 	public Object getVersionValue(Object[] updateValues);
+	
+//	public void setLock(LockInfo lock);
 
 }

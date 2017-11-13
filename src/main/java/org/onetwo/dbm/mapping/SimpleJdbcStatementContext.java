@@ -18,6 +18,13 @@ public class SimpleJdbcStatementContext<T> implements JdbcStatementContext<T> {
 		this.values = values;
 		this.sqlBuilder = sqlBuilder;
 	}
+	public SimpleJdbcStatementContext(String sql, T values) {
+		super();
+		this.sql = sql;
+		this.values = values;
+		this.sqlBuilder = null;
+	}
+
 	@Override
 	public String getSql() {
 		return sql;
