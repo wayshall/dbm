@@ -30,7 +30,7 @@ public class MySQLDialect extends AbstractDBDialect {
 	
 
 	protected String getReadLockString(int timeoutInMillis) {
-		return " lock in share mode";
+		return "lock in share mode";
 	}
 	
 

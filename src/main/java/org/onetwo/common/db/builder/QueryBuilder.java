@@ -2,6 +2,8 @@ package org.onetwo.common.db.builder;
 
 import java.util.Map;
 
+import org.onetwo.dbm.dialet.DBDialect.LockInfo;
+
 /***
  * @author way
  *
@@ -42,6 +44,7 @@ public interface QueryBuilder {
 	public QueryBuilder desc(String... fields);
 
 	public QueryBuilder distinct(String... fields);
+	public QueryBuilder lock(LockInfo lock);
 	
 	public QueryBuilderJoin leftJoin(String table, String alias);
 

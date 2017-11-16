@@ -11,11 +11,11 @@ import java.util.Set;
 
 import org.onetwo.common.db.RawSqlWrapper;
 import org.onetwo.common.exception.BaseException;
-import org.onetwo.common.profiling.TimeProfileStack;
 import org.onetwo.common.utils.Assert;
 import org.onetwo.common.utils.CUtils;
 import org.onetwo.common.utils.LangUtils;
 import org.onetwo.common.utils.StringUtils;
+import org.onetwo.dbm.dialet.DBDialect.LockInfo;
 
 @SuppressWarnings({"unchecked", "rawtypes"})
 public class SelectExtQueryImpl extends AbstractExtQuery implements SelectExtQuery {
@@ -104,6 +104,9 @@ public class SelectExtQueryImpl extends AbstractExtQuery implements SelectExtQue
 			this.initQuery();
 		}
 		this.buildSelect().buildJoin().buildOrderBy();
+		//build befor where
+		String lockSql = buildLockString();
+		
 		sql = new StringBuilder();
 		sql.append(select);
 		if (join != null)
@@ -115,8 +118,12 @@ public class SelectExtQueryImpl extends AbstractExtQuery implements SelectExtQue
 				sql.append(where);
 		}
 		
-		if (orderBy != null)
+		if (orderBy != null){
 			sql.append(orderBy);
+		}
+		if(StringUtils.isNotBlank(lockSql)){
+			sql.append(lockSql);
+		}
 
 		if (isDebug()) {
 			logger.info("generated sql : " + sql);
@@ -128,6 +135,14 @@ public class SelectExtQueryImpl extends AbstractExtQuery implements SelectExtQue
 		
 		this.hasBuilt = true;
 		return this;
+	}
+	
+	protected String buildLockString(){
+		LockInfo lockInfo = (LockInfo)this.params.remove(K.FOR_UPDATE);
+		if(lockInfo==null){
+			return null;
+		}
+		return this.symbolManager.getSqlDialet().getLockSqlString(lockInfo);
 	}
 
 	protected SelectExtQueryImpl buildSelect() {

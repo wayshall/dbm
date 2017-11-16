@@ -199,7 +199,7 @@ public class SimpleDbmInnerServiceRegistry implements DbmInnerServiceRegistry {
 		
 		//init sql symbol
 		sqlSymbolManager = initializeComponent(sqlSymbolManager, SQLSymbolManager.class, ()->{
-			JFishSQLSymbolManagerImpl newSqlSymbolManager = JFishSQLSymbolManagerImpl.create();
+			JFishSQLSymbolManagerImpl newSqlSymbolManager = JFishSQLSymbolManagerImpl.create(this.dialect);
 //			newSqlSymbolManager.setDialect(dialect);
 			newSqlSymbolManager.setMappedEntryManager(mappedEntryManager);
 			newSqlSymbolManager.setListeners(Arrays.asList(new DataQueryFilterListener()));

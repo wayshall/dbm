@@ -49,6 +49,16 @@ public interface DBDialect extends Initializable {
 	public String getLockSqlString(LockInfo lock);
 	
 	public static class LockInfo {
+		public static LockInfo lock(DbmLock lock, int timeoutInMillis){
+			return new LockInfo(lock, timeoutInMillis);
+		}
+		public static LockInfo write(){
+			return new LockInfo(DbmLock.PESSIMISTIC_WRITE, WAIT_FOREVER);
+		}
+		public static LockInfo read(){
+			return new LockInfo(DbmLock.PESSIMISTIC_READ, WAIT_FOREVER);
+		}
+		
 		public static final int NO_WAIT = 0;
 		public static final int WAIT_FOREVER = -1;
 		

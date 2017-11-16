@@ -182,11 +182,11 @@ abstract public class AbstractDBDialect implements InnerDBDialet, DBDialect {
 	
 
 	protected String getReadLockString(int timeoutInMillis) {
-		return " for update";
+		return "for update";
 	}
 
 	protected String getWriteLockString(int timeoutInMillis) {
-		return " for update";
+		return "for update";
 	}
 
 	public void setDbmeta(DBMeta dbmeta) {

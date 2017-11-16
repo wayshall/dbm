@@ -28,7 +28,7 @@ public class DbmLockEventListener extends AbstractDbmEventListener {
 		
 		RowMapper rowMapper = es.getSessionFactory().getRowMapper(event.getEntityClass());
 		JdbcStatementContext<List<Object[]>> lockContext = entry.makeFetch(entity, true);
-		String sql = lockContext.getSql() + dialect.getLockSqlString(new LockInfo(lockEvent.getLock(), lockEvent.getTimeInMillis()));
+		String sql = lockContext.getSql() + " " + dialect.getLockSqlString(new LockInfo(lockEvent.getLock(), lockEvent.getTimeInMillis()));
 		
 		List list = (List) es.getDbmJdbcOperations().query(sql, lockContext.getValue().get(0), rowMapper);
 		if(LangUtils.isNotEmpty(list)){

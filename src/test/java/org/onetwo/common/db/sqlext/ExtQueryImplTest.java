@@ -17,8 +17,8 @@ import org.onetwo.common.db.Magazine;
 import org.onetwo.common.db.sqlext.ExtQuery.K;
 import org.onetwo.common.db.sqlext.ExtQuery.K.IfNull;
 import org.onetwo.common.db.sqlext.ExtQueryUtils.F;
+import org.onetwo.common.dbm.model.entity.UserEntity;
 import org.onetwo.common.utils.CUtils;
-import org.onetwo.common.utils.UserEntity;
 
 
 @SuppressWarnings({"unchecked", "rawtypes"})
@@ -251,7 +251,7 @@ public class ExtQueryImplTest {
 		q = sqlSymbolManagerFactory.getJPA().createSelectQuery(Object.class, properties);
 		q.build();
 		
-		sql = "select new org.onetwo.dbm.entity.UserEntity(object.aa, object.bb) from Object object where object.aa = :object_aa0";
+		sql = "select new org.onetwo.common.dbm.model.entity.UserEntity(object.aa, object.bb) from Object object where object.aa = :object_aa0";
 		paramsting = "{object_aa0=bb}";
 		Assert.assertEquals(sql.trim(), q.getSql().trim());
 		Assert.assertEquals(paramsting, q.getParamsValue().getValues().toString());

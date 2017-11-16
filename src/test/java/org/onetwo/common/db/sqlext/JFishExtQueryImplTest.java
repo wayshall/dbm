@@ -10,6 +10,9 @@ import org.onetwo.common.db.Magazine;
 import org.onetwo.common.db.sqlext.ExtQuery.K;
 import org.onetwo.common.db.sqlext.ExtQueryUtils.F;
 import org.onetwo.common.utils.CUtils;
+import org.onetwo.dbm.dialet.DBDialect;
+import org.onetwo.dbm.dialet.DBDialect.LockInfo;
+import org.onetwo.dbm.dialet.MySQLDialect;
 import org.onetwo.dbm.query.JFishSQLSymbolManagerImpl;
 
 public class JFishExtQueryImplTest {
@@ -20,6 +23,7 @@ public class JFishExtQueryImplTest {
 	Map<Object, Object> properties;
 	
 	private SQLSymbolManagerFactory sqlSymbolManagerFactory;
+	DBDialect dialect = new MySQLDialect();
 	
 
 	@Before
@@ -54,7 +58,7 @@ public class JFishExtQueryImplTest {
 
 	@Test
 	public void testJFishExtQuery(){
-		JFishSQLSymbolManagerImpl jqm = JFishSQLSymbolManagerImpl.create();
+		JFishSQLSymbolManagerImpl jqm = JFishSQLSymbolManagerImpl.create(dialect);
 		this.properties.put("name:", null);
 		this.properties.put("nickname:", "way");
 		this.properties.put(K.IF_NULL, K.IfNull.Ignore);
@@ -68,5 +72,19 @@ public class JFishExtQueryImplTest {
 		Assert.assertEquals(expected, tsql.trim());
 	}
 	
-	
+
+	@Test
+	public void testForUpdate(){
+		JFishSQLSymbolManagerImpl jqm = JFishSQLSymbolManagerImpl.create(dialect);
+		properties = new LinkedHashMap<Object, Object>();
+		properties.put("field1", "value1");
+		properties.put("field2", 333);
+		properties.put(K.FOR_UPDATE, LockInfo.write());
+		ExtQuery q = jqm.createSelectQuery(Object.class, properties);
+		q.build();
+		
+		System.out.println("testOrderBy: " + q.getSql());
+		String sql = "select object.* from object object where object.field1 = :object_field10 and object.field2 = :object_field21 for update";
+		Assert.assertEquals(sql.trim(), q.getSql().trim());
+	}
 }

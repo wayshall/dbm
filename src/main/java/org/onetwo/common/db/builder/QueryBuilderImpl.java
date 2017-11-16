@@ -12,6 +12,7 @@ import org.onetwo.common.db.sqlext.SQLSymbolManager;
 import org.onetwo.common.db.sqlext.SQLSymbolManagerFactory;
 import org.onetwo.common.utils.LangUtils;
 import org.onetwo.common.utils.StringUtils;
+import org.onetwo.dbm.dialet.DBDialect.LockInfo;
 
 /*********
  * 提供简易有明确api的查询构造器
@@ -106,36 +107,12 @@ public class QueryBuilderImpl implements QueryBuilder {
 		}
 	}
 	
-	/*@Override
-	public QueryBuilderImpl and(QueryBuilder subQuery){
-		this.checkSubQuery(subQuery);
-		this.params.put(K.AND, subQuery.getParams());
+
+	@Override
+	public QueryBuilder lock(LockInfo lock) {
+		this.params.put(K.FOR_UPDATE, lock);
 		return self();
 	}
-	
-	@Override
-	public QueryBuilderImpl ignoreIfNull(){
-		this.params.put(K.IF_NULL, K.IfNull.Ignore);
-		return self();
-	}
-	
-	@Override
-	public QueryBuilderImpl throwIfNull(){
-		this.params.put(K.IF_NULL, K.IfNull.Throw);
-		return self();
-	}
-	
-	@Override
-	public QueryBuilderImpl calmIfNull(){
-		this.params.put(K.IF_NULL, K.IfNull.Calm);
-		return self();
-	}*/
-	
-	/*@Override
-	public DefaultQueryBuilderField field(String...fields){
-//		this.throwIfHasBuild();
-		return new DefaultQueryBuilderField(this, fields);
-	}*/
 
 	@Override
 	public QueryBuilderImpl select(String...fields){
