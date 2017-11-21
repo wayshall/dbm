@@ -354,9 +354,12 @@ abstract public class AbstractNestedBeanMapper<T> {
 					complexFields.put(jproperty.getName(), propertyMapper);
 				}else{
 //					this.simpleFields.put(JdbcUtils.lowerCaseName(pd.getName()), jproperty);
-					String fullName = getFullName(pd.getName());
+					/*String fullName = getFullName(pd.getName());
 					this.simpleFields.put(toClumnName1(fullName), jproperty);
-					this.simpleFields.put(toClumnName2(fullName), jproperty);
+					this.simpleFields.put(toClumnName2(fullName), jproperty);*/
+//					String fullName = getFullName(pd.getName());
+					this.simpleFields.put(getFullName(toClumnName1(pd.getName())), jproperty);
+					this.simpleFields.put(getFullName(toClumnName2(pd.getName())), jproperty);
 				}
 			}
 		}
@@ -395,7 +398,7 @@ abstract public class AbstractNestedBeanMapper<T> {
 			BeanWrapper bw = null;
 			boolean isNew = true;
 			if(hasIdField()){
-				
+				//根据id属性作为区分一条记录的标志
 				String actualColumnName = getActualColumnName(names, idProperty);
 				if(actualColumnName==null){
 					throw new DbmException("no id column found on resultSet for specified id: " + idPropertyName+", columnPrefix:"+columnPrefix);
@@ -466,12 +469,14 @@ abstract public class AbstractNestedBeanMapper<T> {
 			return names.get(columnName);
 		}
 		private String getActualColumnName(Map<String, Integer> names, JFishProperty jproperty){
-			String fullName = getFullName(jproperty.getName());
-			String columName = toClumnName1(fullName);
+//			String fullName = getFullName(jproperty.getName());
+//			String columName = toClumnName1(fullName);
+			String columName = getFullName(toClumnName1(jproperty.getName()));
 			if(names.containsKey(columName)){
 				return columName;
 			}
-			columName = toClumnName2(fullName);
+//			columName = toClumnName2(fullName);
+			columName = getFullName(toClumnName2(jproperty.getName()));
 			if(names.containsKey(columName)){
 				return columName;
 			}
