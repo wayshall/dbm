@@ -23,6 +23,7 @@ import org.onetwo.dbm.annotation.DbmFieldListeners;
 import org.onetwo.dbm.core.spi.DbmTransaction;
 import org.onetwo.dbm.exception.DbmException;
 import org.onetwo.dbm.exception.UpdateCountException;
+import org.onetwo.dbm.jdbc.JdbcUtils;
 import org.onetwo.dbm.mapping.DbmEntityFieldListener;
 import org.onetwo.dbm.spring.EnableDbm;
 import org.slf4j.Logger;
@@ -81,8 +82,9 @@ final public class DbmUtils {
 		int columnCount = resultSetMetaData.getColumnCount();
 		Map<String, Integer> names = new HashMap<String, Integer>();
 		for (int index = 1; index <= columnCount; index++) {
-//			names.put(JdbcUtils.lowerCaseName(lookupColumnName(resultSetMetaData, index)), index);
-			names.put(lookupColumnName(resultSetMetaData, index), index);
+			String columName = lookupColumnName(resultSetMetaData, index);
+			names.put(JdbcUtils.lowerCaseName(columName), index);
+			names.put(columName, index);
 		}
 		return names;
 	}
