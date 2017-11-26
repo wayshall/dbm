@@ -63,7 +63,7 @@ public class DefaultWhereCauseBuilder implements WhereCauseBuilder {
 	
 	protected void checkSubQuery(QueryBuilder subQuery){
 		if(!(subQuery instanceof SubQueryBuilder)){
-			LangUtils.throwBaseException("please use SQuery.sub() method to create sub query .");
+			LangUtils.throwBaseException("please use "+SubQueryBuilder.class.getSimpleName()+".sub() method to create sub query .");
 		}
 	}
 	

@@ -41,8 +41,8 @@ public class LogSqlInterceptor implements DbmInterceptor {
 		if(sqlParams==null){
 			return chain.invoke();
 		}
-		if(logger.isInfoEnabled()){
-			logger.info("dbm sql: {}, sql parameters: {}", sqlParams.getKey(), sqlParams.getValue());
+		if(logger.isTraceEnabled()){
+			logger.trace("dbm sql: {}, sql parameters: {}", sqlParams.getKey(), sqlParams.getValue());
 		}
 		
 		TimeCounter counter = TimeCounter.start("dbm jdbc: ");
@@ -50,8 +50,8 @@ public class LogSqlInterceptor implements DbmInterceptor {
 			return chain.invoke();
 		}finally{
 			counter.stop(false);
-			if(logger.isInfoEnabled()){
-				logger.info(counter.getMessage());
+			if(logger.isTraceEnabled()){
+				logger.trace(counter.getMessage());
 			}
 		}
 	}

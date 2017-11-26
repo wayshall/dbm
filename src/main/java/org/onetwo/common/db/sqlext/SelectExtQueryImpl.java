@@ -125,9 +125,9 @@ public class SelectExtQueryImpl extends AbstractExtQuery implements SelectExtQue
 			sql.append(lockSql);
 		}
 
-		if (isDebug()) {
-			logger.info("generated sql : " + sql);
-			logger.info("params : " + this.paramsValue.getValues());
+		if (isDebug() && logger.isTraceEnabled()) {
+			logger.trace("generated sql : " + sql);
+			logger.trace("params : " + this.paramsValue.getValues());
 		}
 
 		/*if(isDebug())
@@ -525,9 +525,9 @@ public class SelectExtQueryImpl extends AbstractExtQuery implements SelectExtQue
 		}
 		
 		String countSql = buildCountSql(sql.toString());
-		if (isDebug()) {
-			logger.info("generated count sql : " + countSql);
-			logger.info("params : " + (Map) this.paramsValue.getValues());
+		if (isDebug() && logger.isTraceEnabled()) {
+			logger.trace("generated count sql : " + countSql);
+			logger.trace("params : " + (Map) this.paramsValue.getValues());
 		}
 		return countSql;
 	}
