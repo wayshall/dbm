@@ -690,7 +690,9 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 			field.freezing();
 		}
 		freezing = true;
-		logger.info("mapped entry["+getEntityName()+"] has built and freezing!");
+		if(logger.isTraceEnabled()){
+			logger.trace("mapped entry["+getEntityName()+"] has built and freezing!");
+		}
 	}
 
 	protected void checkFreezing(String name) {
