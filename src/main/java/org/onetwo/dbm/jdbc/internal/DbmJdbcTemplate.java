@@ -39,7 +39,8 @@ import org.springframework.util.Assert;
 public class DbmJdbcTemplate extends JdbcTemplate implements DbmJdbcOperations {
 	
 	private final Logger logger = JFishLoggerFactory.getLogger(this.getClass());
-	
+
+	private final DbmListRowMapperResultSetExtractor<Map<String, Object>> generatedKeysExtractor = new DbmListRowMapperResultSetExtractor<Map<String, Object>>(getColumnMapRowMapper(), 1);
 	protected DbmNamedJdbcTemplate dbmNamedJdbcOperations;
 	private JdbcStatementParameterSetter jdbcParameterSetter;
 
@@ -75,7 +76,7 @@ public class DbmJdbcTemplate extends JdbcTemplate implements DbmJdbcOperations {
 	public DbmNamedJdbcTemplate getDbmNamedJdbcOperations() {
 		return dbmNamedJdbcOperations;
 	}
-
+	
 	@Override
 	public int updateWith(final SimpleArgsPreparedStatementCreator spsc, final KeyHolder generatedKeyHolder) throws DataAccessException {
 		return updateWith(spsc, new AroundPreparedStatementExecute() {
@@ -89,8 +90,8 @@ public class DbmJdbcTemplate extends JdbcTemplate implements DbmJdbcOperations {
 				ResultSet keys = ps.getGeneratedKeys();
 				if (keys != null) {
 					try {
-						DbmListRowMapperResultSetExtractor<Map<String, Object>> rse = new DbmListRowMapperResultSetExtractor<Map<String, Object>>(getColumnMapRowMapper(), 1);
-						generatedKeys.addAll(rse.extractData(keys));
+//						DbmListRowMapperResultSetExtractor<Map<String, Object>> rse = new DbmListRowMapperResultSetExtractor<Map<String, Object>>(getColumnMapRowMapper(), 1);
+						generatedKeys.addAll(generatedKeysExtractor.extractData(keys));
 					}
 					finally {
 						JdbcUtils.closeResultSet(keys);
