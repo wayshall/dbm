@@ -12,6 +12,9 @@ public class DepartmentVO {
 	protected List<EmployeeVO> employees;
 	
 	protected CompanyVO company;
+	
+
+	protected List<String> employeeNames;
   
 	public DepartmentVO(){
 	}
@@ -62,6 +65,14 @@ public class DepartmentVO {
 
 	public void setCompany(CompanyVO company) {
 		this.company = company;
+	}
+
+	public List<String> getEmployeeNames() {
+		return employeeNames;
+	}
+
+	public void setEmployeeNames(List<String> employeeNames) {
+		this.employeeNames = employeeNames;
 	}
 
 }

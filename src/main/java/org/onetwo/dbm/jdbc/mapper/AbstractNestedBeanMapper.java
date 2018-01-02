@@ -3,6 +3,7 @@ package org.onetwo.dbm.jdbc.mapper;
 import java.beans.PropertyDescriptor;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Map.Entry;
 
 import org.apache.commons.lang3.StringUtils;
@@ -367,10 +368,11 @@ abstract public class AbstractNestedBeanMapper<T> {
 		private JFishProperty getActualJFishProperty(String propName){
 			JFishProperty jproperty = classIntro.getJFishProperty(propName, false);
 			JFishProperty actualProperty = jproperty;
+			Optional<JFishProperty> fieldProperty = jproperty.getCorrespondingJFishProperty();
 			if(!jproperty.hasAnnotation(DbmNestedResult.class) 
-					&& jproperty.getCorrespondingJFishProperty().isPresent()
-					&& jproperty.getCorrespondingJFishProperty().get().hasAnnotation(DbmNestedResult.class)){
-				actualProperty = jproperty.getCorrespondingJFishProperty().get();
+					&& fieldProperty.isPresent()
+					&& fieldProperty.get().hasAnnotation(DbmNestedResult.class)){
+				actualProperty = fieldProperty.get();
 			}
 			return actualProperty;
 		}

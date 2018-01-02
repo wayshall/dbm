@@ -125,8 +125,17 @@ left join
 left join
     employee emply on emply.department_id=depart.id
 
-
-
+/***
+ *@name: findDepartmentWithEmployeeNames
+ * 
+ */
+select 
+    depart.*,
+    emply.name as emply_name
+from 
+    department depart
+left join
+    employee emply on emply.department_id=depart.id
 
 
 

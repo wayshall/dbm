@@ -46,5 +46,11 @@ public interface CompanyDao {
 			@DbmNestedResult(property="departmentMap", id="id", columnPrefix="departments_", nestedType=NestedType.MAP)
 	})
 	List<CompanyVO> findNestedCompaniesWithDepartmentMap();
+	
+
+	@DbmResultMapping(value={
+			@DbmNestedResult(property="employeeNames", id="name", columnPrefix="emply_", nestedType=NestedType.COLLECTION),
+	})
+	List<DepartmentVO> findDepartmentWithEmployeeNames();
 
 }

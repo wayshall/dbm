@@ -122,6 +122,19 @@ public class DbmNestedMappingTest extends DbmBaseTest {
 			});
 		});
 		
+		departments = companyDao.findDepartmentWithEmployeeNames();
+		assertThat(departments.size()).isEqualTo(100);
+		departments.stream().forEach(depart->{
+			assertThat(depart.getCompany()).isNull();
+
+			assertThat(depart.getEmployeeNames()).isNotNull();
+			assertThat(depart.getEmployeeNames()).isNotEmpty();
+			depart.getEmployeeNames().stream().forEach(employeeName->{
+				assertThat(employeeName).isNotNull();
+				assertThat(employeeName).startsWith("员工-");
+			});
+		});
+		
 		List<CompanyVO> companies = companyDao.findNestedCompanies();
 		assertThat(companies.size()).isEqualTo(10);
 		companies.stream().forEach(company->{
