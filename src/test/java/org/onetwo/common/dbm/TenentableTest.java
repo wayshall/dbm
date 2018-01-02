@@ -26,11 +26,11 @@ public class TenentableTest extends DbmBaseTest {
 		article.setContent("测试内容");
 		article = entityManager.save(article);
 
-		assertThat(article.getTenentId()).isEqualTo(TenentBaseEntity.FIXED_TENENT_ID);
+		assertThat(article.getTenementId()).isEqualTo(TenentBaseEntity.FIXED_TENENT_ID);
 		assertThat(article.getClientId()).isEqualTo(TenentBaseEntity.FIXED_CLIENT_ID);
 		
 		article = entityManager.findOne(ArticleEntity.class, "id", article.getId(), K.DEBUG, true);
-		assertThat(article.getTenentId()).isEqualTo(TenentBaseEntity.FIXED_TENENT_ID);
+		assertThat(article.getTenementId()).isEqualTo(TenentBaseEntity.FIXED_TENENT_ID);
 		assertThat(article.getClientId()).isEqualTo(TenentBaseEntity.FIXED_CLIENT_ID);
 	}
 

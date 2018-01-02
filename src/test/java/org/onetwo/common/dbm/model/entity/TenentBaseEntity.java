@@ -26,15 +26,15 @@ public class TenentBaseEntity {
 	public static String FIXED_CLIENT_ID = "clientId_1000";
 	
 	@DbmFieldListeners(FixedListener.class)
-	private Long tenentId;
+	private Long tenementId;
 	@DbmFieldListeners(FixedListener.class)
 	private String clientId;
 	
-	public Long getTenentId() {
-		return tenentId;
+	public Long getTenementId() {
+		return tenementId;
 	}
-	public void setTenentId(Long tenentId) {
-		this.tenentId = tenentId;
+	public void setTenementId(Long tenementId) {
+		this.tenementId = tenementId;
 	}
 	public String getClientId() {
 		return clientId;
@@ -47,7 +47,7 @@ public class TenentBaseEntity {
 
 		@Override
 		public Object beforeFieldInsert(DbmMappedField field, Object fieldValue) {
-			if("tenentId".equals(field.getName())){
+			if("tenementId".equals(field.getName())){
 				return FIXED_TENENT_ID;
 			}else{
 				return FIXED_CLIENT_ID;
@@ -56,7 +56,7 @@ public class TenentBaseEntity {
 
 		@Override
 		public Object beforeFieldUpdate(DbmMappedField field, Object fieldValue) {
-			if("tenentId".equals(field.getName())){
+			if("tenementId".equals(field.getName())){
 				return FIXED_TENENT_ID;
 			}else{
 				return FIXED_CLIENT_ID;
@@ -69,7 +69,7 @@ public class TenentBaseEntity {
 
 		@Override
 		public Map<Object, Object> enhanceParameters(ExtQuery query) {
-			return ImmutableMap.of("tenentId", FIXED_TENENT_ID, "clientId", FIXED_CLIENT_ID);
+			return ImmutableMap.of("tenementId", FIXED_TENENT_ID, "clientId", FIXED_CLIENT_ID);
 		}
 		
 

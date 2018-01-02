@@ -1,6 +1,5 @@
 package org.onetwo.dbm.jdbc.internal;
 
-import java.beans.PropertyDescriptor;
 import java.sql.SQLException;
 
 import org.onetwo.dbm.exception.DbmException;
@@ -12,13 +11,14 @@ import org.springframework.jdbc.support.rowset.ResultSetWrappingSqlRowSet;
 public class SpringJdbcResultSetGetter implements JdbcResultSetGetter {
 
 	@Override
-	public Object getColumnValue(ResultSetWrappingSqlRowSet rs, int index, PropertyDescriptor pd) {
+	public Object getColumnValue(ResultSetWrappingSqlRowSet rs, int index, Class<?> requiredType) {
 //		JFishProperty jproperty = Intro.wrap(pd.getWriteMethod().getDeclaringClass()).getJFishProperty(pd.getName(), false);
 		Object value;
 		try {
-			value = JdbcUtils.getResultSetValue(rs.getResultSet(), index, pd.getPropertyType());
+			value = JdbcUtils.getResultSetValue(rs.getResultSet(), index, requiredType);
 		} catch (SQLException e) {
-			throw new DbmException("get column value error, index:"+index+", name:"+pd.getName(), e);
+//			throw new DbmException("get column value error, index:"+index+", name:"+pd.getName(), e);
+			throw new DbmException("get column value error, index:"+index, e);
 		}
 		return value;
 	}

@@ -112,7 +112,8 @@ public class EntryRowMapper<T> implements RowMapper<T>{
 	}
 
 	protected Object getColumnValue(ResultSetWrappingSqlRowSet rs, int index, PropertyDescriptor pd, int sqlType) throws SQLException {
-		return jdbcResultSetGetter.getColumnValue(rs, index, pd);
+//		return jdbcResultSetGetter.getColumnValue(rs, index, pd);
+		return jdbcResultSetGetter.getColumnValue(rs, index, pd.getPropertyType());
 		/*JFishProperty jproperty = Intro.wrap(pd.getWriteMethod().getDeclaringClass()).getJFishProperty(pd.getName(), false);
 		TypeHandler<?> typeHandler = sqlTypeMapping.getTypeHander(jproperty.getType(), sqlType);
 		Object value = typeHandler.getResult(rs, index);

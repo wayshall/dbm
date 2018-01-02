@@ -61,7 +61,7 @@ public class HibernateNestedBeanTransformer<T> extends AbstractNestedBeanMapper<
 		}
 
 		@Override
-		public Object getColumnValue(int index, PropertyDescriptor pd) {
+		public Object getColumnValue(int index, Class<?> requiredType) {
 			return tuple[index];
 		}
 

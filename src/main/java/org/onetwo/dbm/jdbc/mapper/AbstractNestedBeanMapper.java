@@ -3,8 +3,8 @@ package org.onetwo.dbm.jdbc.mapper;
 import java.beans.PropertyDescriptor;
 import java.util.Collection;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Map.Entry;
+import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -14,6 +14,7 @@ import org.onetwo.common.reflect.ClassIntroManager;
 import org.onetwo.common.reflect.Intro;
 import org.onetwo.common.reflect.ReflectUtils;
 import org.onetwo.common.utils.JFishProperty;
+import org.onetwo.common.utils.LangUtils;
 import org.onetwo.dbm.annotation.DbmNestedResult;
 import org.onetwo.dbm.annotation.DbmNestedResult.NestedType;
 import org.onetwo.dbm.annotation.DbmResultMapping;
@@ -201,6 +202,12 @@ abstract public class AbstractNestedBeanMapper<T> {
 		public ResultClassMapper getParentMapper() {
 			return parentMapper;
 		}
+		public Object getPropertyValue(Object propertyValue){
+			if(propertyValue instanceof SimpleValueNestedMappingHoder){
+				propertyValue = ((SimpleValueNestedMappingHoder)propertyValue).value;
+			}
+			return propertyValue;
+		}
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -224,6 +231,8 @@ abstract public class AbstractNestedBeanMapper<T> {
 			if(propertyValue==null){
 				return ;
 			}
+			
+			propertyValue = getPropertyValue(propertyValue);
 			String propName = getBelongToProperty().getName();
 			Collection values = (Collection)parent.getPropertyValue(propName);
 			if(values==null){
@@ -287,12 +296,39 @@ abstract public class AbstractNestedBeanMapper<T> {
 			values.put(id, propertyValue);
 		}
 	}
-	
+
+	public static class SimpleValueNestedMappingHoder {
+		Object value;
+		public void setValue(Object value) {
+			this.value = value;
+		}
+		public Object getValue() {
+			return value;
+		}
+	}
+	protected static class PropertyMeta {
+		final String name;
+		final Class<?> type;
+		final boolean simpleValue;
+		public PropertyMeta(String name, Class<?> type, boolean simpleValue) {
+			super();
+			this.name = name;
+			this.type = type;
+			this.simpleValue = simpleValue;
+		}
+		public String getName() {
+			return name;
+		}
+		public Class<?> getType() {
+			return type;
+		}
+		
+	}
 	protected static class ResultClassMapper {
 		private String idPropertyName = "";
 		private String columnPrefix = "";
 		private Intro<?> classIntro;
-		private JFishProperty idProperty;
+		private PropertyMeta idProperty;
 		private Map<String, JFishProperty> simpleFields = Maps.newHashMap();
 		private Map<String, PropertyResultClassMapper> complexFields = Maps.newHashMap();
 		protected Map<Integer, BeanWrapper> datas = Maps.newHashMap();
@@ -308,6 +344,17 @@ abstract public class AbstractNestedBeanMapper<T> {
 //			this.initialize(mappedClass);
 			this.resultClass = mappedClass;
 			this.context = context;
+			
+			if(LangUtils.isSimpleType(mappedClass)){
+				this.resultClass = SimpleValueNestedMappingHoder.class;
+				if(StringUtils.isBlank(idPropertyName)){
+					idPropertyName = "value";
+				}
+				if(!"value".equals(idPropertyName)){
+					throw new DbmException("the idPropertyName must be 'value' if nested mapped type is a simple type!");
+				}
+				this.idProperty = new PropertyMeta(idPropertyName, mappedClass, true);
+			}
 		}
 
 		public String getIdPropertyName() {
@@ -318,7 +365,7 @@ abstract public class AbstractNestedBeanMapper<T> {
 			return resultClass;
 		}
 
-		public JFishProperty getIdProperty() {
+		public PropertyMeta getIdProperty() {
 			return idProperty;
 		}
 
@@ -333,7 +380,17 @@ abstract public class AbstractNestedBeanMapper<T> {
 		
 		public void initialize() {
 			this.classIntro = ClassIntroManager.getInstance().getIntro(resultClass);
-			this.idProperty = this.classIntro.getJFishProperty(idPropertyName, false);
+			if(idProperty==null && StringUtils.isNotBlank(idPropertyName)){
+				JFishProperty idJProperty = this.classIntro.getJFishProperty(idPropertyName, false);
+				try {
+					this.idProperty = new PropertyMeta(idPropertyName, idJProperty.getPropertyDescriptor().getPropertyType(), false);
+				} catch (Exception e) {
+					throw new DbmException("create id property error:"+e.getMessage(), e);
+				}
+			}
+			/*if(this.idProperty!=null && this.idProperty.simpleValue){
+				return ;
+			}*/
 			for (PropertyDescriptor pd : classIntro.getProperties()) {
 				if(pd.getWriteMethod()==null){
 					continue;
@@ -406,7 +463,7 @@ abstract public class AbstractNestedBeanMapper<T> {
 					throw new DbmException("no id column found on resultSet for specified id: " + idPropertyName+", columnPrefix:"+columnPrefix);
 				}
 				int index = names.get(actualColumnName);
-				Object idValue = columnValueGetter.getColumnValue(index, idProperty.getPropertyDescriptor());
+				Object idValue = columnValueGetter.getColumnValue(index, idProperty.getType());
 				if(idValue==null){
 //					throw new DbmException("id column can not be null for specified id field: " + idPropertyName+", columnPrefix:"+columnPrefix);
 					return null;
@@ -455,7 +512,7 @@ abstract public class AbstractNestedBeanMapper<T> {
 				if(index==null){
 					continue;
 				}
-				Object value = columnValueGetter.getColumnValue(index, jproperty.getPropertyDescriptor());
+				Object value = columnValueGetter.getColumnValue(index, jproperty.getPropertyDescriptor().getPropertyType());
 				if(value!=null){
 					if(bw==null){
 						Object mappedObject = classIntro.newInstance();
@@ -470,7 +527,7 @@ abstract public class AbstractNestedBeanMapper<T> {
 		private Integer getIndexForColumnName(Map<String, Integer> names, String columnName){
 			return names.get(columnName);
 		}
-		private String getActualColumnName(Map<String, Integer> names, JFishProperty jproperty){
+		private String getActualColumnName(Map<String, Integer> names, PropertyMeta jproperty){
 //			String fullName = getFullName(jproperty.getName());
 //			String columName = toClumnName1(fullName);
 			String columName = getFullName(toClumnName1(jproperty.getName()));

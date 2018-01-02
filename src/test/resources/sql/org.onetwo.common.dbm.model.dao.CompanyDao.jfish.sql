@@ -131,7 +131,7 @@ left join
  */
 select 
     depart.*,
-    emply.name as emply_name
+    emply.name as emply_value
 from 
     department depart
 left join

@@ -49,7 +49,7 @@ public interface CompanyDao {
 	
 
 	@DbmResultMapping(value={
-			@DbmNestedResult(property="employeeNames", id="name", columnPrefix="emply_", nestedType=NestedType.COLLECTION),
+			@DbmNestedResult(property="employeeNames", id="value", columnPrefix="emply_", nestedType=NestedType.COLLECTION),
 	})
 	List<DepartmentVO> findDepartmentWithEmployeeNames();
 

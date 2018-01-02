@@ -1,6 +1,5 @@
 package org.onetwo.dbm.jdbc.internal;
 
-import java.beans.PropertyDescriptor;
 import java.sql.ResultSet;
 
 import org.onetwo.dbm.jdbc.spi.ColumnValueGetter;
@@ -31,8 +30,8 @@ public class ResultSetColumnValueGetter implements ColumnValueGetter {
 	}
 
 	@Override
-	public Object getColumnValue(int index, PropertyDescriptor pd) {
-		return jdbcResultSetGetter.getColumnValue(rowSet, index, pd);
+	public Object getColumnValue(int index, Class<?> requiredType) {
+		return jdbcResultSetGetter.getColumnValue(rowSet, index, requiredType);
 	}
 
 	@Override
