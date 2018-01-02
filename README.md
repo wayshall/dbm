@@ -673,6 +673,8 @@ left join
 List<CompanyVO> companies = companyDao.findNestedCompanies();
 ```
 
+- 注意：若嵌套类型为NestedType.COLLECTION，而容器的元素为简单类型，则把@DbmNestedResult注解的id属性设置为“value”即可。
+
 ## 自定义实现DbmRepository查询接口
 dbm的Repository查询接口采用了流行的只有接口没有实现类的风格，但有时你需要的查询，可能不只是写一条sql查询出来即可的，尽管你可以把这种逻辑处理定义到Service，但你又觉得这些是数据处理逻辑并不属于Service，并且你希望把这种实现也挂载到已经存在的Repository查询接口，没问题，dbm支持这种做法。
 比如，你已经有了一个名叫UserDao的Repository查询接口，然后你可以自顶一个CustomerUserDao接口：
