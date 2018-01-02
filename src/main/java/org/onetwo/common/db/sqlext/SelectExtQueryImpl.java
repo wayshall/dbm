@@ -99,10 +99,8 @@ public class SelectExtQueryImpl extends AbstractExtQuery implements SelectExtQue
 		if(isDebug())
 			UtilTimerStack.push(fname);*/
 		
-		//re-init-query if rebuild
-		if(hasBuilt()){
-			this.initQuery();
-		}
+		beforeBuild();
+		
 		this.buildSelect().buildJoin().buildOrderBy();
 		//build befor where
 		String lockSql = buildLockString();
@@ -125,15 +123,16 @@ public class SelectExtQueryImpl extends AbstractExtQuery implements SelectExtQue
 			sql.append(lockSql);
 		}
 
-		if (isDebug() && logger.isTraceEnabled()) {
-			logger.trace("generated sql : " + sql);
-			logger.trace("params : " + this.paramsValue.getValues());
+		if (isDebug()) {
+			logger.info("generated sql : {}, params: {}", sql, this.paramsValue.getValues());
 		}
 
 		/*if(isDebug())
 			UtilTimerStack.pop(fname);*/
 		
 		this.hasBuilt = true;
+		
+		afaterBuild();
 		return this;
 	}
 	
@@ -525,9 +524,10 @@ public class SelectExtQueryImpl extends AbstractExtQuery implements SelectExtQue
 		}
 		
 		String countSql = buildCountSql(sql.toString());
-		if (isDebug() && logger.isTraceEnabled()) {
-			logger.trace("generated count sql : " + countSql);
-			logger.trace("params : " + (Map) this.paramsValue.getValues());
+		if (isDebug()) {
+			/*logger.trace("generated count sql : " + countSql);
+			logger.trace("params : " + (Map) this.paramsValue.getValues());*/
+			logger.info("generated countSql : {}, params: {}", countSql, this.paramsValue.getValues());
 		}
 		return countSql;
 	}
@@ -560,7 +560,7 @@ public class SelectExtQueryImpl extends AbstractExtQuery implements SelectExtQue
 		properties.put("&LOWER(name)", "way");
 		properties.put("&substring(name, 5, 1)", "w");
 
-		ExtQuery q = SQLSymbolManagerFactory.getInstance().getJPA().createSelectQuery(Object.class, "mag", properties);
+		ExtQueryInner q = SQLSymbolManagerFactory.getInstance().getJPA().createSelectQuery(Object.class, "mag", properties);
 		q.build();
 		
 	}

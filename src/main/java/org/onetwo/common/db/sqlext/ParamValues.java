@@ -51,7 +51,7 @@ public class ParamValues {
 		params.forEach((k, v)->values.put(k, getActualSqlValue(v)));
 	}
 	
-	public void joinToQuery(ExtQuery subQuery){
+	public void joinToQuery(ExtQueryInner subQuery){
 		/*Map<String, Object> pvs = getValues();
 		Map<String, Object> subParamValues = subQuery.getParamsValue().getValues();
 		subParamValues.putAll(pvs);

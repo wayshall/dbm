@@ -11,4 +11,8 @@ public interface ExtQueryInner extends ExtQuery {
 
 	public boolean hasParameterField(String fieldName);
 	public Set<String> getAllParameterFieldNames();
+
+	public void initQuery();
+	public ExtQuery build();
+
 }

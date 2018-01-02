@@ -36,6 +36,18 @@
   </scm>
 
   <dependencies>
+        
+    <dependency>
+        <groupId>ch.qos.logback</groupId>
+        <artifactId>logback-core</artifactId>
+        <optional>true</optional>
+    </dependency>
+    
+    <dependency>
+        <groupId>ch.qos.logback</groupId>
+        <artifactId>logback-classic</artifactId>
+        <optional>true</optional>
+    </dependency>
     
     <dependency>
       <groupId>org.onetwo4j</groupId>
@@ -277,6 +289,7 @@
     </build>
     
     <profiles>
+       
        <profile>
            <id>release</id>
            <build>

@@ -54,7 +54,7 @@ abstract public class AbstractSupportedSubQuerySQLSymbolParser extends AbstractS
 			hql.append(field).append(" ").append(symbol).append(" ( ");
 			paramlist.remove(value1);
 			Class subEntity = (Class)value1;
-			ExtQuery subQuery = this.createSubQuery(subEntity, paramlist);
+			ExtQueryInner subQuery = this.createSubQuery(subEntity, paramlist);
 			paramValues.joinToQuery(subQuery);
 			hql.append(subQuery.getSql());
 			hql.append(") ");
@@ -63,7 +63,7 @@ abstract public class AbstractSupportedSubQuerySQLSymbolParser extends AbstractS
 		return false;
 	}
 	
-	protected ExtQuery createSubQuery(Class subEntity, List paramlist){
+	protected ExtQueryInner createSubQuery(Class subEntity, List paramlist){
 		SelectExtQuery subQuery = null;
 		String subAlias = "sub_"+StringUtils.uncapitalize(subEntity.getSimpleName());
 		if(paramlist.size()%2==0)

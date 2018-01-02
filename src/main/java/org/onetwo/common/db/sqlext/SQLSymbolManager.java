@@ -54,7 +54,7 @@ public interface SQLSymbolManager {
 //	public String createHql(Map<Object, Object> properties, List<Object> values) ;
 //	public PlaceHolder getPlaceHolder();
 	
-	public ExtQuery createDeleteQuery(Class<?> entityClass, Map<Object, Object> properties);
+	public ExtQueryInner createDeleteQuery(Class<?> entityClass, Map<Object, Object> properties);
 	
 	public SelectExtQuery createSelectQuery(Class<?> entityClass, Map<Object, Object> properties);
 	public SelectExtQuery createSelectQuery(Class<?> entityClass, String alias, Map<Object, Object> properties);

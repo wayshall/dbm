@@ -19,7 +19,7 @@ import org.onetwo.common.utils.StringUtils;
 import org.slf4j.Logger;
 
 abstract public class AbstractExtQuery implements ExtQueryInner{
-	protected final Logger logger = JFishLoggerFactory.getLogger(SelectExtQueryImpl.class);
+	protected final Logger logger = JFishLoggerFactory.getLogger(this.getClass());
 
 
 	public static final String[] SQL_KEY_WORKDS = new String[]{" ", ";", ",", "(", ")", "'", "\"\"", "/", "+", "-"};
@@ -63,6 +63,9 @@ abstract public class AbstractExtQuery implements ExtQueryInner{
 //		this.init(entityClass, this.alias);
 	}
 	
+	public Map<?, ?> getSourceParams() {
+		return sourceParams;
+	}
 	protected void initParams(){
 		if(sourceParams==null){
 			this.params = CUtils.newLinkedHashMap();
@@ -77,7 +80,7 @@ abstract public class AbstractExtQuery implements ExtQueryInner{
 		this.initParams();
 		
 //		setSqlQuery(getValueAndRemoveKeyFromParams(K.SQL_QUERY, sqlQuery));
-		this.debug = getValueAndRemoveKeyFromParams(K.DEBUG, true);
+		this.debug = getValueAndRemoveKeyFromParams(K.DEBUG, false);
 		this.ifNull = getValueAndRemoveKeyFromParams(K.IF_NULL, IfNull.Calm);
 
 		this.paramsValue = new ParamValues(symbolManager.getSqlDialet());
@@ -86,7 +89,16 @@ abstract public class AbstractExtQuery implements ExtQueryInner{
 		
 		this.fireInitListeners();
 	}
-	
+
+	protected void beforeBuild(){
+		//re-init-query if rebuild
+		if(hasBuilt()){
+			this.initQuery();
+		}
+	}
+	protected void afaterBuild(){
+//		this.fireAfterBuildListeners();
+	}
 
 	protected String getFromName(Class<?> entityClass){
 		return entityClass.getName();
@@ -99,6 +111,14 @@ abstract public class AbstractExtQuery implements ExtQueryInner{
 			}
 		}
 	}
+	
+	/*protected void fireAfterBuildListeners(){
+		if(this.fireListeners){
+			for(ExtQueryListener l : this.listeners){
+				l.afterBuild(this);
+			}
+		}
+	}*/
 	
 	public SQLFunctionManager getSqlFunctionManager() {
 		return DefaultSQLFunctionManager.get();

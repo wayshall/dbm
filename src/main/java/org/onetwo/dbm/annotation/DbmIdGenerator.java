@@ -23,5 +23,7 @@ public @interface DbmIdGenerator {
 	 * @return
 	 */
 	Class<? extends CustomIdGenerator> generatorClass();
+	
+	String attributes() default "";
 
 }

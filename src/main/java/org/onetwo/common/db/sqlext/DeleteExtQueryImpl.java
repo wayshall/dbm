@@ -14,6 +14,8 @@ public class DeleteExtQueryImpl extends AbstractExtQuery {
 
 	@Override
 	public ExtQuery build() {
+		beforeBuild();
+		
 		sql = new StringBuilder();
 //		sql.append("delete ").append(this.alias).append(" from ").append(this.getFromName(entityClass)).append(" ").append(this.alias).append(" ");
 		sql.append("delete ").append("from ").append(this.getFromName(entityClass)).append(" ");
@@ -23,11 +25,12 @@ public class DeleteExtQueryImpl extends AbstractExtQuery {
 			sql.append(where);
 		
 		if (isDebug()) {
-			logger.info("generated sql : " + sql);
-			logger.info("params : " + (Map<?, ?>) this.paramsValue.getValues());
+			logger.info("generated sql : {}, params: {}", sql, this.paramsValue.getValues());
 		}
 
 		this.hasBuilt = true;
+		
+		afaterBuild();
 		return this;
 	}
 

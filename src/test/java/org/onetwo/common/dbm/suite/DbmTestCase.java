@@ -31,7 +31,8 @@ import org.onetwo.common.dbm.UserTableIdEntityTest;
 	UserDbmIdEntityTest.class,
 	QueryConfigTest.class,
 	CustomDaoTest.class,
-	JsonFieldTest.class
+	JsonFieldTest.class,
+//	UserAutoidServiceTest.class
 //	RichModelTest.class
 })
 public class DbmTestCase {

@@ -133,7 +133,7 @@ abstract public class DbmCrudServiceImpl<T, PK extends Serializable> extends Bas
 	
 	@Transactional
 	public int removeAll(){
-		return baseEntityManager.removeAll(entityClass);
+		return getBaseEntityManager().removeAll(entityClass);
 	}
 	
 	protected ValidationBindingResult validate(Object obj, Class<?>... groups){

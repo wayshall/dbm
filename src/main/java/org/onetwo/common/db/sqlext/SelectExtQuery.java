@@ -2,7 +2,7 @@ package org.onetwo.common.db.sqlext;
 
 import java.util.Map;
 
-public interface SelectExtQuery extends ExtQuery {
+public interface SelectExtQuery extends ExtQueryInner {
 
 	public boolean needSetRange();
 

@@ -41,7 +41,7 @@ public class ExtQueryImplTest {
 	@Test
 	public void testFindAll(){
 
-		ExtQuery q = sqlSymbolManagerFactory.getJPA().createSelectQuery(Magazine.class, "mag", null);
+		ExtQueryInner q = sqlSymbolManagerFactory.getJPA().createSelectQuery(Magazine.class, "mag", null);
 		q.build();
 		
 		String sql = "select mag from Magazine mag";
@@ -58,7 +58,7 @@ public class ExtQueryImplTest {
 		this.properties.put("name:is null", true);
 		this.properties.put("nickname:is null", false);
 		this.properties.put(K.DEBUG, true);
-		ExtQuery q = sqlSymbolManagerFactory.getJPA().createSelectQuery(Magazine.class, "mag", properties);
+		ExtQueryInner q = sqlSymbolManagerFactory.getJPA().createSelectQuery(Magazine.class, "mag", properties);
 		q.build();
 		
 		String sql = "select mag from Magazine mag where mag.name is null and mag.nickname is not null order by mag.id desc";
@@ -75,7 +75,7 @@ public class ExtQueryImplTest {
 		this.properties.put("name:=", SQLKeys.Null);
 		this.properties.put("nickname:!=", SQLKeys.Null);
 		this.properties.put(K.DEBUG, true);
-		ExtQuery q = sqlSymbolManagerFactory.getJPA().createSelectQuery(Magazine.class, "mag", properties);
+		ExtQueryInner q = sqlSymbolManagerFactory.getJPA().createSelectQuery(Magazine.class, "mag", properties);
 		q.build();
 		
 		String sql = "select mag from Magazine mag where mag.name is null and mag.nickname is not null order by mag.id desc";
@@ -91,7 +91,7 @@ public class ExtQueryImplTest {
 
 		this.properties.put("name:like", "way%");
 		this.properties.put(K.DEBUG, true);
-		ExtQuery q = sqlSymbolManagerFactory.getJPA().createSelectQuery(Magazine.class, "mag", properties);
+		ExtQueryInner q = sqlSymbolManagerFactory.getJPA().createSelectQuery(Magazine.class, "mag", properties);
 		q.build();
 		
 		String sql = "select mag from Magazine mag where mag.name like :mag_name0 order by mag.id desc";
@@ -107,7 +107,7 @@ public class ExtQueryImplTest {
 
 		this.properties.put("name:=~", "way%");
 		this.properties.put(K.DEBUG, true);
-		ExtQuery q = sqlSymbolManagerFactory.getJPA().createSelectQuery(Magazine.class, "mag", properties);
+		ExtQueryInner q = sqlSymbolManagerFactory.getJPA().createSelectQuery(Magazine.class, "mag", properties);
 		q.build();
 		
 		String sql = "select mag from Magazine mag where mag.name like :mag_name0 order by mag.id desc";
@@ -137,7 +137,7 @@ public class ExtQueryImplTest {
 		this.properties.put("pages:is empty", true);
 		this.properties.put("types:is empty", false);
 		this.properties.put(K.DEBUG, true);
-		ExtQuery q = sqlSymbolManagerFactory.getJPA().createSelectQuery(Magazine.class, "mag", properties);
+		ExtQueryInner q = sqlSymbolManagerFactory.getJPA().createSelectQuery(Magazine.class, "mag", properties);
 		q.build();
 		
 		String sql = "select mag from Magazine mag where mag.pages is empty and mag.types is not empty order by mag.id desc";
@@ -160,7 +160,7 @@ public class ExtQueryImplTest {
 		params.put(K.DESC, "name, text");
 		params.put(K.ORDERBY, "object.nameid desc, object.textid asc");
 		params.put(K.IF_NULL, IfNull.Ignore);
-		ExtQuery q = sqlSymbolManagerFactory.getJPA().createSelectQuery(Object.class, params);
+		ExtQueryInner q = sqlSymbolManagerFactory.getJPA().createSelectQuery(Object.class, params);
 		q.build();
 		
 //		System.out.println("testCommon:" + q.getSql().trim());
@@ -179,7 +179,7 @@ public class ExtQueryImplTest {
 		properties.put("userName", "");
 		properties.put(":fetch", "bid");
 		properties.put(K.IF_NULL, IfNull.Calm);
-		ExtQuery q = sqlSymbolManagerFactory.getJPA().createSelectQuery(Object.class, properties);
+		ExtQueryInner q = sqlSymbolManagerFactory.getJPA().createSelectQuery(Object.class, properties);
 		q.build();
 
 //		System.out.println("testCommonIfNullCalm:" + q.getSql().trim());
@@ -194,7 +194,7 @@ public class ExtQueryImplTest {
 	public void testBetweenDate(){
 		properties.put("startTime:>=", new Date());
 		properties.put("startTime:<=", new Date());
-		ExtQuery q = sqlSymbolManagerFactory.getJPA().createSelectQuery(Object.class, properties);
+		ExtQueryInner q = sqlSymbolManagerFactory.getJPA().createSelectQuery(Object.class, properties);
 		q.build();
 		
 //		System.out.println("date: " + q.getSql());
@@ -207,7 +207,7 @@ public class ExtQueryImplTest {
 		properties = new LinkedHashMap<Object, Object>();
 		properties.put(K.ASC, "sort");
 		properties.put(K.DESC, "id");
-		ExtQuery q = sqlSymbolManagerFactory.getJPA().createSelectQuery(Object.class, properties);
+		ExtQueryInner q = sqlSymbolManagerFactory.getJPA().createSelectQuery(Object.class, properties);
 		q.build();
 		
 		System.out.println("testOrderBy: " + q.getSql());
@@ -222,7 +222,7 @@ public class ExtQueryImplTest {
 		properties.put(K.SELECT, new Object[]{HashMap.class, "aa", "bb"});
 		properties.put("aa", "bb");
 		
-		ExtQuery q = sqlSymbolManagerFactory.getJPA().createSelectQuery(Object.class, properties);
+		ExtQueryInner q = sqlSymbolManagerFactory.getJPA().createSelectQuery(Object.class, properties);
 		q.build();
 		
 		String sql = "select new map(object.aa, object.bb) from Object object where object.aa = :object_aa0 order by object.id desc ";
@@ -266,7 +266,7 @@ public class ExtQueryImplTest {
 		properties.put(K.SELECT, new Object[]{"aa:a1", "bb:b1"});
 		properties.put("aa", "bb");
 		
-		ExtQuery q = sqlSymbolManagerFactory.getJPA().createSelectQuery(Object.class, properties);
+		ExtQueryInner q = sqlSymbolManagerFactory.getJPA().createSelectQuery(Object.class, properties);
 		q.build();
 		
 		String sql = "select object.aa as a1, object.bb as b1 from Object object where object.aa = :object_aa0 order by object.id desc ";
@@ -283,7 +283,7 @@ public class ExtQueryImplTest {
 		properties.put(K.SELECT, new String[]{"aa", "bb"});
 		properties.put("aa", "bb");
 		
-		ExtQuery q = sqlSymbolManagerFactory.getJPA().createSelectQuery(Object.class, properties);
+		ExtQueryInner q = sqlSymbolManagerFactory.getJPA().createSelectQuery(Object.class, properties);
 		q.build();
 		
 		String sql = "select object.aa, object.bb from Object object where object.aa = :object_aa0 order by object.id desc ";
@@ -295,7 +295,7 @@ public class ExtQueryImplTest {
 		properties.remove(K.SELECT);
 		properties.put(K.DISTINCT, new String[]{"aa", "bb"});
 		properties.put("aa", "bb");
-		ExtQuery q2 = sqlSymbolManagerFactory.getJPA().createSelectQuery(Object.class, properties);
+		ExtQueryInner q2 = sqlSymbolManagerFactory.getJPA().createSelectQuery(Object.class, properties);
 		q2.build();
 		String sql2 = "select distinct object.aa, object.bb from Object object where object.aa = :object_aa0 order by object.id desc ";
 		Assert.assertEquals(sql2.trim(), q2.getSql().trim());
@@ -310,7 +310,7 @@ public class ExtQueryImplTest {
 		properties.put("aa", "bb");
 		properties.put(K.DISTINCT, null);
 		
-		ExtQuery q = sqlSymbolManagerFactory.getJPA().createSelectQuery(Object.class, properties);
+		ExtQueryInner q = sqlSymbolManagerFactory.getJPA().createSelectQuery(Object.class, properties);
 		q.build();
 		
 		String sql = "select distinct object.cc, object.aa, object.bb from Object object where object.aa = :object_aa0 order by object.id desc ";
@@ -328,7 +328,7 @@ public class ExtQueryImplTest {
 //		properties.put(K.DISTINCT, "object");
 		properties.put(K.COUNT, "object.id");
 		properties.put("aa", "bb");
-		ExtQuery q2 = sqlSymbolManagerFactory.getJPA().createSelectQuery(Object.class, properties);
+		ExtQueryInner q2 = sqlSymbolManagerFactory.getJPA().createSelectQuery(Object.class, properties);
 		q2.build();
 		String paramsting = "{object_aa0=bb}";
 		String sql2 = "select count(object.id) from Object object where object.aa = :object_aa0 order by object.id desc";
@@ -346,7 +346,7 @@ public class ExtQueryImplTest {
 		properties.put("aa", "bb");
 		properties.put(".cc.cc2", 22);
 		
-		ExtQuery q = sqlSymbolManagerFactory.getJPA().createSelectQuery(Object.class, properties);
+		ExtQueryInner q = sqlSymbolManagerFactory.getJPA().createSelectQuery(Object.class, properties);
 		q.build();
 		
 		String sql = "select object from Object object left join fetch cc where object.aa = :object_aa0 and cc.cc2 = :cc_cc21 order by object.id desc";
@@ -361,7 +361,7 @@ public class ExtQueryImplTest {
 		properties.put("aa", "bb");
 		properties.put("cc", 22);
 		
-		ExtQuery q = sqlSymbolManagerFactory.getJPA().createSelectQuery(Magazine.class, properties);
+		ExtQueryInner q = sqlSymbolManagerFactory.getJPA().createSelectQuery(Magazine.class, properties);
 		q.build();
 		
 		String sql = "select magazine from Magazine magazine join fetch author auth join fetch pages page where magazine.aa = :magazine_aa0 and magazine.cc = :magazine_cc1 order by magazine.id desc";
@@ -380,7 +380,7 @@ public class ExtQueryImplTest {
 		properties.put(K.JOIN, new String[]{"articles:art", "art.author:auth"});
 		properties.put("auth.lastName", "Grisham");
 
-		ExtQuery q = sqlSymbolManagerFactory.getJPA().createSelectQuery(Magazine.class, "mag", properties);
+		ExtQueryInner q = sqlSymbolManagerFactory.getJPA().createSelectQuery(Magazine.class, "mag", properties);
 		q.build();
 		
 		String sql = "select distinct mag from Magazine mag join articles art join art.author auth where auth.lastName = :auth_lastName0 order by mag.id desc";
@@ -397,7 +397,7 @@ public class ExtQueryImplTest {
 		properties.put(K.LEFT_JOIN, new String[]{"articles:art", "art.author:auth"});
 		properties.put("auth.lastName", "Grisham");
 
-		ExtQuery q = sqlSymbolManagerFactory.getJPA().createSelectQuery(Magazine.class, "mag", properties);
+		ExtQueryInner q = sqlSymbolManagerFactory.getJPA().createSelectQuery(Magazine.class, "mag", properties);
 		q.build();
 		
 		String sql = "select distinct mag from Magazine mag join user u join role r left join articles art left join art.author auth where auth.lastName = :auth_lastName0 order by mag.id desc";
@@ -415,7 +415,7 @@ public class ExtQueryImplTest {
 		properties.put(K.JOIN_IN, "articles:art");
 		properties.put(K.NO_PREFIX+"art.lastName", "Grisham");
 
-		ExtQuery q = sqlSymbolManagerFactory.getJPA().createSelectQuery(Magazine.class, "mag", properties);
+		ExtQueryInner q = sqlSymbolManagerFactory.getJPA().createSelectQuery(Magazine.class, "mag", properties);
 		q.build();
 		
 		String sql = "select mag from Magazine mag , in(articles) art where art.lastName = :art_lastName0 order by mag.id desc";
@@ -431,7 +431,7 @@ public class ExtQueryImplTest {
 		properties.put(".LOWER(name)", "way");
 
 		try {
-			ExtQuery q = sqlSymbolManagerFactory.getJPA().createSelectQuery(Magazine.class, "mag", properties);
+			ExtQueryInner q = sqlSymbolManagerFactory.getJPA().createSelectQuery(Magazine.class, "mag", properties);
 			q.build();
 			Assert.fail("it must thorw : [ERROR]:the field is inValid : lower(name)");
 		} catch (Exception e) {
@@ -447,7 +447,7 @@ public class ExtQueryImplTest {
 		properties.put(F.sqlFunc("substring(name, 5, 1)"), "w");
 		properties.put(K.IF_NULL, IfNull.Ignore);
 
-		ExtQuery q = sqlSymbolManagerFactory.getJPA().createSelectQuery(Magazine.class, "mag", properties);
+		ExtQueryInner q = sqlSymbolManagerFactory.getJPA().createSelectQuery(Magazine.class, "mag", properties);
 		q.build();
 		
 		String sql = "select mag from Magazine mag where LOWER(name) = :LOWER_name_0 and substring(name, 5, 1) = :substring_name_5_1_1 order by mag.id desc";
@@ -468,7 +468,7 @@ public class ExtQueryImplTest {
 		properties.put("&LOWER(@name)", "way");
 		properties.put("&substring(@name, 5, 1)", "w");
 
-		ExtQuery q = sqlSymbolManagerFactory.getJPA().createSelectQuery(Magazine.class, "mag", properties);
+		ExtQueryInner q = sqlSymbolManagerFactory.getJPA().createSelectQuery(Magazine.class, "mag", properties);
 		q.build();
 		
 		String sql = "select mag from Magazine mag , in(articles) art where art.lastName = :art_lastName0 and lower(mag.name) = :lower_mag_name_1 and substring(mag.name, 5, 1) = :substring_mag_name_5_1_2 order by mag.id desc ";
@@ -488,7 +488,7 @@ public class ExtQueryImplTest {
 		properties.put("&LOWER(@name)", "way");
 		properties.put(("&substring(@name, 5, 1)"), "w");
 
-		ExtQuery q = sqlSymbolManagerFactory.getJPA().createSelectQuery(Magazine.class, "mag", properties);
+		ExtQueryInner q = sqlSymbolManagerFactory.getJPA().createSelectQuery(Magazine.class, "mag", properties);
 		q.build();
 		
 		String sql = "select mag from Magazine mag , in(articles) art where art.lastName = :art_lastName0 and lower(mag.name) = :lower_mag_name_1 and substring(mag.name, 5, 1) = :substring_mag_name_5_1_2 order by mag.id desc";
@@ -513,7 +513,7 @@ public class ExtQueryImplTest {
 		properties.put("createTime:date in", "2011-10-27");
 		
 
-		ExtQuery q = sqlSymbolManagerFactory.getJPA().createSelectQuery(Magazine.class, "mag", properties);
+		ExtQueryInner q = sqlSymbolManagerFactory.getJPA().createSelectQuery(Magazine.class, "mag", properties);
 		q.build();
 
 		String sql = "select mag from Magazine mag where ( mag.createTime >= :mag_createTime0 and mag.createTime < :mag_createTime1 ) order by mag.id desc";
@@ -565,7 +565,7 @@ public class ExtQueryImplTest {
 		properties.put("name:like", "way");
 		properties.put(":and", CUtils.asMap(new String[]{"age"}, new Object[]{17, 18}));
 
-		ExtQuery q = sqlSymbolManagerFactory.getJPA().createSelectQuery(Magazine.class, "mag", properties);
+		ExtQueryInner q = sqlSymbolManagerFactory.getJPA().createSelectQuery(Magazine.class, "mag", properties);
 		q.build();
 
 //		System.out.println("testAnd:" + q.getSql());
@@ -589,7 +589,7 @@ public class ExtQueryImplTest {
 		
 		properties.put(K.OR, or1);
 		
-		ExtQuery q = sqlSymbolManagerFactory.getJPA().createSelectQuery(Object.class, properties);
+		ExtQueryInner q = sqlSymbolManagerFactory.getJPA().createSelectQuery(Object.class, properties);
 		q.build();
 		
 		System.out.println("testOr sql: " + q.getSql());
@@ -616,7 +616,7 @@ public class ExtQueryImplTest {
 		
 		properties.put(":and", or1);
 		
-		ExtQuery q = sqlSymbolManagerFactory.getJPA().createSelectQuery(Object.class, properties);
+		ExtQueryInner q = sqlSymbolManagerFactory.getJPA().createSelectQuery(Object.class, properties);
 		q.build();
 		
 		String sql = "select object from Object object where object.siteId = :object_siteId0 and object.title like :object_title1 and ( object.columnId = :object_columnId2 or ( object.columns.id = :object_columns_id3 and object.department.id = :object_department_id4 ) ) order by object.id desc ";
@@ -630,7 +630,7 @@ public class ExtQueryImplTest {
 		this.properties.put("name:is null", true);
 //		this.properties.put("address:!=", Keys.Empty);
 		this.properties.put("address:has", "testAddress");
-		ExtQuery q = sqlSymbolManagerFactory.getJPA().createSelectQuery(Magazine.class, "mag", properties);
+		ExtQueryInner q = sqlSymbolManagerFactory.getJPA().createSelectQuery(Magazine.class, "mag", properties);
 		q.build();
 		
 		String sql = "select mag from Magazine mag where mag.name is null and :mag_address0 member of mag.address order by mag.id desc";
@@ -650,7 +650,7 @@ public class ExtQueryImplTest {
 			this.properties.put("nickname:", "way");
 			this.properties.put(K.DEBUG, true);
 			this.properties.put(K.IF_NULL, K.IfNull.Throw);
-			ExtQuery q = sqlSymbolManagerFactory.getJPA().createSelectQuery(Magazine.class, "mag", properties);
+			ExtQueryInner q = sqlSymbolManagerFactory.getJPA().createSelectQuery(Magazine.class, "mag", properties);
 			q.build();
 			TestCase.fail("null value should be fail!");
 		} catch (Exception e) {
@@ -666,7 +666,7 @@ public class ExtQueryImplTest {
 		this.properties.put("nickname:not in", "way");
 		this.properties.put(K.DEBUG, true);
 		this.properties.put(K.IF_NULL, IfNull.Ignore);
-		ExtQuery q = sqlSymbolManagerFactory.getJPA().createDeleteQuery(Magazine.class, properties);
+		ExtQueryInner q = sqlSymbolManagerFactory.getJPA().createDeleteQuery(Magazine.class, properties);
 		q.build();
 		
 		String sql = "delete from org.onetwo.common.db.Magazine where nickname not in ( :nickname0)";

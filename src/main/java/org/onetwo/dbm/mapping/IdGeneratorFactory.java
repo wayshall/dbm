@@ -1,13 +1,17 @@
 package org.onetwo.dbm.mapping;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.Optional;
 
 import javax.persistence.SequenceGenerator;
 import javax.persistence.TableGenerator;
 
+import org.apache.commons.lang3.StringUtils;
 import org.onetwo.common.annotation.AnnotationInfo;
+import org.onetwo.common.jackson.JsonMapper;
 import org.onetwo.common.reflect.ReflectUtils;
+import org.onetwo.common.spring.SpringUtils;
 import org.onetwo.common.spring.Springs;
 import org.onetwo.dbm.annotation.DbmIdGenerator;
 import org.onetwo.dbm.id.CustomIdGenerator;
@@ -59,6 +63,11 @@ public class IdGeneratorFactory {
 		CustomIdGenerator<? extends Serializable> customIdGenerator = Springs.getInstance().getBean(dg.generatorClass());
 		if(customIdGenerator==null){
 			customIdGenerator = ReflectUtils.newInstance(dg.generatorClass());
+		}
+		String attribute = dg.attributes();
+		if(StringUtils.isNotBlank(attribute)){
+			HashMap<String, Object> jsonMap = JsonMapper.IGNORE_EMPTY.fromJson(attribute, HashMap.class);
+			SpringUtils.getMapToBean().injectBeanProperties(jsonMap, customIdGenerator);
 		}
 		IdentifierGenerator<? extends Serializable> idGenerator = new CustomerIdGeneratorAdapter<>(dg.name(), customIdGenerator);
 		return Optional.of(idGenerator);

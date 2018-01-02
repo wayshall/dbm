@@ -97,17 +97,13 @@ public interface ExtQuery {
 		
 	}
 	
-	public void initQuery();
 	
 	public boolean hasBuilt();
 
-	public ExtQuery build();
 
-//	public Map getParams();
 
 //	public void setParams(Map params);
 	
-	public Map<Object, Object> getParams();
 	
 
 	public ParamValues getParamsValue();
@@ -122,6 +118,10 @@ public interface ExtQuery {
 
 	public Class<?> getEntityClass();
 //	public boolean isSqlQuery();
+	
+
+	public Map<?, ?> getSourceParams();
+	public Map<Object, Object> getParams();
 	
 
 }

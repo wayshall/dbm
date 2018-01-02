@@ -1,7 +1,9 @@
 package org.onetwo.common.db.filter.annotation;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.ExecutionException;
 
 import org.onetwo.common.convert.Types;
 import org.onetwo.common.db.filter.DataQueryParamaterEnhancer;
@@ -11,13 +13,48 @@ import org.onetwo.common.db.sqlext.ExtQuery.K;
 import org.onetwo.common.db.sqlext.ExtQueryInner;
 import org.onetwo.common.db.sqlext.ExtQueryListenerAdapter;
 import org.onetwo.common.exception.BaseException;
+import org.onetwo.common.log.JFishLoggerFactory;
 import org.onetwo.common.reflect.ReflectUtils;
+import org.onetwo.common.spring.Springs;
 import org.onetwo.common.utils.LangUtils;
 import org.onetwo.common.utils.StringUtils;
+import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.util.Assert;
+
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 
 //@Component
 public class DataQueryFilterListener extends ExtQueryListenerAdapter{
+	static final IDataQueryParamterEnhancer NULL_ENHANCER = new IDataQueryParamterEnhancer(){
+		@Override
+		public Map<Object, Object> enhanceParameters(ExtQuery query) {
+			return Collections.emptyMap();
+		}
+	};
+	
+	private LoadingCache<Class<?>, IDataQueryParamterEnhancer> queryParamaterEnhancerCaches = CacheBuilder.newBuilder()
+																									.build(new CacheLoader<Class<?>, IDataQueryParamterEnhancer>(){
+
+																										@Override
+																										public IDataQueryParamterEnhancer load(Class<?> entityClass) throws Exception {
+//																											DataQueryParamaterEnhancer dqpe = entityClass.getAnnotation(DataQueryParamaterEnhancer.class);
+//																											DataQueryParamaterEnhancer dqpe = AnnotationUtils.findAnnotation(entityClass, DataQueryParamaterEnhancer.class);
+																											DataQueryParamaterEnhancer dqpe = AnnotatedElementUtils.findMergedAnnotation(entityClass, DataQueryParamaterEnhancer.class);
+																											if(dqpe==null){
+																												return NULL_ENHANCER;
+																											}
+																											Class<? extends IDataQueryParamterEnhancer> enhancerCls = dqpe.value();
+																											boolean useSpringContext = Springs.getInstance().isInitialized();
+																											IDataQueryParamterEnhancer enhancer = useSpringContext?Springs.getInstance().getBean(enhancerCls):null;
+																											if(enhancer==null){
+																												enhancer = ReflectUtils.newInstance(enhancerCls);
+																											}
+																											return enhancer;
+																										}
+																										
+																									});
 
 	@Override
 	public void onInit(ExtQuery q) {
@@ -26,7 +63,6 @@ public class DataQueryFilterListener extends ExtQueryListenerAdapter{
 		boolean isEnabledDataFilter = dataFilterValue!=null?Types.convertValue(dataFilterValue, Boolean.class):true;
 		if(isEnabledDataFilter){
 			DataQueryFilter qdf = (DataQueryFilter)query.getEntityClass().getAnnotation(DataQueryFilter.class);
-	//		DataQueryFilter qdf = (DataQueryFilter)ReflectUtils.getIntro(query.getEntityClass()).getAnnotationWithParent(DataQueryFilter.class);
 			if(qdf!=null)
 				addParameterByDataQueryFilter(query, qdf);
 		}
@@ -35,9 +71,10 @@ public class DataQueryFilterListener extends ExtQueryListenerAdapter{
 		dataFilterValue = LangUtils.firstNotNull(query.getParams().remove(DataQueryParamaterEnhancer.class), query.getParams().remove(K.DATA_FILTER));
 		isEnabledDataFilter = dataFilterValue!=null?Types.convertValue(dataFilterValue, Boolean.class):true;
 		if(isEnabledDataFilter){
-			DataQueryParamaterEnhancer dqpe = query.getEntityClass().getAnnotation(DataQueryParamaterEnhancer.class);
+			/*DataQueryParamaterEnhancer dqpe = query.getEntityClass().getAnnotation(DataQueryParamaterEnhancer.class);
 			if(dqpe!=null)
-				addParameterByIDataQueryParamterEnhancer(query, dqpe);
+				addParameterByIDataQueryParamterEnhancer(query, dqpe);*/
+			addParameterByIDataQueryParamterEnhancer(query);
 		}
 		
 	}
@@ -49,8 +86,9 @@ public class DataQueryFilterListener extends ExtQueryListenerAdapter{
 		if(fields.length!=values.length)
 			throw new BaseException("the length is not equals of QueryDataFilter");
 		int index = 0;
+		Map<?, ?> sourceParams = query.getSourceParams();
 		for(String field : fields){
-			if(query.getParams().containsKey(field)){
+			if(sourceParams.containsKey(field)){
 				Object val = query.getParams().get(field);
 				if(val!=null && StringUtils.isNotBlank(val.toString()))
 					return ;
@@ -61,11 +99,27 @@ public class DataQueryFilterListener extends ExtQueryListenerAdapter{
 		}
 	}
 	
-	private void addParameterByIDataQueryParamterEnhancer(ExtQueryInner query, DataQueryParamaterEnhancer dqpe){
-		Assert.notNull(dqpe);
-		Class<? extends IDataQueryParamterEnhancer> enhancerCls = dqpe.value();
-		IDataQueryParamterEnhancer enhancer = ReflectUtils.newInstance(enhancerCls);
-		Map<Object, Object> params = enhancer.filterParameters();
+	private void addParameterByIDataQueryParamterEnhancer(ExtQueryInner query){
+//		Assert.notNull(enhancer);
+		/*Class<? extends IDataQueryParamterEnhancer> enhancerCls = dqpe.value();
+
+		boolean useSpringContext = Springs.getInstance().isInitialized();
+		IDataQueryParamterEnhancer enhancer = useSpringContext?Springs.getInstance().getBean(enhancerCls):null;
+		if(enhancer==null){
+			enhancer = ReflectUtils.newInstance(enhancerCls);
+		}*/
+		
+		IDataQueryParamterEnhancer enhancer;
+		try {
+			enhancer = this.queryParamaterEnhancerCaches.get(query.getEntityClass());
+		} catch (ExecutionException e) {
+			JFishLoggerFactory.getCommonLogger().debug("find IDataQueryParamterEnhancer error on class: " + query.getEntityClass());
+			enhancer = NULL_ENHANCER;
+		}
+		if(enhancer==NULL_ENHANCER){
+			return ;
+		}
+		Map<Object, Object> params = enhancer.enhanceParameters(query);
 		if(LangUtils.isEmpty(params))
 			return;
 
