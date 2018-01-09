@@ -126,6 +126,7 @@ left join
     employee emply on emply.department_id=depart.id
 
 /***
+ * 嵌套属性的元素为简单类型
  *@name: findDepartmentWithEmployeeNames
  * 
  */
