@@ -14,6 +14,7 @@ import org.onetwo.common.dbm.JsonFieldTest;
 import org.onetwo.common.dbm.QueryConfigTest;
 import org.onetwo.common.dbm.TransactionalListenerTest;
 import org.onetwo.common.dbm.UserDbmIdEntityTest;
+import org.onetwo.common.dbm.UserOptionDaoTest;
 import org.onetwo.common.dbm.UserTableIdEntityTest;
 
 @RunWith(Suite.class)
@@ -32,6 +33,7 @@ import org.onetwo.common.dbm.UserTableIdEntityTest;
 	QueryConfigTest.class,
 	CustomDaoTest.class,
 	JsonFieldTest.class,
+	UserOptionDaoTest.class
 //	UserAutoidServiceTest.class
 //	RichModelTest.class
 })

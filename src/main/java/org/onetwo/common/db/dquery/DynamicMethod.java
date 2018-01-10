@@ -67,8 +67,10 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 		//check query swither
 		checkAndFindQuerySwitch(parameters);
 		
-		Class<?> returnClass = method.getReturnType();
-		Class<?> compClass = ReflectUtils.getGenricType(method.getGenericReturnType(), 0);
+//		Class<?> returnClass = method.getReturnType();
+		Class<?> returnClass = getActualReturnType();
+//		Class<?> compClass = ReflectUtils.getGenricType(method.getGenericReturnType(), 0);
+		Class<?> compClass = getActualComponentType();
 		Optional<DynamicMethodParameter> pageParameterOpt = this.findPagePrarameter();
 		if(returnClass==void.class){
 //			DynamicMethodParameter firstParamter = parameters.get(0);
@@ -109,6 +111,27 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 		findAndSetQueryName(this.asCountQuery);
 		
 		LangUtils.println("resultClass: ${0}, componentClass:${1}", resultClass, compClass);
+	}
+	
+	final public Class<?> getActualReturnType(){
+		Class<?> returnClass = method.getReturnType();
+		if(isReturnOptional()){
+			returnClass = ReflectUtils.getGenricType(method.getGenericReturnType(), 0);
+		}
+		return returnClass;
+	}
+	
+	@SuppressWarnings("rawtypes")
+	final public Class<?> getActualComponentType(){
+		Class compClass = ReflectUtils.getGenricType(method.getGenericReturnType(), 0);
+		if(isReturnOptional()){
+			Optional<ParameterizedType> parameterizedType = ReflectUtils.getParameterizedType(method.getGenericReturnType(), 0);
+			compClass = parameterizedType.map(ptype->{
+				return ReflectUtils.getGenricType(ptype, 0);
+			})
+			.orElse(compClass);
+		}
+		return compClass;
 	}
 	
 	public boolean hasPageParamter() {

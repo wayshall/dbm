@@ -194,7 +194,7 @@ abstract public class AbstractDynamicQueryHandler implements DynamicQueryHandler
 		
 		if(dmethod.isReturnVoid()){
 			return null;
-		}else if(dmethod.getResultClass()==Optional.class){
+		}else if(dmethod.isReturnOptional()){
 			return Optional.ofNullable(result);
 		}
 		
