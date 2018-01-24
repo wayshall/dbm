@@ -6,7 +6,6 @@ import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
-import org.assertj.core.util.Sets;
 import org.onetwo.common.db.DataBase;
 import org.onetwo.common.db.DbmQueryValue;
 import org.onetwo.common.db.filequery.SqlFunctionFactory;
@@ -27,6 +26,8 @@ import org.onetwo.dbm.mapping.DbmTypeMapping;
 import org.onetwo.dbm.mapping.DefaultSQLBuilderFactory;
 import org.onetwo.dbm.mapping.SQLBuilderFactory;
 import org.onetwo.dbm.utils.DbmLock;
+
+import com.google.common.collect.Sets;
 
 
 abstract public class AbstractDBDialect implements InnerDBDialet, DBDialect {
