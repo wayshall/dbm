@@ -3,6 +3,7 @@ package org.onetwo.dbm.query;
 import java.util.List;
 import java.util.Map;
 
+import org.onetwo.dbm.dialet.DBDialect.LockInfo;
 import org.springframework.jdbc.core.RowMapper;
 
 public interface DbmQuery {
@@ -31,4 +32,6 @@ public interface DbmQuery {
 	
 	void setRowMapper(RowMapper<?> rowMapper);
 	void setQueryAttributes(Map<Object, Object> params);
+	
+	void setLockInfo(LockInfo lockInfo);
 }

@@ -266,7 +266,9 @@ public class EntrySQLBuilderImpl implements EntrySQLBuilder {
 	protected List<String> nameToString(Collection<DbmMappedField> columns, boolean alias){
 		List<String> strs = new ArrayList<String>();
 		for(DbmMappedField field : columns){
-			strs.add(alias?field.getColumn().getNameWithAlias():field.getColumn().getName());
+			String columnName = alias?field.getColumn().getNameWithAlias():field.getColumn().getName();
+			columnName = dialet.wrapKeywordColumnName(columnName);
+			strs.add(columnName);
 		}
 		return strs;
 	}

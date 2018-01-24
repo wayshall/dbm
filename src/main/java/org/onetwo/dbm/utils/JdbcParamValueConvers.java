@@ -6,11 +6,13 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.Map;
 
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 
+import org.onetwo.common.date.DateUtils;
 import org.onetwo.common.date.Dates;
 import org.onetwo.common.utils.JFishProperty;
 import org.onetwo.common.utils.JFishPropertyInfoImpl;
@@ -60,29 +62,56 @@ final public class JdbcParamValueConvers {
 			return ((Enum<?>)value).name();
 		}else if(value instanceof LocalDate){
 			final LocalDate localDate = (LocalDate) value;
-			return new SqlTypeValue(){
+			return new DateSqlTypeValue<java.sql.Date>(new java.sql.Date(Dates.toDate(localDate).getTime())){
 
 				@Override
 				public void setTypeValue(PreparedStatement ps, int paramIndex, int sqlType, String typeName) throws SQLException {
-					ps.setDate(paramIndex, new java.sql.Date(Dates.toDate(localDate).getTime()));
+//					ps.setDate(paramIndex, new java.sql.Date(Dates.toDate(localDate).getTime()));
+					ps.setDate(paramIndex, getValue());
 				}
 				
 			};
 		}else if(value instanceof LocalDateTime){
 			final LocalDateTime localDateTime = (LocalDateTime) value;
-			return new SqlTypeValue(){
+			return new DateSqlTypeValue<Timestamp>(new Timestamp(Dates.toDate(localDateTime).getTime())){
+				@Override
+				public void setTypeValue(PreparedStatement ps, int paramIndex, int sqlType, String typeName) throws SQLException {
+					ps.setTimestamp(paramIndex, getValue());
+				}
+				
+			};
+			/*return new SqlTypeValue(){
 
 				@Override
 				public void setTypeValue(PreparedStatement ps, int paramIndex, int sqlType, String typeName) throws SQLException {
 					ps.setTimestamp(paramIndex, new Timestamp(Dates.toDate(localDateTime).getTime()));
 				}
 				
-			};
+			};*/
 			
 		}else if(value instanceof JdbcParameterValue){
 			return ((JdbcParameterValue)value).toParameterValue();
 		}
 		return value;
+	}
+	
+	abstract public static class DateSqlTypeValue<T extends Date> implements SqlTypeValue {
+		final private T value;
+
+		public DateSqlTypeValue(T value) {
+			super();
+			this.value = value;
+		}
+
+		public T getValue() {
+			return value;
+		}
+
+		@Override
+		public String toString() {
+			return "" + DateUtils.formatDateTime(value) + "";
+		}
+		
 	}
 	
 	private JdbcParamValueConvers(){

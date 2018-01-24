@@ -1,6 +1,5 @@
 package org.onetwo.common.db.sqlext;
 
-import org.onetwo.dbm.dialet.DBDialect.LockInfo;
 
 
 public class DefaultExtQueryDialetImpl implements ExtQueryDialet {
@@ -35,9 +34,9 @@ public class DefaultExtQueryDialetImpl implements ExtQueryDialet {
 		return nullsOrder;
 	}
 
-	@Override
+	/*@Override
 	public String getLockSqlString(LockInfo lock) {
 		throw new UnsupportedOperationException();
-	}
+	}*/
 
 }

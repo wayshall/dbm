@@ -6,6 +6,7 @@ import java.util.Map;
 import org.onetwo.common.db.AbstractQueryWrapper;
 import org.onetwo.common.db.spi.QueryWrapper;
 import org.onetwo.common.utils.LangUtils;
+import org.onetwo.dbm.dialet.DBDialect.LockInfo;
 import org.springframework.jdbc.core.RowMapper;
 
 public class DbmQueryWrapperImpl extends AbstractQueryWrapper {
@@ -17,6 +18,11 @@ public class DbmQueryWrapperImpl extends AbstractQueryWrapper {
 		this.dbmQuery = jfishQuery;
 	}
 
+	public QueryWrapper setLockInfo(LockInfo lockInfo){
+		this.dbmQuery.setLockInfo(lockInfo);
+		return this;
+	}
+	
 	@Override
 	public int executeUpdate() {
 		return dbmQuery.executeUpdate();

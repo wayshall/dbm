@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.onetwo.common.utils.Page;
+import org.onetwo.dbm.dialet.DBDialect.LockInfo;
 import org.springframework.jdbc.core.RowMapper;
 
 @SuppressWarnings("rawtypes")
@@ -32,6 +33,10 @@ public interface QueryWrapper {
 	public QueryWrapper setPageParameter(final Page page);
 	
 	public QueryWrapper setLimited(final Integer first, final Integer size);
+
+	QueryWrapper setLockInfo(LockInfo lockInfo);
+	
+//	LockInfo getLockInfo();
 	
 	Map<?, Object> getParameters();
 	

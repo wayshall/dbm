@@ -122,6 +122,5 @@ public interface ExtQuery {
 
 	public Map<?, ?> getSourceParams();
 	public Map<Object, Object> getParams();
-	
 
 }

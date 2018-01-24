@@ -25,7 +25,8 @@ public class CompositedFieldValueConverter implements DbmFieldValueConverter {
 			Object actualValue = null;
 			DbmEnumType etype = field.getEnumType();
 			if(etype==DbmEnumType.ORDINAL){
-				actualValue = Types.convertValue(field.getColumnType().cast(value), field.getPropertyInfo().getType());
+//				actualValue = Types.convertValue(field.getColumnType().cast(value), field.getPropertyInfo().getType());
+				actualValue = Types.convertValue((Integer)value, field.getPropertyInfo().getType());
 			}else if(etype==DbmEnumType.STRING){
 				actualValue = Types.convertValue(value.toString(), field.getPropertyInfo().getType());
 			}else{

@@ -10,6 +10,7 @@ import org.onetwo.common.profiling.TimeProfileStack;
 import org.onetwo.common.utils.Assert;
 import org.onetwo.dbm.core.spi.DbmSessionImplementor;
 import org.onetwo.dbm.dialet.DBDialect;
+import org.onetwo.dbm.dialet.DBDialect.LockInfo;
 import org.slf4j.Logger;
 import org.springframework.jdbc.core.RowMapper;
 
@@ -36,6 +37,7 @@ public class DbmQueryImpl implements DbmQuery {
 	private int maxResults = INVALID_VALUE_MAX_RESULTS;
 	
 	private RowMapper<?> rowMapper;
+	private LockInfo lockInfo;
 //	private QType qtype;
 
 	public DbmQueryImpl(DbmSessionImplementor session, String sqlString, Class<?> resultClass) {
@@ -47,6 +49,10 @@ public class DbmQueryImpl implements DbmQuery {
 		this.queryValue = DbmQueryValue.create(null);
 	}
 	
+	public void setLockInfo(LockInfo lockInfo) {
+		this.lockInfo = lockInfo;
+	}
+
 	/**********
 	 * field = :1 and field = :2
 	 */
@@ -135,6 +141,9 @@ public class DbmQueryImpl implements DbmQuery {
 		String sql = sqlString;
 		if(isLimitedQuery()){
 			sql = dbDialect.getLimitStringWithNamed(sqlString, FIRST_RESULT_NAME, MAX_RESULT_NAME);
+		}
+		if(lockInfo!=null){
+			sql += " " + dbDialect.getLockSqlString(lockInfo);
 		}
 		if(TimeProfileStack.isActive()){
 			this.logger.info("sql:"+sql);

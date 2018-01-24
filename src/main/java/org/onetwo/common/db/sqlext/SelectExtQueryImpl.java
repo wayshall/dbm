@@ -45,6 +45,8 @@ public class SelectExtQueryImpl extends AbstractExtQuery implements SelectExtQue
 
 //	protected StringBuilder couontSelect;
 	protected StringBuilder couontJoin;
+	
+	private LockInfo lockInfo;
 
 	public SelectExtQueryImpl(Class<?> entityClass, String alias, Map<?, ?> params, SQLSymbolManager symbolManager) {
 		super(entityClass, alias, params, symbolManager);
@@ -63,6 +65,7 @@ public class SelectExtQueryImpl extends AbstractExtQuery implements SelectExtQue
 		this.maxResults = getValueAndRemoveKeyFromParams(K.MAX_RESULTS, maxResults);
 		this.countValue = getValueAndRemoveKeyFromParams(K.COUNT, countValue);
 //		this.cacheable = getValueAndRemoveKeyFromParams(K.CACHEABLE, cacheable);
+		this.lockInfo = (LockInfo)this.params.remove(K.FOR_UPDATE);
 		
 		//query config
 		Object qc = getValueAndRemoveKeyFromParams(K.QUERY_CONFIG, queryConfig);
@@ -103,7 +106,8 @@ public class SelectExtQueryImpl extends AbstractExtQuery implements SelectExtQue
 		
 		this.buildSelect().buildJoin().buildOrderBy();
 		//build befor where
-		String lockSql = buildLockString();
+//		String lockSql = buildLockString();
+
 		
 		sql = new StringBuilder();
 		sql.append(select);
@@ -119,9 +123,9 @@ public class SelectExtQueryImpl extends AbstractExtQuery implements SelectExtQue
 		if (orderBy != null){
 			sql.append(orderBy);
 		}
-		if(StringUtils.isNotBlank(lockSql)){
+		/*if(StringUtils.isNotBlank(lockSql)){
 			sql.append(lockSql);
-		}
+		}*/
 
 		if (isDebug()) {
 			logger.info("generated sql : {}, params: {}", sql, this.paramsValue.getValues());
@@ -136,13 +140,13 @@ public class SelectExtQueryImpl extends AbstractExtQuery implements SelectExtQue
 		return this;
 	}
 	
-	protected String buildLockString(){
+	/*protected String buildLockString(){
 		LockInfo lockInfo = (LockInfo)this.params.remove(K.FOR_UPDATE);
 		if(lockInfo==null){
 			return null;
 		}
 		return this.symbolManager.getSqlDialet().getLockSqlString(lockInfo);
-	}
+	}*/
 
 	protected SelectExtQueryImpl buildSelect() {
 		select = new StringBuilder();
@@ -551,6 +555,10 @@ public class SelectExtQueryImpl extends AbstractExtQuery implements SelectExtQue
 	@Override
 	public boolean isCacheable() {
 		return cacheable;
+	}
+
+	public LockInfo getLockInfo() {
+		return lockInfo;
 	}
 
 	public static void main(String[] args) {

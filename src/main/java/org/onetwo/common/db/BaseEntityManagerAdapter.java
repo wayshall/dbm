@@ -161,6 +161,7 @@ public abstract class BaseEntityManagerAdapter implements InnerBaseEntityManager
 			q.setLimited(extQuery.getFirstResult(), extQuery.getMaxResults());
 		}
 		q.setQueryConfig(extQuery.getQueryConfig());
+		q.setLockInfo(extQuery.getLockInfo());
 		return q;
 	}
 

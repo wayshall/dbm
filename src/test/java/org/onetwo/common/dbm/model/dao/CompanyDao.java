@@ -47,7 +47,11 @@ public interface CompanyDao {
 	})
 	List<CompanyVO> findNestedCompaniesWithDepartmentMap();
 	
-
+	/***
+	 * 嵌套的list元素employeeNames为简单类型时，id必须为value
+	 * @author wayshall
+	 * @return
+	 */
 	@DbmResultMapping(value={
 			@DbmNestedResult(property="employeeNames", id="value", columnPrefix="emply_", nestedType=NestedType.COLLECTION),
 	})

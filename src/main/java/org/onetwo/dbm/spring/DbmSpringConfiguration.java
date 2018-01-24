@@ -9,6 +9,7 @@ import javax.validation.Validator;
 import org.apache.commons.lang3.StringUtils;
 import org.onetwo.common.db.dquery.DynamicQueryObjectRegisterListener;
 import org.onetwo.common.spring.Springs;
+import org.onetwo.common.spring.condition.OnMissingBean;
 import org.onetwo.common.utils.LangUtils;
 import org.onetwo.dbm.core.internal.DbmEntityManagerImpl;
 import org.onetwo.dbm.core.internal.DbmSessionFactoryImpl;
@@ -27,6 +28,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportAware;
 import org.springframework.core.type.AnnotationMetadata;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration
@@ -206,6 +208,23 @@ public class DbmSpringConfiguration implements ApplicationContextAware, Initiali
 			ds = enableDbmAttributes.getDataSourceName();
 		}
 		return ds;
+	}
+	
+	@Configuration
+	static class JdbcTransactionManagerConfiguration {
+
+		private final DataSource dataSource;
+
+		JdbcTransactionManagerConfiguration(DataSource dataSource) {
+			this.dataSource = dataSource;
+		}
+
+		@Bean
+		@OnMissingBean(PlatformTransactionManager.class)
+		public DataSourceTransactionManager transactionManager() {
+			return new DataSourceTransactionManager(this.dataSource);
+		}
+
 	}
 	
 }

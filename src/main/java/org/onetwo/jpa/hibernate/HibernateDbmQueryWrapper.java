@@ -4,10 +4,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import org.hibernate.LockOptions;
 import org.hibernate.SQLQuery;
 import org.onetwo.common.db.AbstractQueryWrapper;
 import org.onetwo.common.db.spi.QueryWrapper;
 import org.onetwo.common.reflect.ReflectUtils;
+import org.onetwo.dbm.dialet.DBDialect.LockInfo;
+import org.onetwo.dbm.utils.DbmLock;
 import org.springframework.jdbc.core.RowMapper;
 
 /**
@@ -24,6 +27,15 @@ public class HibernateDbmQueryWrapper extends AbstractQueryWrapper implements Qu
 		this.sqlQuery = sqlQuery;
 	}
 
+	public QueryWrapper setLockInfo(LockInfo lockInfo){
+		if(lockInfo.getLock()==DbmLock.PESSIMISTIC_WRITE){
+			sqlQuery.setLockOptions(LockOptions.UPGRADE);
+		}else if(lockInfo.getLock()==DbmLock.PESSIMISTIC_READ){
+			sqlQuery.setLockOptions(LockOptions.READ);
+		}
+		return this;
+	}
+	
 	@Override
 	public int executeUpdate() {
 		return sqlQuery.executeUpdate();

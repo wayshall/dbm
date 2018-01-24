@@ -2,9 +2,11 @@ package org.onetwo.dbm.dialet;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
+import org.assertj.core.util.Sets;
 import org.onetwo.common.db.DataBase;
 import org.onetwo.common.db.DbmQueryValue;
 import org.onetwo.common.db.filequery.SqlFunctionFactory;
@@ -49,12 +51,29 @@ abstract public class AbstractDBDialect implements InnerDBDialet, DBDialect {
 	
 	private SqlFunctionDialet sqlFunctionDialet;
 	
+	private Set<String> keywrods = Sets.newHashSet();
+	
 	public AbstractDBDialect(DBMeta dbmeta) {
 		super();
 		this.dbmeta = dbmeta;
 		this.typeMapping = new DbmTypeMapping();
 //		this.dataBaseConfig = dataBaseConfig;
 		this.sqlFunctionDialet = SqlFunctionFactory.getSqlFunctionDialet(dbmeta.getDataBase());
+		
+		addKeyword("key");
+	}
+	
+	final protected AbstractDBDialect addKeyword(String kw){
+		keywrods.add(kw);
+		return this;
+	}
+
+	@Override
+	public String wrapKeywordColumnName(String columnName){
+		if(!keywrods.contains(columnName.toLowerCase())){
+			return columnName;
+		}
+		return "`"+columnName+"`";
 	}
 	
 	@Override

@@ -2,6 +2,8 @@ package org.onetwo.common.db.sqlext;
 
 import java.util.Map;
 
+import org.onetwo.dbm.dialet.DBDialect.LockInfo;
+
 public interface SelectExtQuery extends ExtQueryInner {
 
 	public boolean needSetRange();
@@ -22,5 +24,7 @@ public interface SelectExtQuery extends ExtQueryInner {
 	public void setSubQuery(boolean subQuery);
 	
 	public boolean isCacheable();
+
+	public LockInfo getLockInfo();
 	
 }

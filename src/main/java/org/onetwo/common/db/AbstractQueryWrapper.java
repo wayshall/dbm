@@ -9,6 +9,7 @@ import org.onetwo.common.db.spi.QueryWrapper;
 import org.onetwo.common.log.JFishLoggerFactory;
 import org.onetwo.common.utils.Assert;
 import org.onetwo.common.utils.Page;
+import org.onetwo.dbm.dialet.DBDialect.LockInfo;
 import org.slf4j.Logger;
 
 abstract public class AbstractQueryWrapper implements QueryWrapper{
@@ -24,7 +25,14 @@ abstract public class AbstractQueryWrapper implements QueryWrapper{
 			return this;
 		return setLimited(page.getFirst()-1, page.getPageSize());
 	}
-	
+
+	public QueryWrapper setLockInfo(LockInfo lockInfo){
+		throw new UnsupportedOperationException();
+	}
+
+	public LockInfo getLockInfo() {
+		return null;
+	}
 
 	@Override
 	public QueryWrapper setParameters(Map<String, Object> params) {

@@ -533,6 +533,7 @@ public class DbmSessionImpl extends AbstractDbmSession implements DbmSessionEven
 			q.setLimited(extQuery.getFirstResult(), extQuery.getMaxResults());
 		}
 		q.setQueryConfig(extQuery.getQueryConfig());
+		q.setLockInfo(extQuery.getLockInfo());
 		return q;
 	}
 	

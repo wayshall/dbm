@@ -1,6 +1,5 @@
 package org.onetwo.common.db.sqlext;
 
-import org.onetwo.dbm.dialet.DBDialect.LockInfo;
 
 public interface ExtQueryDialet {
 
@@ -12,5 +11,5 @@ public interface ExtQueryDialet {
 	
 	public String getNullsOrderby(String nullsOrder);
 	
-	public String getLockSqlString(LockInfo lock);
+//	public String getLockSqlString(LockInfo lock);
 }
