@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.onetwo.common.db.DbmQueryValue;
 import org.onetwo.common.db.EntityManagerProvider;
+import org.onetwo.common.db.ILogicDeleteEntity;
 import org.onetwo.common.db.builder.QueryBuilder;
 import org.onetwo.common.db.sqlext.SQLSymbolManager;
 import org.onetwo.common.utils.Page;
@@ -54,8 +55,6 @@ public interface BaseEntityManager {
 	public void dymanicUpdate(Object entity);
 
 	/****
-	 * 如果实现了ILogicDeleteEntity接口，着逻辑删除
-	 * 否则，物理删除
 	 * @param entity
 	 */
 	public int remove(Object entity);
@@ -93,6 +92,22 @@ public interface BaseEntityManager {
 	 * @return
 	 */
 	public int removeAll(Class<?> entityClass);
+	
+	/***
+	 * 逻辑删除
+	 * @author wayshall
+	 * @param entity
+	 */
+	public void delete(ILogicDeleteEntity entity);
+
+	/***
+	 * 逻辑删除
+	 * @author wayshall
+	 * @param entityClass
+	 * @param id
+	 * @return
+	 */
+	public <T extends ILogicDeleteEntity> T deleteById(Class<T> entityClass, Serializable id);
 
 	public <T> List<T> findAll(Class<T> entityClass);
 
