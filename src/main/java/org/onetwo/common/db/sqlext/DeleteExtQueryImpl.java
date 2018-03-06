@@ -4,12 +4,11 @@ import java.util.List;
 import java.util.Map;
 
 public class DeleteExtQueryImpl extends AbstractExtQuery {
-
 	
 	public DeleteExtQueryImpl(Class<?> entityClass, String alias, Map<Object, Object> params,
 			SQLSymbolManager symbolManager, List<ExtQueryListener> listeners) {
 		super(entityClass, alias, params, symbolManager, listeners);
-		this.aliasMainTableName = false;
+		this.queryNameStrategy.setAliasMainTableName(false);
 	}
 
 	@Override

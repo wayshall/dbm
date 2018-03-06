@@ -14,6 +14,7 @@ import org.junit.Test;
 import org.onetwo.common.date.DateUtils;
 import org.onetwo.common.db.EntityManagerProvider;
 import org.onetwo.common.db.Magazine;
+import org.onetwo.common.db.Magazine.MagazineWithTable;
 import org.onetwo.common.db.sqlext.ExtQuery.K;
 import org.onetwo.common.db.sqlext.ExtQuery.K.IfNull;
 import org.onetwo.common.db.sqlext.ExtQueryUtils.F;
@@ -658,7 +659,7 @@ public class ExtQueryImplTest {
 //			Assert.assertEquals(BaseException.Prefix+ExtQuery.Msg.THROW_IF_NULL_MSG, e.getMessage());
 		}
 	}
-	
+
 
 	@Test
 	public void testDeleteQuery(){
@@ -670,6 +671,25 @@ public class ExtQueryImplTest {
 		q.build();
 		
 		String sql = "delete from org.onetwo.common.db.Magazine where nickname not in ( :nickname0)";
+		String paramsting = "{nickname0=way}";
+		System.out.println("testHas: " + q.getSql().trim());
+//		System.out.println("testHas: " + q.getParamsValue().getValues().toString());
+		Assert.assertEquals(sql.trim(), q.getSql().trim());
+		Assert.assertEquals(paramsting, q.getParamsValue().getValues().toString());
+		
+	}
+
+	@Test
+	public void testDeleteQueryWithTable(){
+		this.properties.put("name:", null);
+		this.properties.put("nickname:not in", "way");
+		this.properties.put(K.DEBUG, true);
+		this.properties.put(K.IF_NULL, IfNull.Ignore);
+		
+		ExtQueryInner q = sqlSymbolManagerFactory.getJdbc().createDeleteQuery(MagazineWithTable.class, properties);
+		q.build();
+		
+		String sql = "delete from magazine_with_table where nickname not in ( :nickname0)";
 		String paramsting = "{nickname0=way}";
 		System.out.println("testHas: " + q.getSql().trim());
 //		System.out.println("testHas: " + q.getParamsValue().getValues().toString());

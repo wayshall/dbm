@@ -8,6 +8,7 @@ import org.onetwo.common.db.InnerBaseEntityManager;
 import org.onetwo.common.db.RawSqlWrapper;
 import org.onetwo.common.db.sqlext.ExtQuery;
 import org.onetwo.common.db.sqlext.ExtQuery.K;
+import org.onetwo.common.db.sqlext.ExtQueryInner;
 import org.onetwo.common.db.sqlext.SQLSymbolManager;
 import org.onetwo.common.db.sqlext.SQLSymbolManagerFactory;
 import org.onetwo.common.utils.LangUtils;
@@ -196,6 +197,13 @@ public class QueryBuilderImpl implements QueryBuilder {
 	public QueryAction toSelect(){
 		return createQueryAction();
 	}
+
+	public int delete(){
+		InnerBaseEntityManager em = (InnerBaseEntityManager) baseEntityManager;
+		ExtQueryInner query = em.getSQLSymbolManager().createDeleteQuery(entityClass, params);
+		ExtQuery q = query.build();
+		return em.createQuery(q.getSql(), q.getParamsValue().asMap()).executeUpdate();
+	}
 	
 	/*public ParamValues getParamValues(){
 		return extQuery.getParamsValue();
@@ -214,7 +222,7 @@ public class QueryBuilderImpl implements QueryBuilder {
 		extQuery = createExtQuery(entityClass, alias, params);
 		extQuery.build();*/
 		
-		QueryActionImpl queryAction = new QueryActionImpl(baseEntityManager, entityClass, leftJoinSql, params);
+		QueryActionImpl queryAction = new QueryActionImpl(baseEntityManager, entityClass, alias, params);
 		
 		/*JFishQueryValue qv = JFishQueryValue.create(getSQLSymbolManager().getPlaceHolder(), extQuery.getSql());
 		qv.setResultClass(extQuery.getEntityClass());

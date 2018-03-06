@@ -11,9 +11,7 @@ import org.onetwo.common.db.builder.QueryFieldImpl;
 import org.onetwo.common.db.sqlext.ExtQuery.K.IfNull;
 import org.onetwo.common.exception.ServiceException;
 import org.onetwo.common.log.JFishLoggerFactory;
-import org.onetwo.common.utils.Assert;
 import org.onetwo.common.utils.CUtils;
-import org.onetwo.common.utils.LangUtils;
 import org.onetwo.common.utils.MyUtils;
 import org.onetwo.common.utils.StringUtils;
 import org.slf4j.Logger;
@@ -26,7 +24,10 @@ abstract public class AbstractExtQuery implements ExtQueryInner{
 
 	protected Class<?> entityClass;
 	protected String alias;
-	protected boolean aliasMainTableName=true;
+//	protected boolean aliasMainTableName=true;
+	
+	protected QueryNameStrategy queryNameStrategy;
+	
 	protected Map<Object, Object> params;
 	protected ParamValues paramsValue;
 	// private Map<String, Object> paramsValue = new LinkedHashMap<String,
@@ -61,8 +62,12 @@ abstract public class AbstractExtQuery implements ExtQueryInner{
 		this.listeners = (listeners==null?Collections.emptyList():listeners);
 		
 //		this.init(entityClass, this.alias);
+		this.queryNameStrategy = new QueryNameStrategy(alias);
 	}
 	
+	public QueryNameStrategy getQueryNameStrategy() {
+		return queryNameStrategy;
+	}
 	public Map<?, ?> getSourceParams() {
 		return sourceParams;
 	}
@@ -101,7 +106,7 @@ abstract public class AbstractExtQuery implements ExtQueryInner{
 	}
 
 	protected String getFromName(Class<?> entityClass){
-		return entityClass.getName();
+		return this.queryNameStrategy.getFromName(entityClass);
 	}
 	
 	protected void fireInitListeners(){
@@ -291,42 +296,13 @@ abstract public class AbstractExtQuery implements ExtQueryInner{
 		return causeScript.toString();
 	}
 
-	public String translateAt(String f){
-		if(f.indexOf(K.PREFIX_REF)!=-1){
-			f = f.replace(K.PREFIX_REF, this.alias+".");
-		}
-		return f;
-	}
-	
-	public String appendAlias(String f){
-		String newf = f;
-		if(f.startsWith(K.NO_PREFIX)){
-			newf = f.substring(K.NO_PREFIX.length());
-		}else{
-			if(aliasMainTableName){
-				if(!f.startsWith(this.alias + "."))
-					f = this.alias + "." + f;
-			}
-			
-			newf = f;
-		}
-		return newf;
-	}
-	
-	protected String checkFieldNameValid(String field){
-		Assert.hasText(field);
-		for(String str : SQL_KEY_WORKDS){
-			if(field.indexOf(str)!=-1)
-				LangUtils.throwBaseException("the field is inValid : " + field);
-		}
-		return field;
-	}
 	
 	public String getFieldName(String f) {
-		Assert.hasText(f);
+		return this.queryNameStrategy.getFieldName(f);
+		/*Assert.hasText(f);
 		f = appendAlias(translateAt(f));
 		checkFieldNameValid(f);
-		return f;
+		return f;*/
 	}
 	
 	public SQLSymbolManager getSymbolManager() {

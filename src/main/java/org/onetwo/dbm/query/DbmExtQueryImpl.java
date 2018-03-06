@@ -7,10 +7,6 @@ import java.util.stream.Collectors;
 import org.onetwo.common.db.sqlext.ExtQueryListener;
 import org.onetwo.common.db.sqlext.SQLSymbolManager;
 import org.onetwo.common.db.sqlext.SelectExtQueryImpl;
-import org.onetwo.common.utils.LangUtils;
-import org.onetwo.common.utils.MyUtils;
-import org.onetwo.common.utils.StringUtils;
-import org.onetwo.dbm.exception.DbmException;
 import org.onetwo.dbm.mapping.DbmMappedEntry;
 
 public class DbmExtQueryImpl extends SelectExtQueryImpl {
@@ -18,13 +14,13 @@ public class DbmExtQueryImpl extends SelectExtQueryImpl {
 	private DbmMappedEntry entry;
 	
 	public DbmExtQueryImpl(DbmMappedEntry entry, Class<?> entityClass, String alias, Map<?, ?> params, SQLSymbolManager symbolManager) {
-		super(entityClass, alias, params, symbolManager);
-		this.entry = entry;
+		this(entry, entityClass, alias, params, symbolManager, null);
 	}
 
 	public DbmExtQueryImpl(DbmMappedEntry entry, Class<?> entityClass, String alias, Map<?, ?> params, SQLSymbolManager symbolManager, List<ExtQueryListener> listeners) {
 		super(entityClass, alias, params, symbolManager, listeners);
 		this.entry = entry;
+		this.queryNameStrategy = new DbmQueryNameStrategy(entry, alias, this.joinMapped, true);
 	}
 
 
@@ -35,16 +31,6 @@ public class DbmExtQueryImpl extends SelectExtQueryImpl {
 //		super.setSqlQuery(true);
 	}
 
-
-	protected String getFromName(Class<?> entityClass){
-		String tableName = null;
-		if(entry!=null){
-			tableName = entry.getTableInfo().getName();
-		}else{
-			tableName = StringUtils.convert2UnderLineName(entityClass.getSimpleName());
-		}
-		return tableName;
-	}
 
 	protected String getDefaultSelectFields(Class<?> entityClass, String alias){
 		return alias + ".*";
@@ -78,28 +64,7 @@ public class DbmExtQueryImpl extends SelectExtQueryImpl {
 		return super.getSelectFieldName(fname);
 	}
 
-	@Override
-	public String getFieldName(String f) {
-		String fieldName = f;
-		if(entry!=null && entry.contains(f)){
-			fieldName = entry.getColumnName(f);
-		}
-		return super.getFieldName(fieldName);
-	}
-	
-
-	public String appendAlias(String f){
-		String newf = f;
-		if(f.startsWith(K.NO_PREFIX)){
-			newf = f.substring(K.NO_PREFIX.length());
-		}else{
-			if(!f.contains("."))
-				newf = this.alias + "." + f;
-		}
-		return newf;
-	}
-
-	@SuppressWarnings("unchecked")
+	/*@SuppressWarnings("unchecked")
 	protected SelectExtQueryImpl buildJoin(StringBuilder joinBuf, String joinKey, boolean hasParentheses) {
 		if (!hasParams(joinKey))
 			return this;
@@ -134,6 +99,6 @@ public class DbmExtQueryImpl extends SelectExtQueryImpl {
 		joinBuf.append(") ");
 		this.getParams().remove(joinKey);
 		return this;
-	}
+	}*/
 	
 }

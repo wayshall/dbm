@@ -47,13 +47,16 @@ public class SelectExtQueryImpl extends AbstractExtQuery implements SelectExtQue
 	protected StringBuilder couontJoin;
 	
 	private LockInfo lockInfo;
+	protected Map<String, String> joinMapped = new HashMap<>();
 
 	public SelectExtQueryImpl(Class<?> entityClass, String alias, Map<?, ?> params, SQLSymbolManager symbolManager) {
 		super(entityClass, alias, params, symbolManager);
+		this.queryNameStrategy = new SelectQueryNameStrategy(alias, joinMapped, true);
 	}
 	
 	public SelectExtQueryImpl(Class<?> entityClass, String alias, Map<?, ?> params, SQLSymbolManager symbolManager, List<ExtQueryListener> listeners) {
 		super(entityClass, alias, params, symbolManager, listeners);
+		this.queryNameStrategy = new SelectQueryNameStrategy(alias, joinMapped, true);
 	}
 
 
@@ -101,6 +104,9 @@ public class SelectExtQueryImpl extends AbstractExtQuery implements SelectExtQue
 		/*String fname = "build ext query";
 		if(isDebug())
 			UtilTimerStack.push(fname);*/
+		/*if(hasBuilt()){
+			return this;
+		}*/
 		
 		beforeBuild();
 		
@@ -253,7 +259,7 @@ public class SelectExtQueryImpl extends AbstractExtQuery implements SelectExtQue
 		if(this.alias.equals(f)){
 			return f;
 		}else{
-			return appendAlias(translateAt(f));
+			return this.queryNameStrategy.appendAlias(this.queryNameStrategy.translateAt(f));
 		}
 	}
 	
@@ -315,7 +321,6 @@ public class SelectExtQueryImpl extends AbstractExtQuery implements SelectExtQue
 		return this;
 	}
 
-	private Map<String, String> joinMapped = new HashMap<>();
 	
 	protected SelectExtQueryImpl buildJoin(StringBuilder joinBuf, String joinKey, Object value, boolean hasParentheses) {
 		String joinWord = K.JOIN_MAP.get(joinKey);
@@ -334,10 +339,10 @@ public class SelectExtQueryImpl extends AbstractExtQuery implements SelectExtQue
 				}
 				if(jstrs.length>1){//alias
 					joinMapped.put(jstrs[1], jstrs[0]);
-					joinBuf.append(joinWord).append(hasParentheses?"(":" ").append(getJoinFieldName(jstrs[0])).append(hasParentheses?") ":" ").append(jstrs[1]).append(" ");
+					joinBuf.append(joinWord).append(hasParentheses?"(":" ").append(queryNameStrategy.getJoinFieldName(jstrs[0])).append(hasParentheses?") ":" ").append(jstrs[1]).append(" ");
 				}else{
 					joinMapped.put(joinString, joinString);
-					joinBuf.append(joinWord).append(hasParentheses?"(":" ").append(getJoinFieldName(joinString)).append(hasParentheses?") ":" ");
+					joinBuf.append(joinWord).append(hasParentheses?"(":" ").append(queryNameStrategy.getJoinFieldName(joinString)).append(hasParentheses?") ":" ");
 				}
 			}else if(obj.getClass().isArray()){
 				joinBuf.append("on ( ");
@@ -358,12 +363,6 @@ public class SelectExtQueryImpl extends AbstractExtQuery implements SelectExtQue
 		return this;
 	}
 	
-	public String getJoinFieldName(String f) {
-		Assert.hasText(f);
-		f = translateAt(f);
-		checkFieldNameValid(f);
-		return f;
-	}
 	
 	public String getFieldNameIfNecessary(Object field) {
 		Assert.notNull(field);
@@ -373,15 +372,7 @@ public class SelectExtQueryImpl extends AbstractExtQuery implements SelectExtQue
 		return getFieldName(f);
 	}
 	
-	public String getFieldName(String f) {
-		int firstIndex = f.indexOf('.');
-		if(firstIndex!=-1){
-			String firstWord = f.substring(0, firstIndex);
-			if(joinMapped.containsKey(firstWord))
-				return f;
-		}
-		return super.getFieldName(f);
-	}
+	
 	
 
 	protected ExtQuery buildOrderBy() {

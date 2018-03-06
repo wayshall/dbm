@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.onetwo.common.db.exception.NotUniqueResultException;
-import org.onetwo.common.db.spi.QueryWrapper;
 import org.onetwo.common.db.sqlext.ExtQuery;
 import org.onetwo.common.db.sqlext.SelectExtQuery;
 import org.onetwo.common.utils.LangUtils;

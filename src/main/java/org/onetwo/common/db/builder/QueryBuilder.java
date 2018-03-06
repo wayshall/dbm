@@ -56,6 +56,8 @@ public interface QueryBuilder {
 	public QueryAction toQuery();
 	public QueryAction toSelect();
 	
+	public int delete();
+	
 	public Map<Object, Object> getParams();
 	
 //	public ParamValues getParamValues();

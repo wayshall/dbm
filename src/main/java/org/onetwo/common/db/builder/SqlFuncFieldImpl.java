@@ -23,6 +23,6 @@ public class SqlFuncFieldImpl extends QueryFieldImpl {
 
 	public String getActualFieldName() {
 		SelectExtQueryImpl q = (SelectExtQueryImpl)this.getExtQuery();
-		return q.translateAt(super.getFieldName());
+		return q.getQueryNameStrategy().translateAt(super.getFieldName());
 	}
 }

@@ -5,7 +5,7 @@ import java.util.Map;
 
 import org.onetwo.common.db.DbmQueryValue;
 import org.onetwo.common.db.InnerBaseEntityManager;
-import org.onetwo.common.db.sqlext.ExtQuery;
+import org.onetwo.common.db.sqlext.ExtQueryInner;
 import org.onetwo.common.db.sqlext.SQLSymbolManager;
 import org.onetwo.common.db.sqlext.SelectExtQuery;
 import org.onetwo.common.spring.copier.CopyUtils;
@@ -27,7 +27,7 @@ public class QueryActionImpl implements QueryAction {
 		}
 		this.baseEntityManager = baseEntityManager;
 		extQuery = getSQLSymbolManager().createSelectQuery(entityClass, alias, properties);
-		extQuery.build();
+//		extQuery.build();
 	}
 	
 	public SelectExtQuery getExtQuery() {
@@ -77,7 +77,8 @@ public class QueryActionImpl implements QueryAction {
 		return page;
 	}
 
-	protected DbmQueryValue convertAsDbmQueryValue(ExtQuery extQuery){
+	protected DbmQueryValue convertAsDbmQueryValue(ExtQueryInner extQuery){
+		extQuery.build();
 		DbmQueryValue qv = DbmQueryValue.create(extQuery.getSql());
 		qv.setResultClass(extQuery.getEntityClass());
 		/*if(extQuery.getParamsValue().isList()){
