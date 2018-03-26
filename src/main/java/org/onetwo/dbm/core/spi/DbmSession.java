@@ -230,4 +230,6 @@ public interface DbmSession {
 	@DbmJdbcOperationMark(type=DbmJdbcOperationType.QUERY)
 	public Number countByProperties(Class<?> entityClass, Map<Object, Object> properties);
 	
+	public void close();
+	
 }

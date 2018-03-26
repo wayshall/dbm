@@ -216,6 +216,9 @@ public class SimpleDbmInnerServiceRegistry implements DbmInnerServiceRegistry {
 		//add
 		this.interceptorManager = initializeComponent(interceptorManager, DbmInterceptorManager.class, ()->{
 			List<DbmInterceptor> interceptors = Lists.newArrayList();
+			if(dataBaseConfig.isEnabledDebugContext()){
+				interceptors.add(new DebugContextInterceptor(context.getSessionFactory()));
+			}
 			interceptors.add(new SessionCacheInterceptor(context.getSessionFactory()));
 			interceptors.add(new LogSqlInterceptor(dataBaseConfig));
 			if(this.interceptors!=null){

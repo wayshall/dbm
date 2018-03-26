@@ -5,6 +5,7 @@ import java.sql.Connection;
 import org.onetwo.dbm.core.spi.DbmTransaction;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 public class DbmTransactionImpl implements DbmTransaction {
 	
@@ -17,6 +18,10 @@ public class DbmTransactionImpl implements DbmTransaction {
 		this.status = transactionStatus;
 		this.transactionManager = transactionManager;
 		this.containerAutoCommit = containerAutoCommit;
+	}
+	
+	public Integer getCurrentIsolationLevel(){
+		return TransactionSynchronizationManager.getCurrentTransactionIsolationLevel();
 	}
 
 	@Override

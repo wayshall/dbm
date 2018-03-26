@@ -101,8 +101,7 @@ public class DbmSpringConfiguration implements ApplicationContextAware, Initiali
 		AnnotationScanBasicDynamicQueryObjectRegister register = new AnnotationScanBasicDynamicQueryObjectRegister(this.applicationContext);
 		return register;
 	}*/
-
-	public DbmConfig defaultDbmConfig(){
+	public DbmConfig dbmConfig(){
 //		DbmConfigFactory dbmConfigFactory = Springs.getInstance().getBean(DbmConfig.class);
 		if(dbmConfig==null){
 			this.dbmConfig = new DefaultDbmConfig();
@@ -172,7 +171,7 @@ public class DbmSpringConfiguration implements ApplicationContextAware, Initiali
 		}
 		DbmSessionFactoryImpl sf = new DbmSessionFactoryImpl(applicationContext, transactionManager, dataSource);
 		sf.setPackagesToScan(getAllDbmPackageNames().toArray(new String[0]));
-		sf.setDataBaseConfig(defaultDbmConfig());
+		sf.setDataBaseConfig(dbmConfig());
 		
 //		ConfigurableListableBeanFactory cbf = (ConfigurableListableBeanFactory)applicationContext.getAutowireCapableBeanFactory();
 //		cbf.registerResolvableDependency(DbmSession.class, new DbmSessionObjectFactory(sf));
@@ -203,7 +202,7 @@ public class DbmSpringConfiguration implements ApplicationContextAware, Initiali
 	}*/
 	
 	private String getDataSourceName(){
-		String ds = defaultDbmConfig().getDataSource();
+		String ds = dbmConfig().getDataSource();
 		if(StringUtils.isBlank(ds) && enableDbmAttributes!=null){
 			ds = enableDbmAttributes.getDataSourceName();
 		}

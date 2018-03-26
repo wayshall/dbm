@@ -24,6 +24,8 @@ public class DefaultDbmConfig implements DbmConfig {
 	private EnableDbmAttributes enableDbmAttributes;
 	
 	private boolean enableSessionCache;
+	
+	private boolean enabledDebugContext;
 
 	public DefaultDbmConfig(){
 	}
@@ -114,6 +116,14 @@ public class DefaultDbmConfig implements DbmConfig {
 
 	public void setDataSource(String dataSource) {
 		this.dataSource = dataSource;
+	}
+
+	public boolean isEnabledDebugContext() {
+		return enabledDebugContext;
+	}
+
+	public void setEnabledDebugContext(boolean enabledDebugContext) {
+		this.enabledDebugContext = enabledDebugContext;
 	}
 
 }

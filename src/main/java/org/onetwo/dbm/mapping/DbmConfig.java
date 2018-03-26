@@ -38,5 +38,7 @@ public interface DbmConfig {
 //	public String[] getModelPackagesToScan();
 	
 	public String getDataSource();
+	
+	public boolean isEnabledDebugContext();
 
 }

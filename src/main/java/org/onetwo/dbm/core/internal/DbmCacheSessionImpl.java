@@ -18,7 +18,7 @@ public class DbmCacheSessionImpl extends DbmSessionImpl implements CachableSessi
 	static final private KeyGenerator DEFAULT_KEY_GENERATOR = new MethodKeyGenerator();
 	
 	final private KeyGenerator keyGenerator = DEFAULT_KEY_GENERATOR;
-	final private Cache<Object, ValueWrapper> sessionCaches = CacheBuilder.newBuilder().build();
+	private Cache<Object, ValueWrapper> sessionCaches = CacheBuilder.newBuilder().build();
 	
 	public DbmCacheSessionImpl(DbmSessionFactory sessionFactory, long id, DbmTransaction transaction) {
 		super(sessionFactory, id, transaction);
@@ -54,6 +54,12 @@ public class DbmCacheSessionImpl extends DbmSessionImpl implements CachableSessi
 		return keyGenerator.generate(target, method, params);
 	}
 
+	@Override
+	public void close() {
+		super.close();
+		this.sessionCaches.cleanUp();
+		this.sessionCaches = null;
+	}
 	@Override
 	public void flush() {
 		this.sessionCaches.cleanUp();

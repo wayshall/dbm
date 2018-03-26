@@ -1,6 +1,7 @@
 package org.onetwo.dbm.core;
 
 import org.onetwo.dbm.core.internal.DbmSessionResourceHolder;
+import org.onetwo.dbm.core.internal.DebugContextInterceptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.datasource.DataSourceUtils;
@@ -43,7 +44,7 @@ public class DbmTransactionSynchronization extends TransactionSynchronizationAda
 		if(logger.isDebugEnabled()){
 			logger.debug("spring transaction synchronization committing for dbm session: {}, and dbm session flush.", this.sessionHolder.getSession());
 		}
-		this.sessionHolder.getSession().flush();
+//		this.sessionHolder.getSession().flush();
 	}
 
 	@Override
@@ -52,6 +53,8 @@ public class DbmTransactionSynchronization extends TransactionSynchronizationAda
 			logger.debug("spring transaction synchronization closing for dbm session: {}, and dbm session flush.", this.sessionHolder.getSession());
 		}
 		TransactionSynchronizationManager.unbindResource(this.sessionHolder.getSessionFactory());
+		this.sessionHolder.getSession().close();
 		this.sessionHolder.reset();
+		DebugContextInterceptor.getDebugContext().remove();
 	}
 }

@@ -76,6 +76,11 @@ public class DbmSessionImpl extends AbstractDbmSession implements DbmSessionEven
 		return id;
 	}
 
+	@Override
+	public void close() {
+		
+	}
+
 	public boolean useContextTransactional() {
 		return transactionType == SessionTransactionType.CONTEXT_MANAGED;
 	}
@@ -587,6 +592,7 @@ public class DbmSessionImpl extends AbstractDbmSession implements DbmSessionEven
 	public DbmInnerServiceRegistry getServiceRegistry() {
 		return sessionFactory.getServiceRegistry();
 	}
+
 
 	@Override
 	public String toString() {

@@ -41,6 +41,12 @@ public class LogSqlInterceptor implements DbmInterceptor {
 		if(sqlParams==null){
 			return chain.invoke();
 		}
+		
+		if(dbmConfig.isEnabledDebugContext()){
+			DebugContextInterceptor.getCurrentDebugContextData().ifPresent(data->{
+				data.addSqlAndParams(sqlParams);
+			});
+		}
 		if(logger.isTraceEnabled()){
 			logger.trace("dbm sql: {}, sql parameters: {}", sqlParams.getKey(), sqlParams.getValue());
 		}
