@@ -247,7 +247,11 @@ abstract public class AbstractExtQuery implements ExtQueryInner{
 		List<?> valueList = ExtQueryUtils.processValue(fields, values, ifNull);
 		
 		//ignore null
-		if (valueList == null || valueList.isEmpty())
+		/*if (valueList == null || valueList.isEmpty())
+			return null;*/
+		//actually, never can not be null
+		//Fix: 去掉 valueList.isEmpty()条件, null没有被忽略，但empty却被忽略了，行为应该交给IfNull控制
+		if (valueList == null)
 			return null;
 
 		List<?> fieldList =  MyUtils.asList(fields);
