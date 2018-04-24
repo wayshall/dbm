@@ -39,7 +39,9 @@ public class DbmMappedProperty extends AbstractMappedField {
 		}
 		IdentifierGenerator<?> idGenerator = this.idGenerators.get(generatedValueIAttrs.getGenerator());
 		if(idGenerator==null){
-			throw new DbmException("can not find IdGenerator for name: " + generatedValueIAttrs.getGenerator()+", entity: " + getEntry().getEntityName());
+			throw new DbmException("can not find IdGenerator for name: " + generatedValueIAttrs.getGenerator()+", "
+					+ "entity: " + getEntry().getEntityName()
+					+ ", use @DbmIdGenerator annotation can fix!");
 		}
 		if(!idGenerator.getStrategyType().equals(getStrategyType())){
 			throw new DbmException("the id generator GenerationType["+idGenerator.getStrategyType().getGenerationType()+"] "
