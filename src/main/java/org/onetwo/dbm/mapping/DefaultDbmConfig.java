@@ -26,6 +26,8 @@ public class DefaultDbmConfig implements DbmConfig {
 	private boolean enableSessionCache;
 	
 	private boolean enabledDebugContext;
+	
+	private boolean autoProxySessionTransaction = false;
 
 	public DefaultDbmConfig(){
 	}
@@ -124,6 +126,18 @@ public class DefaultDbmConfig implements DbmConfig {
 
 	public void setEnabledDebugContext(boolean enabledDebugContext) {
 		this.enabledDebugContext = enabledDebugContext;
+	}
+
+	public boolean isAutoProxySessionTransaction() {
+		return autoProxySessionTransaction;
+	}
+
+	public void setAutoProxySessionTransaction(boolean autoProxySessionTransaction) {
+		this.autoProxySessionTransaction = autoProxySessionTransaction;
+	}
+
+	public void setEnableDbmAttributes(EnableDbmAttributes enableDbmAttributes) {
+		this.enableDbmAttributes = enableDbmAttributes;
 	}
 
 }

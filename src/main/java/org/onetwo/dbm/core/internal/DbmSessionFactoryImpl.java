@@ -37,7 +37,6 @@ import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -177,8 +176,11 @@ public class DbmSessionFactoryImpl implements InitializingBean, DbmSessionFactor
 			return sessionOpt.get();
 		}
 		if(!TransactionSynchronizationManager.isSynchronizationActive()){
-			throw new DbmException("no transaction synchronization in current thread, you should add @Transactional to transaction method!");
-//			TransactionSynchronizationManager.initSynchronization();
+			if(this.dataBaseConfig.isAutoProxySessionTransaction()){
+				TransactionSynchronizationManager.initSynchronization();
+			}else{
+				throw new DbmException("no transaction synchronization in current thread, you should add @Transactional to transaction method!");
+			}
 		}
 		
 		if(TransactionSynchronizationManager.isActualTransactionActive()){//transaction exists in current thread

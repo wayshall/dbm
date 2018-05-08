@@ -40,5 +40,12 @@ public interface DbmConfig {
 	public String getDataSource();
 	
 	public boolean isEnabledDebugContext();
+	
+	/****
+	 * 如果当前线程上下文没发现事务，是否自动为当前session开启事务，以避免出错
+	 * @author wayshall
+	 * @return
+	 */
+	public boolean isAutoProxySessionTransaction();
 
 }
