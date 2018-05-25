@@ -145,9 +145,9 @@ public class DbmQueryImpl implements DbmQuery {
 		if(lockInfo!=null){
 			sql += " " + dbDialect.getLockSqlString(lockInfo);
 		}
-		if(TimeProfileStack.isActive()){
+		/*if(TimeProfileStack.isActive()){
 			this.logger.info("sql:"+sql);
-		}
+		}*/
 		return sql;
 	}
 
