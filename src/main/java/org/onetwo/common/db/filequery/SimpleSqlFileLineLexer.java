@@ -16,8 +16,8 @@ public class SimpleSqlFileLineLexer {
 	public static final String STAR = "*";
 	public static final String MULTIP_COMMENT_START = "/*";
 	public static final String MULTIP_COMMENT_END = "*/";
-	public static final String CONFIG_PREFIX = "--@@";
-	public static final String NAME_PREFIX = "--@";
+//	public static final String CONFIG_PREFIX = "--@@";
+//	public static final String NAME_PREFIX = "--@";
 	public static final String EQUALS_MARK = "=";
 	
 	public static enum LineToken {

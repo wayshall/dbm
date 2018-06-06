@@ -17,6 +17,8 @@ import org.slf4j.Logger;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.PropertyAccessorFactory;
 
+import com.google.common.collect.ImmutableList;
+
 /****
  * file example:
  	@name: findById
@@ -31,6 +33,12 @@ import org.springframework.beans.PropertyAccessorFactory;
  */
 public class MultipCommentsSqlFileParser implements NamedQueryInfoParser {
 	
+	/***
+	 * 这个实现有问题，少了空格
+	 * @author wayshall
+	 *
+	 */
+	@Deprecated
 	public static class SimpleDirectiveExtractor implements SqlDirectiveExtractor {
 		public static final String DIRECTIVE_PREFIX = SimpleSqlFileLineLexer.COMMENT + ">";//-->
 		public static final String DIRECTIVE_START = DIRECTIVE_PREFIX + "[";
@@ -50,6 +58,35 @@ public class MultipCommentsSqlFileParser implements NamedQueryInfoParser {
 		
 	}
 	
+	/****
+	 * 重新实现注释型指令，使用"-- >"
+	 * @author wayshall
+	 *
+	 */
+	public static class CustomDirectiveExtractor implements SqlDirectiveExtractor {
+		private String prefix;
+		private String start;
+		private String end;
+
+		public CustomDirectiveExtractor(String prefix, String start, String end) {
+			super();
+			this.prefix = prefix;
+			this.start = prefix+start;
+			this.end = end;
+		}
+
+		@Override
+		public boolean isDirective(String value) {
+			return value.startsWith(start) && value.endsWith(end);
+		}
+
+		@Override
+		public String extractDirective(String value) {
+			String directive = StringUtils.substringAfter(value, prefix);
+			return directive;
+		}
+	}
+	
 	public static final String GLOBAL_NS_KEY = "global";
 	public static final String AT = "@";
 //	public static final String EQUALS_MARK = "=";
@@ -58,7 +95,9 @@ public class MultipCommentsSqlFileParser implements NamedQueryInfoParser {
 	
 	protected final Logger logger = JFishLoggerFactory.getLogger(this.getClass());
 	protected boolean debug = false;
-	protected SqlDirectiveExtractor sqlDirectiveExtractor = new SimpleDirectiveExtractor();
+//	protected SqlDirectiveExtractor sqlDirectiveExtractor = new SimpleDirectiveExtractor();
+	protected List<SqlDirectiveExtractor> sqlDirectiveExtractors = ImmutableList.of(new SimpleDirectiveExtractor(), 
+																					new CustomDirectiveExtractor("-- >", "[", "]"));
 	
 	@Override
 	public void parseToNamedQueryFile(NamedQueryFile namespaceInfo, ResourceAdapter<?> sqlFile) {
@@ -186,9 +225,10 @@ public class MultipCommentsSqlFileParser implements NamedQueryInfoParser {
 				break;
 			}else if(lineLexer.getLineToken()==LineToken.ONE_LINE_COMMENT){
 				String value = StringUtils.join(lineLexer.getLineBuf(), " ");
-				if(sqlDirectiveExtractor.isDirective(value)){//-->[#if ... ]
+				/*if(sqlDirectiveExtractor.isDirective(value)){//-->[#if ... ]
 					buf.append(sqlDirectiveExtractor.extractDirective(value)).append(" ");
-				}
+				}*/
+				this.parseSqlDirectiveExtractors(buf, value);
 				continue;
 			}else if(lineLexer.getLineToken()==LineToken.CONTENT){
 				String value = StringUtils.join(lineLexer.getLineBuf(), " ");
@@ -198,6 +238,14 @@ public class MultipCommentsSqlFileParser implements NamedQueryInfoParser {
 			}
 		}
 		return buf.toString();
+	}
+	
+	protected void parseSqlDirectiveExtractors(StringBuilder buf, String value){
+		this.sqlDirectiveExtractors.forEach(sqlDirectiveExtractor->{
+			if(sqlDirectiveExtractor.isDirective(value)){//-->[#if ... ]
+				buf.append(sqlDirectiveExtractor.extractDirective(value)).append(" ");
+			}
+		});
 	}
 	
 	

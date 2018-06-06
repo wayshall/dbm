@@ -13,6 +13,18 @@
          and nickName like :nickName?likeString
         -->[/#if]
 
+/*****
+ * @name: removeByUserNameWithSpace
+ * 批量删除
+ */
+    delete from test_user_autoid 
+        where 1=1 
+        -- >[#if userName?has_content]
+         and user_name like :userName?likeString
+        -- >[/#if]
+        -- >[#if nickName?has_content]
+         and nickName like :nickName?likeString
+        -- >[/#if]
          
 /*****
  * @name: batchInsert
