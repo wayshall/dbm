@@ -387,8 +387,7 @@ sql/test.dao.UserAutoidDao.jfish.sql
 - dbm会根据sql文件名去掉.jfish.sql后缀后作为类名，绑定对应的接口类，此处为：test.dao.UserAutoidDao    
 - @name: 表示此sql绑定的方法，此处表示会绑定到UserAutoidDao.removeByUserName方法    
 - \[\#if\]...\[/\#if\]，是freemarker的语法，表示条件判断。此处表示，如果userName的值不为空，才生成“user_name like ？” 这个条件   
-- :userName，spring jdg
-- c的命名参数，和接口的方法参数绑定 
+- :userName，spring jdbc的命名参数，和接口的方法参数绑定 
 - @ExecuteUpdate注解表示这个方法会以jdbc的executeUpdate方法执行，实际上可以忽略，因为dbm会识别update，insert，delete等前缀的方法名来判断。
 
 ### 3、调用   
