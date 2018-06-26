@@ -49,7 +49,7 @@ JDK 1.8+
 spring 4.0+
 
 ## maven
-当前snapshot版本：4.6.1-SNAPSHOT
+当前snapshot版本：4.7.1-SNAPSHOT
 
 若使用snapshot版本，请添加snapshotRepository仓储：
 ```xml
@@ -68,7 +68,7 @@ spring 4.0+
 <dependency>
     <groupId>org.onetwo4j</groupId>
     <artifactId>onetwo-dbm</artifactId>
-    <version>4.6.1-SNAPSHOT</version>
+    <version>4.7.1-SNAPSHOT</version>
 </dependency>
 
 ```
