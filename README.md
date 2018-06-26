@@ -537,8 +537,8 @@ dbm内置支持了JPA（Hibernate）实现的QueryProvideManager。
 
 ## 查询映射
 DbmRepository的查询映射无需任何xml配置，只需要遵循规则即可：   
-** 1、 ** Java类的属性名与sql查询返回的列名一致   
-** 2、 ** 或者Java类的属性名采用驼峰命名，而列明采用下划线的方式分隔。如：userName对应user_name   
+- 1、  Java类的属性名与sql查询返回的列名一致   
+- 2、  或者Java类的属性名采用驼峰命名，而列明采用下划线的方式分隔。如：userName对应user_name   
 
 举例：   
 ### 创建一个DbmRepository接口
@@ -754,12 +754,12 @@ dbm对充血模型提供一定的api支持，如果觉得好玩，可尝试使�
 ### 1、需要在Configuration类配置model所在的包位置
 单独使用dbm的项目，只要model类在@EnableDbm注解所在的配置类的包（包括子包）下面即可，dbm会自动扫描。
 ```Java
+### 2、继承RichModel类
 @EnableDbm
 public class DbmSampleApplication {
 }  
 ```    
 
-### 2、继承RichModel类
 ```Java
 
 @Entity
@@ -784,6 +784,13 @@ List<User> users = User.findList("userName", userName, K.IF_NULL, IfNull.Ignore)
 
 ## 参数配置
 - logSql：是否打印执行的sql和时间，默认为true；
+需要同时配置日志文件：
+```xml
+	<!-- print dbm sql-->
+    <logger name="org.onetwo.dbm.core.internal.LogSqlInterceptor" level="TRACE">
+        <appender-ref ref="logFile" />
+    </logger>
+```
 - watchSqlFile：是否监视sql文件，如果有修改则重新加载，默认为true；
 - useBatchOptimize：是否使用批量优化save和insert等api的操作，为true并且插入数量超过了设定的阈值，则会把此类api的循环插入优化为jdbc的批量插入，默认为true；
 - useBatchThreshold：批量插入的阈值，调用save和insert等api时，如果传入的集合数量超过了阈值，则自动转为批量插入，否则循环插入，默认为50；
