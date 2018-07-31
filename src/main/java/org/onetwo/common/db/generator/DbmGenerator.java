@@ -3,6 +3,7 @@ package org.onetwo.common.db.generator;
 import java.io.File;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import javax.sql.DataSource;
 
@@ -11,6 +12,7 @@ import org.onetwo.common.db.generator.ftl.FtlEngine;
 import org.onetwo.common.db.generator.ftl.TomcatDataSourceBuilder;
 import org.onetwo.common.file.FileUtils;
 import org.onetwo.common.utils.LangUtils;
+import org.onetwo.dbm.exception.DbmException;
 import org.springframework.util.Assert;
 
 import com.google.common.collect.Maps;
@@ -55,6 +57,8 @@ public class DbmGenerator {
 	
 	private Map<String, Object> context = Maps.newHashMap();
 	
+	private boolean configured;
+	
 	public DbmGenerator(DbGenerator dbGenerator) {
 		super();
 		this.dbGenerator = dbGenerator;
@@ -63,24 +67,33 @@ public class DbmGenerator {
 	private DbmGenerator() {
 		super();
 	}
+	
+	protected final void checkConfigured(String methodName){
+		if(configured){
+			throw new DbmException("dbGenerator has been configured, can not invoke method: " + methodName);
+		}
+	}
 
-	public DbGenerator dbGenerator() {
-		return dbGenerator;
+	public DbmGenerator configGenerator(Consumer<DbGenerator> configurer) {
+		configurer.accept(dbGenerator);
+		this.configured = true;
+		return this;
 	}
 	
 	public DbmGenerator mavenProjectDir(){
 		Assert.hasText(javaBasePackage, "javaBasePackage not set!");
-		dbGenerator.stripTablePrefix(stripTablePrefix)
-					.globalConfig()
-						.pageFileBaseDir(pageFileBaseDir)
-						.resourceDir(resourceDir)
-						.javaSrcDir(javaSrcDir)
-						.javaBasePackage(javaBasePackage)
-						.moduleName(moduleName)
-						.defaultTableContexts()
-						.end()
-					.end();
-		return this;
+		return configGenerator(dbGenerator->{
+			dbGenerator.stripTablePrefix(stripTablePrefix)
+			.globalConfig()
+				.pageFileBaseDir(pageFileBaseDir)
+				.resourceDir(resourceDir)
+				.javaSrcDir(javaSrcDir)
+				.javaBasePackage(javaBasePackage)
+				.moduleName(moduleName)
+				.defaultTableContexts()
+				.end()
+			.end();
+		});
 	}
 	
 	public DbmGenerator pluginProjectDir(String pluginName){
@@ -91,16 +104,19 @@ public class DbmGenerator {
 	}
 	
 	public DbmGenerator javaBasePackage(String javaBasePackage) {
+		this.checkConfigured("javaBasePackage");
 		this.javaBasePackage = javaBasePackage;
 		return this;
 	}
 
 	public DbmGenerator moduleName(String moduleName) {
+		this.checkConfigured("moduleName");
 		this.moduleName = moduleName;
 		return this;
 	}
 
 	public DbmGenerator stripTablePrefix(String stripTablePrefix) {
+		this.checkConfigured("stripTablePrefix");
 		this.stripTablePrefix = stripTablePrefix;
 		return this;
 	}
@@ -114,6 +130,8 @@ public class DbmGenerator {
 
 	
 	public void generate(){
+		Assert.hasText(javaSrcDir, "javaSrcDir not set!");
+		Assert.hasText(javaBasePackage, "javaBasePackage not set!");
 		generate(context);
 	}
 	

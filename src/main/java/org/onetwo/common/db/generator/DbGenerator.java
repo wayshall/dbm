@@ -315,7 +315,9 @@ public class DbGenerator {
 		public DbTableGenerator entityTemplate(String entitySubPackage, String templatePath, String fileNamePostfix){
 			TableGeneratedConfig config = new TableGeneratedConfig(tableName, templatePath);
 			config.setLocalPackage(entitySubPackage);
-			config.outfilePathFunc(c->getJavaSrcOutfilePathByType(config, "/"+entitySubPackage, templatePath, fileNamePostfix));
+			config.outfilePathFunc(c->{
+				return getJavaSrcOutfilePathByType(config, "/"+entitySubPackage, templatePath, fileNamePostfix);
+			});
 			tableGeneratedConfig.add(config);
 			return this;
 		}
