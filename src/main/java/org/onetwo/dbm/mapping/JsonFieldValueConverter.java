@@ -8,7 +8,11 @@ import org.onetwo.common.jackson.JsonMapper;
  */
 public class JsonFieldValueConverter implements DbmFieldValueConverter {
 	
-	public static final JsonFieldValueConverter INSTANCE = new JsonFieldValueConverter();
+	/*private static final JsonFieldValueConverter INSTANCE = new JsonFieldValueConverter();
+	
+	public static DbmFieldValueConverter getInstance(){
+		return INSTANCE;
+	}*/
 	
 	private JsonMapper jsonMapper = JsonMapper.ignoreNull();
 	
@@ -25,7 +29,5 @@ public class JsonFieldValueConverter implements DbmFieldValueConverter {
 	public Object forStore(DbmMappedField field, Object fieldValue) {
 		return jsonMapper.toJson(fieldValue);
 	}
-	
-	
 
 }

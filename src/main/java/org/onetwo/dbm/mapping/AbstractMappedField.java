@@ -6,9 +6,11 @@ import java.util.List;
 
 import javax.persistence.Enumerated;
 
+import org.onetwo.common.reflect.ReflectUtils;
 import org.onetwo.common.utils.JFishProperty;
 import org.onetwo.common.utils.LangUtils;
 import org.onetwo.common.utils.StringUtils;
+import org.onetwo.dbm.annotation.DbmField;
 import org.onetwo.dbm.annotation.DbmFieldListeners;
 import org.onetwo.dbm.annotation.DbmJsonField;
 import org.onetwo.dbm.event.DbmEventAction;
@@ -16,6 +18,7 @@ import org.onetwo.dbm.id.StrategyType;
 import org.onetwo.dbm.jpa.GeneratedValueIAttrs;
 import org.onetwo.dbm.mapping.version.VersionableType;
 import org.onetwo.dbm.utils.DbmUtils;
+import org.onetwo.dbm.utils.SpringAnnotationFinder;
 
 
 @SuppressWarnings("unchecked")
@@ -49,6 +52,7 @@ abstract public class AbstractMappedField implements DbmMappedField{
 	 */
 	private Class<?> actualMappingColumnType;
 	final private DbmJsonField jsonFieldAnnotation;
+	final private DbmField dbmFieldAnnotation;
 	
 	private DbmEnumType enumType;
 	
@@ -59,6 +63,8 @@ abstract public class AbstractMappedField implements DbmMappedField{
 		this.entry = entry;
 		this.propertyInfo = propertyInfo;
 		this.name = propertyInfo.getName();
+		
+		this.propertyInfo.getAnnotationInfo().setAnnotationFinder(SpringAnnotationFinder.INSTANCE);
 		
 		if(propertyInfo.hasAnnotation(Enumerated.class)){
 			Enumerated enumerated = propertyInfo.getAnnotation(Enumerated.class);
@@ -80,9 +86,15 @@ abstract public class AbstractMappedField implements DbmMappedField{
 		if(enumType!=null){
 			compositedConverter.addFieldValueConverter(CompositedFieldValueConverter.ENUM_CONVERTER);
 		}
+		this.dbmFieldAnnotation = propertyInfo.getAnnotation(DbmField.class);
 		this.jsonFieldAnnotation = propertyInfo.getAnnotation(DbmJsonField.class);
-		if(jsonFieldAnnotation != null){
-			compositedConverter.addFieldValueConverter(JsonFieldValueConverter.INSTANCE);
+		/*if(jsonFieldAnnotation != null){
+			compositedConverter.addFieldValueConverter(JsonFieldValueConverter.getInstance());
+		}*/
+		if(this.dbmFieldAnnotation!=null){
+			Class<? extends DbmFieldValueConverter> converterClass = this.dbmFieldAnnotation.converterClass();
+			DbmFieldValueConverter converter = ReflectUtils.newInstance(converterClass);
+			compositedConverter.addFieldValueConverter(converter);
 		}
 		this.fieldValueConverter = compositedConverter;
 		

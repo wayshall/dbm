@@ -15,7 +15,7 @@ import com.google.common.collect.Lists;
  */
 public class CompositedFieldValueConverter implements DbmFieldValueConverter {
 	
-	public static DbmFieldValueConverter ENUM_CONVERTER = new DbmFieldValueConverter() {
+	final public static DbmFieldValueConverter ENUM_CONVERTER = new DbmFieldValueConverter() {
 		
 		@Override
 		public Object forJava(DbmMappedField field, Object value) {
