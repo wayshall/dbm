@@ -18,7 +18,6 @@ import org.onetwo.common.dbm.model.entity.CompanyEntity;
 import org.onetwo.dbm.annotation.DbmJsonField;
 import org.onetwo.dbm.annotation.DbmRowMapper;
 import org.onetwo.dbm.exception.FileNamedQueryException;
-import org.onetwo.dbm.mapping.JdbcRowEntryImpl;
 import org.springframework.beans.ConversionNotSupportedException;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -110,7 +109,7 @@ public class JsonFieldTest extends DbmBaseTest {
 		
 	}
 	
-	@DbmRowMapper(JdbcRowEntryImpl.class)
+	@DbmRowMapper
 	public static class JdbcMapperJsonCompanyVO extends JsonCompanyEntity {
 	}
 	public static class NoJdbcMapperJsonCompanyVO extends JsonCompanyEntity {

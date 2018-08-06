@@ -11,7 +11,6 @@ import org.onetwo.dbm.annotation.DbmRowMapper;
 import org.onetwo.dbm.exception.DbmException;
 import org.onetwo.dbm.jdbc.spi.JdbcResultSetGetter;
 import org.onetwo.dbm.mapping.DbmMappedEntry;
-import org.onetwo.dbm.mapping.JdbcRowEntryImpl;
 import org.onetwo.dbm.mapping.MappedEntryManager;
 import org.springframework.jdbc.core.RowMapper;
 
@@ -63,9 +62,10 @@ public class DbmRowMapperFactory extends JdbcDaoRowMapperFactory {
 			return rowMapper;
 		}else if(type.getAnnotation(DbmRowMapper.class)!=null){
 			DbmRowMapper dbmRowMapper = type.getAnnotation(DbmRowMapper.class);
-			if(dbmRowMapper.value()==Void.class){
+			/*if(dbmRowMapper.value()==Void.class){
 				return new DbmBeanPropertyRowMapper<>(this.jdbcResultSetGetter,  type);
-			}else if(dbmRowMapper.value()==JdbcRowEntryImpl.class){
+			}else */
+			if(dbmRowMapper.value()==Void.class){
 				DbmMappedEntry entry = this.getMappedEntryManager().getReadOnlyEntry(type);
 				rowMapper = new EntryRowMapper<>(entry, this.jdbcResultSetGetter);
 				return rowMapper;

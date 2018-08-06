@@ -7,7 +7,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**********
- * only for named query
+ * 用于配置指定的mapper，默认使用EntryRowMapper
+ * 
  * @author wayshall
  *
  */

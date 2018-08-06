@@ -185,8 +185,6 @@ public class MutilMappedEntryManager implements MappedEntryBuilder, MappedEntryM
 					throw new NoMappedEntryException("can find build entry for this object, may be no mapping : " + entityObject.getClass());
 
 				buildEntry(value);
-//				putInCache(key, value);
-				System.out.println("getEntry entityObject: " + key);
 				value.freezing();
 				return value;
 			});
@@ -213,7 +211,9 @@ public class MutilMappedEntryManager implements MappedEntryBuilder, MappedEntryM
 	}
 	
 	
-	
+	/***
+	 * 
+	 */
 	@Override
 	public DbmMappedEntry getReadOnlyEntry(final Class<?> clazz) {
 		Assert.notNull(clazz, "the class arg can not be null!");

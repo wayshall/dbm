@@ -21,7 +21,7 @@ public interface MappedEntryBuilder extends Initializable {
 	public DbmMappedEntry buildMappedEntry(Object entity);
 	
 	/***
-	 * 只构建相关字段映射结构，不构建与jpa相关的任何注解信息
+	 * 只构建相关字段映射结构，用于非实体查询时映射值
 	 * @author wayshall
 	 * @param entry
 	 * @return
