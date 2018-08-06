@@ -177,7 +177,7 @@ public class SimpleDbmInnerServiceRegistry implements DbmInnerServiceRegistry {
 		}
 
 		mappedEntryManager = initializeComponent(mappedEntryManager, MappedEntryManager.class, ()->{
-			MutilMappedEntryManager entryManager = new MutilMappedEntryManager();
+			MutilMappedEntryManager entryManager = new MutilMappedEntryManager(this);
 //			this.mappedEntryManager.initialize();
 			
 			List<MappedEntryBuilder> builders = LangUtils.newArrayList();

@@ -1,6 +1,7 @@
 package org.onetwo.common.dbm;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -12,8 +13,13 @@ import javax.persistence.Table;
 import org.junit.Test;
 import org.onetwo.common.base.DbmBaseTest;
 import org.onetwo.common.db.spi.BaseEntityManager;
+import org.onetwo.common.dbm.model.dao.JsonCompanyDao;
 import org.onetwo.common.dbm.model.entity.CompanyEntity;
 import org.onetwo.dbm.annotation.DbmJsonField;
+import org.onetwo.dbm.annotation.DbmRowMapper;
+import org.onetwo.dbm.exception.FileNamedQueryException;
+import org.onetwo.dbm.mapping.JdbcRowEntryImpl;
+import org.springframework.beans.ConversionNotSupportedException;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -24,6 +30,8 @@ public class JsonFieldTest extends DbmBaseTest {
 	
 	@Autowired
 	private BaseEntityManager baseEntityManager;
+	@Autowired
+	private JsonCompanyDao jsonCompanyDao;
 
 	@Test
 	public void testSave(){
@@ -59,6 +67,22 @@ public class JsonFieldTest extends DbmBaseTest {
 		assertThat(dbCompany).isNotNull();
 		assertThat(dbCompany.getName()).isEqualTo(company.getName());
 		assertThat(dbCompany.getExtInfo()).isEqualTo(company.getExtInfo());
+		
+		
+		dbCompany = jsonCompanyDao.findOne(company.getName());
+		assertThat(dbCompany).isNotNull();
+		assertThat(dbCompany.getName()).isEqualTo(company.getName());
+		assertThat(dbCompany.getExtInfo()).isEqualTo(company.getExtInfo());
+		
+
+		JsonCompanyEntity finalCampany = company;
+		assertThatExceptionOfType(FileNamedQueryException.class).isThrownBy(()->{
+			jsonCompanyDao.findOneNoJdbcMapper(finalCampany.getName());
+		})
+		//<org.springframework.beans.ConversionNotSupportedException: 
+		//Failed to convert property value of type 'java.lang.String' to required type 'org.onetwo.common.dbm.JsonFieldTest$ExtInfo' for property 'extInfo'; nested exception is java.lang.IllegalStateException: Cannot convert value of type 'java.lang.String' to required type 'org.onetwo.common.dbm.JsonFieldTest$ExtInfo' 
+		//for property 'extInfo': no matching editors or conversion strategy found>
+		.withCauseInstanceOf(ConversionNotSupportedException.class);
 	}
 
 	@Entity
@@ -84,6 +108,12 @@ public class JsonFieldTest extends DbmBaseTest {
 			this.buildAt = buildAt;
 		}
 		
+	}
+	
+	@DbmRowMapper(JdbcRowEntryImpl.class)
+	public static class JdbcMapperJsonCompanyVO extends JsonCompanyEntity {
+	}
+	public static class NoJdbcMapperJsonCompanyVO extends JsonCompanyEntity {
 	}
 	
 	public static class ExtInfo {

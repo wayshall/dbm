@@ -12,4 +12,7 @@ public interface MappedEntryManager {
 //	public JFishMappedEntry buildMappedEntry(Class<?> entityClass, boolean byProperty);
 	
 
+	public DbmMappedEntry getReadOnlyEntry(Class<?> clazz);
+	
+
 }

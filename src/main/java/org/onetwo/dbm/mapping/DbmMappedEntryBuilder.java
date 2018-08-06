@@ -225,6 +225,7 @@ public class DbmMappedEntryBuilder implements MappedEntryBuilder, RegisterManage
 		}else{
 			entry = buildMappedEntryByField(entry);
 		}
+//		buildMappedEntryProperties(entry, byProperty);
 		
 //		TableInfo tableInfo = entry.getTableInfo();
 //		entry.build(tableInfo);
@@ -232,6 +233,11 @@ public class DbmMappedEntryBuilder implements MappedEntryBuilder, RegisterManage
 		this.listenerManager.notifyAfterBuildMappedEntry(entry);
 		
 		return entry;
+	}
+	
+	@Override
+	public DbmMappedEntry buildMappedFields(DbmMappedEntry entry) {
+		return buildMappedEntryByField(entry);
 	}
 
 	protected DbmMappedEntry buildMappedEntryByProperty(DbmMappedEntry entry) {
@@ -367,7 +373,9 @@ public class DbmMappedEntryBuilder implements MappedEntryBuilder, RegisterManage
 		//设置关系
 		if(col!=null){
 			mfield.setColumn(col);
-			entry.getTableInfo().addColumn(col);
+			if(entry.getTableInfo()!=null){
+				entry.getTableInfo().addColumn(col);
+			}
 		}
 		return mfield;
 	}

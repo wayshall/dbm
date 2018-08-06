@@ -51,8 +51,8 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 //	private boolean queryableOnly;
 	private AnnotationInfo annotationInfo;
 
-	private Map<String, AbstractMappedField> mappedFields = new LinkedHashMap<String, AbstractMappedField>();
-	private Map<String, AbstractMappedField> mappedColumns = new HashMap<String, AbstractMappedField>();
+	protected Map<String, AbstractMappedField> mappedFields = new LinkedHashMap<String, AbstractMappedField>();
+	protected Map<String, AbstractMappedField> mappedColumns = new HashMap<String, AbstractMappedField>();
 	private DbmMappedField identifyField;
 	private DbmMappedField versionField;
 	
