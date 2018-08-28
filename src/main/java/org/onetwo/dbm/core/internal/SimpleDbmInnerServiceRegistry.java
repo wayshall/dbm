@@ -50,7 +50,6 @@ import org.onetwo.dbm.mapping.MultiMappedEntryListener;
 import org.onetwo.dbm.mapping.MutilMappedEntryManager;
 import org.onetwo.dbm.query.JFishSQLSymbolManagerImpl;
 import org.springframework.aop.aspectj.annotation.AspectJProxyFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.util.Assert;
 
@@ -105,8 +104,8 @@ public class SimpleDbmInnerServiceRegistry implements DbmInnerServiceRegistry {
 	
 	
 
-	@Autowired(required=false)
-	private List<DbmInterceptor> interceptors;
+	/*@Autowired(required=false)
+	private List<DbmInterceptor> interceptors;*/
 	private DbmInterceptorManager interceptorManager;
 	private DbmJdbcOperations dbmJdbcOperations;
 	
@@ -124,6 +123,9 @@ public class SimpleDbmInnerServiceRegistry implements DbmInnerServiceRegistry {
 		T componentBean = SpringUtils.getBean(applicationContext, componentClass);
 		if(componentBean==null){
 			componentBean = initializer.get();
+			if(componentBean!=null){
+				SpringUtils.injectAndInitialize(applicationContext, componentBean);
+			}
 		}
 		return componentBean;
 	}
@@ -210,23 +212,24 @@ public class SimpleDbmInnerServiceRegistry implements DbmInnerServiceRegistry {
 		rowMapperFactory = initializeComponent(rowMapperFactory, RowMapperFactory.class, ()->new DbmRowMapperFactory(mappedEntryManager, jdbcResultSetGetter));
 		sequenceNameManager = initializeComponent(sequenceNameManager, SequenceNameManager.class, ()->new JPASequenceNameManager());
 
-		if(interceptors==null){
+		/*if(interceptors==null){
 			interceptors = Lists.newArrayList();
-		}
+		}*/
 		//add
 		this.interceptorManager = initializeComponent(interceptorManager, DbmInterceptorManager.class, ()->{
 			List<DbmInterceptor> interceptors = Lists.newArrayList();
+			interceptors.addAll(SpringUtils.getBeans(applicationContext, DbmInterceptor.class));
 			if(dataBaseConfig.isEnabledDebugContext()){
 				interceptors.add(new DebugContextInterceptor(context.getSessionFactory()));
 			}
 			interceptors.add(new SessionCacheInterceptor(context.getSessionFactory()));
 			interceptors.add(new LogSqlInterceptor(dataBaseConfig));
-			if(this.interceptors!=null){
+			/*if(this.interceptors!=null){
 				interceptors.addAll(this.interceptors);
-			}
+			}*/
 			DbmInterceptorManager interceptorManager = new DbmInterceptorManager();
 			interceptorManager.setInterceptors(interceptors);
-			interceptorManager.afterPropertiesSet();
+//			interceptorManager.afterPropertiesSet();
 			return interceptorManager;
 		});
 		

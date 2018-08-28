@@ -21,7 +21,7 @@ import com.google.common.collect.ImmutableList;
 @Order(value=Ordered.HIGHEST_PRECEDENCE)
 public class DbmInterceptorManager implements InitializingBean {
 	
-	@Autowired
+	@Autowired(required=false)
 	private List<DbmInterceptor> interceptors;
 	private CollectionMap<InterceptorType, DbmInterceptor> typeInterceptors = CollectionMap.newLinkedListMap();
 
