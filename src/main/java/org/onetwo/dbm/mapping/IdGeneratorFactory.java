@@ -69,6 +69,7 @@ public class IdGeneratorFactory {
 			HashMap<String, Object> jsonMap = JsonMapper.IGNORE_EMPTY.fromJson(attribute, HashMap.class);
 			SpringUtils.getMapToBean().injectBeanProperties(jsonMap, customIdGenerator);
 		}
+		customIdGenerator.initGenerator();
 		IdentifierGenerator<? extends Serializable> idGenerator = new CustomerIdGeneratorAdapter<>(dg.name(), customIdGenerator);
 		return Optional.of(idGenerator);
 	}

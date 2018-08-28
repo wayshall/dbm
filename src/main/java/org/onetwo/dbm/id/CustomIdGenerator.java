@@ -9,6 +9,10 @@ import org.onetwo.dbm.core.spi.DbmSessionImplementor;
  * <br/>
  */
 public interface CustomIdGenerator<T extends Serializable> {
+	
+	default CustomIdGenerator<T> initGenerator(){
+		return this;
+	};
 
 	T generate(DbmSessionImplementor session);
 
