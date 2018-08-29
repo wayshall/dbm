@@ -10,17 +10,18 @@ import org.onetwo.common.db.DataBase;
 import org.onetwo.common.db.DbmQueryValue;
 import org.onetwo.common.db.filequery.SqlFunctionFactory;
 import org.onetwo.common.db.filequery.func.SqlFunctionDialet;
-import org.onetwo.dbm.event.DbmBatchInsertEventListener;
-import org.onetwo.dbm.event.DbmBatchUpdateEventListener;
-import org.onetwo.dbm.event.DbmDeleteEventListener;
-import org.onetwo.dbm.event.DbmEventAction;
-import org.onetwo.dbm.event.DbmEventListenerManager;
-import org.onetwo.dbm.event.DbmExtQueryEventListener;
-import org.onetwo.dbm.event.DbmFindEventListener;
-import org.onetwo.dbm.event.DbmInsertEventListener;
-import org.onetwo.dbm.event.DbmInsertOrUpdateListener;
-import org.onetwo.dbm.event.DbmLockEventListener;
-import org.onetwo.dbm.event.DbmUpdateEventListener;
+import org.onetwo.dbm.event.internal.DbmBatchInsertEventListener;
+import org.onetwo.dbm.event.internal.DbmBatchUpdateEventListener;
+import org.onetwo.dbm.event.internal.DbmDeleteEventListener;
+import org.onetwo.dbm.event.internal.DbmExtQueryEventListener;
+import org.onetwo.dbm.event.internal.DbmFindEventListener;
+import org.onetwo.dbm.event.internal.DbmInsertEventListener;
+import org.onetwo.dbm.event.internal.DbmInsertOrUpdateListener;
+import org.onetwo.dbm.event.internal.DbmLockEventListener;
+import org.onetwo.dbm.event.internal.DbmUpdateEventListener;
+import org.onetwo.dbm.event.internal.DefaultCoreEventListenerManager;
+import org.onetwo.dbm.event.spi.DbmCoreEventListenerManager;
+import org.onetwo.dbm.event.spi.DbmEventAction;
 import org.onetwo.dbm.id.StrategyType;
 import org.onetwo.dbm.mapping.DbmTypeMapping;
 import org.onetwo.dbm.mapping.DefaultSQLBuilderFactory;
@@ -44,7 +45,7 @@ abstract public class AbstractDBDialect implements InnerDBDialet, DBDialect {
 	private boolean autoDetectIdStrategy;
 
 //	protected JFishQueryableEventListener[] queryableEventListeners;
-	protected DbmEventListenerManager dbmEventListenerManager;
+	protected DefaultCoreEventListenerManager dbmEventListenerManager;
 	
 	private SQLBuilderFactory sqlBuilderFactory;
 	
@@ -106,7 +107,7 @@ abstract public class AbstractDBDialect implements InnerDBDialet, DBDialect {
 		//优先使用自定义的 DbEventListenerManager
 		if(this.dbmEventListenerManager==null){
 //			DbEventListenerManager dbelm = this.findDbEventListenerManagerFromContext(applicationContext);
-			DbmEventListenerManager listMg = new DbmEventListenerManager();
+			DefaultCoreEventListenerManager listMg = new DefaultCoreEventListenerManager();
 //			dbelm.registerDefaultEventListeners();
 			this.onDefaultDbEventListenerManager(listMg);
 			this.dbmEventListenerManager = listMg;
@@ -126,7 +127,7 @@ abstract public class AbstractDBDialect implements InnerDBDialet, DBDialect {
 	protected void registerIdStrategy(){
 	}
 	
-	protected void onDefaultDbEventListenerManager(DbmEventListenerManager listMg){
+	protected void onDefaultDbEventListenerManager(DefaultCoreEventListenerManager listMg){
 		listMg.registerListeners(DbmEventAction.insertOrUpdate, new DbmInsertOrUpdateListener())
 				.registerListeners(DbmEventAction.insert, new DbmInsertEventListener())
 				.registerListeners(DbmEventAction.batchInsert, new DbmBatchInsertEventListener())
@@ -222,12 +223,12 @@ abstract public class AbstractDBDialect implements InnerDBDialet, DBDialect {
 	}
 
 
-	public DbmEventListenerManager getDbmEventListenerManager() {
+	public DbmCoreEventListenerManager getDbmEventListenerManager() {
 		return dbmEventListenerManager;
 	}
 
 	public void setDbmEventListenerManager(
-			DbmEventListenerManager jfishdbEventListenerManager) {
+			DefaultCoreEventListenerManager jfishdbEventListenerManager) {
 		this.dbmEventListenerManager = jfishdbEventListenerManager;
 	}
 

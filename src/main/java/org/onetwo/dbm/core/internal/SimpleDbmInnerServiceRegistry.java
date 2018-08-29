@@ -20,6 +20,7 @@ import org.onetwo.common.spring.SpringUtils;
 import org.onetwo.common.utils.LangUtils;
 import org.onetwo.dbm.core.Jsr303EntityValidator;
 import org.onetwo.dbm.core.spi.DbmInnerServiceRegistry;
+import org.onetwo.dbm.core.spi.DbmInterceptor;
 import org.onetwo.dbm.core.spi.DbmSessionFactory;
 import org.onetwo.dbm.dialet.AbstractDBDialect.DBMeta;
 import org.onetwo.dbm.dialet.DBDialect;
@@ -27,14 +28,15 @@ import org.onetwo.dbm.dialet.DbmetaFetcher;
 import org.onetwo.dbm.dialet.DefaultDatabaseDialetManager;
 import org.onetwo.dbm.dialet.MySQLDialect;
 import org.onetwo.dbm.dialet.OracleDialect;
+import org.onetwo.dbm.event.internal.EdgeEventBus;
 import org.onetwo.dbm.exception.DbmException;
 import org.onetwo.dbm.jdbc.DbmJdbcOperationsProxy;
 import org.onetwo.dbm.jdbc.internal.DbmJdbcTemplate;
+import org.onetwo.dbm.jdbc.internal.JdbcEventInterceptor;
 import org.onetwo.dbm.jdbc.internal.SpringJdbcResultSetGetter;
 import org.onetwo.dbm.jdbc.internal.SpringStatementParameterSetter;
 import org.onetwo.dbm.jdbc.mapper.DbmRowMapperFactory;
 import org.onetwo.dbm.jdbc.mapper.RowMapperFactory;
-import org.onetwo.dbm.jdbc.spi.DbmInterceptor;
 import org.onetwo.dbm.jdbc.spi.DbmJdbcOperations;
 import org.onetwo.dbm.jdbc.spi.JdbcResultSetGetter;
 import org.onetwo.dbm.jdbc.spi.JdbcStatementParameterSetter;
@@ -110,6 +112,8 @@ public class SimpleDbmInnerServiceRegistry implements DbmInnerServiceRegistry {
 	private DbmJdbcOperations dbmJdbcOperations;
 	
 	private SqlParamterPostfixFunctionRegistry sqlParamterPostfixFunctionRegistry;
+	
+	private EdgeEventBus edgeEventBus;
 	
 	private ApplicationContext applicationContext;
 	
@@ -212,9 +216,13 @@ public class SimpleDbmInnerServiceRegistry implements DbmInnerServiceRegistry {
 		rowMapperFactory = initializeComponent(rowMapperFactory, RowMapperFactory.class, ()->new DbmRowMapperFactory(mappedEntryManager, jdbcResultSetGetter));
 		sequenceNameManager = initializeComponent(sequenceNameManager, SequenceNameManager.class, ()->new JPASequenceNameManager());
 
-		/*if(interceptors==null){
-			interceptors = Lists.newArrayList();
-		}*/
+		
+		//edgeEventBus init
+		if(this.edgeEventBus==null){
+			EdgeEventBus eventBus = new EdgeEventBus();
+			this.edgeEventBus = eventBus;
+		}
+		
 		//add
 		this.interceptorManager = initializeComponent(interceptorManager, DbmInterceptorManager.class, ()->{
 			List<DbmInterceptor> interceptors = Lists.newArrayList();
@@ -224,6 +232,7 @@ public class SimpleDbmInnerServiceRegistry implements DbmInnerServiceRegistry {
 			}
 			interceptors.add(new SessionCacheInterceptor(context.getSessionFactory()));
 			interceptors.add(new LogSqlInterceptor(dataBaseConfig));
+			interceptors.add(new JdbcEventInterceptor(edgeEventBus));
 			/*if(this.interceptors!=null){
 				interceptors.addAll(this.interceptors);
 			}*/
@@ -357,6 +366,11 @@ public class SimpleDbmInnerServiceRegistry implements DbmInnerServiceRegistry {
 	public void setSqlParamterPostfixFunctionRegistry(
 			SqlParamterPostfixFunctionRegistry sqlParamterPostfixFunctionRegistry) {
 		this.sqlParamterPostfixFunctionRegistry = sqlParamterPostfixFunctionRegistry;
+	}
+
+
+	public EdgeEventBus getEdgeEventBus() {
+		return edgeEventBus;
 	}
 
 

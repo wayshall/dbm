@@ -8,7 +8,7 @@ import org.onetwo.common.utils.ArrayUtils;
 import org.onetwo.common.utils.Assert;
 import org.onetwo.common.utils.CUtils;
 import org.onetwo.common.utils.LangUtils;
-import org.onetwo.dbm.event.DbmEventAction;
+import org.onetwo.dbm.event.spi.DbmEventAction;
 import org.onetwo.dbm.mapping.SQLBuilderFactory.SqlBuilderType;
 
 public class JdbcStatementContextBuilder implements JdbcStatementContext<List<Object[]>> {

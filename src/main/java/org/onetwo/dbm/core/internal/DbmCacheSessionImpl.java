@@ -4,9 +4,9 @@ import java.lang.reflect.Method;
 
 import org.onetwo.common.spring.cache.MethodKeyGenerator;
 import org.onetwo.dbm.core.spi.CachableSession;
+import org.onetwo.dbm.core.spi.DbmInterceptorChain;
 import org.onetwo.dbm.core.spi.DbmSessionFactory;
 import org.onetwo.dbm.core.spi.DbmTransaction;
-import org.onetwo.dbm.jdbc.spi.DbmInterceptorChain;
 import org.springframework.cache.Cache.ValueWrapper;
 import org.springframework.cache.interceptor.KeyGenerator;
 import org.springframework.cache.support.SimpleValueWrapper;

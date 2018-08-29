@@ -15,15 +15,18 @@ import java.util.function.Supplier;
 import javax.sql.DataSource;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.onetwo.common.log.JFishLoggerFactory;
 import org.onetwo.common.reflect.ReflectUtils;
 import org.onetwo.common.spring.SpringUtils;
+import org.onetwo.common.utils.CUtils;
 import org.onetwo.common.utils.LangUtils;
 import org.onetwo.dbm.annotation.DbmFieldListeners;
 import org.onetwo.dbm.core.spi.DbmTransaction;
 import org.onetwo.dbm.exception.DbmException;
 import org.onetwo.dbm.exception.UpdateCountException;
 import org.onetwo.dbm.jdbc.JdbcUtils;
+import org.onetwo.dbm.jdbc.spi.SqlParametersProvider;
 import org.onetwo.dbm.mapping.DbmEntityFieldListener;
 import org.onetwo.dbm.spring.EnableDbm;
 import org.slf4j.Logger;
@@ -32,6 +35,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.data.transaction.ChainedTransactionManager;
+import org.springframework.jdbc.core.SqlProvider;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.support.rowset.SqlRowSetMetaData;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -59,7 +63,7 @@ final public class DbmUtils {
 	}
 	
 	public static List<DbmEntityFieldListener> initDbmEntityFieldListeners(DbmFieldListeners listenersAnntation){
-		Assert.notNull(listenersAnntation);
+		Assert.notNull(listenersAnntation, "listenersAnntationn can not be null");
 		Class<? extends DbmEntityFieldListener>[] flClasses = listenersAnntation.value();
 		List<DbmEntityFieldListener> fieldListeners = Lists.newArrayList();
 		for(Class<? extends DbmEntityFieldListener> flClass : flClasses){
@@ -242,7 +246,41 @@ final public class DbmUtils {
 		}
 		return false;
 	}
+	
 
+	public static Pair<String, Object> findSqlAndParams(Object[] args){
+		String sql = null;
+		Object params = null;
+		for (int i = 0; i < args.length; i++) {
+			Object arg = args[i];
+			if(arg==null){
+				continue;
+			}
+			if(arg instanceof String){
+				sql = (String)arg;
+			}else if(arg instanceof Map){
+				params = arg;
+			}else if(arg.getClass().isArray()){
+				params = CUtils.tolist(arg, false);
+			}else if(arg instanceof Collection){//batch operation...
+				params = arg;
+			}else{
+				//if arg is SimpleArgsPreparedStatementCreator
+				if(arg instanceof SqlProvider){
+					sql = ((SqlProvider)arg).getSql();
+				}
+				if(arg instanceof SqlParametersProvider){
+					params = ((SqlParametersProvider)arg).getSqlParameterList();
+				}
+			}
+			
+		}
+		if(sql==null){
+			return null;
+		}
+		return Pair.of(sql, params);
+	}
+	
 	private DbmUtils(){
 	}
 }

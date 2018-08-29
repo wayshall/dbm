@@ -5,16 +5,17 @@ import java.util.Optional;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.onetwo.common.log.JFishLoggerFactory;
+import org.onetwo.dbm.core.spi.DbmInterceptor;
+import org.onetwo.dbm.core.spi.DbmInterceptorChain;
 import org.onetwo.dbm.core.spi.DbmSessionFactory;
-import org.onetwo.dbm.jdbc.spi.DbmInterceptor;
-import org.onetwo.dbm.jdbc.spi.DbmInterceptorChain;
 import org.onetwo.dbm.jdbc.spi.DbmJdbcOperationType.DatabaseOperationType;
 import org.slf4j.Logger;
 import org.springframework.core.NamedThreadLocal;
+import org.springframework.core.Ordered;
 
 import com.google.common.collect.EvictingQueue;
 
-public class DebugContextInterceptor implements DbmInterceptor {
+public class DebugContextInterceptor implements DbmInterceptor, Ordered {
 	
 	static private NamedThreadLocal<DebugContextData> DebugContext = new NamedThreadLocal<>("DBM-Debuger");
 	static private Logger logger = JFishLoggerFactory.getLogger(DebugContextInterceptor.class);
@@ -49,6 +50,12 @@ public class DebugContextInterceptor implements DbmInterceptor {
 		data.getInvokeList().add(invoke);
 		
 		return chain.invoke();
+	}
+	
+
+	@Override
+	public int getOrder() {
+		return DbmInterceptorOrder.DEBUG;
 	}
 	
 	public class DebugContextData {

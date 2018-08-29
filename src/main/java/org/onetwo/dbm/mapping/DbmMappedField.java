@@ -3,7 +3,7 @@ package org.onetwo.dbm.mapping;
 import java.util.List;
 
 import org.onetwo.common.utils.JFishProperty;
-import org.onetwo.dbm.event.DbmEventAction;
+import org.onetwo.dbm.event.spi.DbmEventAction;
 import org.onetwo.dbm.id.IdentifierGenerator;
 import org.onetwo.dbm.id.StrategyType;
 import org.onetwo.dbm.jpa.GeneratedValueIAttrs;

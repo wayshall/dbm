@@ -22,7 +22,7 @@ import org.onetwo.dbm.annotation.DbmEntityListeners;
 import org.onetwo.dbm.annotation.DbmFieldListeners;
 import org.onetwo.dbm.annotation.DbmValidatorEnabled;
 import org.onetwo.dbm.core.spi.DbmInnerServiceRegistry;
-import org.onetwo.dbm.event.DbmEventAction;
+import org.onetwo.dbm.event.spi.DbmEventAction;
 import org.onetwo.dbm.exception.DbmException;
 import org.onetwo.dbm.id.IdentifierGenerator;
 import org.onetwo.dbm.mapping.SQLBuilderFactory.SqlBuilderType;

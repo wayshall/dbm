@@ -6,7 +6,7 @@ import java.util.Optional;
 import javax.sql.DataSource;
 
 import org.onetwo.common.db.filequery.func.SqlFunctionDialet;
-import org.onetwo.dbm.jdbc.spi.DbmInterceptor;
+import org.onetwo.dbm.core.spi.DbmInterceptor;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
 
 public interface QueryProvideManager {

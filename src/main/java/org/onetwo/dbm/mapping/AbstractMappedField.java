@@ -13,7 +13,7 @@ import org.onetwo.common.utils.StringUtils;
 import org.onetwo.dbm.annotation.DbmField;
 import org.onetwo.dbm.annotation.DbmFieldListeners;
 import org.onetwo.dbm.annotation.DbmJsonField;
-import org.onetwo.dbm.event.DbmEventAction;
+import org.onetwo.dbm.event.spi.DbmEventAction;
 import org.onetwo.dbm.id.StrategyType;
 import org.onetwo.dbm.jpa.GeneratedValueIAttrs;
 import org.onetwo.dbm.mapping.version.VersionableType;

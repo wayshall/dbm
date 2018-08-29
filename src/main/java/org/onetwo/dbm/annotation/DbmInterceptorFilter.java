@@ -27,7 +27,7 @@ public @interface DbmInterceptorFilter {
 	 */
 	InterceptorType[] type();
 
-	enum InterceptorType {
+	public enum InterceptorType {
 		SESSION,
 		JDBC,
 		REPOSITORY
