@@ -15,9 +15,11 @@ import org.onetwo.dbm.core.internal.DbmEntityManagerImpl;
 import org.onetwo.dbm.core.internal.DbmSessionFactoryImpl;
 import org.onetwo.dbm.core.spi.DbmEntityManager;
 import org.onetwo.dbm.core.spi.DbmSessionFactory;
+import org.onetwo.dbm.event.internal.EdgeEventBus;
 import org.onetwo.dbm.exception.DbmException;
 import org.onetwo.dbm.mapping.DbmConfig;
 import org.onetwo.dbm.mapping.DefaultDbmConfig;
+import org.onetwo.dbm.stat.SqlExecutedStatis;
 import org.onetwo.dbm.utils.DbmUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InitializingBean;
@@ -177,6 +179,17 @@ public class DbmSpringConfiguration implements ApplicationContextAware, Initiali
 //		cbf.registerResolvableDependency(DbmSession.class, new DbmSessionObjectFactory(sf));
 		
 		return sf;
+	}
+	
+	@Bean
+	public EdgeEventBus edgeEventBus(){
+		EdgeEventBus eventBus = new EdgeEventBus();
+		return eventBus;
+	}
+	
+	@Bean
+	public SqlExecutedStatis sqlExecutedStatis(){
+		return new SqlExecutedStatis();
 	}
 	
 	

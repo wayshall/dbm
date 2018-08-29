@@ -15,7 +15,6 @@ import org.onetwo.common.db.filter.annotation.DataQueryFilterListener;
 import org.onetwo.common.db.spi.SqlParamterPostfixFunctionRegistry;
 import org.onetwo.common.db.sql.SequenceNameManager;
 import org.onetwo.common.db.sqlext.SQLSymbolManager;
-import org.onetwo.common.exception.BaseException;
 import org.onetwo.common.spring.SpringUtils;
 import org.onetwo.common.utils.LangUtils;
 import org.onetwo.dbm.core.Jsr303EntityValidator;
@@ -80,7 +79,7 @@ public class SimpleDbmInnerServiceRegistry implements DbmInnerServiceRegistry {
 		try {
 			return SERVICE_REGISTRY_MAPPER.get(context);
 		} catch (ExecutionException e) {
-			throw new BaseException("obtain SimpleDbmInnerServiceRegistry error: " + e.getMessage(), e);
+			throw new DbmException("obtain SimpleDbmInnerServiceRegistry error: " + e.getMessage(), e);
 		}
 	}
 	private static SimpleDbmInnerServiceRegistry createServiceRegistry(DbmServiceRegistryCreateContext context){
@@ -126,7 +125,9 @@ public class SimpleDbmInnerServiceRegistry implements DbmInnerServiceRegistry {
 		}
 		T componentBean = SpringUtils.getBean(applicationContext, componentClass);
 		if(componentBean==null){
-			componentBean = initializer.get();
+			if(initializer!=null){
+				componentBean = initializer.get();
+			}
 			if(componentBean!=null){
 				SpringUtils.injectAndInitialize(applicationContext, componentBean);
 			}
@@ -218,10 +219,8 @@ public class SimpleDbmInnerServiceRegistry implements DbmInnerServiceRegistry {
 
 		
 		//edgeEventBus init
-		if(this.edgeEventBus==null){
-			EdgeEventBus eventBus = new EdgeEventBus();
-			this.edgeEventBus = eventBus;
-		}
+		edgeEventBus = initializeComponent(this.edgeEventBus, EdgeEventBus.class, null);
+		Assert.notNull(edgeEventBus, "Dbm Edge EventBus can not be null");
 		
 		//add
 		this.interceptorManager = initializeComponent(interceptorManager, DbmInterceptorManager.class, ()->{
@@ -313,14 +312,14 @@ public class SimpleDbmInnerServiceRegistry implements DbmInnerServiceRegistry {
 
 	@Override
 	public <T> T getService(Class<T> clazz) {
-		Assert.notNull(clazz);
+		Assert.notNull(clazz, "class can not be null");
 		return clazz.cast(getService(clazz.getName()));
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
 	public <T> T getService(String name) {
-		Assert.hasText(name);
+		Assert.hasText(name, "name must have text");
 		return (T) services.get(name);
 	}
 
@@ -331,8 +330,8 @@ public class SimpleDbmInnerServiceRegistry implements DbmInnerServiceRegistry {
 
 	@Override
 	public <T> DbmInnerServiceRegistry register(String name, T service) {
-		Assert.hasText(name);
-		Assert.notNull(service);
+		Assert.hasText(name, "name must have text");
+		Assert.notNull(service, "service can not be null");
 		services.put(name, service);
 		return this;
 	}

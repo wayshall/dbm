@@ -40,7 +40,7 @@ public class JdbcEventInterceptor implements DbmInterceptor, Ordered {
 			return chain.invoke();
 		}
 		
-		SqlExecutedEvent event = new SqlExecutedEvent(sqlParams.getKey(), sqlParams.getValue());
+		SqlExecutedEvent event = new SqlExecutedEvent(chain.getTargetMethod(), sqlParams.getKey(), sqlParams.getValue());
 		try {
 			return chain.invoke();
 		}finally{
