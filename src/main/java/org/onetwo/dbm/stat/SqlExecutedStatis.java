@@ -61,28 +61,31 @@ public class SqlExecutedStatis {
 	}
 	
 	public String toFormatedString() {
+		return toFormatedString("\n");
+	}
+	public String toFormatedString(String separater) {
 		StringBuilder log = new StringBuilder(1024);
 
-		log.append("\n");
+		log.append(separater);
 		Collection<StatInfo> stats = getStatInfos();
 //		int maxLength = stats.stream().mapToInt(s->s.getName().length()).max().orElse(0);
 //		String title = String.format("%-"+maxLength+"s|%13s|%15s|%50s\n", "name", "executedCount", "maxExecutedTime", "sql");
-		String title = String.format("%13s|%15s|%50s\n", "executedCount", "maxExecutedTime", "sql");
+		String title = String.format("%13s|%15s|%50s"+separater, "executedCount", "maxExecutedTime", "sql");
 		log.append(title);
-		printSepLine(log, title);
+		printSepLine(log, title, separater);
 		for(StatInfo stat : stats){
 //			log.append(String.format("%-"+maxLength+"s", stat.getName())).append("|");
 			log.append(String.format("%13d", stat.getExecutedCount())).append("|");
 			log.append(String.format("%15d", stat.getMaxExecutedTime())).append("|");
 			log.append(String.format("%-50s", stat.getSql()));
-			log.append("\n");
+			log.append(separater);
 		}
-		printSepLine(log, title);
+		printSepLine(log, title, separater);
 		
 		return log.toString();
 	}
 
-    private void printSepLine(StringBuilder sb, String title) {
+    private void printSepLine(StringBuilder sb, String title, String separater) {
         title.chars().forEach((c) -> {
             if (c == '|') {
                 sb.append('+');
@@ -90,7 +93,7 @@ public class SqlExecutedStatis {
                 sb.append('-');
             }
         });
-        sb.append('\n');
+        sb.append(separater);
     }
 
 
