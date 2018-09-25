@@ -10,6 +10,7 @@ import javax.persistence.TableGenerator;
 import org.apache.commons.lang3.StringUtils;
 import org.onetwo.common.annotation.AnnotationInfo;
 import org.onetwo.common.jackson.JsonMapper;
+import org.onetwo.common.log.JFishLoggerFactory;
 import org.onetwo.common.reflect.ReflectUtils;
 import org.onetwo.common.spring.SpringUtils;
 import org.onetwo.common.spring.Springs;
@@ -21,12 +22,14 @@ import org.onetwo.dbm.id.SequenceGeneratorAttrs;
 import org.onetwo.dbm.id.SequenceIdGenerator;
 import org.onetwo.dbm.id.TableGeneratorAttrs;
 import org.onetwo.dbm.id.TableIdGenerator;
+import org.slf4j.Logger;
 
 /**
  * @author wayshall
  * <br/>
  */
 public class IdGeneratorFactory {
+	private static final Logger logger = JFishLoggerFactory.getLogger(IdGeneratorFactory.class);
 	
 	public static Optional<IdentifierGenerator<Long>> createSequenceGenerator(AnnotationInfo annotationInfo){
 		SequenceGenerator sg = annotationInfo.getAnnotation(SequenceGenerator.class);
@@ -60,7 +63,13 @@ public class IdGeneratorFactory {
 		if(dg==null){
 			return Optional.empty();
 		}
-		CustomIdGenerator<? extends Serializable> customIdGenerator = Springs.getInstance().getBean(dg.generatorClass());
+		CustomIdGenerator<? extends Serializable> customIdGenerator = null;
+		if(Springs.getInstance().isActive()){
+			if(logger.isWarnEnabled()){
+				logger.warn("spring application is not active: {}", Springs.getInstance().getAppContext());
+			}
+			customIdGenerator = Springs.getInstance().getBean(dg.generatorClass());
+		}
 		if(customIdGenerator==null){
 			customIdGenerator = ReflectUtils.newInstance(dg.generatorClass());
 		}
