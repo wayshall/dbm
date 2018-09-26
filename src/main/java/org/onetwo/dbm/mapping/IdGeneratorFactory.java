@@ -65,10 +65,11 @@ public class IdGeneratorFactory {
 		}
 		CustomIdGenerator<? extends Serializable> customIdGenerator = null;
 		if(Springs.getInstance().isActive()){
+			customIdGenerator = Springs.getInstance().getBean(dg.generatorClass());
+		}else{
 			if(logger.isWarnEnabled()){
 				logger.warn("spring application is not active: {}", Springs.getInstance().getAppContext());
 			}
-			customIdGenerator = Springs.getInstance().getBean(dg.generatorClass());
 		}
 		if(customIdGenerator==null){
 			customIdGenerator = ReflectUtils.newInstance(dg.generatorClass());
