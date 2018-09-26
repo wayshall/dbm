@@ -11,7 +11,6 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.onetwo.common.db.sql.SequenceNameManager;
 import org.onetwo.common.db.sqlext.SQLSymbolManager;
 import org.onetwo.common.log.JFishLoggerFactory;
-import org.onetwo.common.spring.Springs;
 import org.onetwo.common.utils.Assert;
 import org.onetwo.dbm.core.DbmTransactionSynchronization;
 import org.onetwo.dbm.core.internal.SimpleDbmInnerServiceRegistry.DbmServiceRegistryCreateContext;
@@ -91,7 +90,7 @@ public class DbmSessionFactoryImpl implements InitializingBean, DbmSessionFactor
 
 	@Override
 	public void afterPropertiesSet() {
-		Springs.initApplicationIfNotInitialized(applicationContext);
+//		Springs.initApplicationIfNotInitialized(applicationContext);
 		if(transactionManager==null && applicationContext!=null){
 			this.transactionManager = DbmUtils.getDataSourceTransactionManager(applicationContext, dataSource, ()->{
 				if(logger.isWarnEnabled()){
