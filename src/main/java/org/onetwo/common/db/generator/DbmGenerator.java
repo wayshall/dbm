@@ -4,10 +4,12 @@ import java.io.File;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import javax.sql.DataSource;
 
 import org.onetwo.common.db.generator.DbGenerator.DbTableGenerator;
+import org.onetwo.common.db.generator.GlobalConfig.OutfilePathFunc;
 import org.onetwo.common.db.generator.ftl.FtlEngine;
 import org.onetwo.common.db.generator.ftl.TomcatDataSourceBuilder;
 import org.onetwo.common.file.FileUtils;
@@ -73,6 +75,16 @@ public class DbmGenerator {
 			throw new DbmException("dbGenerator has been configured, can not invoke method: " + methodName);
 		}
 	}
+	
+	public DbmGenerator projectPath(String projectPath) {
+		this.projectPath = projectPath;
+		return this;
+	}
+
+	public DbmGenerator pageFileBaseDir(String pageFileBaseDir) {
+		this.pageFileBaseDir = pageFileBaseDir;
+		return this;
+	}
 
 	public DbmGenerator configGenerator(Consumer<DbGenerator> configurer) {
 		configurer.accept(dbGenerator);
@@ -85,6 +97,7 @@ public class DbmGenerator {
 		return configGenerator(dbGenerator->{
 			dbGenerator.stripTablePrefix(stripTablePrefix)
 			.globalConfig()
+				.projectPath(projectPath)
 				.pageFileBaseDir(pageFileBaseDir)
 				.resourceDir(resourceDir)
 				.javaSrcDir(javaSrcDir)
@@ -127,27 +140,79 @@ public class DbmGenerator {
 		webadmin.tableGenerator = tableGenerator;
 		return webadmin;
 	}
-
 	
+	/****
+	 * @see build()
+	 * @author wayshall
+	 */
+	@Deprecated
 	public void generate(){
-		Assert.hasText(javaSrcDir, "javaSrcDir not set!");
-		Assert.hasText(javaBasePackage, "javaBasePackage not set!");
-		generate(context);
+//		Assert.hasText(javaSrcDir, "javaSrcDir not set!");
+//		Assert.hasText(javaBasePackage, "javaBasePackage not set!");
+//		generate(context);
+		build().generate(context);
+	}
+
+	/****
+	 * @see build()
+	 * @author wayshall
+	 */
+	@Deprecated
+	public void generate(Map<String, Object> context){
+//		if(context!=this.context){
+//			this.context.putAll(context);
+//		}
+//		if(webadmin!=null){
+//			List<GeneratedResult<File>> resullt = this.dbGenerator.generate(context);
+//			System.out.println("webadmin result: " + resullt);
+//		}
+		build().generate(context);
 	}
 	
-	public void generate(Map<String, Object> context){
-		if(context!=this.context){
-			this.context.putAll(context);
+	public GeneratorExecutor build(){
+		if(!this.configured){
+//			throw new BaseException("dbGenerator has not been configured");
+			this.mavenProjectDir();
 		}
-		if(webadmin!=null){
-			List<GeneratedResult<File>> resullt = this.dbGenerator.generate(context);
-			System.out.println("webadmin result: " + resullt);
+		GeneratorExecutor executor = new GeneratorExecutor();
+		return executor;
+	}
+	
+	public class GeneratorExecutor {
+		
+		public void generate(){
+			Assert.hasText(javaSrcDir, "javaSrcDir not set!");
+			Assert.hasText(javaBasePackage, "javaBasePackage not set!");
+			generate(context);
+		}
+		
+		public void generate(Map<String, Object> context){
+			if(context!=DbmGenerator.this.context){
+				DbmGenerator.this.context.putAll(context);
+			}
+			if(webadmin!=null){
+				List<GeneratedResult<File>> resullt = dbGenerator.generate(context);
+				System.out.println("webadmin result: " + resullt);
+			}
 		}
 	}
 	
 	public class WebadminGenerator {
 		private String templateName = templateBasePath + "webadmin";
 		private DbTableGenerator tableGenerator;
+		Function<String, OutfilePathFunc> vueFileNameFuncCreator = path -> {
+			return c->{
+				String tableShortName = c.tableNameStripStart(c.globalGeneratedConfig().getStripTablePrefix());
+				String pageFileBaseDir = c.globalGeneratedConfig().getPageFileBaseDir();
+				Assert.notNull(pageFileBaseDir, "pageFileBaseDir can not be null");
+				String moduleName = c.globalGeneratedConfig().getModuleName();
+				Assert.notNull(moduleName, "moduleName can not be null");
+				
+				String filePath = pageFileBaseDir + "/"+moduleName+"/"+
+				tableShortName.replace('_', '-') + FileUtils.getFileNameWithoutExt(path);
+				return filePath;
+			};
+		};
 		
 		public WebadminGenerator generateServiceImpl(){
 			tableGenerator.serviceImplTemplate(templateName+"/ServiceImpl.java.ftl");
@@ -168,6 +233,53 @@ public class DbmGenerator {
 		public WebadminGenerator generatePage(){
 			tableGenerator.pageTemplate(templateName+"/index.html.ftl");
 			tableGenerator.pageTemplate(templateName+"/edit-form.html.ftl");
+			return this;
+		}
+		public WebadminGenerator generate(String templatePath, OutfilePathFunc outFileNameFunc){
+			tableGenerator.pageTemplate(templatePath, outFileNameFunc);
+			return this;
+		}
+		
+		public WebadminGenerator generateVueCrud(){
+			this.generateVueJsApi();
+			this.generateVueMgr();
+			this.generateVueMgrForm();
+			return this;
+		}
+		
+		public WebadminGenerator generateVueMgr(){
+			String mgrPath = templateName+"/Mgr.vue.ftl";
+			tableGenerator.pageTemplate(mgrPath, vueFileNameFuncCreator.apply(mgrPath));
+			return this;
+		}
+		
+		public WebadminGenerator generateVueMgrForm(){
+			String mgrPath = templateName+"/Mgr.vue.ftl";
+			tableGenerator.pageTemplate(mgrPath, vueFileNameFuncCreator.apply(mgrPath));
+			
+			String formPath = templateName+"/MgrForm.vue.ftl";
+			tableGenerator.pageTemplate(formPath, vueFileNameFuncCreator.apply(formPath));
+			return this;
+		}
+		public WebadminGenerator generateVueJsApi(){
+			String apiDir = "/src/api";
+			Function<String, OutfilePathFunc> outFileNameFuncCreator = path -> {
+				return c->{
+					String tableShortName = c.tableNameStripStart(c.globalGeneratedConfig().getStripTablePrefix());
+					String projectDir = c.globalGeneratedConfig().getProjectPath();
+					Assert.notNull(projectDir, "projectDir can not be null");
+					String moduleName = c.globalGeneratedConfig().getModuleName();
+					Assert.notNull(moduleName, "moduleName can not be null");
+					
+					String filePath = projectDir + apiDir + "/"+moduleName+"/"+
+					tableShortName.replace('_', '-') + FileUtils.getFileNameWithoutExt(path);
+					return filePath;
+				};
+			};
+			
+			String mgrPath = templateName+"/Api.js.ftl";
+			tableGenerator.pageTemplate(mgrPath, outFileNameFuncCreator.apply(mgrPath));
+			
 			return this;
 		}
 		

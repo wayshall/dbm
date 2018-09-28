@@ -24,6 +24,7 @@
 - [批量插入](#批量插入)
 - [充血模型支持](#充血模型支持)
 - [参数配置](#参数配置)
+- [代码生成器](#代码生成器)
 - [捐赠](#捐赠)
 
 
@@ -810,6 +811,30 @@ List<User> users = User.findList("userName", userName, K.IF_NULL, IfNull.Ignore)
 - processSizePerBatch：批量插入时，每次提交的数量，默认为10000；
 - enableSessionCache：是否启用会话缓存，默认为false；
 
+
+## 代码生成器
+dbm内置了一个代码生成器，可以根据模板生成下列文件：
+- 实体
+- service
+- controller
+- 基于freemarker的增删改查页面
+- 基于element-ui(vue)的增删改查页面
+
+使用示例：
+```Java
+DbmGenerator.createWithDburl("jdbc:mysql://localhost:3306/test?useUnicode=true&characterEncoding=utf8", "root", "root")
+					.javaBasePackage("com.test.order")//基础包名
+					.pluginProjectDir("OrderPlugin")//插件项目名称
+					.webadminGenerator("t_order")//要生成的表名
+						.generateEntity()
+						.generateServiceImpl()//配置在service.impl包下生成service类
+						.generateController(BaseController.class)//配置在controller包下生成controller，并制定controller基类
+						.generatePage()//生成freemarker的增删改查页面，配置在src/main/resources/META-INF/resources/webftls/${pluginName}下生成crud页面
+						.generateVueCrud()//生成基于element-ui(vue)的增删改查页面，
+					.end()
+					.build()
+					.generate();//生成文件
+```
 
 
 ## 待续。。。

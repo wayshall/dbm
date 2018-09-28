@@ -8,6 +8,7 @@ import java.util.stream.Stream;
 import javax.sql.DataSource;
 
 import org.onetwo.common.db.DataBase;
+import org.onetwo.common.db.generator.DbGenerator.DbTableGenerator.TableGeneratedConfig;
 import org.onetwo.common.db.generator.GlobalConfig.OutfilePathFunc;
 import org.onetwo.common.db.generator.dialet.DatabaseMetaDialet;
 import org.onetwo.common.db.generator.dialet.MysqlMetaDialet;
@@ -223,19 +224,32 @@ public class DbGenerator {
 		}
 		
 		public DbTableGenerator pageTemplate(String templatePath){
+			OutfilePathFunc outFileNameFunc = c->{
+				String tableShortName = c.tableNameStripStart(c.globalGeneratedConfig().getStripTablePrefix());
+				String pageFileBaseDir = c.globalGeneratedConfig().getPageFileBaseDir();
+				Assert.notNull(pageFileBaseDir, "pageFileBaseDir can not be null");
+				String moduleName = c.globalGeneratedConfig().getModuleName();
+				Assert.notNull(moduleName, "moduleName can not be null");
+				
+				String filePath = pageFileBaseDir +
+				"/"+moduleName+"/"+
+				tableShortName.replace('_', '-')+
+				"-"+FileUtils.getFileNameWithoutExt(templatePath);
+				return filePath.toLowerCase();
+			};
+			/*TableGeneratedConfig config = new TableGeneratedConfig(tableName, templatePath);
+			config.outfilePathFunc();
+			tableGeneratedConfig.add(config);*/
+			return this;
+		}
+
+		public DbTableGenerator pageTemplate(String templatePath, OutfilePathFunc outFileNameFunc){
 			TableGeneratedConfig config = new TableGeneratedConfig(tableName, templatePath);
-			config.outfilePathFunc(c->{
-										String tableShortName = c.tableNameStripStart(c.globalGeneratedConfig().getStripTablePrefix());
-										String filePath = c.globalGeneratedConfig().getPageFileBaseDir()+
-										"/"+c.globalGeneratedConfig().getModuleName()+"/"+
-										tableShortName.replace('_', '-')+
-										"-"+FileUtils.getFileNameWithoutExt(templatePath);
-										return filePath.toLowerCase();
-									}
-								);
+			config.outfilePathFunc(outFileNameFunc);
 			tableGeneratedConfig.add(config);
 			return this;
 		}
+		
 		
 		public DbTableGenerator mybatisDaoXmlTemplate(String templatePath){
 			TableGeneratedConfig config = new TableGeneratedConfig(tableName, templatePath);

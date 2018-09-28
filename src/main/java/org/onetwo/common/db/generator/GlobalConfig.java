@@ -26,6 +26,7 @@ public class GlobalConfig {
 	
 	private HashMap<String, Object> rootContext = Maps.newHashMap();
 
+	private String projectPath;
 	private String javaBasePackage;
 	private String moduleName;
 	private String javaSrcDir;
@@ -71,6 +72,14 @@ public class GlobalConfig {
 	
 	OutfilePathFunc getOutFileNameFunc() {
 		return outFileNameFunc;
+	}
+
+	public String getProjectPath() {
+		return projectPath;
+	}
+
+	public GlobalConfig 	projectPath(String projectPath) {
+		this.projectPath = projectPath;
 	}
 
 	public GlobalConfig outFileNameFunc(OutfilePathFunc outFileNameFunc) {
