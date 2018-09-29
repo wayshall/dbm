@@ -9,6 +9,7 @@
       id-property="${table.primaryKey.javaName}"
       :list-api="listApi"
       :query-form-model="queryFormModel"
+      :refresh="refreshTable"
       :delete-api="deleteApi">
       <template slot="queryForm">
   <#list table.columns as column>
@@ -51,7 +52,7 @@
       </el-table-column>
     </layout-table>
 
-    <${table.propertyName}-mgr-form :status-mode="dialog.status" :visible.sync="dialog.visible" :data-model="dataModel" @finishHandle="refreshTable"/>
+    <${table.propertyName}-mgr-form :status-mode="dialog.status" :visible.sync="dialog.visible" :data-model="dataModel" @finishHandle="refreshTable = true"/>
 
   </div>
 </template>
@@ -81,7 +82,8 @@ export default {
         status: '',
         visible: false
       },
-      dataModel: this.initDataModel()
+      dataModel: this.initDataModel(),
+      refreshTable: false
     }
   },
   mounted: function() {
@@ -89,9 +91,6 @@ export default {
   methods: {
     listApi: ${apiName}.getList,
     deleteApi: ${apiName}.remove,
-    refreshTable() {
-      this.$refs.listTable.getList()
-    },
     // 初始化dataModel
     initDataModel() {
       return {
