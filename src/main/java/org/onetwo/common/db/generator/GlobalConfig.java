@@ -78,8 +78,9 @@ public class GlobalConfig {
 		return projectPath;
 	}
 
-	public GlobalConfig 	projectPath(String projectPath) {
+	public GlobalConfig projectPath(String projectPath) {
 		this.projectPath = projectPath;
+		return this;
 	}
 
 	public GlobalConfig outFileNameFunc(OutfilePathFunc outFileNameFunc) {
