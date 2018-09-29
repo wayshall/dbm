@@ -15,9 +15,9 @@ class DatasourceGeneratorTest {
 					.javaBasePackage("com.test")//基础包名
 					.moduleName("adminModule")
 					.projectPath($/D:\mydev\js\workspace\neo-vue-admin/$)
-					.pageFileBaseDir($/D:\mydev\js\workspace\neo-vue-admin\src\views2/$)
+					.pageFileBaseDir($/D:\mydev\js\workspace\neo-vue-admin\src\views/$)
 					.stripTablePrefix("admin_")
-					.webadminGenerator("admin_user")//要生成的表名
+					.webadminGenerator("admin_application")//要生成的表名
 						.generateVueCrud()//会在api目录生成userApi.js，在/views/adminModule/目录生成userMgr.vue和userMgrForm.vue两个文件，包含了基本的增删改查
 					.end()
 					.build()

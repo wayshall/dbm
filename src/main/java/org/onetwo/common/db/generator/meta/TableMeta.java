@@ -55,7 +55,8 @@ public class TableMeta {
 	}
 	
 	public String getPropertyName(){
-		return StringUtils.toPropertyName(getShortName());
+		String shortName = getShortName();
+		return StringUtils.toPropertyName(shortName);
 	}
 
 	
@@ -71,7 +72,8 @@ public class TableMeta {
 	public String tableNameStripStart(String stripChars){
 		if(StringUtils.isBlank(stripChars))
 			return name;
-		return StringUtils.stripStart(name.toLowerCase(), stripChars.toLowerCase());
+//		return StringUtils.stripStart(name.toLowerCase(), stripChars.toLowerCase());
+		return name.toLowerCase().substring(stripChars.length());
 	}
 
 	public Map<String, ColumnMeta> getColumnMap() {
