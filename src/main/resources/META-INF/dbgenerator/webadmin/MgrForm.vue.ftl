@@ -1,6 +1,7 @@
 <#import "helper.ftl" as helper>
 
 <#assign hasFileType=false/>
+<#assign hasSelectType=false/>
 <#assign dataFormName="dataForm"/>
 <#assign apiName="${table.propertyName}Api"/>
 <#assign formComponentName="${table.propertyName}MgrForm"/>
@@ -36,14 +37,11 @@
           inactive-color="#ff4949">
         </el-switch>
       <#elseif column.isDictType()==true>
-        <el-select v-model="dataModel.${column.javaName}" placeholder="请选择">
-          <el-option
-            v-for="item in ${column.javaName}Options"
-            :key="item.value"
-            :label="item.label"
-            :value="item.value">
-          </el-option>
-        </el-select>
+        <xselect v-model="dataModel.${column.javaName}" :data="${column.javaName}Options"/>
+        <#assign hasSelectType=true/>
+      <#elseif column.isDbDictType()>
+        <xselect v-model="dataModel.${column.javaName}" :data="${column.javaName}Options" url="/web-admin/dictionary/combobox/${column.commentsInfo['字典代码']}.json"/>
+        <#assign hasSelectType=true/>
       <#elseif column.isFileType()==true>
         <file-input v-model="dataModel.${column.javaName}File"/>
         <#assign hasFileType=true/>
@@ -67,10 +65,21 @@ import * as ${apiName} from '@/api/${moduleName}/${apiName}'
 <#if hasFileType>
 import fileInput from '@/components/xui/fileInput'
 </#if>
+<#if hasSelectType>
+import xselect from '@/components/xui/xselect'
+</#if>
 //  import { exchangeLinebreak } from '@/filters'
 
 export default {
   name: '${_tableContext.className}MgrForm',
+  components: {
+<#if hasFileType>
+    fileInput,
+</#if>
+<#if hasSelectType>
+    xselect
+</#if>
+  },
   props: {
     statusMode: {
       type: String,
@@ -114,7 +123,6 @@ export default {
         Edit: '编辑[${(table.comments[0])!''}]'
       },
       savingLoading: false
-      // dataModel: this.initDataModel()
     }
   },
   computed: {

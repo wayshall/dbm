@@ -89,7 +89,7 @@ public class ColumnMeta {
 		return isUiType(UITypes.KEY_DICT);
 	}
 	public boolean isDbDictType(){
-		//<#elseif column.commentsInfo['字典类型']??>
+		//<#elseif column.commentsInfo['数据库字典']??> key: 字典代码
 		return isUiType(UITypes.KEY_DB_DICT);
 	}
 

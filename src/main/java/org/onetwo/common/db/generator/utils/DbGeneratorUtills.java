@@ -23,7 +23,7 @@ public class DbGeneratorUtills {
 	 * SEX_FEMALE：女
 	 * 
 	 * 类型：数据库字典
-	 * 代码：SEX
+	 * 字典代码：SEX
 	 * 
 	 * 文件类型
 	 * 
