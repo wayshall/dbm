@@ -6,6 +6,7 @@
 
     <layout-table
       ref="listTable"
+      id-property="${table.primaryKey.javaName}"
       :list-api="listApi"
       :query-form-model="queryFormModel"
       :delete-api="deleteApi">
@@ -112,7 +113,7 @@ export default {
       if (command === 'edit') {
         this.handleEdit(data.row)
       } else if (command === 'delete') {
-        this.handleDelete([data.row.${table.primaryKey.javaName}])
+        this.$refs.listTable.handleDelete([data.row.${table.primaryKey.javaName}])
       }
     },
     handleAdd() {
@@ -124,7 +125,7 @@ export default {
       this.dialog.status = 'Edit'
       this.dialog.visible = true
       this.dialog.dataId = row.${table.primaryKey.javaName}
-      ${apiName}.get(row.id).then(res => {
+      ${apiName}.get(row.${table.primaryKey.javaName}).then(res => {
         this.dataModel = res.data.data
       })
     }

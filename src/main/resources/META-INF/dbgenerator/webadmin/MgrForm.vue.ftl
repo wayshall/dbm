@@ -9,7 +9,6 @@
   <el-dialog :title="title" :visible.sync="visible" :close-on-click-modal="false" :before-close="handleClose">
     <el-form ref="${dataFormName}" :rules="rules" :model="dataModel" label-position="left" label-width="100px" style="width: 400px; margin-left:50px;">
    <#list table.columns as column>
-    <#if !column.primaryKey>
       <el-form-item label="${(column.comments[0])!''}" prop="${column.javaName}">
       <#if column.mapping.isNumberType()==true>
         <el-input-number v-model="dataModel.${column.javaName}" :min="1" :max="10" label="${(column.comments[0])!''}"<#if column.mapping.isSqlFloat()==true> :precision="2"</#if>/>
@@ -54,7 +53,6 @@
         <el-input v-model="dataModel.${column.javaName}" placeholder="请输入${(column.comments[0])!''}"/>
       </#if>
       </el-form-item>
-    </#if>
   </#list>
     </el-form>
     <div slot="footer" class="dialog-footer">
