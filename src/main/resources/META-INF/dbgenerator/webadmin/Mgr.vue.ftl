@@ -10,7 +10,8 @@
       :list-api="listApi"
       :query-form-model="queryFormModel"
       :refresh="refreshTable"
-      :delete-api="deleteApi">
+      :delete-api="deleteApi"
+      :operations="operations">
       <template slot="queryForm">
   <#list table.columns as column>
     <#if !column.primaryKey>
@@ -39,17 +40,6 @@
       <el-table-column align="center" label="${(column.comments[0])!''}" prop="${column.javaName}" width="100"/>
     </#if>
   </#list>
-      <el-table-column align="center" label="操作">
-        <template slot-scope="scope">
-          <el-dropdown size="medium" split-button type="primary" @command="handleAction">
-            操作…
-            <el-dropdown-menu slot="dropdown">
-              <el-dropdown-item :command="{action: 'edit', row: scope.row}">编 辑</el-dropdown-item>
-              <el-dropdown-item :command="{action: 'delete', row: scope.row}" divided>删 除</el-dropdown-item>
-            </el-dropdown-menu>
-          </el-dropdown>
-        </template>
-      </el-table-column>
     </layout-table>
 
     <${table.propertyName}-mgr-form :status-mode="dialog.status" :visible.sync="dialog.visible" :data-model="dataModel" @finishHandle="refreshTable = true"/>
@@ -83,7 +73,10 @@ export default {
         visible: false
       },
       dataModel: this.initDataModel(),
-      refreshTable: false
+      refreshTable: false,
+      operations: [
+        { action: 'edit', text: '编辑', handler: this.handleEdit }
+      ]
     }
   },
   mounted: function() {

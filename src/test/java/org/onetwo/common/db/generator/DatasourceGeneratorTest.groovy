@@ -19,7 +19,7 @@ class DatasourceGeneratorTest {
 					.stripTablePrefix("admin_")
 					.webadminGenerator("admin_user")//要生成的表名
 //						.generateVueCrud()//会在api目录生成userApi.js，在/views/adminModule/目录生成userMgr.vue和userMgrForm.vue两个文件，包含了基本的增删改查
-						.generateVueMgrForm()
+//						.generateVueMgrForm()
 //						.generateVueMgr()
 					.end()
 					.build()
