@@ -8,6 +8,7 @@ import org.onetwo.common.dbm.BaseCrudEntityManagerTest;
 import org.onetwo.common.dbm.BatchInsertTest;
 import org.onetwo.common.dbm.CustomDaoTest;
 import org.onetwo.common.dbm.DbmDaoTest;
+import org.onetwo.common.dbm.DbmDataFilterTest;
 import org.onetwo.common.dbm.DbmEntityManagerTest;
 import org.onetwo.common.dbm.DbmNestedMappingTest;
 import org.onetwo.common.dbm.JsonFieldTest;
@@ -21,6 +22,7 @@ import org.onetwo.common.dbm.UserTableIdEntityTest;
 @SuiteClasses({
 	DbmDaoTest.class,
 	DbmEntityManagerTest.class,
+	DbmDataFilterTest.class,
 //	DBCheckerTest.class,
 //	OneBatchInsertTest.class,
 	BatchInsertTest.class,
