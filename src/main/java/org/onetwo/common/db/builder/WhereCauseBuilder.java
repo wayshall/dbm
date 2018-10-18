@@ -4,25 +4,28 @@ import javax.persistence.metamodel.SingularAttribute;
 
 
 public interface WhereCauseBuilder {
-	public WhereCauseBuilder debug();
+	WhereCauseBuilder debug();
 
-	public WhereCauseBuilder or(QueryBuilder subQuery);
+	WhereCauseBuilder or(QueryBuilder subQuery);
 
-	public WhereCauseBuilder and(QueryBuilder subQuery);
+	WhereCauseBuilder and(QueryBuilder subQuery);
 
 
-	public WhereCauseBuilder addFields(Object entity);
+	WhereCauseBuilder addFields(Object entity);
 	
-	public WhereCauseBuilder addField(WhereCauseBuilderField field);
+	WhereCauseBuilder addField(WhereCauseBuilderField field);
 
-	public WhereCauseBuilder ignoreIfNull();
-
-	public WhereCauseBuilder throwIfNull();
-
-	public WhereCauseBuilder calmIfNull();
-
-	public DefaultWhereCauseBuilderField field(String... fields);
-	public DefaultWhereCauseBuilderField field(SingularAttribute<?, ?>... fields);
+	WhereCauseBuilder ignoreIfNull();
 	
-	public QueryBuilder end();
+	WhereCauseBuilder disabledDataFilter();
+
+	WhereCauseBuilder throwIfNull();
+
+	WhereCauseBuilder calmIfNull();
+
+	DefaultWhereCauseBuilderField field(String... fields);
+	DefaultWhereCauseBuilderField field(SingularAttribute<?, ?>... fields);
+	
+	QueryBuilder end();
+	QueryAction toQuery();
 }

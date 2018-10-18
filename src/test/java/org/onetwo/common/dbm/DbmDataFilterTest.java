@@ -9,8 +9,8 @@ import javax.annotation.Resource;
 import org.junit.Test;
 import org.onetwo.common.base.DbmBaseTest;
 import org.onetwo.common.date.DateUtils;
+import org.onetwo.common.db.builder.Querys;
 import org.onetwo.common.db.spi.BaseEntityManager;
-import org.onetwo.common.db.sqlext.ExtQuery.K;
 import org.onetwo.common.dbm.model.entity.UserWithDataFilterEntity;
 import org.onetwo.common.dbm.model.entity.UserWithDataFilterEntity.AgeIDataQueryParamterEnhancer;
 import org.onetwo.common.utils.LangOps;
@@ -42,7 +42,7 @@ public class DbmDataFilterTest extends DbmBaseTest {
 		});
 		entityManager.save(users);
 
-		List<UserWithDataFilterEntity> dbuserList = entityManager.findList(UserWithDataFilterEntity.class, K.DATA_FILTER, false);
+		List<UserWithDataFilterEntity> dbuserList = Querys.from(UserWithDataFilterEntity.class).where().disabledDataFilter().toQuery().list();
 		assertThat(dbuserList.size()).isEqualTo(20);
 		
 		dbuserList = entityManager.findList(UserWithDataFilterEntity.class);

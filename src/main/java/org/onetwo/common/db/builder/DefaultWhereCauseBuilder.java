@@ -81,6 +81,12 @@ public class DefaultWhereCauseBuilder implements WhereCauseBuilder {
 	}
 	
 	@Override
+	public DefaultWhereCauseBuilder disabledDataFilter() {
+		this.params.put(K.DATA_FILTER, false);
+		return self();
+	}
+	
+	@Override
 	public DefaultWhereCauseBuilder throwIfNull(){
 		this.params.put(K.IF_NULL, K.IfNull.Throw);
 		return self();
@@ -105,5 +111,10 @@ public class DefaultWhereCauseBuilder implements WhereCauseBuilder {
 	@Override
 	public QueryBuilder end(){
 		return queryBuilder;
+	}
+
+	@Override
+	public QueryAction toQuery(){
+		return queryBuilder.toQuery();
 	}
 }
