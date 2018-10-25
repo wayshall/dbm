@@ -18,6 +18,7 @@ import org.onetwo.common.db.spi.BaseEntityManager;
 import org.onetwo.common.dbm.model.entity.UserAutoidEntity;
 import org.onetwo.common.dbm.model.entity.UserAutoidEntity.UserStatus;
 import org.onetwo.common.dbm.model.entity.UserEntity;
+import org.onetwo.common.dbm.model.entity.UserEntity.UserGenders;
 import org.onetwo.common.dbm.model.entity.UserWithListenerEntity;
 import org.onetwo.common.dbm.model.entity.UserWithListenerEntity.AutoIdListener;
 import org.onetwo.common.utils.JodatimeUtils;
@@ -91,6 +92,7 @@ public class DbmEntityManagerTest extends DbmBaseTest {
 		user.setHeight(3.3f);
 		user.setAge(28);
 		user.setId(10000000000L);
+		user.setGender(UserGenders.MALE);
 		entityManager.save(user);
 		Assert.assertEquals(10000000000L, user.getId(), 0);
 		
@@ -98,6 +100,7 @@ public class DbmEntityManagerTest extends DbmBaseTest {
 		Assert.assertNotNull(quser);
 		Assert.assertEquals(user.getId(), quser.getId());
 		Assert.assertEquals(user.getUserName(), quser.getUserName());
+		Assert.assertEquals(user.getGender(), quser.getGender());
 		
 		testUpdate(quser.getId());
 		testLock(quser.getId());

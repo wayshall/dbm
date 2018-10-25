@@ -2,6 +2,7 @@ package org.onetwo.dbm.mapping;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.onetwo.common.convert.Types;
 import org.onetwo.common.utils.LangUtils;
@@ -29,6 +30,15 @@ public class CompositedFieldValueConverter implements DbmFieldValueConverter {
 				actualValue = Types.convertValue((Integer)value, field.getPropertyInfo().getType());
 			}else if(etype==DbmEnumType.STRING){
 				actualValue = Types.convertValue(value.toString(), field.getPropertyInfo().getType());
+			}else if(etype == DbmEnumType.MAPPING) {
+				DbmEnumValueMapping[] values = (DbmEnumValueMapping[]) field.getPropertyInfo().getType().getEnumConstants();
+				DbmEnumValueMapping valueMapping = Stream.of(values)
+														.filter(dvm->Integer.valueOf(dvm.getMappingValue()).equals(value))
+														.findFirst()
+														.orElseThrow(()-> {
+															return new DbmException("error enum mapping value: " + value);
+														});
+				actualValue = valueMapping;
 			}else{
 				throw new DbmException("error enum type: " + etype);
 			}
@@ -47,6 +57,9 @@ public class CompositedFieldValueConverter implements DbmFieldValueConverter {
 				actualValue = enumValue.ordinal();
 			}else if(etype==DbmEnumType.STRING){
 				actualValue = enumValue.name();
+			}else if(etype == DbmEnumType.MAPPING) {
+				DbmEnumValueMapping mapping = (DbmEnumValueMapping)value;
+				actualValue = mapping.getMappingValue();
 			}else{
 				throw new DbmException("error enum type: " + etype);
 			}

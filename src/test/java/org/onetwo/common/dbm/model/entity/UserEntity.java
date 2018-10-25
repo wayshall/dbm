@@ -14,6 +14,7 @@ import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.NotBlank;
 import org.onetwo.common.spring.dozer.DozerMapping;
+import org.onetwo.dbm.mapping.DbmEnumValueMapping;
 import org.springframework.format.annotation.DateTimeFormat;
 
 
@@ -66,7 +67,7 @@ public class UserEntity {
 	/*****
 	 * 
 	 */
-	protected Integer gender;
+	protected UserGenders gender;
 	protected UserStatus status;
 	
   
@@ -85,6 +86,26 @@ public class UserEntity {
 	public UserEntity(){
 	}
 	
+
+	public static enum UserGenders implements DbmEnumValueMapping {
+		FEMALE("女性", 10),
+		MALE("男性", 11);
+		
+		final private String label;
+		final private int value;
+		private UserGenders(String label, int value) {
+			this.label = label;
+			this.value = value;
+		}
+		public String getLabel() {
+			return label;
+		}
+		@Override
+		public int getMappingValue() {
+			return value;
+		}
+		
+	}
 	
 	/*****
 	 * 
@@ -157,14 +178,6 @@ public class UserEntity {
 	 * 
 	 * @return
 	 */
-//	@Column(name="GENDER")
-	public Integer getGender() {
-		return this.gender;
-	}
-	
-	public void setGender(Integer gender) {
-		this.gender = gender;
-	}
 	
 	/*****
 	 * 
@@ -176,7 +189,16 @@ public class UserEntity {
 	public Date getBirthday() {
 		return this.birthday;
 	}
-	
+
+	@Enumerated(EnumType.ORDINAL)
+	public UserGenders getGender() {
+		return gender;
+	}
+
+	public void setGender(UserGenders gender) {
+		this.gender = gender;
+	}
+
 	public void setBirthday(Date birthday) {
 		this.birthday = birthday;
 	}
