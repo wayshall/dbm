@@ -23,11 +23,17 @@ public class DbmTransactionSynchronization extends TransactionSynchronizationAda
 		return DataSourceUtils.CONNECTION_SYNCHRONIZATION_ORDER - 100;
 	}
 
+	/***
+	 * 挂起事务
+	 */
 	@Override
 	public void suspend() {
 		TransactionSynchronizationManager.unbindResource(sessionHolder.getSessionFactory());
 	}
 
+	/***
+	 * 恢复事务
+	 */
 	@Override
 	public void resume() {
 		TransactionSynchronizationManager.bindResource(sessionHolder.getSessionFactory(), sessionHolder);
@@ -47,12 +53,17 @@ public class DbmTransactionSynchronization extends TransactionSynchronizationAda
 //		this.sessionHolder.getSession().flush();
 	}
 
+	/***
+	 * 提交之后
+	 */
 	@Override
 	public void afterCompletion(int status) {
 		if(logger.isDebugEnabled()){
 			logger.debug("spring transaction synchronization closing for dbm session: {}, and dbm session flush.", this.sessionHolder.getSession());
 		}
-		TransactionSynchronizationManager.unbindResource(this.sessionHolder.getSessionFactory());
+		if(TransactionSynchronizationManager.getResource(this.sessionHolder.getSessionFactory())!=null) {
+			TransactionSynchronizationManager.unbindResource(this.sessionHolder.getSessionFactory());
+		}
 		this.sessionHolder.getSession().close();
 		this.sessionHolder.reset();
 		DebugContextInterceptor.getDebugContext().remove();
