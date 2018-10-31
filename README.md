@@ -277,6 +277,20 @@ class SimpleEntity {
 }
 ```
 
+如果该字段是泛型，需要保存类型信息，可以设置storeTyping属性为true
+```Java
+class SimpleEntity {
+	@DbmJsonField(storeTyping=true)
+	private Map<String, ConfigData> configData;
+
+	
+	public static class ExtInfo {
+		String address;
+		List<String> phones;
+	}
+}
+```
+
 需要添加依赖：
 ```xml
     <dependency>
@@ -286,8 +300,8 @@ class SimpleEntity {
 ```
 
 ### @DbmField注解
-@DbmField注解可自定义一个值转换器，用于从数据库表获取的字段值转换为Java对象的属性值，和把Java对象的属性值转换为数据库表的字段值。   
-@DbmJsonField注解实际上是包装了@DbmField注解实现的。
+@DbmField 注解可自定义一个值转换器，用于从数据库表获取的字段值转换为Java对象的属性值，和把Java对象的属性值转换为数据库表的字段值。   
+@DbmJsonField 注解实际上是包装了@DbmField注解实现的。
 
 
 ## BaseEntityManager接口
