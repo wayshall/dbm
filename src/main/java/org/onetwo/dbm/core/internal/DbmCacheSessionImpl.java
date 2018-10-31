@@ -58,7 +58,6 @@ public class DbmCacheSessionImpl extends DbmSessionImpl implements CachableSessi
 	public void close() {
 		super.close();
 		this.sessionCaches.cleanUp();
-		this.sessionCaches = null;
 	}
 	@Override
 	public void flush() {
