@@ -14,7 +14,7 @@ public class JsonFieldValueConverter implements DbmFieldValueConverter {
 		return INSTANCE;
 	}*/
 	
-	private JsonMapper jsonMapper = JsonMapper.ignoreNull();
+	private JsonMapper jsonMapper = JsonMapper.ignoreNull().enableTyping();
 	
 	public JsonFieldValueConverter() {
 		super();
