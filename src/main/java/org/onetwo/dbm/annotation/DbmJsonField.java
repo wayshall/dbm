@@ -12,5 +12,7 @@ import org.onetwo.dbm.mapping.JsonFieldValueConverter;
 @Retention(RetentionPolicy.RUNTIME)
 @DbmField(converterClass=JsonFieldValueConverter.class)
 public @interface DbmJsonField {
+	
+	boolean storeTyping() default false;
 
 }

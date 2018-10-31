@@ -311,4 +311,9 @@ abstract public class AbstractMappedField implements DbmMappedField{
 	public DbmEnumType getEnumType() {
 		return enumType;
 	}
+
+	public DbmJsonField getJsonFieldAnnotation() {
+		return jsonFieldAnnotation;
+	}
+	
 }

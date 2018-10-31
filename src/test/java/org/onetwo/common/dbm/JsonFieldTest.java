@@ -106,7 +106,7 @@ public class JsonFieldTest extends DbmBaseTest {
 		@DbmJsonField
 		protected ExtInfo extInfo;
 		protected LocalDateTime buildAt;
-		@DbmJsonField
+		@DbmJsonField(storeTyping=true)
 		private Map<String, DbmModuleConfigTestVO> configData;
 
 		public ExtInfo getExtInfo() {
