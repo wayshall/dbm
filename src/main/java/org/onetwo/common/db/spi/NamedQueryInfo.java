@@ -49,7 +49,6 @@ public class NamedQueryInfo implements Cloneable{
 	
 	private NamedQueryFile dbmNamedQueryFile;
 	private String namespace;
-	//TODO  not used
 	private JFishProperties config;
 	private ResourceAdapter<?> srcfile;
 	
