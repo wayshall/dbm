@@ -54,6 +54,7 @@ public class DbmRowMapperFactory extends JdbcDaoRowMapperFactory {
 			throw new DbmException("no BeanPropertyRowMapper found for type:"+type);
 		}
 	}
+	@SuppressWarnings("unchecked")
 	protected RowMapper<?> getBeanPropertyRowMapper0(Class<?> type) {
 		RowMapper<?> rowMapper = null;
 		if(getMappedEntryManager().isSupportedMappedEntry(type)){
