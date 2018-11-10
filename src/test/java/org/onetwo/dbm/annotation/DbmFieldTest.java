@@ -5,11 +5,8 @@ import java.util.Map;
 import javax.persistence.Entity;
 
 import org.junit.Test;
-import org.onetwo.common.apiclient.annotation.RestApiClient;
-import org.onetwo.common.spring.utils.AnnotatedElementUtilsTest.SubTestClass2;
 import org.onetwo.dbm.mapping.DbmFieldValueConverter;
 import org.onetwo.dbm.mapping.DbmMappedField;
-import org.springframework.core.annotation.AnnotationUtils;
 
 /**
  * @author wayshall
@@ -20,7 +17,6 @@ public class DbmFieldTest {
 	@Test
 	public void test(){
 		
-		AnnotationUtils.findAnnotation(SubTestClass2.class, RestApiClient.class);
 	}
 	
 	@Entity
