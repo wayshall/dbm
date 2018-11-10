@@ -175,7 +175,7 @@
 	</dependency>
 	
 	
-	
+	<!-- 用于实现HibernateJPAQueryProvideManager -->
 	<dependency>
 	   <groupId>org.hibernate</groupId>
 	   <artifactId>hibernate-core</artifactId>

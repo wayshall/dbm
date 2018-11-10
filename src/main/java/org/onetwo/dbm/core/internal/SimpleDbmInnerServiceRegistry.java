@@ -129,7 +129,7 @@ public class SimpleDbmInnerServiceRegistry implements DbmInnerServiceRegistry {
 				componentBean = initializer.get();
 			}
 			if(componentBean!=null){
-				SpringUtils.injectAndInitialize(applicationContext, componentBean);
+				SpringUtils.initializeBean(applicationContext, componentBean);
 			}
 		}
 		return componentBean;

@@ -12,7 +12,7 @@ import org.onetwo.common.db.sqlext.ExtQuery.K.IfNull;
 import org.onetwo.common.exception.ServiceException;
 import org.onetwo.common.log.JFishLoggerFactory;
 import org.onetwo.common.utils.CUtils;
-import org.onetwo.common.utils.MyUtils;
+import org.onetwo.common.utils.LangUtils;
 import org.onetwo.common.utils.StringUtils;
 import org.slf4j.Logger;
 
@@ -129,6 +129,7 @@ abstract public class AbstractExtQuery implements ExtQueryInner{
 		return DefaultSQLFunctionManager.get();
 	}
 
+	@SuppressWarnings("unchecked")
 	protected <T> T getValueAndRemoveKeyFromParams(String key, T def){
 		if(!this.params.containsKey(key))
 			return def;
@@ -137,7 +138,7 @@ abstract public class AbstractExtQuery implements ExtQueryInner{
 		return value==null?def:value;
 	}
 	
-	public void setEntityClass(Class entityClass) {
+	public void setEntityClass(Class<?> entityClass) {
 		this.entityClass = entityClass;
 		this.alias = StringUtils.uncapitalize(entityClass.getSimpleName());
 	}
@@ -160,6 +161,7 @@ abstract public class AbstractExtQuery implements ExtQueryInner{
 	}
 	
 
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	String buildWhere(Map params, boolean isSubQuery) {
 		/*String fname = "buildWhere";
 		if(isDebug())
@@ -179,7 +181,7 @@ abstract public class AbstractExtQuery implements ExtQueryInner{
 			Object fields = entry.getKey();
 			Object values = entry.getValue();
 
-			if (K.ASC.equals(fields) || K.DESC.equals(fields) || MyUtils.isEmpty(fields))
+			if (K.ASC.equals(fields) || K.DESC.equals(fields) || LangUtils.isEmpty(fields))
 				continue;
 			
 			/*if(ExtQueryUtils.isContinueByCauseValue(values, ifNull)){
@@ -254,7 +256,8 @@ abstract public class AbstractExtQuery implements ExtQueryInner{
 		if (valueList == null)
 			return null;
 
-		List<?> fieldList =  MyUtils.asList(fields);
+//		List<?> fieldList =  MyUtils.asList(fields);
+		List<?> fieldList =  CUtils.trimAndexcludeTheClassElement(true, fields);
 		int index = 0;
 		String h = null;
 		StringBuilder causeScript = new StringBuilder();

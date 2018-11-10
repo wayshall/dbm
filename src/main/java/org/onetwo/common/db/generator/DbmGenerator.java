@@ -76,6 +76,10 @@ public class DbmGenerator {
 		}
 	}
 	
+	public DbGenerator dbGenerator() {
+		return dbGenerator;
+	}
+
 	public DbmGenerator projectPath(String projectPath) {
 		this.projectPath = projectPath;
 		return this;

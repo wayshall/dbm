@@ -9,7 +9,7 @@
       id-property="${table.primaryKey.javaName}"
       :list-api="listApi"
       :query-form-model="queryFormModel"
-      :refresh="refreshTable"
+      :refresh.sync="refreshTable"
       :delete-api="deleteApi"
       :operations="operations">
       <template slot="queryForm">

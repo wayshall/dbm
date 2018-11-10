@@ -1,6 +1,7 @@
 package org.onetwo.common.dbm.model.entity;
 
 import java.util.Date;
+import java.util.Map;
 
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -13,8 +14,12 @@ import javax.persistence.TemporalType;
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.NotBlank;
-import org.onetwo.common.spring.dozer.DozerMapping;
-import org.onetwo.dbm.mapping.DbmEnumValueMapping;
+import org.onetwo.common.db.filter.DataQueryParamaterEnhancer;
+import org.onetwo.common.db.filter.IDataQueryParamterEnhancer;
+import org.onetwo.common.db.sqlext.ExtQuery;
+import org.onetwo.common.dbm.model.entity.UserEntity.UserStatus;
+import org.onetwo.common.dbm.model.entity.UserWithDataFilterEntity.AgeIDataQueryParamterEnhancer;
+import org.onetwo.common.utils.CUtils;
 import org.springframework.format.annotation.DateTimeFormat;
 
 
@@ -24,9 +29,19 @@ import org.springframework.format.annotation.DateTimeFormat;
  */
 @Entity
 @Table(name="TEST_USER")
-//@TableGenerator(table=Constant.SEQ_TABLE_NAME, pkColumnName="GEN_NAME",valueColumnName="GEN_VALUE", pkColumnValue="SEQ_ADMIN_USER", allocationSize=50, initialValue=1, name="UserEntityGenerator")
-@DozerMapping
-public class UserEntity {
+@DataQueryParamaterEnhancer(AgeIDataQueryParamterEnhancer.class)
+public class UserWithDataFilterEntity {
+
+	
+	public static class AgeIDataQueryParamterEnhancer implements IDataQueryParamterEnhancer {
+		static public final int FIXED_AGE = 34;
+
+		@Override
+		public Map<Object, Object> enhanceParameters(ExtQuery query) {
+			return CUtils.asMap("age", FIXED_AGE);
+		}
+		
+	}
 	
 	/*****
 	 * 
@@ -67,7 +82,7 @@ public class UserEntity {
 	/*****
 	 * 
 	 */
-	protected UserGenders gender;
+	protected Integer gender;
 	protected UserStatus status;
 	
   
@@ -83,29 +98,9 @@ public class UserEntity {
 	//系统代码
 	protected String appCode;
   
-	public UserEntity(){
+	public UserWithDataFilterEntity(){
 	}
 	
-
-	public static enum UserGenders implements DbmEnumValueMapping {
-		FEMALE("女性", 10),
-		MALE("男性", 11);
-		
-		final private String label;
-		final private int value;
-		private UserGenders(String label, int value) {
-			this.label = label;
-			this.value = value;
-		}
-		public String getLabel() {
-			return label;
-		}
-		@Override
-		public int getMappingValue() {
-			return value;
-		}
-		
-	}
 	
 	/*****
 	 * 
@@ -178,6 +173,14 @@ public class UserEntity {
 	 * 
 	 * @return
 	 */
+//	@Column(name="GENDER")
+	public Integer getGender() {
+		return this.gender;
+	}
+	
+	public void setGender(Integer gender) {
+		this.gender = gender;
+	}
 	
 	/*****
 	 * 
@@ -189,16 +192,7 @@ public class UserEntity {
 	public Date getBirthday() {
 		return this.birthday;
 	}
-
-	@Enumerated(EnumType.ORDINAL)
-	public UserGenders getGender() {
-		return gender;
-	}
-
-	public void setGender(UserGenders gender) {
-		this.gender = gender;
-	}
-
+	
 	public void setBirthday(Date birthday) {
 		this.birthday = birthday;
 	}
@@ -265,38 +259,4 @@ public class UserEntity {
 		this.height = height;
 	}
 
-
-	public static enum UserStatus {
-		NORMAL("正常"),
-		STOP("停用"),
-		DELETE("删除");
-		
-		private final String label;
-		UserStatus(String label){
-			this.label = label;
-		}
-		public String getLabel() {
-			return label;
-		}
-		public String getValue(){
-			return toString();
-		}
-
-	}
-	public static enum UserGender {
-		MALE("男"),
-		FEMALE("女");
-		
-		private final String label;
-		UserGender(String label){
-			this.label = label;
-		}
-		public String getLabel() {
-			return label;
-		}
-		public int getValue(){
-			return ordinal();
-		}
-
-	}
 }

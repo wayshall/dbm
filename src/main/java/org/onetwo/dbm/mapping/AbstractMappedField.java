@@ -72,6 +72,10 @@ abstract public class AbstractMappedField implements DbmMappedField{
 		}else if(Enum.class.isAssignableFrom(propertyInfo.getType())){
 			this.enumType = DbmEnumType.STRING;
 		}
+		// 如果配置了ORDINAL，并且实现了DbmEnumValueMapping接口，则设置为MAPPING
+		if(enumType==DbmEnumType.ORDINAL && DbmEnumValueMapping.class.isAssignableFrom(this.propertyInfo.getType())) {
+			this.enumType = DbmEnumType.MAPPING;
+		}
 		
 		DbmFieldListeners listenersAnntation = propertyInfo.getAnnotation(DbmFieldListeners.class);
 		if(listenersAnntation!=null){
@@ -307,4 +311,9 @@ abstract public class AbstractMappedField implements DbmMappedField{
 	public DbmEnumType getEnumType() {
 		return enumType;
 	}
+
+	public DbmJsonField getJsonFieldAnnotation() {
+		return jsonFieldAnnotation;
+	}
+	
 }

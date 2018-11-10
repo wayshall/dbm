@@ -8,7 +8,6 @@ import java.util.stream.Stream;
 import javax.sql.DataSource;
 
 import org.onetwo.common.db.DataBase;
-import org.onetwo.common.db.generator.DbGenerator.DbTableGenerator.TableGeneratedConfig;
 import org.onetwo.common.db.generator.GlobalConfig.OutfilePathFunc;
 import org.onetwo.common.db.generator.dialet.DatabaseMetaDialet;
 import org.onetwo.common.db.generator.dialet.MysqlMetaDialet;
@@ -240,7 +239,7 @@ public class DbGenerator {
 			/*TableGeneratedConfig config = new TableGeneratedConfig(tableName, templatePath);
 			config.outfilePathFunc();
 			tableGeneratedConfig.add(config);*/
-			return this;
+			return pageTemplate(templatePath, outFileNameFunc);
 		}
 
 		public DbTableGenerator pageTemplate(String templatePath, OutfilePathFunc outFileNameFunc){
@@ -417,6 +416,9 @@ public class DbGenerator {
 				super();
 				this.tableMeta = tableMeta;
 				this.tableGenerator = tableGenerator;
+			}
+			public TableMeta tableMeta() {
+				return tableMeta;
 			}
 			public ColumnMetaConfig column(String name){
 				ColumnMeta column = this.tableMeta.getColumn(name);

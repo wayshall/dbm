@@ -153,7 +153,8 @@ abstract public class AbstractDbmInterceptorChain implements DbmInterceptorChain
 				return (NestedRuntimeException)ite.getTargetException();
 			}
 		}
-		return new DbmException("invoke method error: " + targetMethod, e);
+		return new DbmException("invoke method error, targetMethod: " + targetMethod + ";"
+				+ "args: " + LangUtils.toString(this.targetArgs), e);
 	}
 
 	@Override

@@ -19,7 +19,6 @@ import org.onetwo.common.spring.Springs;
 import org.onetwo.common.utils.LangUtils;
 import org.onetwo.common.utils.StringUtils;
 import org.springframework.core.annotation.AnnotatedElementUtils;
-import org.springframework.util.Assert;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -59,7 +58,9 @@ public class DataQueryFilterListener extends ExtQueryListenerAdapter{
 	@Override
 	public void onInit(ExtQuery q) {
 		ExtQueryInner query = (ExtQueryInner) q;
-		Object dataFilterValue = LangUtils.firstNotNull(query.getParams().remove(DataQueryFilter.class), query.getParams().remove(K.DATA_FILTER));
+		Boolean hasDataFilter = (Boolean)query.getParams().remove(K.DATA_FILTER);
+		
+		Object dataFilterValue = LangUtils.firstNotNull(query.getParams().remove(DataQueryFilter.class), hasDataFilter);
 		boolean isEnabledDataFilter = dataFilterValue!=null?Types.convertValue(dataFilterValue, Boolean.class):true;
 		if(isEnabledDataFilter){
 			DataQueryFilter qdf = (DataQueryFilter)query.getEntityClass().getAnnotation(DataQueryFilter.class);
@@ -67,8 +68,8 @@ public class DataQueryFilterListener extends ExtQueryListenerAdapter{
 				addParameterByDataQueryFilter(query, qdf);
 		}
 
-
-		dataFilterValue = LangUtils.firstNotNull(query.getParams().remove(DataQueryParamaterEnhancer.class), query.getParams().remove(K.DATA_FILTER));
+		Object hasDataQueryParamaterEnhancer = query.getParams().remove(DataQueryParamaterEnhancer.class);
+		dataFilterValue = LangUtils.firstNotNull(hasDataQueryParamaterEnhancer, hasDataFilter);
 		isEnabledDataFilter = dataFilterValue!=null?Types.convertValue(dataFilterValue, Boolean.class):true;
 		if(isEnabledDataFilter){
 			/*DataQueryParamaterEnhancer dqpe = query.getEntityClass().getAnnotation(DataQueryParamaterEnhancer.class);
@@ -79,10 +80,12 @@ public class DataQueryFilterListener extends ExtQueryListenerAdapter{
 		
 	}
 	
-	private void addParameterByDataQueryFilter(ExtQueryInner query, DataQueryFilter qdf){
-		Assert.notNull(qdf);
-		String[] fields = qdf.fields();
-		String[] values = qdf.values();
+	private void addParameterByDataQueryFilter(ExtQueryInner query, DataQueryFilter dataQueryFilter){
+		if(dataQueryFilter == null) {
+			throw new IllegalArgumentException("dataQueryFilter can not be null");
+		}
+		String[] fields = dataQueryFilter.fields();
+		String[] values = dataQueryFilter.values();
 		if(fields.length!=values.length)
 			throw new BaseException("the length is not equals of QueryDataFilter");
 		int index = 0;

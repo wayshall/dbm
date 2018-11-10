@@ -199,6 +199,68 @@ public class UserEntity implements Serializable {
 
 ## 其它特有的映射
 
+### 枚举映射
+dbm支持jpa的@Enumerated枚举映射注解，使用方法和jpa一样，默认为EnumType.ORDINAL int值类型映射，可以通过注解属性指定为EnumType.STRING名称映射。
+
+但是，当枚举为EnumType.ORDINAL映射的时候，ordinal的值是从0开始根据定义时的先后顺序决定，这使得我们开发的时候很不方便，比如我有一个枚举类型，是需要映射为int类型，但是值并不是从0开始的，这时候就相当的尴尬，因为你既不能用默认为EnumType.ORDINAL,也不能用EnumType.STRING。
+
+所以dbm还另外增加了自定义的int值映射接口DbmEnumValueMapping，只要枚举类型实现了这个接口，就可以自定义返回实际的映射值，比如：
+```Java
+@Entity
+@Table(name="TEST_USER")
+public class UserEntity {
+	@Id
+	Long id;
+	@Enumerated(EnumType.ORDINAL)
+	UserGenders gender;
+
+	public static enum UserGenders {
+		FEMALE("女性"),
+		MALE("男性");
+		
+		final private String label;
+		private UserGenders(String label) {
+			this.label = label;
+		}
+		public String getLabel() {
+			return label;
+		}
+	}
+}
+```
+如果按照jpa的做法，枚举类型映射为@Enumerated(EnumType.ORDINAL)后，用户实体的gender属性对应的数据库列只能是0（FEMALE）和1（MALE）。
+在dbm里，你可以通过实现DbmEnumValueMapping接口，返回自定义的映射值，比如10（FEMALE）和11（MALE）。
+```Java
+@Entity
+@Table(name="TEST_USER")
+public class UserEntity {
+	@Id
+	Long id;
+	@Enumerated(EnumType.ORDINAL)
+	UserGenders gender;
+
+	public static enum UserGenders implements DbmEnumValueMapping {
+		FEMALE("女性", 10),
+		MALE("男性", 11);
+		
+		final private String label;
+		final private int value;
+		private UserGenders(String label, int value) {
+			this.label = label;
+			this.value = value;
+		}
+		public String getLabel() {
+			return label;
+		}
+		@Override
+		public int getMappingValue() {
+			return value;
+		}
+		
+	}
+}
+```
+
 ### json映射
 有时候，我们需要在数据库的某个字段里存储json格式的数据，又想在获取到数据后转为java对象使用，这时你可以使用 @DbmJsonField 注解，这个注解会在保存实体的时候把对象转化为json字符串，然后在取出数据的时候自动把字符串转化为对象。
 示例：
@@ -206,6 +268,20 @@ public class UserEntity implements Serializable {
 class SimpleEntity {
 	@DbmJsonField
 	private ExtInfo extInfo;
+
+	
+	public static class ExtInfo {
+		String address;
+		List<String> phones;
+	}
+}
+```
+
+如果该字段是泛型，需要保存类型信息，可以设置storeTyping属性为true
+```Java
+class SimpleEntity {
+	@DbmJsonField(storeTyping=true)
+	private Map<String, ConfigData> configData;
 
 	
 	public static class ExtInfo {
@@ -224,8 +300,8 @@ class SimpleEntity {
 ```
 
 ### @DbmField注解
-@DbmField注解可自定义一个值转换器，用于从数据库表获取的字段值转换为Java对象的属性值，和把Java对象的属性值转换为数据库表的字段值。   
-@DbmJsonField注解实际上是包装了@DbmField注解实现的。
+@DbmField 注解可自定义一个值转换器，用于从数据库表获取的字段值转换为Java对象的属性值，和把Java对象的属性值转换为数据库表的字段值。   
+@DbmJsonField 注解实际上是包装了@DbmField注解实现的。
 
 
 ## BaseEntityManager接口

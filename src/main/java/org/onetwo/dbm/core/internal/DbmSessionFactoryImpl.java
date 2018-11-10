@@ -261,8 +261,11 @@ public class DbmSessionFactoryImpl implements InitializingBean, DbmSessionFactor
 	DbmTransactionSynchronization registerSessionSynchronization(DbmSession session){
 		Connection connection = DataSourceUtils.getConnection(this.dataSource);
 		//sessionHolder
-		DbmSessionResourceHolder sessionHolder = new DbmSessionResourceHolder(session, connection);
-		TransactionSynchronizationManager.bindResource(this, sessionHolder);
+		DbmSessionResourceHolder sessionHolder = (DbmSessionResourceHolder)TransactionSynchronizationManager.getResource(this);
+		if(sessionHolder==null) {
+			sessionHolder = new DbmSessionResourceHolder(session, connection);
+			TransactionSynchronizationManager.bindResource(this, sessionHolder);
+		}
 		//synchronization
 		DbmTransactionSynchronization synchronization = new DbmTransactionSynchronization(sessionHolder);
 		sessionHolder.setSynchronizedWithTransaction(true);

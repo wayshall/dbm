@@ -2,6 +2,7 @@ package org.onetwo.dbm.mapping;
 
 public enum DbmEnumType {
     ORDINAL(int.class),
+    MAPPING(int.class),
     STRING(String.class);
     
     private final Class<?> javaType;
