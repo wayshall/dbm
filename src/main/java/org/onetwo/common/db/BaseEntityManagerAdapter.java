@@ -119,6 +119,9 @@ public abstract class BaseEntityManagerAdapter implements InnerBaseEntityManager
 		return entity;
 	}
 
+	/****
+	 * 查找唯一结果，如果找不到则返回null，找到多个则抛异常 IncorrectResultSizeDataAccessException，详见：DataAccessUtils.requiredSingleResult
+	 */
 	@Override
 	public <T> T selectUnique(SelectExtQuery extQuery) {
 		extQuery.build();

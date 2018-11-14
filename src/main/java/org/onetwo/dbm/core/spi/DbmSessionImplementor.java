@@ -35,11 +35,22 @@ public interface DbmSessionImplementor extends DbmSession {
 	/**********
 	 * 通过<code>JFishQueryValue</code>查询一条数据
 	 * JFishQueryValue只是对sql、参数和结果类型的封装
+	 * 
+	 * 查找唯一结果，如果找不到则返回null，找到多个则抛异常 IncorrectResultSizeDataAccessException，详见：DataAccessUtils.requiredSingleResult
+	 * 
 	 * @param queryValue
 	 * @return
 	 */
 	@DbmJdbcOperationMark(type=DbmJdbcOperationType.QUERY)
 	public <T> T findUnique(DbmQueryValue queryValue);
+	
+	/***
+	 * 查找唯一结果，如果找不到则返回null，找到多个则抛异常 IncorrectResultSizeDataAccessException，详见：DataAccessUtils.requiredSingleResult
+	 * @author weishao zeng
+	 * @param queryValue
+	 * @param row
+	 * @return
+	 */
 	@DbmJdbcOperationMark(type=DbmJdbcOperationType.QUERY)
 	public <T> T findUnique(DbmQueryValue queryValue, RowMapper<T> row);
 
