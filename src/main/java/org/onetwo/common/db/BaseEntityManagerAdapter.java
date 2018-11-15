@@ -9,6 +9,7 @@ import org.onetwo.common.db.builder.QueryBuilder;
 import org.onetwo.common.db.spi.QueryWrapper;
 import org.onetwo.common.db.spi.SqlParamterPostfixFunctionRegistry;
 import org.onetwo.common.db.sql.SequenceNameManager;
+import org.onetwo.common.db.sqlext.ExtQuery.K;
 import org.onetwo.common.db.sqlext.SelectExtQuery;
 import org.onetwo.common.exception.BaseException;
 import org.onetwo.common.exception.ServiceException;
@@ -34,9 +35,9 @@ public abstract class BaseEntityManagerAdapter implements InnerBaseEntityManager
 
 	abstract public SequenceNameManager getSequenceNameManager();
 		
-	protected void createSequence(Class<?> entityClass){
+	protected Long createSequence(Class<?> entityClass){
 		String seqName = getSequenceNameManager().getSequenceName(entityClass);
-		this.createSequence(seqName);
+		return createSequence(seqName);
 	}
 	
 
@@ -44,21 +45,19 @@ public abstract class BaseEntityManagerAdapter implements InnerBaseEntityManager
 	 * 创建序列，for oracle
 	 * @param sequenceName
 	 */
-	protected void createSequence(String sequenceName){
+	protected Long createSequence(String sequenceName){
 		String sql = getSequenceNameManager().getSequenceSql(sequenceName, null);
 		Long id = null;
-			try {
-				QueryWrapper dq = this.createQuery(getSequenceNameManager().getCreateSequence(sequenceName), null);
-				dq.executeUpdate();
-				
-				dq = this.createQuery(sql, null);
-				id = ((Number)dq.getSingleResult()).longValue();
-			} catch (Exception ne) {
-				ne.printStackTrace();
-				throw new ServiceException("createSequences error: " + ne.getMessage(), ne);
-			}
-			if (id == null)
-				throw new ServiceException("createSequences error. ");
+		try {
+			QueryWrapper dq = this.createQuery(getSequenceNameManager().getCreateSequence(sequenceName), null);
+			dq.executeUpdate();
+			
+			dq = this.createQuery(sql, null);
+			id = ((Number)dq.getSingleResult()).longValue();
+		} catch (Exception ne) {
+			throw new ServiceException("createSequences error: " + ne.getMessage(), ne);
+		}
+		return id;
 	}
 	
 	
@@ -198,6 +197,10 @@ public abstract class BaseEntityManagerAdapter implements InnerBaseEntityManager
 		} catch (NotUniqueResultException e) {
 			return null;//return null if error
 		}*/
+		// 添加max_result，防止返回数据过大
+		if (!properties.containsKey(K.MAX_RESULTS)) {
+			properties.put(K.MAX_RESULTS, 1);
+		}
 		List<T> list = findListByProperties(entityClass, properties);
 		return list.isEmpty()?null:list.get(0);
 	}
