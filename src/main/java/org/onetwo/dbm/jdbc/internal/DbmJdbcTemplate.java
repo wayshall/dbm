@@ -306,6 +306,9 @@ public class DbmJdbcTemplate extends JdbcTemplate implements DbmJdbcOperations {
 		return this.dbmNamedJdbcOperations.query(sql, paramMap, rowMapper);
 	}
 
+	/****
+	 * 返回结果会调用  DataAccessUtils.requiredSingleResult 过滤
+	 */
 	@Override
 	public <T> T queryForObject(String sql, Map<String, ?> paramMap, RowMapper<T> rowMapper) throws DataAccessException {
 		return this.dbmNamedJdbcOperations.queryForObject(sql, paramMap, rowMapper);

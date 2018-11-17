@@ -12,6 +12,14 @@ public interface WhereCauseBuilder {
 
 
 	WhereCauseBuilder addFields(Object entity);
+	/***
+	 * 
+	 * @author weishao zeng
+	 * @param entity
+	 * @param useLikeIfStringVlue 当属性的值为string类型时，是否使用like查询
+	 * @return
+	 */
+	WhereCauseBuilder addFields(Object entity, boolean useLikeIfStringVlue);
 	
 	WhereCauseBuilder addField(WhereCauseBuilderField field);
 

@@ -29,13 +29,17 @@ public class DefaultWhereCauseBuilder implements WhereCauseBuilder {
 
 	@Override
 	public DefaultWhereCauseBuilder addFields(Object entity){
+		return addFields(entity, true);
+	}
+	
+	public DefaultWhereCauseBuilder addFields(Object entity, boolean useLikeIfStringVlue){
 		DbmSessionFactory sf = queryBuilder.getBaseEntityManager().getSessionFactory();
 		DbmMappedEntry entry = sf.getMappedEntryManager().getEntry(entity);
 		Map<String, Object> fieldMap = ReflectUtils.toMap(entity, (p, v)->{
 			return v!=null && entry.contains(p.getName());
 		});
 		fieldMap.entrySet().forEach(e->{
-			if(String.class.isInstance(e.getValue())){
+			if(useLikeIfStringVlue && String.class.isInstance(e.getValue())){
 				field(e.getKey()).like(e.getValue().toString());
 			}else{
 				field(e.getKey()).equalTo(e.getValue());

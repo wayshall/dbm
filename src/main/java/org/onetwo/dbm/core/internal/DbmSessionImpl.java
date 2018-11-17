@@ -23,16 +23,16 @@ import org.onetwo.dbm.core.spi.DbmTransaction;
 import org.onetwo.dbm.dialet.DBDialect;
 import org.onetwo.dbm.event.internal.DbmSessionEventSource;
 import org.onetwo.dbm.event.spi.DbmDeleteEvent;
+import org.onetwo.dbm.event.spi.DbmDeleteEvent.DeleteType;
 import org.onetwo.dbm.event.spi.DbmEventAction;
 import org.onetwo.dbm.event.spi.DbmExtQueryEvent;
+import org.onetwo.dbm.event.spi.DbmExtQueryEvent.ExtQueryType;
 import org.onetwo.dbm.event.spi.DbmFindEvent;
 import org.onetwo.dbm.event.spi.DbmInsertEvent;
 import org.onetwo.dbm.event.spi.DbmInsertOrUpdateEvent;
 import org.onetwo.dbm.event.spi.DbmLockEvent;
 import org.onetwo.dbm.event.spi.DbmSessionEvent;
 import org.onetwo.dbm.event.spi.DbmUpdateEvent;
-import org.onetwo.dbm.event.spi.DbmDeleteEvent.DeleteType;
-import org.onetwo.dbm.event.spi.DbmExtQueryEvent.ExtQueryType;
 import org.onetwo.dbm.exception.DbmException;
 import org.onetwo.dbm.jdbc.AbstractDbmSession;
 import org.onetwo.dbm.jdbc.spi.DbmJdbcOperations;
@@ -43,6 +43,7 @@ import org.onetwo.dbm.query.DbmQueryImpl;
 import org.onetwo.dbm.query.DbmQueryWrapperImpl;
 import org.onetwo.dbm.utils.DbmLock;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.ColumnMapRowMapper;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowMapper;
@@ -360,11 +361,15 @@ public class DbmSessionImpl extends AbstractDbmSession implements DbmSessionEven
 		return findUnique(sql, params, getDefaultRowMapper(type, true));
 	}
 	
+	/****
+	 * 查找唯一结果，如果找不到则返回null，找到多个则抛异常 IncorrectResultSizeDataAccessException，详见：DataAccessUtils.requiredSingleResult
+	 */
 	public <T> T findUnique(String sql, Map<String, ?> params, RowMapper<T> rowMapper){
 		T result = null;
 		try{
 			result = this.dbmJdbcOperations.queryForObject(sql, params, rowMapper);
 		}catch(EmptyResultDataAccessException e){
+			// 返回空集的时候，屏蔽错误，返回null
 			logger.error("findUnique error: "+e.getMessage());
 		}
 		return result;

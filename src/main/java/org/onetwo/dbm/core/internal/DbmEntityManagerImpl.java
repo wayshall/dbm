@@ -44,7 +44,6 @@ import org.onetwo.dbm.utils.DbmLock;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
-import org.springframework.util.Assert;
 
 //@SuppressWarnings({"rawtypes", "unchecked"})
 public class DbmEntityManagerImpl extends BaseEntityManagerAdapter implements QueryProvideManager, DbmEntityManager, InitializingBean , DisposableBean {
@@ -171,9 +170,11 @@ public class DbmEntityManagerImpl extends BaseEntityManagerAdapter implements Qu
 
 	@Override
 	public <T> T removeById(Class<T> entityClass, Serializable id) {
-		Assert.notNull(id);
+		if (id==null) {
+			throw new IllegalArgumentException("id can not be null");
+		}
 		T entity = getCurrentSession().findById(entityClass, id);
-		if(entity==null)
+		if (entity==null)
 			return null;
 //		T entity = load(entityClass, id);
 		int updateCount = getCurrentSession().delete(entity);
@@ -275,7 +276,7 @@ public class DbmEntityManagerImpl extends BaseEntityManagerAdapter implements Qu
 			
 			SQLException se = (SQLException) e.getCause();
 			if ("42000".equals(se.getSQLState())) {
-				this.createSequence(sequenceName);
+				id = createSequence(sequenceName);
 				/*try {
 					DataQuery dq = this.createSQLQuery(getSequenceNameManager().getCreateSequence(sequenceName), null);
 					dq.executeUpdate();
