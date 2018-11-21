@@ -3,11 +3,12 @@ package org.onetwo.dbm.mapping;
 import java.util.List;
 import java.util.Map;
 
+import org.onetwo.dbm.dialet.DBDialect;
 import org.onetwo.dbm.id.IdentifierGenerator;
 import org.onetwo.dbm.mapping.SQLBuilderFactory.SqlBuilderType;
 
 public interface DbmMappedEntry extends DbmMappedEntryMeta {
-	
+	public DBDialect getDbDialect();
 	public Map<String, IdentifierGenerator<?>> getIdGenerators();
 	public void addIdGenerator(IdentifierGenerator<?> idGenerator);
 	

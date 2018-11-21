@@ -8,9 +8,10 @@ import org.onetwo.common.utils.LangUtils;
 import org.onetwo.dbm.event.spi.DbmUpdateEvent;
 import org.onetwo.dbm.exception.EntityNotFoundException;
 import org.onetwo.dbm.exception.EntityVersionException;
-import org.onetwo.dbm.mapping.DbmMappedField;
 import org.onetwo.dbm.mapping.DbmMappedEntry;
+import org.onetwo.dbm.mapping.DbmMappedField;
 import org.onetwo.dbm.mapping.JdbcStatementContext;
+import org.onetwo.dbm.utils.Dbms;
 
 /*****
  * 
@@ -18,6 +19,8 @@ import org.onetwo.dbm.mapping.JdbcStatementContext;
  *
  */
 public class DbmUpdateEventListener extends UpdateEventListener {
+	
+//	private SimpleBeanCopier copier = BeanCopierBuilder.newBuilder().build();
 
 	/*****
 	 * 不是调用批量接口更新的，取用循环插入的方式，通过调用updateSingleEntity方法来检查是否更新成功！
@@ -66,16 +69,16 @@ public class DbmUpdateEventListener extends UpdateEventListener {
 	 */
 	private int updateSingleEntity(boolean dymanic, DbmSessionEventSource es, DbmMappedEntry entry, Object singleEntity){
 		Object currentTransactionVersion = null;
+		Object entityVersion = null;
 
 		if(entry.isVersionControll()){
+			currentTransactionVersion = getLastVersionWithNewTransaction(es, entry, singleEntity);
+			entityVersion = entry.getVersionField().getValue(singleEntity);
 			DbmMappedField versionField = entry.getVersionField();
-			JdbcStatementContext<Object[]> versionContext = entry.makeSelectVersion(singleEntity);
-			//因为在同一个事务里，实际上得到的version还是旧的，只是防止程序员自己修改version字段
-			currentTransactionVersion = es.getDbmJdbcOperations().queryForObject(versionContext.getSql(), versionField.getColumnType(), entry.getId(singleEntity));
-			Object entityVersion = entry.getVersionField().getValue(singleEntity);
 			
+			// 如果一个实体被获取后，脱离了事务，然后又重新使用update方法，则会出现实体版本和当前事务版本不一致的情况；
 			if(!versionField.getVersionableType().isEquals(entityVersion, currentTransactionVersion)){
-				throw new EntityVersionException(entry.getEntityClass(), entry.getId(singleEntity), currentTransactionVersion);
+				throw new EntityVersionException(entry.getEntityClass(), entry.getId(singleEntity), entityVersion, currentTransactionVersion);
 			}
 		}
 		
@@ -86,7 +89,7 @@ public class DbmUpdateEventListener extends UpdateEventListener {
 			if(currentTransactionVersion!=null){
 //				Object entityVersion = update.getSqlBuilder().getVersionValue(update.getValue().get(0));
 //				Object entityVersion = entry.getVersionField().getValue(singleEntity);
-				throw new EntityVersionException(entry.getEntityClass(), entry.getId(singleEntity), currentTransactionVersion);
+				throw new EntityVersionException(entry.getEntityClass(), entry.getId(singleEntity), entityVersion, currentTransactionVersion);
 			}else{
 				throw new EntityNotFoundException("update count is " + count + ".", singleEntity.getClass(), entry.getId(singleEntity));
 			}
@@ -95,6 +98,37 @@ public class DbmUpdateEventListener extends UpdateEventListener {
 		this.updateEntityVersionIfNecessary(update.getSqlBuilder(), update.getValue().get(0), singleEntity);
 		
 		return count;
+	}
+	
+	/***
+	 * 如果在同一个事务里，实际上得到的version还是旧的，只是防止程序员自己修改version字段
+	 * 
+	 * @author weishao zeng
+	 * @param es
+	 * @param entry
+	 * @param singleEntity
+	 * @return
+	 */
+	private Object getLastVersion(DbmSessionEventSource es, DbmMappedEntry entry, Object singleEntity) {
+		DbmMappedField versionField = entry.getVersionField();
+		JdbcStatementContext<Object[]> versionContext = entry.makeSelectVersion(singleEntity);
+		Object last = es.getDbmJdbcOperations().queryForObject(versionContext.getSql(), versionField.getColumnType(), entry.getId(singleEntity));
+		return last;
+	}
+	
+	/***
+	 * 使用新的事务获取最新版本值
+	 * 
+	 * @author weishao zeng
+	 * @param es
+	 * @param entry
+	 * @param singleEntity
+	 * @return
+	 */
+	private Object getLastVersionWithNewTransaction(DbmSessionEventSource es, DbmMappedEntry entry, Object singleEntity) {
+		return Dbms.doInRequiresNewPropagation(es, t->{
+			return getLastVersion(es, entry, singleEntity);
+		});
 	}
 
 }

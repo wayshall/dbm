@@ -2,6 +2,7 @@ package org.onetwo.dbm.utils;
 
 import java.io.Serializable;
 import java.util.concurrent.ExecutionException;
+import java.util.function.Function;
 
 import javax.sql.DataSource;
 
@@ -17,12 +18,16 @@ import org.onetwo.dbm.core.internal.DbmSessionFactoryImpl;
 import org.onetwo.dbm.core.internal.SimpleDbmInnerServiceRegistry;
 import org.onetwo.dbm.core.internal.SimpleDbmInnerServiceRegistry.DbmServiceRegistryCreateContext;
 import org.onetwo.dbm.core.spi.DbmSessionFactory;
+import org.onetwo.dbm.core.spi.DbmSessionImplementor;
+import org.onetwo.dbm.core.spi.DbmTransaction;
 import org.onetwo.dbm.exception.DbmException;
 import org.onetwo.dbm.spring.DbmEntityManagerCreateEvent;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.context.ApplicationContext;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.support.DefaultTransactionDefinition;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -159,6 +164,25 @@ final public class Dbms {
 		sf.setServiceRegistry(SimpleDbmInnerServiceRegistry.obtainServiceRegistry(new DbmServiceRegistryCreateContext(appContext, sf)));
 		sf.afterPropertiesSet();
 		return sf;
+	}
+	
+
+	public static <R> R doInRequiresNewPropagation(DbmSessionImplementor contextSession, Function<DbmTransaction, R> func) {
+		DbmSessionImplementor session = (DbmSessionImplementor)contextSession.getSessionFactory().openSession();
+		DefaultTransactionDefinition definition = new DefaultTransactionDefinition();
+		definition.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+		DbmTransaction transaction = session.beginTransaction(definition);
+		try {
+			R result = func.apply(transaction);
+			transaction.commit();
+			return result;
+		} catch (DbmException e) {
+			transaction.rollback();
+			throw e;
+		} catch (Exception e) {
+			transaction.rollback();
+			throw new DbmException("doInRequiresNewPropagation error", e);
+		} 
 	}
 
 	private Dbms(){

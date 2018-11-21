@@ -1,6 +1,13 @@
 package org.onetwo.dbm.mapping.version;
 
+import org.onetwo.dbm.dialet.DBDialect;
+
 public class IntegerVersionableType implements VersionableType<Integer> {
+
+	@Override
+	public boolean isSupportType(DBDialect dbDialect, Class<?> type) {
+		return type==Integer.class || type==int.class;
+	}
 
 	@Override
 	public Integer getVersionValule(Integer oldVersion) {

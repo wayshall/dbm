@@ -22,6 +22,7 @@ import org.onetwo.dbm.annotation.DbmEntityListeners;
 import org.onetwo.dbm.annotation.DbmFieldListeners;
 import org.onetwo.dbm.annotation.DbmValidatorEnabled;
 import org.onetwo.dbm.core.spi.DbmInnerServiceRegistry;
+import org.onetwo.dbm.dialet.DBDialect;
 import org.onetwo.dbm.event.spi.DbmEventAction;
 import org.onetwo.dbm.exception.DbmException;
 import org.onetwo.dbm.id.IdentifierGenerator;
@@ -73,12 +74,15 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 	
 	private Map<String, IdentifierGenerator<?>> idGenerators = Maps.newHashMap();
 	
+	private final DBDialect dbDialect;
+	
 //	private Map<SqlBuilderType, EntrySQLBuilder> entrySQLBuilderMap = Maps.newHashMap();
 	/*public AbstractJFishMappedEntryImpl(AnnotationInfo annotationInfo) {
 		this(annotationInfo, null);
 	}*/
 	
 	public AbstractDbmMappedEntryImpl(AnnotationInfo annotationInfo, TableInfo tableInfo, DbmInnerServiceRegistry serviceRegistry) {
+		this.dbDialect = serviceRegistry.getDialect();
 		this.entityClass = annotationInfo.getSourceClass();
 		this.annotationInfo = annotationInfo;
 		this.sqlTypeMapping = serviceRegistry.getTypeMapping();
@@ -114,6 +118,10 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 		this.entrySQLBuilderMap.put(type, builder);
 	}*/
 	
+	public DBDialect getDbDialect() {
+		return dbDialect;
+	}
+
 	@Override
 	public void addIdGenerator(IdentifierGenerator<?> idGenerator){
 		this.idGenerators.put(idGenerator.getName(), idGenerator);
@@ -573,23 +581,25 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 			List<Object> list = LangUtils.asList(entity);
 			for(Object en : list){
 				this.checkIdValue(en);
+				dsb.processWhereCauseValuesFromEntity(en); // 先处理where字段值，因为如果使用了类似updateAt的字段做版本，processIBaseEntity方法会修改updateAt字段的值
 				this.processIBaseEntity(en, false);
 				
 				this.vailidateEntity(entity);
 				
 //				dsb.setColumnValuesFromEntity(en)
 				dsb.processColumnValues(en)
-					.processWhereCauseValuesFromEntity(en)
+//					.processWhereCauseValuesFromEntity(en)
 					.addBatch();
 			}
 		}else{
 			this.checkIdValue(entity);
+			dsb.processWhereCauseValuesFromEntity(entity); // 先处理where字段值，因为如果使用了类似updateAt的字段做版本，processIBaseEntity方法会修改updateAt字段的值
 			this.processIBaseEntity(entity, false);
 			
 			this.vailidateEntity(entity);
 //			dsb.setColumnValuesFromEntity(entity);
 			dsb.processColumnValues(entity);
-			dsb.processWhereCauseValuesFromEntity(entity);
+//			dsb.processWhereCauseValuesFromEntity(entity); 上移到processIBaseEntity之前
 		}
 		
 		dsb.build();
@@ -604,21 +614,51 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 	}
 	
 	@Override
-	public JdbcStatementContext<List<Object[]>> makeDymanicUpdate(Object entity){//single entity
+	public JdbcStatementContext<List<Object[]>> makeDymanicUpdate(Object entity) {//single entity
 		this.throwIfQueryableOnly();
 
 		this.checkIdValue(entity);
+		
+		// 先处理where字段值，因为如果使用了类似updateAt的字段做版本，processIBaseEntity方法会修改updateAt字段的值
+		EntrySQLBuilderImpl sb = sqlBuilderFactory.createQMark(this, this.getTableInfo().getAlias(), SqlBuilderType.update);
+		JdbcStatementContextBuilder dsb = JdbcStatementContextBuilder.create(DbmEventAction.update, this, sb);
+		makeWhereFieldsForDymanicUpdate(dsb, entity);
+		
 		this.processIBaseEntity(entity, false);
-		JdbcStatementContextBuilder dsb = makeDymanicUpdateJdbcStatementContextBuilder(entity);
+		makeUpdateFieldsForDymanicUpdate(dsb, entity);
 		dsb.build();
 //		KVEntry<String, List<Object[]>> kv = new KVEntry<String, List<Object[]>>(dsb.getSql(), dsb.getValues());
 //		JdbcStatementContext<List<Object[]>> kv = SimpleJdbcStatementContext.create(dsb);
 		return dsb;
 	}
 
-	protected JdbcStatementContextBuilder makeDymanicUpdateJdbcStatementContextBuilder(Object entity){
-		EntrySQLBuilderImpl sb = sqlBuilderFactory.createQMark(this, this.getTableInfo().getAlias(), SqlBuilderType.update);
-		JdbcStatementContextBuilder sqlBuilder = JdbcStatementContextBuilder.create(DbmEventAction.update, this, sb);
+	/**
+	 * where字段在processIBaseEntity之前另外处理，因为如果使用了类似updateAt的字段做版本，processIBaseEntity方法会修改updateAt字段的值
+	 * 
+	 * @author weishao zeng
+	 * @param sqlBuilder
+	 * @param entity
+	 * @return
+	 */
+	final protected JdbcStatementContextBuilder makeWhereFieldsForDymanicUpdate(JdbcStatementContextBuilder sqlBuilder, Object entity) {
+		Object val = null;
+		for (DbmMappedField mfield : this.mappedColumns.values()){
+			val = mfield.getValue(entity);
+			if (mfield.isIdentify()){
+				Assert.notNull(val, "id can not be null : " + entity);
+				sqlBuilder.appendWhere(mfield, val);
+			} else if(mfield.isVersionControll()){
+				Assert.notNull(val, "version field["+mfield.getName()+"] can not be null : " + entity);
+				sqlBuilder.appendWhere(mfield, val);
+				val = mfield.getVersionableType().getVersionValule(val);
+			}
+		}
+		return sqlBuilder;
+	}
+
+	protected JdbcStatementContextBuilder makeUpdateFieldsForDymanicUpdate(JdbcStatementContextBuilder sqlBuilder, Object entity){
+		/*EntrySQLBuilderImpl sb = sqlBuilderFactory.createQMark(this, this.getTableInfo().getAlias(), SqlBuilderType.update);
+		JdbcStatementContextBuilder sqlBuilder = JdbcStatementContextBuilder.create(DbmEventAction.update, this, sb);*/
 		Object val = null;
 		for(DbmMappedField mfield : this.mappedColumns.values()){
 			val = mfield.getValue(entity);
@@ -630,7 +670,15 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 			/*if(mfield.fireDbmEntityFieldEvents(val, DbmEventAction.update)!=val){
 				mfield.setValue(entity, val);
 			}*/
-			if(mfield.isIdentify()){
+			if(mfield.isVersionControll()){
+				// 获取新的版本值
+				val = mfield.getVersionableType().getVersionValule(val);
+			}
+			if(val!=null)
+				sqlBuilder.append(mfield, val);
+			// where字段在processIBaseEntity之前另外处理，因为如果使用了类似updateAt的字段做版本，processIBaseEntity方法会修改updateAt字段的值
+			/* 
+			 * if(mfield.isIdentify()){
 				Assert.notNull(val, "id can not be null : " + entity);
 				sqlBuilder.appendWhere(mfield, val);
 			}else{
@@ -641,7 +689,7 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 				}
 				if(val!=null)
 					sqlBuilder.append(mfield, val);
-			}
+			}*/
 		}
 		return sqlBuilder;
 	}

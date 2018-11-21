@@ -1,6 +1,13 @@
 package org.onetwo.dbm.mapping.version;
 
+import org.onetwo.dbm.dialet.DBDialect;
+
 public class LongVersionableType implements VersionableType<Long> {
+
+	@Override
+	public boolean isSupportType(DBDialect dbDialect, Class<?> type) {
+		return type==Long.class || type==long.class;
+	}
 
 	@Override
 	public Long getVersionValule(Long oldVersion) {

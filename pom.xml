@@ -182,6 +182,12 @@
        <optional>true</optional>
 	</dependency>
 	
+    <dependency>
+        <groupId>org.projectlombok</groupId>
+        <artifactId>lombok</artifactId>
+        <optional>true</optional>
+    </dependency>
+	
 	<dependency>
 	   <groupId>org.hibernate</groupId>
 	   <artifactId>hibernate-entitymanager</artifactId>

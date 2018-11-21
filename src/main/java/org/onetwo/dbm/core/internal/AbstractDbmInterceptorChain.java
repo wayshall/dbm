@@ -149,9 +149,16 @@ abstract public class AbstractDbmInterceptorChain implements DbmInterceptorChain
 	private RuntimeException convertRuntimeException(Exception e){
 		if(e instanceof InvocationTargetException){
 			InvocationTargetException ite = (InvocationTargetException)e;
-			if(ite.getTargetException() instanceof NestedRuntimeException){
-				return (NestedRuntimeException)ite.getTargetException();
+			Throwable target = ite.getTargetException();
+			if(target instanceof NestedRuntimeException){
+				throw (NestedRuntimeException)ite.getTargetException();
+			}else if (target instanceof DbmException) {
+				throw (DbmException) target;
 			}
+		}
+		
+		if (e instanceof DbmException) {
+			throw (DbmException) e;
 		}
 		return new DbmException("invoke method error, targetMethod: " + targetMethod + ";"
 				+ "args: " + LangUtils.toString(this.targetArgs), e);

@@ -11,6 +11,7 @@ import org.onetwo.common.dbm.DbmDaoTest;
 import org.onetwo.common.dbm.DbmDataFilterTest;
 import org.onetwo.common.dbm.DbmEntityManagerTest;
 import org.onetwo.common.dbm.DbmNestedMappingTest;
+import org.onetwo.common.dbm.DbmDateVersionTest;
 import org.onetwo.common.dbm.JsonFieldTest;
 import org.onetwo.common.dbm.QueryConfigTest;
 import org.onetwo.common.dbm.TransactionalListenerTest;
@@ -35,7 +36,8 @@ import org.onetwo.common.dbm.UserTableIdEntityTest;
 	QueryConfigTest.class,
 	CustomDaoTest.class,
 	JsonFieldTest.class,
-	UserOptionDaoTest.class
+	UserOptionDaoTest.class,
+	DbmDateVersionTest.class
 //	UserAutoidServiceTest.class
 //	RichModelTest.class
 })
