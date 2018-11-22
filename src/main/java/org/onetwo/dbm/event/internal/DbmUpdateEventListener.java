@@ -11,7 +11,6 @@ import org.onetwo.dbm.exception.EntityVersionException;
 import org.onetwo.dbm.mapping.DbmMappedEntry;
 import org.onetwo.dbm.mapping.DbmMappedField;
 import org.onetwo.dbm.mapping.JdbcStatementContext;
-import org.onetwo.dbm.utils.Dbms;
 
 /*****
  * 
@@ -72,11 +71,10 @@ public class DbmUpdateEventListener extends UpdateEventListener {
 		Object entityVersion = null;
 
 		if(entry.isVersionControll()){
-			currentTransactionVersion = getLastVersionWithNewTransaction(es, entry, singleEntity);
+			currentTransactionVersion = getLastVersion(es, entry, singleEntity);
 			entityVersion = entry.getVersionField().getValue(singleEntity);
 			DbmMappedField versionField = entry.getVersionField();
 			
-			// 如果一个实体被获取后，脱离了事务，然后又重新使用update方法，则会出现实体版本和当前事务版本不一致的情况；
 			if(!versionField.getVersionableType().isEquals(entityVersion, currentTransactionVersion)){
 				throw new EntityVersionException(entry.getEntityClass(), entry.getId(singleEntity), entityVersion, currentTransactionVersion);
 			}
@@ -86,10 +84,8 @@ public class DbmUpdateEventListener extends UpdateEventListener {
 		int count = this.executeJdbcUpdate(false, update.getSql(), update.getValue(), es);
 		
 		if(count<1){
-			if(currentTransactionVersion!=null){
-//				Object entityVersion = update.getSqlBuilder().getVersionValue(update.getValue().get(0));
-//				Object entityVersion = entry.getVersionField().getValue(singleEntity);
-				throw new EntityVersionException(entry.getEntityClass(), entry.getId(singleEntity), entityVersion, currentTransactionVersion);
+			if(entry.isVersionControll()){
+				throw new EntityVersionException(entry.getEntityClass(), entry.getId(singleEntity), entityVersion);
 			}else{
 				throw new EntityNotFoundException("update count is " + count + ".", singleEntity.getClass(), entry.getId(singleEntity));
 			}
@@ -101,7 +97,8 @@ public class DbmUpdateEventListener extends UpdateEventListener {
 	}
 	
 	/***
-	 * 如果在同一个事务里，实际上得到的version还是旧的，只是防止程序员自己修改version字段
+	 * 在不可重复读事务里，返回数据库最新版本值
+	 * 如果在一个可重复读的事务里，实际上得到的version还是旧的，只是防止程序员自己修改version字段
 	 * 
 	 * @author weishao zeng
 	 * @param es
@@ -118,17 +115,19 @@ public class DbmUpdateEventListener extends UpdateEventListener {
 	
 	/***
 	 * 使用新的事务获取最新版本值
-	 * 
+	 * 不应该使用这个方法，update时保证即可
 	 * @author weishao zeng
 	 * @param es
 	 * @param entry
 	 * @param singleEntity
 	 * @return
-	 */
+	 
+	@SuppressWarnings("unused")
+	@Deprecated
 	private Object getLastVersionWithNewTransaction(DbmSessionEventSource es, DbmMappedEntry entry, Object singleEntity) {
 		return Dbms.doInRequiresNewPropagation(es, t->{
 			return getLastVersion(es, entry, singleEntity);
 		});
-	}
+	}*/
 
 }

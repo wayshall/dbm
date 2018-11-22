@@ -40,7 +40,7 @@ public class UserLongVersionService {
 		return user;
 	}
 	
-	public UserLongVersionEntity reloadAndUpdate(UserLongVersionEntity user) {
+	public UserLongVersionEntity reload(UserLongVersionEntity user) {
 		return this.baseEntityManager.load(UserLongVersionEntity.class, user.getId());
 	}
 	

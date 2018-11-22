@@ -6,6 +6,7 @@ import java.util.List;
 import javax.annotation.Resource;
 import javax.sql.DataSource;
 
+import org.onetwo.common.db.spi.BaseEntityManager;
 import org.onetwo.common.dbm.model.dao.UserAutoidDao;
 import org.onetwo.common.dbm.model.dao.UserAutoidDao2;
 import org.onetwo.common.dbm.model.entity.UserAutoidEntity;
@@ -14,6 +15,7 @@ import org.onetwo.common.utils.CUtils;
 import org.onetwo.common.utils.LangUtils;
 import org.onetwo.common.utils.Page;
 import org.onetwo.dbm.core.spi.DbmSessionFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,6 +36,8 @@ public class UserAutoidServiceImpl implements UserAutoidService {
 	
 	@Resource
 	private UserAutoidDao userAutoidDao;
+	@Autowired
+	private BaseEntityManager baseEntityManager;
 
 	public int removeByUserName(String userName){
 		return this.userAutoidDao.removeByUserName(userName);
@@ -143,5 +147,4 @@ public class UserAutoidServiceImpl implements UserAutoidService {
 		return this.userAutoidDao2.findUserList(status);
 	}
 	
-
 }

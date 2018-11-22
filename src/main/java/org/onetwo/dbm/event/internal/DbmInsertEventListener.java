@@ -24,9 +24,7 @@ public class DbmInsertEventListener extends InsertEventListener{
 	protected void beforeDoInsert(DbmInsertEvent event, DbmMappedEntry entry){
 		Object entity = event.getObject();
 		
-		if(LangUtils.isMultiple(entity)){
-			throw new DbmException("the source object can not be a multiple object : "+entity.getClass());
-		}
+		throwIfEntityIsMultiple(entity);
 		if(entry.isEntity() && entry.getIdentifyField().isGeneratedValue()){
 			Serializable id = generatedIdentifyBeforeInsert(event, entry);
 			entry.setId(entity, id);
@@ -45,9 +43,25 @@ public class DbmInsertEventListener extends InsertEventListener{
 				entry.setId(entity, id);
 			}
 		}*/
-		
 	}
 	
+	/***
+	 * 另外提供了batchInsert，简直insert的参数为集合类型
+	 * 
+	 * @author weishao zeng
+	 * @param entity
+	 */
+	private void throwIfEntityIsMultiple(Object entity){
+		if(LangUtils.isMultiple(entity)){
+			throw new DbmException("the source object can not be a multiple object : "+entity.getClass());
+		}
+	}
+	
+	/****
+	 * 显式调用insert，并且fetchId为false，才会转为批量插入；
+	 * 已经修改为实际不会自动优化
+	 * @see #throwIfEntityIsMultiple
+	 */
 	protected void doInsert(DbmInsertEvent event, DbmMappedEntry entry) {
 		DbmSessionEventSource es = event.getEventSource();
 		this.beforeDoInsert(event, entry);
@@ -63,6 +77,7 @@ public class DbmInsertEventListener extends InsertEventListener{
 		
 		int updateCount = 0;
 		if(event.isFetchId()){
+			// 自动生成id的话，无法使用批量插入优化
 			if(entry.getIdentifyField()!=null && entry.getIdentifyField().isIdentityStrategy()){ 
 				int index = 0;
 				for(Object[] arg : args){

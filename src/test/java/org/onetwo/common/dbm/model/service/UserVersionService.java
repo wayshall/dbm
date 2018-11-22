@@ -40,7 +40,7 @@ public class UserVersionService {
 		return user;
 	}
 	
-	public UserVersionEntity reloadAndUpdate(UserVersionEntity user) {
+	public UserVersionEntity reload(UserVersionEntity user) {
 		return this.baseEntityManager.load(UserVersionEntity.class, user.getId());
 	}
 	

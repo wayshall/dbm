@@ -63,24 +63,28 @@ CREATE TABLE `employee` (
 -- Table structure for test_user
 -- ----------------------------
 DROP TABLE IF EXISTS `test_user`;
-CREATE TABLE `test_user` (
-  `id` bigint(20) unsigned NOT NULL,
-  `user_name` varchar(50) COLLATE utf8_bin NOT NULL,
-  `nick_name` varchar(50) COLLATE utf8_bin DEFAULT NULL,
-  `password` varchar(50) COLLATE utf8_bin DEFAULT NULL,
-  `email` varchar(50) COLLATE utf8_bin DEFAULT NULL,
-  `mobile` varchar(20) COLLATE utf8_bin DEFAULT NULL,
-  `gender` int(11) DEFAULT NULL,
-  `status` varchar(20) COLLATE utf8_bin DEFAULT NULL,
-  `birthday` datetime DEFAULT NULL,
-  `age` int(11) DEFAULT NULL,
-  `height` float DEFAULT NULL,
-  `create_at` datetime DEFAULT NULL,
-  `update_at` datetime DEFAULT NULL,
-  `app_code` varchar(20) COLLATE utf8_bin DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `id_UNIQUE` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+CREATE TABLE `test_user`  (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `user_name` varchar(50) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `nick_name` varchar(50) CHARACTER SET utf8 COLLATE utf8_bin NULL DEFAULT NULL,
+  `password` varchar(50) CHARACTER SET utf8 COLLATE utf8_bin NULL DEFAULT NULL,
+  `email` varchar(50) CHARACTER SET utf8 COLLATE utf8_bin NULL DEFAULT NULL,
+  `mobile` varchar(20) CHARACTER SET utf8 COLLATE utf8_bin NULL DEFAULT NULL,
+  `gender` int(11) NULL DEFAULT NULL,
+  `status` varchar(20) CHARACTER SET utf8 COLLATE utf8_bin NULL DEFAULT NULL,
+  `birthday` datetime(0) NULL DEFAULT NULL,
+  `age` int(11) NULL DEFAULT NULL,
+  `height` float NULL DEFAULT NULL,
+  `create_at` datetime(0) NULL DEFAULT NULL,
+  `update_at` datetime(0) NULL DEFAULT NULL,
+  `app_code` varchar(20) CHARACTER SET utf8 COLLATE utf8_bin NULL DEFAULT NULL,
+  `appCode` varchar(255) CHARACTER SET utf8 COLLATE utf8_bin NULL DEFAULT NULL,
+  `userName` varchar(255) CHARACTER SET utf8 COLLATE utf8_bin NULL DEFAULT NULL,
+  `data_version` bigint(20) NULL DEFAULT NULL,
+  PRIMARY KEY (`id`) USING BTREE,
+  UNIQUE INDEX `id_UNIQUE`(`id`) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_bin ROW_FORMAT = Compact;
+
 
 -- ----------------------------
 -- Table structure for test_user_autoid

@@ -167,6 +167,10 @@ final public class Dbms {
 	}
 	
 
+	public static <R> R doInRequiresNewPropagation(BaseEntityManager baseEntityManager, Function<DbmTransaction, R> func) {
+		return doInRequiresNewPropagation((DbmSessionImplementor)baseEntityManager.getSessionFactory(), func);
+	}
+	
 	public static <R> R doInRequiresNewPropagation(DbmSessionImplementor contextSession, Function<DbmTransaction, R> func) {
 		DbmSessionImplementor session = (DbmSessionImplementor)contextSession.getSessionFactory().openSession();
 		DefaultTransactionDefinition definition = new DefaultTransactionDefinition();
@@ -184,7 +188,7 @@ final public class Dbms {
 			throw new DbmException("doInRequiresNewPropagation error", e);
 		} 
 	}
-
+	
 	private Dbms(){
 	}
 }

@@ -8,6 +8,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import javax.annotation.Resource;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.onetwo.common.base.DbmBaseTest;
 import org.onetwo.common.date.NiceDate;
@@ -21,6 +22,11 @@ public class OneBatchInsertTest extends DbmBaseTest {
 	
 	@Resource
 	private UserAutoidServiceImpl userAutoidServiceImpl;
+	
+	@Before
+	public void setup() {
+		userAutoidServiceImpl.deleteAll();
+	}
 	
 	@Test
 	public void testBatchInsert(){
@@ -39,7 +45,6 @@ public class OneBatchInsertTest extends DbmBaseTest {
 		Assert.assertEquals(insertCount, count);
 		t.stop();
 		
-		userAutoidServiceImpl.deleteAll();
 	}
 	
 	@Test

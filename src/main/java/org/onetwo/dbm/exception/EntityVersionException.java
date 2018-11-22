@@ -9,6 +9,12 @@ public class EntityVersionException extends DbmException{
 	final private Object entityVersion;
 	final private Object lastVersion;
 	
+	public EntityVersionException(Class<?> entityClass, Object id, Object entityVersion) {
+		super("entity["+entityClass+"] version has changed, id: " + id + ", entity version: " + entityVersion);
+		this.id = id;
+		this.entityVersion = entityVersion;
+		this.lastVersion = null;
+	}
 	public EntityVersionException(Class<?> entityClass, Object id, Object entityVersion, Object lastVersion) {
 		super("entity["+entityClass+"] version has changed, id: " + id + ", entity version: " + entityVersion + ", lasted version: " + lastVersion);
 		this.id = id;
@@ -30,8 +36,7 @@ public class EntityVersionException extends DbmException{
 
 	@Override
 	public String toString() {
-		return "EntityVersionException [id=" + id + ", entityVersion=" + entityVersion + ", lastVersion=" + lastVersion
-				+ "]";
+		return "EntityVersionException [id=" + id + ", entityVersion=" + entityVersion + ", lastVersion=" + lastVersion + "]";
 	}
 	
 }

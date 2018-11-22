@@ -47,8 +47,8 @@ public class DbmLongVersionTest extends DbmBaseTest {
 		user.setGender(UserGenders.MALE);
 		this.userLongVersionService.persist(user);
 		Assert.assertEquals(10000000000L, user.getId(), 0);
+		assertThat(user.getDataVersion()).isEqualTo(1);
 		
-		// 由于mysql的时间字段只能精确到秒，所以必须等待一秒后再更新，否则下面的抛错断言会出错
 		LangUtils.await(1);
 		UserLongVersionEntity quser = userLongVersionService.findById(id);
 		Assert.assertNotNull(quser);
@@ -57,19 +57,20 @@ public class DbmLongVersionTest extends DbmBaseTest {
 		Assert.assertEquals(user.getGender(), quser.getGender());
 		quser.setAge(35);
 		userLongVersionService.update(quser);
+		assertThat(quser.getDataVersion()).isEqualTo(2);
 		
 		LangUtils.await(1);
 		user.setAge(30);
 		// 这里拿旧的实体更新，上面更新过，所以这里抛错
-		Object updateAt = user.getUpdateAt();
 		assertThatThrownBy(()->{
 			userLongVersionService.update(user);
 		})
 		.isInstanceOf(EntityVersionException.class)
-		.hasFieldOrPropertyWithValue("entityVersion", updateAt);
-		
+		.hasFieldOrPropertyWithValue("lastVersion", quser.getDataVersion());
+
 		// 重新加载保存
-		userLongVersionService.reloadAndUpdate(user);
+		UserLongVersionEntity reloaduser = userLongVersionService.reload(user);
+		assertThat(reloaduser.getDataVersion()).isEqualTo(2);
 
 
 		CyclicBarrier barrier = new CyclicBarrier(2);
@@ -81,6 +82,7 @@ public class DbmLongVersionTest extends DbmBaseTest {
 			} catch(EntityVersionException e) {
 				Assert.assertNotNull(e.getEntityVersion());
 				System.out.println(e);
+				e.printStackTrace();
 			}
 			latch.countDown();
 		});
@@ -88,6 +90,7 @@ public class DbmLongVersionTest extends DbmBaseTest {
 		UserLongVersionEntity user40age = userLongVersionService.update(id, 40);
 		barrier.await(); // 调用await，让updateWithCountDownLatch1方法开始执行更新操作
 		assertThat(user40age.getAge()).isEqualTo(40);
+		assertThat(user40age.getDataVersion()).isEqualTo(3);
 
 		latch.await();
 	}
@@ -106,10 +109,15 @@ public class DbmLongVersionTest extends DbmBaseTest {
 		user.setGender(UserGenders.MALE);
 		this.userLongVersionService.persist(user);
 		Assert.assertEquals(id, user.getId(), 0);
+		assertThat(user.getDataVersion()).isEqualTo(1);
 		
 		user.setAge(40);
 		UserLongVersionEntity newuser = userLongVersionService.dymanicUpdate(user);
 		assertThat(newuser.getAge()).isEqualTo(40);
+		assertThat(newuser.getDataVersion()).isEqualTo(2);
+		
+		newuser = userLongVersionService.dymanicUpdate(user);
+		assertThat(newuser.getDataVersion()).isEqualTo(3);
 		
 		// 测试获取新的版本值 val = mfield.getVersionableType().getVersionValule(val);
 		

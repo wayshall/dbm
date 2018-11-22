@@ -49,15 +49,17 @@ public class DbmDateVersionTest extends DbmBaseTest {
 		this.userVersionService.persist(user);
 		Assert.assertEquals(10000000000L, user.getId(), 0);
 		
-		// 由于mysql的时间字段只能精确到秒，所以必须等待一秒后再更新，否则下面的抛错断言会出错
-		LangUtils.await(1);
+		
 		UserVersionEntity quser = userVersionService.findById(id);
 		Assert.assertNotNull(quser);
 		Assert.assertEquals(user.getId(), quser.getId());
 		Assert.assertEquals(user.getUserName(), quser.getUserName());
 		Assert.assertEquals(user.getGender(), quser.getGender());
 		quser.setAge(35);
+		// 由于mysql的时间字段只能精确到秒，所以必须等待一秒后再更新，使更新的时候版本值能变化，否则下面拿旧实体更新也不会抛错
+		LangUtils.await(1);
 		userVersionService.update(quser);
+		assertThat(quser.getUpdateAt().getTime()).isGreaterThan(user.getUpdateAt().getTime());
 		
 		LangUtils.await(1);
 		user.setAge(30);
@@ -70,7 +72,8 @@ public class DbmDateVersionTest extends DbmBaseTest {
 		.hasFieldOrPropertyWithValue("entityVersion", updateAt);
 		
 		// 重新加载保存
-		userVersionService.reloadAndUpdate(user);
+		UserVersionEntity reloaduser = userVersionService.reload(user);
+		assertThat(quser.getUpdateAt().getTime()).isEqualTo(reloaduser.getUpdateAt().getTime());
 
 
 		CyclicBarrier barrier = new CyclicBarrier(2);
@@ -82,6 +85,7 @@ public class DbmDateVersionTest extends DbmBaseTest {
 			} catch(EntityVersionException e) {
 				Assert.assertNotNull(e.getEntityVersion());
 				System.out.println(e);
+				e.printStackTrace();
 			}
 			latch.countDown();
 		});
@@ -89,6 +93,7 @@ public class DbmDateVersionTest extends DbmBaseTest {
 		UserVersionEntity user40age = userVersionService.update(id, 40);
 		barrier.await(); // 调用await，让updateWithCountDownLatch1方法开始执行更新操作
 		assertThat(user40age.getAge()).isEqualTo(40);
+		assertThat(user40age.getUpdateAt().getTime()).isGreaterThan(user.getUpdateAt().getTime());
 
 		latch.await();
 	}
@@ -107,10 +112,13 @@ public class DbmDateVersionTest extends DbmBaseTest {
 		user.setGender(UserGenders.MALE);
 		this.userVersionService.persist(user);
 		Assert.assertEquals(id, user.getId(), 0);
+		long lastUpdateAt = user.getUpdateAt().getTime();
 		
+		LangUtils.await(1);
 		user.setAge(40);
 		UserVersionEntity newuser = userVersionService.dymanicUpdate(user);
 		assertThat(newuser.getAge()).isEqualTo(40);
+		assertThat(newuser.getUpdateAt().getTime()).isGreaterThan(lastUpdateAt);
 		
 	}
 }

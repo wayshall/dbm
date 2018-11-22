@@ -1,0 +1,61 @@
+package org.onetwo.common.dbm.model.service;
+
+import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import org.onetwo.common.db.spi.BaseEntityManager;
+import org.onetwo.common.dbm.model.entity.UserEntity;
+import org.onetwo.common.dbm.model.entity.UserEntity.UserGenders;
+import org.onetwo.common.dbm.model.entity.UserEntity.UserStatus;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+/**
+ * @author weishao zeng
+ * <br/>
+ */
+@Service
+@Transactional
+public class NoAutoIdUserService {
+	@Autowired
+	BaseEntityManager baseEntityManager;
+
+	public int deleteAll(){
+		return this.baseEntityManager.removeAll(UserEntity.class);
+	}
+	
+	public void insertList(int startId, int insertCount){
+		List<UserEntity> userlist = Stream.iterate(startId, item->item+1).limit(insertCount)
+					.map(i->createUserEntity("testList", i))
+					.collect(Collectors.toList());
+		
+		baseEntityManager.getSessionFactory().getSession().batchInsert(userlist);
+	}
+	
+	public void insertByStep(int startId, int insertCount){
+		String userName = "unique_user_name______________________";
+		Stream.iterate(startId, item->item+1).limit(insertCount).forEach(item->{
+			UserEntity entity = createUserEntity("test", item);
+			entity.setUserName(userName);
+			baseEntityManager.save(entity);
+		});
+	}
+	private UserEntity createUserEntity(String userNamePrefix,  int i){
+		UserEntity user = new UserEntity();
+		user.setId(Long.valueOf(i));;
+		user.setUserName(userNamePrefix+"-batch-"+i);
+		user.setPassword("password-batch-"+i);
+//		user.setCreateTime(new Date());
+		user.setGender(UserGenders.MALE);
+		user.setNickName("nickName-batch-"+i);
+		user.setEmail("test@qq.com");
+		user.setMobile("137"+i);
+		user.setBirthday(new Date());
+		user.setStatus(UserStatus.NORMAL);
+		return user;
+	}
+}
+
