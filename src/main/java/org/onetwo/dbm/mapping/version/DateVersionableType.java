@@ -8,7 +8,7 @@ import org.onetwo.dbm.dialet.DBDialect;
 public class DateVersionableType implements VersionableType<Date> {
 
 	@Override
-	public boolean isSupportType(DBDialect dbDialect, Class<?> type) {
+	public boolean isSupport(DBDialect dbDialect, Class<?> type) {
 		return Date.class.isAssignableFrom(type) && dbDialect.getDbmeta().getDataBase()!=DataBase.MySQL;
 	}
 

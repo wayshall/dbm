@@ -80,7 +80,7 @@ public class JPAMappedEntryBuilder extends DbmMappedEntryBuilder {
 	
 	private Optional<VersionableType<?>> findSupportedVersionableType(DbmMappedField mfield) {
 		DBDialect dbDialect = mfield.getEntry().getDbDialect();
-		return VersionableTypes.stream().filter(vt->vt.isSupportType(dbDialect, mfield.getPropertyInfo().getType())).findFirst();
+		return VersionableTypes.stream().filter(vt->vt.isSupport(dbDialect, mfield.getPropertyInfo().getType())).findFirst();
 	}
 
 	@Override
