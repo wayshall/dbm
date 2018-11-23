@@ -26,8 +26,9 @@ import org.onetwo.common.reflect.ReflectUtils;
 import org.onetwo.common.utils.LangOps;
 import org.onetwo.dbm.core.spi.DbmEntityManager;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.annotation.Rollback;
 
-//@Rollback(false)
+@Rollback(false)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class DbmNestedMappingTest extends DbmBaseTest {
 
