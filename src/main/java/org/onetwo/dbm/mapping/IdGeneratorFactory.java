@@ -12,13 +12,16 @@ import org.onetwo.common.annotation.AnnotationInfo;
 import org.onetwo.common.jackson.JsonMapper;
 import org.onetwo.common.reflect.ReflectUtils;
 import org.onetwo.common.spring.SpringUtils;
+import org.onetwo.common.spring.Springs;
 import org.onetwo.dbm.annotation.DbmIdGenerator;
+import org.onetwo.dbm.annotation.DbmIdGenerator.GeneratorCreator;
 import org.onetwo.dbm.id.CustomIdGenerator;
 import org.onetwo.dbm.id.CustomerIdGeneratorAdapter;
 import org.onetwo.dbm.id.IdentifierGenerator;
 import org.onetwo.dbm.id.SequenceGeneratorAttrs;
 import org.onetwo.dbm.id.SequenceIdGenerator;
 import org.onetwo.dbm.id.SnowflakeGenerator;
+import org.onetwo.dbm.id.SnowflakeIdGenerator;
 import org.onetwo.dbm.id.TableGeneratorAttrs;
 import org.onetwo.dbm.id.TableIdGenerator;
 
@@ -28,7 +31,7 @@ import org.onetwo.dbm.id.TableIdGenerator;
  */
 public class IdGeneratorFactory {
 //	private static final Logger logger = JFishLoggerFactory.getLogger(IdGeneratorFactory.class);
-	private static final SnowflakeGenerator DefaultSnowflakeGenerator = new SnowflakeGenerator();
+//	private static final SnowflakeGenerator DefaultSnowflakeGenerator = new SnowflakeGenerator();
 	
 	public static Optional<IdentifierGenerator<Long>> createSequenceGenerator(AnnotationInfo annotationInfo){
 		SequenceGenerator sg = annotationInfo.getAnnotation(SequenceGenerator.class);
@@ -59,23 +62,25 @@ public class IdGeneratorFactory {
 	@SuppressWarnings("unchecked")
 	public static Optional<IdentifierGenerator<? extends Serializable>> createDbmIdGenerator(AnnotationInfo annotationInfo){
 		DbmIdGenerator dg = annotationInfo.getAnnotation(DbmIdGenerator.class);
-		if(dg==null){
+		if (dg==null) {
 			return Optional.empty();
 		}
-		String attribute = dg.attributes();
-		// 如果没有attrbiute定制属性，使用默认的生成器
-		if(StringUtils.isBlank(attribute) && dg.generatorClass()==SnowflakeGenerator.class){
-//			customIdGenerator = Springs.getInstance().getBean(dg.generatorClass());
-			IdentifierGenerator<? extends Serializable> idGenerator = new CustomerIdGeneratorAdapter<>(dg.name(), DefaultSnowflakeGenerator);
+		GeneratorCreator creator = dg.creator();
+		if (creator==GeneratorCreator.SPRING) {
+			CustomIdGenerator<? extends Serializable> customIdGenerator = Springs.getInstance().getBean(dg.generatorClass());
+			IdentifierGenerator<? extends Serializable> idGenerator = new CustomerIdGeneratorAdapter<>(dg.name(), customIdGenerator);
 			return Optional.of(idGenerator);
 		}
 		
+		String attribute = dg.attributes();
 		CustomIdGenerator<? extends Serializable> customIdGenerator = null;
-		/*if (Springs.getInstance().isActive()) {
-			customIdGenerator = Springs.getInstance().getBean(dg.generatorClass());
-		}*/
+		if (dg.generatorClass()==SnowflakeGenerator.class) {
+			SnowflakeIdGenerator idg = Springs.getInstance().getBean(SnowflakeIdGenerator.class);
+			customIdGenerator = new SnowflakeGenerator(idg);
+		} else {
+			customIdGenerator = ReflectUtils.newInstance(dg.generatorClass());
+		}
 		
-		customIdGenerator = ReflectUtils.newInstance(dg.generatorClass());
 		if(StringUtils.isNotBlank(attribute)){
 			HashMap<String, Object> jsonMap = JsonMapper.IGNORE_EMPTY.fromJson(attribute, HashMap.class);
 			SpringUtils.getMapToBean().injectBeanProperties(jsonMap, customIdGenerator);

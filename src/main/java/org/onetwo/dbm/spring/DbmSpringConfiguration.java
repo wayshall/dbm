@@ -4,7 +4,6 @@ import java.util.Collection;
 import java.util.Map;
 
 import javax.sql.DataSource;
-import javax.validation.Validator;
 
 import org.apache.commons.lang3.StringUtils;
 import org.onetwo.common.db.dquery.DynamicQueryObjectRegisterListener;
@@ -17,7 +16,10 @@ import org.onetwo.dbm.core.spi.DbmEntityManager;
 import org.onetwo.dbm.core.spi.DbmSessionFactory;
 import org.onetwo.dbm.event.internal.EdgeEventBus;
 import org.onetwo.dbm.exception.DbmException;
+import org.onetwo.dbm.id.DbmIds;
+import org.onetwo.dbm.id.SnowflakeIdGenerator;
 import org.onetwo.dbm.mapping.DbmConfig;
+import org.onetwo.dbm.mapping.DbmConfig.SnowflakeIdConfig;
 import org.onetwo.dbm.mapping.DefaultDbmConfig;
 import org.onetwo.dbm.stat.SqlExecutedStatis;
 import org.onetwo.dbm.utils.DbmUtils;
@@ -42,8 +44,8 @@ public class DbmSpringConfiguration implements ApplicationContextAware, Initiali
 	@Autowired(required=false)
 	private DbmConfig dbmConfig;
 
-	@Autowired(required=false)
-	private Validator validator;
+//	@Autowired(required=false)
+//	private Validator validator;
 	
 //	private String[] packagesToScan;
 //	private List<String> packageNames = new ArrayList<String>();
@@ -120,6 +122,18 @@ public class DbmSpringConfiguration implements ApplicationContextAware, Initiali
 		DbmEntityManagerCreateEvent.publish(applicationContext, dbmEntityManager);
 		
 		return dbmEntityManager;
+	}
+	
+	@Bean(name=DbmIds.SNOWFLAKE_BEAN_NAME)
+	public SnowflakeIdGenerator dbmSnowflakeIdGenerator(DbmConfig dbmConfig) {
+		SnowflakeIdGenerator sid = null;
+		SnowflakeIdConfig config = dbmConfig.getSnowflakeId();
+		if (config.isAuto()) {
+			sid = DbmIds.createIdGeneratorByAddress();
+		} else {
+			sid = DbmIds.createIdGenerator(config.getDatacenterId(), config.getMachineId());
+		}
+		return sid;
 	}
 	
 	/*@Bean

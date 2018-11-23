@@ -1,6 +1,5 @@
 package org.onetwo.dbm.id;
 
-import java.util.Date;
 import java.util.Set;
 import java.util.concurrent.ConcurrentSkipListSet;
 
@@ -42,7 +41,7 @@ public class SnowflakeIdGeneratorTest {
 					throw new RuntimeException("same id:"+id);
 				}
 				idSet.add(id);
-				System.out.println(new Date().toLocaleString() + ": id length:"+String.valueOf(id).length()+", id:"+id+", sid:"+Long.toString(id, 36));
+				System.out.println("id length:"+String.valueOf(id).length()+", id:"+id+", sid:"+Long.toString(id, 36));
 			}
 		});
 		

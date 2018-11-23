@@ -11,12 +11,12 @@ import org.onetwo.dbm.core.spi.DbmSessionImplementor;
  */
 public class SnowflakeGenerator implements CustomIdGenerator<Serializable>  {
 
-	private SnowflakeIdGenerator idGenerator;
+	final private SnowflakeIdGenerator idGenerator;
 	private String prefix;
 	
-	public SnowflakeGenerator() {
+	public SnowflakeGenerator(SnowflakeIdGenerator idGenerator) {
 		super();
-		this.idGenerator = DbmIds.DefaultSnowflakeGenerator;
+		this.idGenerator = idGenerator;
 	}
 
 	@Override
