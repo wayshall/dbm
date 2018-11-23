@@ -1,6 +1,9 @@
 package org.onetwo.dbm.stat;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -67,7 +70,9 @@ public class SqlExecutedStatis {
 		StringBuilder log = new StringBuilder(1024);
 
 		log.append(separater);
-		Collection<StatInfo> stats = getStatInfos();
+		List<StatInfo> stats = new ArrayList<>(getStatInfos());
+		// 按maxExecutedTime降序
+		stats.sort(Comparator.comparingLong(s->-s.getMaxExecutedTime()));
 //		int maxLength = stats.stream().mapToInt(s->s.getName().length()).max().orElse(0);
 //		String title = String.format("%-"+maxLength+"s|%13s|%15s|%50s\n", "name", "executedCount", "maxExecutedTime", "sql");
 		String title = String.format("%13s|%15s|%50s"+separater, "executedCount", "maxExecutedTime", "sql");

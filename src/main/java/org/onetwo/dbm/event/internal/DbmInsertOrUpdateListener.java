@@ -16,7 +16,7 @@ public class DbmInsertOrUpdateListener extends AbstractDbmEventListener {
 		int updateCount = 0;
 		
 		if(entry.hasIdentifyValue(entity)){
-			//如果id有值并且id是自增
+			// 如果id有值并且id是自增
 			if(entry.getIdentifyField().isGeneratedValue() || entry.getIdentifyField().isIdentityStrategy()){
 				if(insertOrUpdate.isDynamicUpdate()){
 					updateCount = es.dymanicUpdate(entity);
@@ -24,10 +24,19 @@ public class DbmInsertOrUpdateListener extends AbstractDbmEventListener {
 					updateCount = es.update(entity);
 				}
 			}else{
+				// 插入前需要保存version字段的当前值，因为insert的时候可能会更改了
+				Object versionValue = null;
+				if(entry.isVersionControll()) {
+					versionValue = entry.getVersionField().getValue(entity);
+				}
 				try {
 					es.insert(entity);
 				} catch (EntityInsertException | DuplicateKeyException e) {
 					logger.warn("insert error, try to update...");
+					// 失败后把当前version值设置回去
+					if(entry.isVersionControll()) {
+						entry.getVersionField().setValue(entity, versionValue);
+					}
 					if(insertOrUpdate.isDynamicUpdate()){
 						updateCount = es.dymanicUpdate(entity);
 					}else{

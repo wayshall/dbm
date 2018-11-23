@@ -72,7 +72,7 @@ public class JdbcStatementContextBuilder implements JdbcStatementContext<List<Ob
 				}else if(DbmEventAction.update==getEventAction()){
 					Assert.notNull(val, "version field["+field.getName()+"] can't be null on update: " + entry.getEntityName());
 					val = field.getVersionableType().getVersionValule(val);
-//					field.setValue(entity, val);
+					field.setValue(entity, val);
 				}
 			}
 			this.columnValues.put(field, val);
