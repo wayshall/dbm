@@ -5,10 +5,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.Before;
 import org.junit.Test;
 import org.onetwo.common.base.DbmBaseTest;
+import org.onetwo.common.concurrent.ConcurrentRunnable;
 import org.onetwo.common.db.spi.BaseEntityManager;
 import org.onetwo.common.dbm.model.entity.ArticleEntity;
 import org.onetwo.common.dbm.model.entity.SnowflakeIdUserEntity;
 import org.onetwo.common.dbm.model.entity.SnowflakeIdUserEntity.SnowflakeIdUser2Entity;
+import org.onetwo.common.dbm.model.service.SnowflakeIdService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -16,12 +18,43 @@ import org.springframework.beans.factory.annotation.Autowired;
  * <br/>
  */
 public class DbmSnowflakeTest extends DbmBaseTest {
+
 	@Autowired
-	BaseEntityManager entityManager;
+	private BaseEntityManager entityManager;
+	
+	/****
+	 * 必须都要REQUIRES_NEW事务，否则因为使用同一个事务，before方法后并没有提交事务，
+	 * 在执行testConcurrentGenerateIds都并发测试时，会因为等待事务都释放也造成死锁
+	 */
+	@Autowired
+	SnowflakeIdService snowflakeIdService;
 	
 	@Before
 	public void before() {
-		entityManager.removeAll(SnowflakeIdUserEntity.class);
+		snowflakeIdService.removeSnowflakeIdUsers();
+		snowflakeIdService.removeArticles();
+	}
+	
+
+	/***
+	 * 测试并发插入snowfalekID是否有问题
+	 * 
+	 * @author weishao zeng
+	 */
+	@Test
+	public void testConcurrentGenerateIds(){
+		int count = 1000;
+		
+		ConcurrentRunnable cr = ConcurrentRunnable.create(1, () -> {
+			this.snowflakeIdService.saveSnowflakeIdUsers(count);
+		})
+		.addRunnables(()->{
+			this.snowflakeIdService.saveArticles(count);
+		})
+		;
+		
+		cr.start();
+		cr.await();
 	}
 	
 	@Test

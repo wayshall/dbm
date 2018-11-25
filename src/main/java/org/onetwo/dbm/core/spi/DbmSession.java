@@ -16,6 +16,8 @@ import org.onetwo.dbm.utils.DbmLock;
 import org.springframework.transaction.TransactionDefinition;
 
 public interface DbmSession {
+	
+	public DbmTransaction getTransaction();
 
 	public SessionTransactionType getTransactionType();
 	

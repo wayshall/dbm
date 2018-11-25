@@ -1,6 +1,7 @@
 package org.onetwo.dbm.id;
 
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.lang3.StringUtils;
 import org.onetwo.common.convert.Types;
@@ -18,11 +19,17 @@ import lombok.Data;
  * <br/>
  */
 public class DbmIds {
+	private static final AtomicLong TxIdCounter = new AtomicLong(1);
+	
 	public static final String SNOWFLAKE_BEAN_NAME = "dbmSnowflakeIdGenerator";
 	public static final SnowflakeIdGenerator DefaultSnowflakeGenerator = new SnowflakeIdGenerator(7L);
 	private static final Cache<SnowflakeIdKey, SnowflakeIdGenerator> IDCACHES = CacheBuilder.newBuilder()
 																							.build();
 
+	public static AtomicLong getTxIdCounter() {
+		return TxIdCounter;
+	}
+	
 	public static SnowflakeIdGenerator createIdGeneratorByAddress() {
 		//根据ip地址来创建生成器
 		String[] strs = StringUtils.split(NetUtils.getHostAddress(), ".");

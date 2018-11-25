@@ -64,7 +64,7 @@ public class DbmSessionFactoryImpl implements InitializingBean, DbmSessionFactor
 	private DbmInnerServiceRegistry serviceRegistry;
 	protected String[] packagesToScan;
 	
-	private AtomicLong idGenerator = new AtomicLong(0);
+	final private AtomicLong idGenerator = new AtomicLong(0);
 	
 	private DbmInterceptorManager interceptorManager;
 	

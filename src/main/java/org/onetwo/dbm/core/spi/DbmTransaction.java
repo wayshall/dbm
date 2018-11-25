@@ -7,6 +7,8 @@ import org.springframework.transaction.TransactionStatus;
 
 public interface DbmTransaction {
 	
+	long getId();
+	
 	TransactionStatus getStatus();
 	
 	Connection getConnection();
