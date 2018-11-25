@@ -185,11 +185,13 @@ public class JPAMappedEntryBuilder extends DbmMappedEntryBuilder {
 
 	@Override
 	protected void buildMappedField(DbmMappedField mfield){
-		if(mfield.getPropertyInfo().hasAnnotation(Id.class)){
+		if (mfield.getPropertyInfo().hasAnnotation(Id.class)) {
 			mfield.setIdentify(true);
 			this.buildIdGeneratorsOnField(mfield);
+		} else if (mfield.isMappingGenerated()) {
+			this.buildIdGeneratorsOnField(mfield);
 		}
-		if(mfield.getPropertyInfo().hasAnnotation(Version.class)){
+		if (mfield.getPropertyInfo().hasAnnotation(Version.class)) {
 			Optional<VersionableType<?>> opt = findSupportedVersionableType(mfield);
 			if(!opt.isPresent()){
 				throw new DbmException("the type of field["+mfield.getName()+"] is not a supported version type. supported types: " + VersionableTypes);

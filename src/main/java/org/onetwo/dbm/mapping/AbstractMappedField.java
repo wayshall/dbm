@@ -12,6 +12,7 @@ import org.onetwo.common.utils.LangUtils;
 import org.onetwo.common.utils.StringUtils;
 import org.onetwo.dbm.annotation.DbmField;
 import org.onetwo.dbm.annotation.DbmFieldListeners;
+import org.onetwo.dbm.annotation.DbmGenerated;
 import org.onetwo.dbm.annotation.DbmJsonField;
 import org.onetwo.dbm.event.spi.DbmEventAction;
 import org.onetwo.dbm.id.StrategyType;
@@ -57,12 +58,15 @@ abstract public class AbstractMappedField implements DbmMappedField{
 	private DbmEnumType enumType;
 	
 	private DbmFieldValueConverter fieldValueConverter;
+	final private boolean mappingGenerated;
 	
 	public AbstractMappedField(DbmMappedEntry entry, JFishProperty propertyInfo) {
 		super();
 		this.entry = entry;
 		this.propertyInfo = propertyInfo;
 		this.name = propertyInfo.getName();
+		
+		this.mappingGenerated = propertyInfo.hasAnnotation(DbmGenerated.class);
 		
 		this.propertyInfo.getAnnotationInfo().setAnnotationFinder(SpringAnnotationFinder.INSTANCE);
 		
@@ -113,6 +117,10 @@ abstract public class AbstractMappedField implements DbmMappedField{
 			actualType = String.class;
 		}
 		this.actualMappingColumnType = actualType;
+	}
+
+	public boolean isMappingGenerated() {
+		return mappingGenerated;
 	}
 
 	public DbmFieldValueConverter getFieldValueConverter() {

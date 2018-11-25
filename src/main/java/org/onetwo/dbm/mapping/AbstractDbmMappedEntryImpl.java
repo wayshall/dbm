@@ -310,12 +310,14 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 		
 		this.mappedFields.put(field.getName(), field);
 		
-		if(field.isIdentify()){
+		if (field.isIdentify()) {
 			this.identifyField = field;
-		}else if(field.isVersionControll()){
+		} else if (field.isVersionControll()) {
 			if(versionField!=null)
 				throw new DbmException("a version field has already exist : " + versionField.getName());
 			this.versionField = field;
+		} else if (field.isMappingGenerated()) {
+			//TODO add to generatedFieldMapOnInsert or generatedFieldMapOnUpdate
 		}
 
 		/*if(field.isJoinTable()){

@@ -101,4 +101,7 @@ public interface DbmMappedField {
 	DbmFieldValueConverter getFieldValueConverter();
 	
 	DbmJsonField getJsonFieldAnnotation();
+	
+	boolean isMappingGenerated();
+	
 }

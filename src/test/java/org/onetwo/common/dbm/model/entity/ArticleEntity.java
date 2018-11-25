@@ -5,14 +5,20 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.TableGenerator;
+import javax.persistence.Version;
 
 import org.onetwo.dbm.annotation.DbmEntity;
+
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * @author wayshall
  * <br/>
  */
 @DbmEntity(table="test_article")
+@Data
+@EqualsAndHashCode(callSuper=true)
 public class ArticleEntity extends TenentBaseEntity {
 
 	@Id  
@@ -26,26 +32,15 @@ public class ArticleEntity extends TenentBaseEntity {
 	)
 	@SequenceGenerator(name="seqGenerator", sequenceName="SEQ_TEST_ARTICLE")
 	private Long id;
+//	@DbmGenerated(GeneratedOn.INSERT)
+//	@GeneratedValue(strategy = GenerationType.AUTO, generator="snowflakeId") 
+//	@DbmIdGenerator(name="snowflakeId", generatorClass=SnowflakeGenerator.class)
+	private Long tid;
 	private String title;
 	private String content;
 	
-	public Long getId() {
-		return id;
-	}
-	public void setId(Long id) {
-		this.id = id;
-	}
-	public String getTitle() {
-		return title;
-	}
-	public void setTitle(String title) {
-		this.title = title;
-	}
-	public String getContent() {
-		return content;
-	}
-	public void setContent(String content) {
-		this.content = content;
-	}
+	@Version
+	private int dataVersion;
+	
 	
 }

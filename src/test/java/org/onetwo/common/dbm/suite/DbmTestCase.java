@@ -13,6 +13,7 @@ import org.onetwo.common.dbm.DbmDateVersionTest;
 import org.onetwo.common.dbm.DbmEntityManagerTest;
 import org.onetwo.common.dbm.DbmLongVersionTest;
 import org.onetwo.common.dbm.DbmNestedMappingTest;
+import org.onetwo.common.dbm.DbmSnowflakeTest;
 import org.onetwo.common.dbm.JsonFieldTest;
 import org.onetwo.common.dbm.QueryConfigTest;
 import org.onetwo.common.dbm.TransactionalListenerTest;
@@ -41,7 +42,8 @@ import org.onetwo.common.dbm.model.service.UserAutoidServiceTest;
 	UserOptionDaoTest.class,
 	DbmDateVersionTest.class,
 	DbmLongVersionTest.class,
-	UserAutoidServiceTest.class
+	UserAutoidServiceTest.class,
+	DbmSnowflakeTest.class
 //	RichModelTest.class
 })
 public class DbmTestCase {
