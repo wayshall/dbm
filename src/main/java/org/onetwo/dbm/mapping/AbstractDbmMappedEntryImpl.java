@@ -395,6 +395,11 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 		return versionField;
 	}
 
+	@Override
+	public Object getVersionValue(Object entity) {
+		return versionField.getValue(entity);
+	}
+
 	protected void throwIfQueryableOnly(){
 		if(isQueryableOnly()){
 			LangUtils.throwBaseException("this entity is only for query  : " + this.entityClass);
@@ -536,7 +541,7 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 	}
 	
 	@Override
-	public JdbcStatementContext<List<Object[]>> makeDelete(Object objects, boolean isIdentify){
+	public JdbcStatementContext<List<Object[]>> makeDelete(Object objects){
 		this.throwIfQueryableOnly();
 		
 		JdbcStatementContextBuilder dsb = JdbcStatementContextBuilder.create(DbmEventAction.delete, this, getStaticDeleteSqlBuilder());
@@ -544,19 +549,13 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 		if(LangUtils.isMultiple(objects)){
 			List<Object> list = LangUtils.asList(objects);
 			for(Object obj : list){
-				if(isIdentify){
-					Object idValue = obj;
-					if(isInstance(idValue)){
-						idValue = getId(idValue);
-					}
-					dsb.addCauseValue(idValue);
-				}else{
-					dsb.processWhereCauseValuesFromEntity(obj);
-				}
+				this.addRequiredCauseValue(dsb, obj);
 				dsb.addBatch();
 			}
 		}else{
-			if(isIdentify){
+			this.addRequiredCauseValue(dsb, objects);
+			
+			/*if(isIdentify){
 				Object idValue = objects;
 				if(isInstance(idValue)){
 					idValue = getId(idValue);
@@ -564,13 +563,22 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 				dsb.addCauseValue(idValue);
 			}else{
 				dsb.processWhereCauseValuesFromEntity(objects);
-			}
+			}*/
 		}
 		
 		dsb.build();
 //		KVEntry<String, List<Object[]>> kv = new KVEntry<String, List<Object[]>>(dsb.getSql(), dsb.getValues());
 //		JdbcStatementContext<List<Object[]>> kv = SimpleJdbcStatementContext.create(dsb.getSqlBuilder(), dsb.getValue());
 		return dsb;
+	}
+	
+	private void addRequiredCauseValue(JdbcStatementContextBuilder dsb, Object entityObject) {
+		Object idValue = getId(entityObject);
+		dsb.addCauseValue(idValue);
+		if (isVersionControll()) {
+			Object version = getVersionValue(entityObject);
+			dsb.addCauseValue(version);
+		}
 	}
 	
 	@Override

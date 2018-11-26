@@ -112,12 +112,19 @@ public class DbmLongVersionTest extends DbmBaseTest {
 		assertThat(user.getDataVersion()).isEqualTo(1);
 		
 		user.setAge(40);
-		UserLongVersionEntity newuser = userLongVersionService.dymanicUpdate(user);
-		assertThat(newuser.getAge()).isEqualTo(40);
-		assertThat(newuser.getDataVersion()).isEqualTo(2);
+		UserLongVersionEntity userV2 = userLongVersionService.dymanicUpdate(user);
+		UserLongVersionEntity reloadUser = userLongVersionService.reload(userV2);
+		assertThat(reloadUser.getAge()).isEqualTo(40);
+		assertThat(reloadUser.getDataVersion()).isEqualTo(2);
+
+		UserLongVersionEntity userV3 = userLongVersionService.dymanicUpdate(userV2);
+		assertThat(userV3.getDataVersion()).isEqualTo(3);
 		
-		newuser = userLongVersionService.dymanicUpdate(user);
-		assertThat(newuser.getDataVersion()).isEqualTo(3);
+		assertThatThrownBy(()->{
+			userLongVersionService.remove(reloadUser);
+		})
+		.isInstanceOf(EntityVersionException.class)
+		.hasFieldOrPropertyWithValue("lastVersion", userV3.getDataVersion());
 		
 		// 测试获取新的版本值 val = mfield.getVersionableType().getVersionValule(val);
 		

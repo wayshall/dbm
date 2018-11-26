@@ -37,8 +37,9 @@ public interface DbmMappedEntryMeta {
 	public boolean isEntity();
 	
 	public boolean isInstance(Object entity);
-	
+
 	public DbmMappedField getVersionField();
+	public Object getVersionValue(Object entity);
 	
 	public boolean isVersionControll();
 	

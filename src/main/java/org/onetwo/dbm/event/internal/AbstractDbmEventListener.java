@@ -13,9 +13,11 @@ import org.onetwo.dbm.event.spi.DbmEventListener;
 import org.onetwo.dbm.event.spi.DbmInsertOrUpdateEvent;
 import org.onetwo.dbm.event.spi.DbmSessionEvent;
 import org.onetwo.dbm.exception.DbmException;
+import org.onetwo.dbm.exception.EntityVersionException;
 import org.onetwo.dbm.jdbc.internal.SimpleArgsPreparedStatementCreator;
 import org.onetwo.dbm.mapping.DbmConfig;
 import org.onetwo.dbm.mapping.DbmEntityListener;
+import org.onetwo.dbm.mapping.DbmMappedEntry;
 import org.onetwo.dbm.mapping.DbmMappedEntryMeta;
 import org.onetwo.dbm.mapping.DbmMappedField;
 import org.onetwo.dbm.mapping.EntrySQLBuilder;
@@ -174,4 +176,53 @@ abstract public class AbstractDbmEventListener implements DbmEventListener<DbmSe
 	protected void throwIfEffectiveCountError(String operation, int expectCount, int effectiveCount){
 		DbmUtils.throwIfEffectiveCountError(operation + " error.", expectCount, effectiveCount);
 	}
+	
+	protected final Object checkEntityLastVersion(DbmSessionEventSource es, DbmMappedEntry entry, Object singleEntity) {
+		Object currentTransactionVersion = null;
+		if(entry.isVersionControll()){
+			currentTransactionVersion = getLastVersion(es, entry, singleEntity);
+			Object entityVersion = entry.getVersionValue(singleEntity);
+			DbmMappedField versionField = entry.getVersionField();
+			
+			if(!versionField.getVersionableType().isEquals(entityVersion, currentTransactionVersion)){
+				throw new EntityVersionException(entry.getEntityClass(), entry.getId(singleEntity), entityVersion, currentTransactionVersion);
+			}
+		}
+		return currentTransactionVersion;
+	}
+	
+
+	/***
+	 * 在不可重复读事务里，返回数据库最新版本值
+	 * 如果在一个可重复读的事务里，实际上得到的version还是旧的，只是防止程序员自己修改version字段
+	 * 
+	 * @author weishao zeng
+	 * @param es
+	 * @param entry
+	 * @param singleEntity
+	 * @return
+	 */
+	private Object getLastVersion(DbmSessionEventSource es, DbmMappedEntry entry, Object singleEntity) {
+		DbmMappedField versionField = entry.getVersionField();
+		JdbcStatementContext<Object[]> versionContext = entry.makeSelectVersion(singleEntity);
+		Object last = es.getDbmJdbcOperations().queryForObject(versionContext.getSql(), versionField.getColumnType(), entry.getId(singleEntity));
+		return last;
+	}
+	
+	/***
+	 * 使用新的事务获取最新版本值
+	 * 不应该使用这个方法，update时保证即可
+	 * @author weishao zeng
+	 * @param es
+	 * @param entry
+	 * @param singleEntity
+	 * @return
+	 
+	@SuppressWarnings("unused")
+	@Deprecated
+	private Object getLastVersionWithNewTransaction(DbmSessionEventSource es, DbmMappedEntry entry, Object singleEntity) {
+		return Dbms.doInRequiresNewPropagation(es, t->{
+			return getLastVersion(es, entry, singleEntity);
+		});
+	}*/
 }

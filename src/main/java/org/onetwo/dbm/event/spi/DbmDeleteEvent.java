@@ -4,24 +4,18 @@ import org.onetwo.dbm.event.internal.DbmSessionEventSource;
 
 public class DbmDeleteEvent extends DbmSessionEvent{
 	
-	public static enum DeleteType {
-		byEntity,
-		byIdentify,
-		deleteAll,
-	}
-
+	private DeleteType deleteType = DeleteType.BY_IDENTIFY;//DeleteType.byIdentify;//
 	public DbmDeleteEvent(Object object, DbmSessionEventSource eventSource) {
 		super(object, DbmEventAction.delete, eventSource);
 	}
 
-	private DeleteType deleteType = DeleteType.byEntity;//DeleteType.byIdentify;//
 
 	public boolean isDeleteByIdentify() {
-		return DeleteType.byIdentify==deleteType;
+		return DeleteType.BY_IDENTIFY==deleteType;
 	}
 
 	public boolean isDeleteAll() {
-		return DeleteType.deleteAll==deleteType;
+		return DeleteType.DELETE_ALL==deleteType;
 	}
 
 	public DeleteType getDeleteType() {
@@ -31,5 +25,10 @@ public class DbmDeleteEvent extends DbmSessionEvent{
 	public void setDeleteType(DeleteType deleteType) {
 		this.deleteType = deleteType;
 	}
-	
+
+	public static enum DeleteType {
+//		BY_ENTITY,
+		BY_IDENTIFY,
+		DELETE_ALL,
+	}
 }

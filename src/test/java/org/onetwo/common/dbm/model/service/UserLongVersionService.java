@@ -30,6 +30,11 @@ public class UserLongVersionService {
 		return user;
 	}
 	
+	public UserLongVersionEntity remove(UserLongVersionEntity user) {
+		this.baseEntityManager.remove(user);
+		return user;
+	}
+	
 	public UserLongVersionEntity update(UserLongVersionEntity user) {
 		this.baseEntityManager.update(user);
 		return user;

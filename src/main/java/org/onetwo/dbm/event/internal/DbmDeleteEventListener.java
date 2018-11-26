@@ -7,6 +7,8 @@ import java.util.List;
 import org.onetwo.common.utils.Assert;
 import org.onetwo.dbm.event.spi.DbmDeleteEvent;
 import org.onetwo.dbm.event.spi.DbmSessionEvent;
+import org.onetwo.dbm.exception.EntityNotFoundException;
+import org.onetwo.dbm.exception.EntityVersionException;
 import org.onetwo.dbm.mapping.DbmMappedEntry;
 import org.onetwo.dbm.mapping.JdbcStatementContext;
 
@@ -37,10 +39,20 @@ public class DbmDeleteEventListener extends AbstractDbmEventListener {
 			argList.add(delete.getValue());
 			count = this.executeJdbcUpdate(delete.getSql(), argList, es);
 		}else{
-			JdbcStatementContext<List<Object[]>> delete = entry.makeDelete(entity, deleteEvent.isDeleteByIdentify());
+			checkEntityLastVersion(es, entry, entity);
+			
+			JdbcStatementContext<List<Object[]>> delete = entry.makeDelete(entity);
 			List<List<Object[]>> argList = new ArrayList<>(1);
 			argList.add(delete.getValue());
 			count = this.executeJdbcUpdate(delete.getSql(), delete.getValue(), es);
+			
+			if(count<1){
+				if(entry.isVersionControll()){
+					throw new EntityVersionException(entry.getEntityClass(), entry.getId(entity), entry.getVersionValue(entity));
+				}else{
+					throw new EntityNotFoundException("update count is " + count + ".", entity.getClass(), entry.getId(entity));
+				}
+			}
 		}
 		/*if(count<1)
 			throw new JFishOrmException("can not delete any entity["+entry.getEntityClass()+"] : " + count);*/

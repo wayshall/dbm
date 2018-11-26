@@ -25,12 +25,10 @@ public class SnowflakeIdService {
 
 	private Set<Long> idSet = new ConcurrentSkipListSet<>();
 	
-	@Transactional
 	public void removeSnowflakeIdUsers() {
 		baseEntityManager.removeAll(SnowflakeIdUserEntity.class);
 	}
 
-	@Transactional
 	public void removeArticles() {
 		baseEntityManager.removeAll(ArticleEntity.class);
 	}

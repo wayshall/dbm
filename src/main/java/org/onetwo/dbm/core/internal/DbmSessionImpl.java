@@ -43,7 +43,6 @@ import org.onetwo.dbm.query.DbmQueryImpl;
 import org.onetwo.dbm.query.DbmQueryWrapperImpl;
 import org.onetwo.dbm.utils.DbmLock;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.ColumnMapRowMapper;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowMapper;
@@ -111,7 +110,7 @@ public class DbmSessionImpl extends AbstractDbmSession implements DbmSessionEven
 		return beginTransaction(null);
 	}
 	
-	public DbmTransaction beginTransaction(TransactionDefinition definition) {
+	public synchronized DbmTransaction beginTransaction(TransactionDefinition definition) {
 		if(this.transactionType==SessionTransactionType.CONTEXT_MANAGED 
 //				|| this.transactionType==SessionTransactionType.PROXY
 			){
@@ -287,7 +286,7 @@ public class DbmSessionImpl extends AbstractDbmSession implements DbmSessionEven
 		Assert.notNull(id);
 		DbmDeleteEvent deleteEvent = new DbmDeleteEvent(id, this);
 		deleteEvent.setEntityClass(entityClass);
-		deleteEvent.setDeleteType(DeleteType.byIdentify);
+		deleteEvent.setDeleteType(DeleteType.BY_IDENTIFY);
 		this.fireEvents(deleteEvent);
 		return deleteEvent.getUpdateCount();
 	}
@@ -295,7 +294,7 @@ public class DbmSessionImpl extends AbstractDbmSession implements DbmSessionEven
 	public int deleteAll(Class<?> entityClass){
 		DbmDeleteEvent deleteEvent = new DbmDeleteEvent(null, this);
 		deleteEvent.setEntityClass(entityClass);
-		deleteEvent.setDeleteType(DeleteType.deleteAll);
+		deleteEvent.setDeleteType(DeleteType.DELETE_ALL);
 		this.fireEvents(deleteEvent);
 		return deleteEvent.getUpdateCount();
 	}
