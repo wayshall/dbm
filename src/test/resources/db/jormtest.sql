@@ -69,7 +69,7 @@ CREATE TABLE `employee` (
 -- ----------------------------
 DROP TABLE IF EXISTS `gen_ids`;
 CREATE TABLE `gen_ids` (
-  `gen_name` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `gen_name` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
   `gen_value` bigint(20) NOT NULL,
   PRIMARY KEY (`gen_name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;

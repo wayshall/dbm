@@ -23,7 +23,8 @@ public class DbmSnowflakeTest extends DbmBaseTest {
 	private BaseEntityManager entityManager;
 	
 	/****
-	 * 必须都要REQUIRES_NEW事务，否则因为使用同一个事务，before方法后并没有提交事务，
+	 * 必须都要REQUIRES_NEW事务，否则死锁；
+	 * 因为spring 测试的时候会自动启动一个事务，非REQUIRES_NEW的话都会使用同一个事务，如此before方法后并没有提交事务，
 	 * 在执行testConcurrentGenerateIds都并发测试时，会因为等待事务都释放也造成死锁
 	 */
 	@Autowired
