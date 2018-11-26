@@ -19,7 +19,14 @@ import lombok.Data;
  * <br/>
  */
 public class DbmIds {
-	private static final AtomicLong TxIdCounter = new AtomicLong(1);
+	/***
+	 * 
+	 * spring单元测试时，一般为-1
+	 * 
+	 */
+	public static final int UNKNOW_TX_ID = -1;
+	
+	private static final AtomicLong TX_ID_COUNTER = new AtomicLong(1);
 	
 	public static final String SNOWFLAKE_BEAN_NAME = "dbmSnowflakeIdGenerator";
 	public static final SnowflakeIdGenerator DefaultSnowflakeGenerator = new SnowflakeIdGenerator(7L);
@@ -27,7 +34,7 @@ public class DbmIds {
 																							.build();
 
 	public static AtomicLong getTxIdCounter() {
-		return TxIdCounter;
+		return TX_ID_COUNTER;
 	}
 	
 	public static SnowflakeIdGenerator createIdGeneratorByAddress() {

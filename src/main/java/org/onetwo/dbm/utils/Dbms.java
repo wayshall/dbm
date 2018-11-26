@@ -168,13 +168,13 @@ final public class Dbms {
 	
 
 	public static <R> R doInRequiresNewPropagation(BaseEntityManager baseEntityManager, Function<DbmTransaction, R> func) {
-		return doInRequiresNewPropagation((DbmSessionImplementor)baseEntityManager.getSessionFactory(), func);
+		return doInPropagation((DbmSessionImplementor)baseEntityManager.getSessionFactory(), TransactionDefinition.PROPAGATION_REQUIRES_NEW, func);
 	}
 	
-	public static <R> R doInRequiresNewPropagation(DbmSessionImplementor contextSession, Function<DbmTransaction, R> func) {
+	public static <R> R doInPropagation(DbmSessionImplementor contextSession, int propagationBehavior, Function<DbmTransaction, R> func) {
 		DbmSessionImplementor session = (DbmSessionImplementor)contextSession.getSessionFactory().openSession();
 		DefaultTransactionDefinition definition = new DefaultTransactionDefinition();
-		definition.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+		definition.setPropagationBehavior(propagationBehavior);
 		DbmTransaction transaction = session.beginTransaction(definition);
 		try {
 			R result = func.apply(transaction);

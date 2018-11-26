@@ -43,7 +43,6 @@ import org.onetwo.dbm.query.DbmQueryImpl;
 import org.onetwo.dbm.query.DbmQueryWrapperImpl;
 import org.onetwo.dbm.utils.DbmLock;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.jdbc.core.ColumnMapRowMapper;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowMapper;
@@ -111,7 +110,7 @@ public class DbmSessionImpl extends AbstractDbmSession implements DbmSessionEven
 		return beginTransaction(null);
 	}
 	
-	public DbmTransaction beginTransaction(TransactionDefinition definition) {
+	public synchronized DbmTransaction beginTransaction(TransactionDefinition definition) {
 		if(this.transactionType==SessionTransactionType.CONTEXT_MANAGED 
 //				|| this.transactionType==SessionTransactionType.PROXY
 			){

@@ -8,6 +8,7 @@ import org.onetwo.dbm.annotation.DbmInterceptorFilter.InterceptorType;
 import org.onetwo.dbm.core.spi.DbmInterceptor;
 import org.onetwo.dbm.core.spi.DbmInterceptorChain;
 import org.onetwo.dbm.core.spi.DbmSessionFactory;
+import org.onetwo.dbm.id.DbmIds;
 import org.onetwo.dbm.mapping.DbmConfig;
 import org.onetwo.dbm.utils.DbmUtils;
 import org.slf4j.Logger;
@@ -48,7 +49,7 @@ public class LogSqlInterceptor implements DbmInterceptor, Ordered {
 			});
 		}
 		if(logger.isTraceEnabled()){
-			long txId = sessionFactory.getSession().getTransaction().getId();
+			long txId = sessionFactory.getSession().getTransaction()!=null?sessionFactory.getSession().getTransaction().getId():DbmIds.UNKNOW_TX_ID;
 			logger.trace("tx[{}] dbm sql: {}, sql parameters: {}", txId, sqlParams.getKey(), sqlParams.getValue());
 		}
 		
