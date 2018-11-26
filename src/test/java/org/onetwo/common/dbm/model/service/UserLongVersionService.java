@@ -35,6 +35,7 @@ public class UserLongVersionService {
 		return user;
 	}
 	
+	
 	public UserLongVersionEntity update(UserLongVersionEntity user) {
 		this.baseEntityManager.update(user);
 		return user;
@@ -49,7 +50,7 @@ public class UserLongVersionService {
 		return this.baseEntityManager.load(UserLongVersionEntity.class, user.getId());
 	}
 	
-	public UserLongVersionEntity updateWithCountDownLatch1(Long id, CyclicBarrier cyclicBarrier)  {
+	public UserLongVersionEntity updateWithCyclicBarrier(Long id, CyclicBarrier cyclicBarrier)  {
 		UserLongVersionEntity user = this.baseEntityManager.load(UserLongVersionEntity.class, id);
 		try {
 			cyclicBarrier.await();
@@ -58,6 +59,16 @@ public class UserLongVersionService {
 		}
 		baseEntityManager.update(user);
 		return user;
+	}
+	public UserLongVersionEntity remove(Long id, CyclicBarrier cyclicBarrier) {
+		// 先加载
+		this.baseEntityManager.load(UserLongVersionEntity.class, id);
+		try {
+			cyclicBarrier.await();
+		} catch (InterruptedException | BrokenBarrierException e) {
+			throw new RuntimeException(e);
+		}
+		return this.baseEntityManager.removeById(UserLongVersionEntity.class, id);
 	}
 	
 	public UserLongVersionEntity update(Long id, int age) {

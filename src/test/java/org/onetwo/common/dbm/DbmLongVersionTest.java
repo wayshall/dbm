@@ -8,6 +8,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -28,6 +29,8 @@ public class DbmLongVersionTest extends DbmBaseTest {
 	@Autowired
 	private UserLongVersionService userLongVersionService;
 	private ExecutorService executorService = Executors.newFixedThreadPool(2);
+	
+	private volatile AtomicBoolean success = new AtomicBoolean(true);
 	
 	@Before
 	public void before() {
@@ -72,27 +75,57 @@ public class DbmLongVersionTest extends DbmBaseTest {
 		UserLongVersionEntity reloaduser = userLongVersionService.reload(user);
 		assertThat(reloaduser.getDataVersion()).isEqualTo(2);
 
-
 		CyclicBarrier barrier = new CyclicBarrier(2);
-		CountDownLatch latch = new CountDownLatch(1);
+		final CountDownLatch latch = new CountDownLatch(1);
 		executorService.execute(()->{
 			try {
-				userLongVersionService.updateWithCountDownLatch1(id, barrier);
+				userLongVersionService.updateWithCyclicBarrier(id, barrier);
+				success.set(false);
 				Assert.fail("实体已被主线程更新过，版本已修改，应该抛出 EntityVersionException 异常");
 			} catch(EntityVersionException e) {
 				Assert.assertNotNull(e.getEntityVersion());
 				System.out.println(e);
 				e.printStackTrace();
+			} finally {
+				latch.countDown();
 			}
-			latch.countDown();
 		});
 		LangUtils.await(2);	// 等待2秒，确保另外线程的updateWithCountDownLatch1方法，先开始事务查询
 		UserLongVersionEntity user40age = userLongVersionService.update(id, 40);
 		barrier.await(); // 调用await，让updateWithCountDownLatch1方法开始执行更新操作
 		assertThat(user40age.getAge()).isEqualTo(40);
 		assertThat(user40age.getDataVersion()).isEqualTo(3);
+		assertThat(success.get()).isTrue();
 
 		latch.await();
+		assertThat(success.get()).isTrue();
+		
+		
+		
+		barrier.reset();
+		CountDownLatch latch2 = new CountDownLatch(1);
+		success.set(true);
+		executorService.execute(()->{
+			try {
+				userLongVersionService.remove(id, barrier);
+				success.set(false);
+				Assert.fail("实体已被主线程更新过，版本已修改，应该抛出 EntityVersionException 异常");
+			} catch(EntityVersionException e) {
+				Assert.assertNotNull(e.getEntityVersion());
+				System.out.println(e);
+				e.printStackTrace();
+			} finally {
+				latch2.countDown();
+			}
+		});
+		UserLongVersionEntity user50age = userLongVersionService.update(id, 50);
+		barrier.await(); // 调用await，让updateWithCountDownLatch1方法开始执行更新操作
+		assertThat(user50age.getAge()).isEqualTo(50);
+		assertThat(user50age.getDataVersion()).isEqualTo(4);
+		
+
+		latch2.await();
+		assertThat(success.get()).isTrue();
 	}
 	
 
