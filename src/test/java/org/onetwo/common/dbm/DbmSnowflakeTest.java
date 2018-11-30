@@ -46,7 +46,7 @@ public class DbmSnowflakeTest extends DbmBaseTest {
 	public void testConcurrentGenerateIds(){
 		int count = 1000;
 		
-		ConcurrentRunnable cr = ConcurrentRunnable.create(1, () -> {
+		ConcurrentRunnable cr = ConcurrentRunnable.create(2, () -> {
 			this.snowflakeIdService.saveSnowflakeIdUsers(count);
 		})
 		.addRunnables(()->{
