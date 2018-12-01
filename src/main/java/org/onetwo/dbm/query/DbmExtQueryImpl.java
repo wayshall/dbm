@@ -52,8 +52,8 @@ public class DbmExtQueryImpl extends SelectExtQueryImpl {
 	}
 
 	protected String getDefaultCountField(){
-		if(entry!=null && entry.getIdentifyField()!=null){
-			return entry.getIdentifyField().getColumn().getName();
+		if(entry!=null && !entry.getIdentifyFields().isEmpty()){
+			return entry.getIdentifyFields().get(0).getColumn().getName();
 		}
 		return "*";
 	}

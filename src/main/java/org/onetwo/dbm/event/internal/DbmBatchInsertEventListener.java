@@ -55,11 +55,12 @@ public class DbmBatchInsertEventListener extends DbmInsertEventListener{
 		if(!LangUtils.isMultiple(entity)){
 			throw new DbmException("the source object must be a multiple object : "+entity.getClass());
 		}
-		if(entry.isEntity() && entry.getIdentifyField().isGeneratedValue()){
+		if(entry.isEntity() && entry.hasGeneratedValueIdField()){
 			Serializable id = null;
 			List<Object> list = LangUtils.asList(entity);
 			for(Object en : list){
-				id = generatedIdentifyBeforeInsert(event, entry);
+//				id = generatedIdentifyBeforeInsert(event, entry);
+				setIdIfNecessary(event, entry, en);
 				entry.setId(en, id);
 			}
 		}

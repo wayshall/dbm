@@ -81,6 +81,22 @@ public class DbmEntityManagerTest extends DbmBaseTest {
 		assertThat(queryUser, is(user));
 		
 	}
+	
+
+	@Test
+	public void testPersist() {
+		entityManager.removeAll(UserEntity.class);
+		user = new UserEntity();
+		user.setUserName("JdbcTest");
+		user.setBirthday(JodatimeUtils.parse("1982-05-06").toDate());
+		user.setEmail("username@qq.com");
+		user.setHeight(3.3f);
+		user.setAge(28);
+		user.setId(10000000000L);
+		user.setGender(UserGenders.MALE);
+		entityManager.persist(user);
+		Assert.assertEquals(10000000000L, user.getId(), 0);
+	}
 
 	@Test
 	public void testSave() {

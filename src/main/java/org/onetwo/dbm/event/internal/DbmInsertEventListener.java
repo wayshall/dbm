@@ -1,13 +1,11 @@
 package org.onetwo.dbm.event.internal;
 
-import java.io.Serializable;
 import java.util.List;
 
 import org.onetwo.common.utils.LangUtils;
 import org.onetwo.dbm.event.spi.DbmInsertEvent;
 import org.onetwo.dbm.exception.DbmException;
 import org.onetwo.dbm.exception.EntityInsertException;
-import org.onetwo.dbm.id.IdentifierGenerator;
 import org.onetwo.dbm.jdbc.internal.SimpleArgsPreparedStatementCreator;
 import org.onetwo.dbm.mapping.DbmMappedEntry;
 import org.onetwo.dbm.mapping.JdbcStatementContext;
@@ -20,15 +18,14 @@ import org.springframework.jdbc.support.KeyHolder;
  *
  */
 public class DbmInsertEventListener extends InsertEventListener{
+	
+	
 
 	protected void beforeDoInsert(DbmInsertEvent event, DbmMappedEntry entry){
 		Object entity = event.getObject();
 		
 		throwIfEntityIsMultiple(entity);
-		if(entry.isEntity() && entry.getIdentifyField().isGeneratedValue()){
-			Serializable id = generatedIdentifyBeforeInsert(event, entry);
-			entry.setId(entity, id);
-		}
+		setIdIfNecessary(event, entry, entity);
 
 		/*if(entry.isEntity() && entry.getIdentifyField().isGeneratedValue()){
 			Serializable id = null;
@@ -76,20 +73,22 @@ public class DbmInsertEventListener extends InsertEventListener{
 		List<Object> objects = LangUtils.asList(entity);
 		
 		int updateCount = 0;
-		if(event.isFetchId()){
+		if (event.isFetchId()) {
 			// 自动生成id的话，无法使用批量插入优化
-			if(entry.getIdentifyField()!=null && entry.getIdentifyField().isIdentityStrategy()){ 
+			if (entry.hasIdentityStrategyField()) { 
 				int index = 0;
-				for(Object[] arg : args){
+				for (Object[] arg : args) {
 					KeyHolder keyHolder = new GeneratedKeyHolder();
 					updateCount += es.getDbmJdbcOperations().updateWith(new SimpleArgsPreparedStatementCreator(sql, arg), keyHolder);
-					if(keyHolder.getKey()!=null)
+					if (keyHolder.getKey()!=null) {
+						//TODO 如果有多个自动生成字段，这里还需要处理
 						entry.setId(objects.get(index++), keyHolder.getKey());
+					}
 				}
 			}else{
 				updateCount += executeJdbcUpdate(sql, args, es);
 			}
-		}else{
+		} else {
 			updateCount += executeJdbcUpdate(sql, args, es);
 		}
 
@@ -101,11 +100,5 @@ public class DbmInsertEventListener extends InsertEventListener{
 	}
 	
 //	@SuppressWarnings("unchecked")
-	public Serializable generatedIdentifyBeforeInsert(DbmInsertEvent event, DbmMappedEntry entry){
-		DbmSessionEventSource es = event.getEventSource();
-		IdentifierGenerator<? extends Serializable> idGenerator = entry.getIdentifyField().getIdGenerator();
-		Serializable id = idGenerator.generate(es);
-		return id;
-	}
 	
 }

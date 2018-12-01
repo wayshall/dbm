@@ -8,21 +8,31 @@ import org.onetwo.dbm.event.spi.DbmInsertEvent;
 import org.onetwo.dbm.exception.DbmException;
 import org.onetwo.dbm.id.IdentifierGenerator;
 import org.onetwo.dbm.mapping.DbmMappedEntry;
+import org.onetwo.dbm.mapping.DbmMappedField;
 import org.onetwo.dbm.mapping.JdbcStatementContext;
 
 public class OracleBatchInsertEventListener extends OracleInsertEventListener {
 	
-	@SuppressWarnings("unchecked")
 	@Override
 	protected void beforeDoInsert(DbmInsertEvent event, DbmMappedEntry entry){
-		if(entry.isEntity() && entry.getIdentifyField().isSeqStrategy()){
+		if (!entry.isEntity()) {
+			return ;
+		}
+		for(DbmMappedField idField : entry.getIdentifyFields()) {
+			generateSeqId(event, entry, idField);
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	protected void generateSeqId(DbmInsertEvent event, DbmMappedEntry entry, DbmMappedField idField){
+		if(idField.isSeqStrategy()){
 			Object entity = event.getObject();
 
 			List<Object> list = LangUtils.asList(entity);
 			
 			/*TimeCounter counter = new TimeCounter("select batch seq...");
 			counter.start();*/
-			IdentifierGenerator<Long> idGenerator = (IdentifierGenerator<Long>)entry.getIdentifyField().getIdGenerator();
+			IdentifierGenerator<Long> idGenerator = (IdentifierGenerator<Long>)idField.getIdGenerator();
 //			Pair<Long, Long> seqs = idGenerator.batchGenerate(event.getEventSource(), list.size());
 //			counter.stop();
 

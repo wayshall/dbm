@@ -140,6 +140,7 @@ abstract public class AbstractMappedField implements DbmMappedField{
 	
 	@Override
 	public Object getValue(Object entity){
+		entity = IDclassEntity
 		Object value = propertyInfo.getValue(entity);
 		value = this.fieldValueConverter.forStore(this, value);
 		return value;

@@ -29,7 +29,7 @@ public class DbmQueryableMappedEntryImpl extends AbstractDbmMappedEntryImpl impl
 		staticFetchSqlBuilder.setNamedPlaceHoder(false);
 		staticFetchSqlBuilder.append(columns);
 		if(taboleInfo.getPrimaryKey()!=null){
-			staticFetchSqlBuilder.appendWhere(getIdentifyField());
+			staticFetchSqlBuilder.appendWhere(getIdentifyFields());
 		}
 		staticFetchSqlBuilder.build();
 	}

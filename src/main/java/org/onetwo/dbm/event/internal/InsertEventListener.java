@@ -1,8 +1,12 @@
 package org.onetwo.dbm.event.internal;
 
+import java.io.Serializable;
+
 import org.onetwo.dbm.event.spi.DbmInsertEvent;
 import org.onetwo.dbm.event.spi.DbmSessionEvent;
+import org.onetwo.dbm.id.IdentifierGenerator;
 import org.onetwo.dbm.mapping.DbmMappedEntry;
+import org.onetwo.dbm.mapping.DbmMappedField;
 
 abstract public class InsertEventListener extends AbstractDbmEventListener {
 	
@@ -36,5 +40,28 @@ abstract public class InsertEventListener extends AbstractDbmEventListener {
 	/*protected int invokeInsert(JFishInsertEvent event, String sql, List<Object[]> args, JFishEventSource es){
 		return executeJdbcUpdate(event, sql, args, es);
 	}*/
+	
+	protected void setIdIfNecessary(DbmInsertEvent event, DbmMappedEntry entry, Object entity) {
+//		if(entry.isEntity() && entry.getIdentifyField().isGeneratedValue()){
+//			Serializable id = generatedIdentifyBeforeInsert(event, entry);
+//			entry.setId(entity, id);
+//		}
+		if (!entry.isEntity()) {
+			return ;
+		}
+		for (DbmMappedField idField : entry.getIdentifyFields()) {
+			if (idField.isGeneratedValue()) {
+				Serializable id = generatedIdentifyBeforeInsert(event, idField);
+				idField.setValue(entity, id);
+			}
+		}
+	}
+
+	public Serializable generatedIdentifyBeforeInsert(DbmInsertEvent event, DbmMappedField idField){
+		DbmSessionEventSource es = event.getEventSource();
+		IdentifierGenerator<? extends Serializable> idGenerator = idField.getIdGenerator();
+		Serializable id = idGenerator.generate(es);
+		return id;
+	}
 	
 }

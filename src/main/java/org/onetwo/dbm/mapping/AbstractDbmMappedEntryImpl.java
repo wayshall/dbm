@@ -10,11 +10,13 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.persistence.IdClass;
+
 import org.onetwo.common.annotation.AnnotationInfo;
 import org.onetwo.common.db.TimeRecordableEntity;
-import org.onetwo.common.exception.BaseException;
 import org.onetwo.common.log.JFishLoggerFactory;
 import org.onetwo.common.reflect.ReflectUtils;
+import org.onetwo.common.spring.SpringUtils;
 import org.onetwo.common.utils.ArrayUtils;
 import org.onetwo.common.utils.Assert;
 import org.onetwo.common.utils.LangUtils;
@@ -29,7 +31,9 @@ import org.onetwo.dbm.id.IdentifierGenerator;
 import org.onetwo.dbm.mapping.SQLBuilderFactory.SqlBuilderType;
 import org.onetwo.dbm.utils.DbmUtils;
 import org.slf4j.Logger;
+import org.springframework.beans.ConfigurablePropertyAccessor;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 @SuppressWarnings({"unchecked", "rawtypes"})
@@ -54,7 +58,8 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 
 	protected Map<String, AbstractMappedField> mappedFields = new LinkedHashMap<String, AbstractMappedField>();
 	protected Map<String, AbstractMappedField> mappedColumns = new HashMap<String, AbstractMappedField>();
-	private DbmMappedField identifyField;
+	private Class<?> idClass = null;
+	private List<DbmMappedField> identifyFields = Lists.newArrayList();
 	private DbmMappedField versionField;
 	
 	private SQLBuilderFactory sqlBuilderFactory;
@@ -76,6 +81,8 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 	
 	private final DBDialect dbDialect;
 	
+	private boolean idMappingOnField = true;
+	
 //	private Map<SqlBuilderType, EntrySQLBuilder> entrySQLBuilderMap = Maps.newHashMap();
 	/*public AbstractJFishMappedEntryImpl(AnnotationInfo annotationInfo) {
 		this(annotationInfo, null);
@@ -89,6 +96,10 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 //		this.serviceRegistry = serviceRegistry;
 		this.entityName = this.entityClass.getName();
 		this.tableInfo = tableInfo;
+		IdClass idclass = annotationInfo.getAnnotation(IdClass.class);
+		if (idclass!=null) {
+			this.idClass = idclass.value();
+		}
 		if(Map.class.isAssignableFrom(entityClass)){
 			this.setDynamic(true);
 		}
@@ -118,6 +129,14 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 		this.entrySQLBuilderMap.put(type, builder);
 	}*/
 	
+	public boolean isIdMappingOnField() {
+		return idMappingOnField;
+	}
+
+	public void setIdMappingOnField(boolean idMappingOnField) {
+		this.idMappingOnField = idMappingOnField;
+	}
+
 	public DBDialect getDbDialect() {
 		return dbDialect;
 	}
@@ -150,6 +169,14 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 		throw new UnsupportedOperationException("the queryable entity unsupported this operation!");
 	}*/
 	
+	public Class<?> getIdClass() {
+		return idClass;
+	}
+	
+	public boolean isCompositePK() {
+		return this.idClass!=null;
+	}
+
 	public Map<String, IdentifierGenerator<?>> getIdGenerators() {
 		return idGenerators;
 	}
@@ -188,17 +215,56 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 	void setTableInfo(TableInfo tableInfo) {
 		this.tableInfo = tableInfo;
 	}
+	
+	public void checkIdType(Object value) {
+		if (!isCompositePK()) {
+			return ;
+		}
+		if (!idClass.isInstance(value)) {
+			throw new DbmException("the id value must be a instance of " + this.idClass);
+		}
+	}
 
 	@Override
-	public void setId(Object entity, Object value){
-		getIdentifyField().setValue(entity, value);
+	public void setId(Object entity, Object value) {
+//		this.checkIdType(value);
+//		getIdentifyField().setValue(entity, value);
+		if (!isCompositePK()) {
+			this.getIdentifyFields().get(0).setValue(entity, value);
+			return ;
+		}
+		if (!idClass.isInstance(value)) {
+			throw new DbmException("the id value must be a instance of " + this.idClass);
+		}
+		for (DbmMappedField field : this.getIdentifyFields()) {
+			Object fieldValue = field.getValue(value);
+			field.setValue(entity, fieldValue);
+		}
 	}
 	
+	/***
+	 * 如果是复合主键，只要有一个主键为null，即返回null
+	 */
 	@Override
 	public Object getId(Object entity){
-		if(getIdentifyField()==null)
-			return null;
-		return getIdentifyField().getValue(entity);
+//		if(getIdentifyField()==null)
+//			return null;
+//		return getIdentifyField().getValue(entity);
+		if (!isCompositePK()) {
+			Object idValue = this.getIdentifyFields().get(0).getValue(entity);
+			return idValue;
+		}
+		Object idValue = ReflectUtils.newInstance(idClass);
+		ConfigurablePropertyAccessor accesor = SpringUtils.newPropertyAccessor(idValue, true);
+		for (DbmMappedField field : this.getIdentifyFields()) {
+			Object fieldValue = field.getValue(entity);
+			// 如果是复合主键，只要有一个主键为null，即返回null
+			if (fieldValue==null) {
+				return null;
+			}
+			accesor.setPropertyValue(field.getName(), fieldValue);
+		}
+		return idValue;
 	}
 	
 	@Override
@@ -247,8 +313,8 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 	protected void checkEntry(){
 		if(getMappedType()!=MappedType.ENTITY)
 			return ;
-		if(getIdentifyField()==null){
-			throw new BaseException("the entity must has a identify : " + getEntityClass());
+		if(getIdentifyFields().isEmpty()){
+			throw new DbmException("the entity must has a identify : " + getEntityClass());
 		}
 	}
 
@@ -311,7 +377,7 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 		this.mappedFields.put(field.getName(), field);
 		
 		if (field.isIdentify()) {
-			this.identifyField = field;
+			this.identifyFields.add(field);
 		} else if (field.isVersionControll()) {
 			if(versionField!=null)
 				throw new DbmException("a version field has already exist : " + versionField.getName());
@@ -386,8 +452,8 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 	}
 
 	@Override
-	public DbmMappedField getIdentifyField() {
-		return identifyField;
+	public List<DbmMappedField> getIdentifyFields() {
+		return identifyFields;
 	}
 
 	@Override
@@ -461,17 +527,23 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 			//actual not support
 			List<Object> list = LangUtils.asList(objects);
 			for(Object id : list){
-				if(isIdentify)
+				if (isIdentify) {
 					dsb.addCauseValue(id);
-				else
+				} else {
 					dsb.processWhereCauseValuesFromEntity(id);
+				}
 				dsb.addBatch();
 			}
 		}else{
-			if(isIdentify)
-				dsb.addCauseValue(objects);
-			else
+			if (isIdentify) {
+//				dsb.addCauseValue(objects);
+				for (DbmMappedField idField : this.getIdentifyFields()) {
+					Object idValue = idField.getValue(objects);
+					dsb.addCauseValue(idValue);
+				}
+			} else {
 				dsb.processWhereCauseValuesFromEntity(objects);
+			}
 		}
 		
 		dsb.build();

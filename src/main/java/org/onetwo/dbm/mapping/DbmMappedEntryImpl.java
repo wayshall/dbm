@@ -66,13 +66,13 @@ public class DbmMappedEntryImpl extends AbstractDbmMappedEntryImpl implements Db
 		
 		staticUpdateSqlBuilder = createSQLBuilder(SqlBuilderType.update);
 		staticUpdateSqlBuilder.append(getUpdateableFields());
-		staticUpdateSqlBuilder.appendWhere(getIdentifyField());
+		staticUpdateSqlBuilder.appendWhere(getIdentifyFields());
 		staticUpdateSqlBuilder.appendWhere(getVersionField());
 		staticUpdateSqlBuilder.build();
 		
 		staticDeleteSqlBuilder = createSQLBuilder(SqlBuilderType.delete);
 		staticDeleteSqlBuilder.setNamedPlaceHoder(false);
-		staticDeleteSqlBuilder.appendWhere(getIdentifyField());
+		staticDeleteSqlBuilder.appendWhere(getIdentifyFields());
 		staticDeleteSqlBuilder.appendWhere(getVersionField());
 		staticDeleteSqlBuilder.build();
 		
@@ -88,7 +88,7 @@ public class DbmMappedEntryImpl extends AbstractDbmMappedEntryImpl implements Db
 		staticFetchSqlBuilder = createSQLBuilder(SqlBuilderType.query);
 		staticFetchSqlBuilder.setNamedPlaceHoder(false);
 		staticFetchSqlBuilder.append(columns);
-		staticFetchSqlBuilder.appendWhere(getIdentifyField());
+		staticFetchSqlBuilder.appendWhere(getIdentifyFields());
 		staticFetchSqlBuilder.build();
 
 		staticFetchAllSqlBuilder = createSQLBuilder(SqlBuilderType.query);
@@ -102,7 +102,7 @@ public class DbmMappedEntryImpl extends AbstractDbmMappedEntryImpl implements Db
 		
 		staticSelectVersionSqlBuilder = createSQLBuilder(SqlBuilderType.query);
 		staticSelectVersionSqlBuilder.append(getVersionField());
-		staticSelectVersionSqlBuilder.appendWhere(getIdentifyField());
+		staticSelectVersionSqlBuilder.appendWhere(getIdentifyFields());
 		staticSelectVersionSqlBuilder.build();
 		
 

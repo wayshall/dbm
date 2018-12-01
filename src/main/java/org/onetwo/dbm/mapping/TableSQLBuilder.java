@@ -109,9 +109,11 @@ public class TableSQLBuilder {
 			this.sql = this.buildDelete();
 		}else if(SqlBuilderType.query==type){
 			this.sql = this.buildQuery();
-		}else if(SqlBuilderType.primaryKey==type){
-			this.sql = this.buildPrimaryKey();
-		}else if(SqlBuilderType.seq==type){
+		}
+//		else if(SqlBuilderType.primaryKey==type){
+//			this.sql = this.buildPrimaryKey();
+//		}
+		else if(SqlBuilderType.seq==type){
 			this.sql = this.buildSeq();
 		}else{
 			LangUtils.throwBaseException("unsupported type: " + type);
