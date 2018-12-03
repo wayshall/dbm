@@ -138,4 +138,34 @@ CREATE TABLE `test_user_autoid` (
   UNIQUE KEY `id_UNIQUE` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=341 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
+
+-- ----------------------------
+-- Table structure for test_article
+-- ----------------------------
+DROP TABLE IF EXISTS `test_article`;
+CREATE TABLE `test_article` (
+  `id` bigint(20) NOT NULL,
+  `tid` bigint(20) DEFAULT NULL,
+  `title` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `create_at` datetime DEFAULT NULL,
+  `update_at` datetime DEFAULT NULL,
+  `data_version` int(11) DEFAULT NULL,
+  `tenement_id` bigint(20) DEFAULT NULL,
+  `client_id` varchar(64) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `content` varchar(1000) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- ----------------------------
+-- Table structure for test_column_article
+-- ----------------------------
+DROP TABLE IF EXISTS `test_column_article`;
+CREATE TABLE `test_column_article` (
+  `article_id` bigint(20) NOT NULL,
+  `column_id` bigint(20) NOT NULL,
+  `is_headline` tinyint(4) DEFAULT NULL COMMENT '是否栏目头条',
+  PRIMARY KEY (`article_id`,`column_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+
 SET FOREIGN_KEY_CHECKS = 1;
