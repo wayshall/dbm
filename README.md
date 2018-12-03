@@ -11,6 +11,7 @@
 - [一行代码启用](#一行代码启用)
 - [实体映射](#实体映射)
 - [id策略](#id策略)
+- [复合主键映射](#复合主键映射)
 - [其它特有的映射](#其它特有的映射)
 - [BaseEntityManager接口](#baseentitymanager接口)
 - [CrudEntityManager接口](#crudentitymanager接口)
@@ -135,6 +136,52 @@ dbm支持jpa的GenerationType的id策略，此外还提供了通过@DbmIdGenerat
   目前的实现是：如果是mysql，则等同于GenerationType.IDENTITY，如果是oracle，则等同于GenerationType.SEQUENCE   
 - DbmIdGenerator   
   dbm提供id生成注解，可通过配置 generatorClass 属性，配置自定义的id实现类，实现类必须实现CustomIdGenerator接口。dbm首先会通过尝试在spring context查找generatorClass类型的bean，如果找不到则通过反射创建实例。
+
+## 复合主键映射
+jpa支持三种复合主键映射策略，dbm目前只支持一种： @IdClass 映射。
+映射方法如下：
+假设有一个表有两个主键：id1，id2。
+实体的Java代码如下：
+```Java
+@Data
+@Entity
+@Table(name="composite_table")
+@IdClass(CompositeId.class)
+public class CompositeEntity {
+
+	@Id  
+	Long id1;
+	@Id
+	Long id2;
+
+	@Transient
+	CompositeId id;
+	
+	//....其它属性
+
+	@Data
+	public static class CompositeId implements Serializable {
+		Long id1;
+		Long id2;
+	}
+}
+
+```
+解释：
+- 把需要映射为主键的实体属性都用 @Id 注解标注   
+- 另外创建一个复合主键的Pojo类CompositeId，属性为实体需要映射为主键的属性，名称类型一一对应，并实现 java.io.Serializable 接口   
+- 在实体类里用 @IdClass 注解标注为复合主键类为 CompositedId 类   
+- 实体的CompositeId属性不是必须的，只是为了更方便使用组合id
+
+
+复合主键实体的查找方法为：
+```Java
+CompositedId cid = new CompositedId(1, 1);
+CompositeEntity entity = baseEntityManager.load(CompositeEntity.class, cid);
+
+int deleteCount = baseEntityManager.removeById(CompositeEntity.class, entity.getId());
+```
+
 
 ### 详细使用
 #### GenerationType.IDENTITY

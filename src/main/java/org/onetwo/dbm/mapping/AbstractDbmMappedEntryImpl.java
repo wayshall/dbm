@@ -656,8 +656,22 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 	}
 	
 	private void addRequiredCauseValue(JdbcStatementContextBuilder dsb, Object entityObject) {
-		Object idValue = getId(entityObject);
-		dsb.addCauseValue(idValue);
+		/*Object idValue = getId(entityObject);
+		dsb.addCauseValue(idValue);*/
+		if (!isCompositePK()) {
+			Object idValue = getId(entityObject);
+			dsb.addCauseValue(idValue);
+		} else {
+			// 复合主键存在多个id的情况
+			EntrySQLBuilder sqlBuilder = dsb.getSqlBuilder();
+			for (DbmMappedField idField : sqlBuilder.getWhereCauseFields()) {
+				if (idField.isIdentify()) {
+					Object idValue = idField.getValue(entityObject);
+					dsb.addCauseValue(idValue);
+				}
+			}
+		}
+		
 		if (isVersionControll()) {
 			Object version = getVersionValue(entityObject);
 			dsb.addCauseValue(version);

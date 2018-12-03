@@ -49,6 +49,9 @@ public class CompositeIDTest extends DbmBaseTest {
 		
 		baseEntityManager.saves(colArticles);
 		
+		int count = baseEntityManager.countRecord(ColumnArticleEntity.class).intValue();
+		assertThat(count).isEqualTo(colArticles.size());
+		
 		
 		
 		ColumnArticleId cid = new ColumnArticleId(toLocalColArt.getColumnId(), toLocalColArt.getArticleId());
@@ -67,6 +70,18 @@ public class CompositeIDTest extends DbmBaseTest {
 		baseEntityManager.save(dbColArticle);
 		dbColArticle = baseEntityManager.findUnique(ColumnArticleEntity.class, "columnId", dbColArticle.getColumnId(), "articleId", dbColArticle.getArticleId());
 		assertThat(dbColArticle.isHeadline()).isTrue();
+		
+		ColumnArticleEntity deleteEntity = baseEntityManager.removeById(ColumnArticleEntity.class, toLocalColArt.getId());
+		assertThat(deleteEntity).isNotNull();
+		assertThat(deleteEntity.getColumnId()).isEqualTo(toLocalColArt.getColumnId());
+		assertThat(deleteEntity.getArticleId()).isEqualTo(toLocalColArt.getArticleId());
+		
+
+		int deleteCount = baseEntityManager.remove(colArticles.get(colArticles.size()-1));
+		assertThat(deleteCount).isEqualTo(1);
+		
+		count = baseEntityManager.countRecord(ColumnArticleEntity.class).intValue();
+		assertThat(count).isEqualTo(colArticles.size()-2);
 	}
 
 }

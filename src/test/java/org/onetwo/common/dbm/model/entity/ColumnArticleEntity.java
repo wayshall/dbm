@@ -7,6 +7,7 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.IdClass;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.onetwo.common.dbm.model.entity.ColumnArticleEntity.ColumnArticleId;
 
@@ -31,6 +32,18 @@ public class ColumnArticleEntity {
 	
 	@Column(name="is_headline")
 	boolean headline;
+	
+	@Transient
+	ColumnArticleId id;
+	
+	public ColumnArticleId getId() {
+		return new ColumnArticleId(columnId, articleId);
+	}
+	
+	public void setId(ColumnArticleId id) {
+		this.columnId = id.getColumnId();
+		this.articleId = id.getArticleId();
+	}
 
 	@SuppressWarnings("serial")
 	@Data
