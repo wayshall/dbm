@@ -158,9 +158,9 @@ public class EntrySQLBuilderImpl implements EntrySQLBuilder {
 	}
 	
 	private String buildUpdate(){
-		if(LangUtils.isEmpty(fields)){
+		/*if(LangUtils.isEmpty(fields)){
 			throw new DbmException("no update field found!");
-		}
+		}*/
 		if(LangUtils.isEmpty(whereCauseFields)){
 			throw new DbmException("no where field found for update!");
 		}

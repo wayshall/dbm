@@ -683,6 +683,10 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 		this.throwIfQueryableOnly();
 		
 		JdbcStatementContextBuilder dsb = JdbcStatementContextBuilder.create(DbmEventAction.update, this, getStaticUpdateSqlBuilder());
+		/*List<DbmMappedField> updateFields = dsb.getSqlBuilder().getFields();
+		if(LangUtils.isEmpty(updateFields)){
+			throw new DbmException("no update field found!");
+		}*/
 		
 		if(LangUtils.isMultiple(entity)){
 			List<Object> list = LangUtils.asList(entity);
