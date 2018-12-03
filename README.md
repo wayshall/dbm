@@ -156,6 +156,15 @@ public class CompositeEntity {
 
 	@Transient
 	CompositeId id;
+
+	public CompositeId getId() {
+		return new CompositeId(id1, id2);
+	}
+	
+	public void setId(CompositeId id) {
+		this.id1 = id.getId1();
+		this.id2= id.getId2();
+	}
 	
 	//....其它属性
 
@@ -171,7 +180,7 @@ public class CompositeEntity {
 - 把需要映射为主键的实体属性都用 @Id 注解标注   
 - 另外创建一个复合主键的Pojo类CompositeId，属性为实体需要映射为主键的属性，名称类型一一对应，并实现 java.io.Serializable 接口   
 - 在实体类里用 @IdClass 注解标注为复合主键类为 CompositedId 类   
-- 实体的CompositeId属性不是必须的，只是为了更方便使用组合id
+- 实体的CompositeId属性不是必须的，只是为了更方便使用组合id，而且无需持久化，所以如果写的话，需要用 @Transient 注解标注
 
 
 复合主键实体的查找方法为：
