@@ -7,6 +7,8 @@ import java.util.List;
 import javax.persistence.Enumerated;
 
 import org.onetwo.common.reflect.ReflectUtils;
+import org.onetwo.common.spring.SpringUtils;
+import org.onetwo.common.utils.Assert;
 import org.onetwo.common.utils.JFishProperty;
 import org.onetwo.common.utils.LangUtils;
 import org.onetwo.common.utils.StringUtils;
@@ -20,6 +22,7 @@ import org.onetwo.dbm.jpa.GeneratedValueIAttrs;
 import org.onetwo.dbm.mapping.version.VersionableType;
 import org.onetwo.dbm.utils.DbmUtils;
 import org.onetwo.dbm.utils.SpringAnnotationFinder;
+import org.springframework.beans.ConfigurablePropertyAccessor;
 
 
 @SuppressWarnings("unchecked")
@@ -140,8 +143,16 @@ abstract public class AbstractMappedField implements DbmMappedField{
 	
 	@Override
 	public Object getValue(Object entity){
-		entity = IDclassEntity
-		Object value = propertyInfo.getValue(entity);
+		Assert.notNull(entity);
+		Object value = null;
+		// 处理复合主键的情况
+//		if (!propertyInfo.getType().equals(entity.getClass())) {
+		if (this.getEntry().isCompositePK()) {
+			ConfigurablePropertyAccessor accessor = SpringUtils.newPropertyAccessor(entity, !propertyInfo.isBeanProperty());
+			value = accessor.getPropertyValue(this.propertyInfo.getName());
+		} else {
+			value = propertyInfo.getValue(entity);
+		}
 		value = this.fieldValueConverter.forStore(this, value);
 		return value;
 	}

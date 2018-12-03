@@ -32,7 +32,7 @@ public class EntrySQLBuilderImpl implements EntrySQLBuilder {
 	protected String alias = "this_";
 	protected DbmMappedEntryMeta entry;
 	protected String tableName;
-	protected DbmMappedField identifyField;
+//	protected DbmMappedField identifyField;
 	protected List<DbmMappedField> fields = LangUtils.newArrayList();
 	protected List<DbmMappedField> whereCauseFields = LangUtils.newArrayList();
 	
@@ -296,9 +296,9 @@ public class EntrySQLBuilderImpl implements EntrySQLBuilder {
 		return strs;
 	}
 
-	public DbmMappedField getIdentifyField() {
+	/*public DbmMappedField getIdentifyField() {
 		return identifyField;
-	}
+	}*/
 	/* (non-Javadoc)
 	 * @see org.onetwo.common.jfishdbm.mapping.EntrySQLBuilder#getSql()
 	 */

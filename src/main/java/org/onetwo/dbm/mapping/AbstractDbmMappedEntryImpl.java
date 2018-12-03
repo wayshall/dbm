@@ -516,8 +516,9 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 		return kv;
 	}
 	
-	/***
-	 * 
+	/*****
+	 * @param objects 
+	 * @param isIdentify 传入的objects是否是实体id
 	 */
 	@Override
 	public JdbcStatementContext<List<Object[]>> makeFetch(Object objects, boolean isIdentify){
@@ -528,7 +529,7 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 			List<Object> list = LangUtils.asList(objects);
 			for(Object id : list){
 				if (isIdentify) {
-					dsb.addCauseValue(id);
+					this.addIdCauseValue(dsb, id);
 				} else {
 					dsb.processWhereCauseValuesFromEntity(id);
 				}
@@ -537,10 +538,7 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 		}else{
 			if (isIdentify) {
 //				dsb.addCauseValue(objects);
-				for (DbmMappedField idField : this.getIdentifyFields()) {
-					Object idValue = idField.getValue(objects);
-					dsb.addCauseValue(idValue);
-				}
+				this.addIdCauseValue(dsb, objects);
 			} else {
 				dsb.processWhereCauseValuesFromEntity(objects);
 			}
@@ -550,6 +548,19 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 //		KVEntry<String, List<Object[]>> kv = new KVEntry<String, List<Object[]>>(dsb.getSql(), dsb.getValues());
 		JdbcStatementContext<List<Object[]>> kv = SimpleJdbcStatementContext.create(dsb.getSqlBuilder(), dsb.getValue());
 		return kv;
+	}
+	
+	private void addIdCauseValue(JdbcStatementContextBuilder dsb, Object idObject) {
+		if (!isCompositePK()) {
+			dsb.addCauseValue(idObject);
+			return ;
+		}
+		// 复合主键存在多个id的情况
+		EntrySQLBuilder sqlBuilder = dsb.getSqlBuilder();
+		for (DbmMappedField idField : sqlBuilder.getWhereCauseFields()) {
+			Object idValue = idField.getValue(idObject);
+			dsb.addCauseValue(idValue);
+		}
 	}
 	
 

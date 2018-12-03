@@ -40,8 +40,9 @@ public class DbmMappedEntryImpl extends AbstractDbmMappedEntryImpl implements Db
 	public List<DbmMappedField> getUpdateableFields(){
 		List<DbmMappedField> updatables = new ArrayList<DbmMappedField>();
 		for(DbmMappedField col : getMappedColumns().values()){
-			if(col.getColumn().isUpdatable())
+			if(col.getColumn().isUpdatable()) {
 				updatables.add(col);
+			}
 		}
 		return updatables;
 	}

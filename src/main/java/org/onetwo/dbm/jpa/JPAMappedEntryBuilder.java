@@ -268,7 +268,8 @@ public class JPAMappedEntryBuilder extends DbmMappedEntryBuilder {
 		
 		if(field.isIdentify()){
 			col.setInsertable(!field.isIdentityStrategy());
-			col.setUpdatable(!field.isIdentityStrategy());
+//			col.setUpdatable(!field.isIdentityStrategy());
+			col.setUpdatable(!field.isIdentify());
 		}
 		
 		return col;
