@@ -15,13 +15,17 @@ import org.onetwo.common.dbm.DbmEntityManagerTest;
 import org.onetwo.common.dbm.DbmLongVersionTest;
 import org.onetwo.common.dbm.DbmNestedMappingTest;
 import org.onetwo.common.dbm.DbmSnowflakeTest;
+import org.onetwo.common.dbm.InQueryWithArrayTest;
 import org.onetwo.common.dbm.JsonFieldTest;
 import org.onetwo.common.dbm.QueryConfigTest;
+import org.onetwo.common.dbm.TenentableTest;
 import org.onetwo.common.dbm.TransactionalListenerTest;
 import org.onetwo.common.dbm.UserDbmIdEntityTest;
 import org.onetwo.common.dbm.UserOptionDaoTest;
 import org.onetwo.common.dbm.UserTableIdEntityTest;
 import org.onetwo.common.dbm.model.service.UserAutoidServiceTest;
+import org.onetwo.common.hibernate.UserQueryHibernateDaoTest;
+import org.onetwo.common.hibernate.dao.HibernateNestedMappingTest;
 
 @RunWith(Suite.class)
 @SuiteClasses({
@@ -45,7 +49,12 @@ import org.onetwo.common.dbm.model.service.UserAutoidServiceTest;
 	DbmLongVersionTest.class,
 	UserAutoidServiceTest.class,
 	DbmSnowflakeTest.class,
-	CompositeIDTest.class
+	CompositeIDTest.class,
+	TenentableTest.class,
+	InQueryWithArrayTest.class,
+	
+	HibernateNestedMappingTest.class,
+	UserQueryHibernateDaoTest.class
 //	RichModelTest.class
 })
 public class DbmTestCase {

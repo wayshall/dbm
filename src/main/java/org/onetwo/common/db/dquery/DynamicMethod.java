@@ -29,6 +29,7 @@ import org.onetwo.common.utils.LangUtils;
 import org.onetwo.common.utils.Page;
 import org.onetwo.common.utils.StringUtils;
 import org.onetwo.dbm.exception.FileNamedQueryException;
+import org.onetwo.dbm.mapping.DbmEnumValueMapping;
 import org.springframework.core.MethodParameter;
 
 
@@ -237,19 +238,27 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 	private Pair<String, Object> addAndCheckParamValue(Param name, String pname, final Object pvalue){
 //		Object val = convertEnumValue(name, pvalue);
 		Object val = pvalue;
-		if(String.class.isInstance(val) && name.isLikeQuery()){
+		if (String.class.isInstance(val) && name.isLikeQuery()) {
 //			values.add(ExtQueryUtils.getLikeString(pvalue.toString()));
 			val = ExtQueryUtils.getLikeString(val.toString());
-		}else{
+		} /*else if (pvalue.getClass().isArray()) {
+			val = LangUtils.asList(pvalue);
+		}*/ else {
 			val = pvalue;
 		}
 		return Pair.of(pname, val);
 	}
 	
-	private Object convertEnumValue(Param name, Object val){
-		if(name!=null && val instanceof Enum){
-			Enum<?> enumValue = (Enum<?>)val;
-			val = name.enumType()==EnumType.ORDINAL?enumValue.ordinal():enumValue.name();
+	private Object convertQueryValue(Param name, Object val){
+		if (name!=null && val instanceof Enum) {
+			if (val instanceof DbmEnumValueMapping) {
+				val = ((DbmEnumValueMapping)val).getMappingValue();
+			} else {
+				Enum<?> enumValue = (Enum<?>)val;
+				val = name.enumType()==EnumType.ORDINAL?enumValue.ordinal():enumValue.name();
+			}
+		} if (val!=null && val.getClass().isArray()) {
+			val = LangUtils.asList(val);
 		}
 		return val;
 	}
@@ -304,7 +313,7 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 		}else{
 			values.put(key, value);
 		}*/
-		value = convertEnumValue(paramMeta, value);
+		value = convertQueryValue(paramMeta, value);
 		values.put(key, value);
 	}
 	

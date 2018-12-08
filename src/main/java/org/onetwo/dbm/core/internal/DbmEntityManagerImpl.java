@@ -37,13 +37,13 @@ import org.onetwo.dbm.core.spi.DbmSessionFactory;
 import org.onetwo.dbm.core.spi.DbmSessionImplementor;
 import org.onetwo.dbm.exception.EntityNotFoundException;
 import org.onetwo.dbm.jdbc.mapper.RowMapperFactory;
+import org.onetwo.dbm.jdbc.spi.DbmJdbcOperations;
 import org.onetwo.dbm.query.DbmNamedFileQueryFactory;
 import org.onetwo.dbm.query.DbmQuery;
 import org.onetwo.dbm.query.DbmQueryWrapperImpl;
 import org.onetwo.dbm.utils.DbmLock;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
 
 //@SuppressWarnings({"rawtypes", "unchecked"})
 public class DbmEntityManagerImpl extends BaseEntityManagerAdapter implements QueryProvideManager, DbmEntityManager, InitializingBean , DisposableBean {
@@ -408,8 +408,8 @@ public class DbmEntityManagerImpl extends BaseEntityManagerAdapter implements Qu
 	}
 
 	@Override
-	public NamedParameterJdbcOperations getJdbcOperations() {
-		return getSessionFactory().getServiceRegistry().getDbmJdbcOperations().getDbmNamedJdbcOperations();
+	public DbmJdbcOperations getJdbcOperations() {
+		return getSessionFactory().getServiceRegistry().getDbmJdbcOperations();
 	}
 
 	@Override

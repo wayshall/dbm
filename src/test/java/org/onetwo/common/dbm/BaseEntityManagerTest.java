@@ -12,7 +12,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.onetwo.common.db.spi.BaseEntityManager;
-import org.onetwo.common.dbm.model.entity.UserEntity;
+import org.onetwo.common.dbm.model.hib.entity.UserEntity;
 
 public class BaseEntityManagerTest {
 	

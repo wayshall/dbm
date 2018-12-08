@@ -33,9 +33,9 @@ import org.onetwo.dbm.core.spi.DbmInterceptor;
 import org.onetwo.dbm.core.spi.DbmInterceptorChain;
 import org.onetwo.dbm.exception.DbmException;
 import org.onetwo.dbm.exception.FileNamedQueryException;
+import org.onetwo.dbm.jdbc.spi.DbmJdbcOperations;
 import org.slf4j.Logger;
 import org.springframework.beans.BeanWrapper;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
 import org.springframework.util.Assert;
 
 import com.google.common.cache.LoadingCache;
@@ -47,7 +47,7 @@ abstract public class AbstractDynamicQueryHandler implements DynamicQueryHandler
 	private LoadingCache<Method, DynamicMethod> methodCache;
 	private QueryProvideManager em;
 //	private Object proxyObject;
-	private NamedParameterJdbcOperations jdbcOperations;
+	private DbmJdbcOperations jdbcOperations;
 	final protected List<Class<?>> proxyInterfaces = new ArrayList<Class<?>>();
 	
 	public AbstractDynamicQueryHandler(QueryProvideManager em, LoadingCache<Method, DynamicMethod> methodCache, Class<?>... proxiedInterfaces){
@@ -57,7 +57,7 @@ abstract public class AbstractDynamicQueryHandler implements DynamicQueryHandler
 //		this.dbmJdbcOperations = em.getSessionFactory().getServiceRegistry().getDbmJdbcOperations();
 		this.jdbcOperations = em.getJdbcOperations();
 		this.proxyInterfaces.addAll(Arrays.asList(proxiedInterfaces));
-		Assert.notNull(jdbcOperations);
+		Assert.notNull(jdbcOperations, "jdbcOperations can not be null");
 	}
 
 	/*private Optional<DbmEntityManager> getDbmEntityManager(){

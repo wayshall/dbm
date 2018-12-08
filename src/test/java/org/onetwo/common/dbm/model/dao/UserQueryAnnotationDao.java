@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.onetwo.common.db.dquery.annotation.DbmRepository;
 import org.onetwo.common.db.dquery.annotation.Query;
-import org.onetwo.common.dbm.model.entity.UserEntity;
+import org.onetwo.common.dbm.model.hib.entity.UserEntity;
 import org.onetwo.common.utils.Page;
 import org.springframework.transaction.annotation.Transactional;
 

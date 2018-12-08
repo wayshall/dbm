@@ -56,7 +56,7 @@ public class HibernateBaseTest extends SpringBaseJUnitTestCase {
 		public LocalContainerEntityManagerFactoryBean entityManagerFactory(DataSource dataSource) {
 			LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
 			em.setDataSource(dataSource);
-			em.setPackagesToScan(new String[]{"org.onetwo.common.dbm.model.entity"});
+			em.setPackagesToScan(new String[]{"org.onetwo.common.dbm.model.hib.entity"});
 			JpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
 			em.setJpaVendorAdapter(vendorAdapter);
 			
