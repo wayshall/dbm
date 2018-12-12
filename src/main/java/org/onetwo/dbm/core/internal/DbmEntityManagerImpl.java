@@ -186,7 +186,7 @@ public class DbmEntityManagerImpl extends BaseEntityManagerAdapter implements Qu
 
 	@Override
 	public void flush() {
-		throw new UnsupportedOperationException();
+		this.getCurrentSession().flush();
 	}
 
 	@Override
