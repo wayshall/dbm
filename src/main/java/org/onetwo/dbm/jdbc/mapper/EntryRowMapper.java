@@ -14,32 +14,37 @@ import org.onetwo.dbm.mapping.DbmMappedField;
 import org.onetwo.dbm.utils.DbmUtils;
 import org.slf4j.Logger;
 import org.springframework.beans.BeanWrapper;
-import org.springframework.beans.PropertyAccessorFactory;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.rowset.ResultSetWrappingSqlRowSet;
 import org.springframework.jdbc.support.rowset.SqlRowSetMetaData;
 
-public class EntryRowMapper<T> implements RowMapper<T>{
+@SuppressWarnings("unchecked")
+public class EntryRowMapper<T> extends DbmBeanPropertyRowMapper<T> implements RowMapper<T>{
 	
 	protected final Logger logger = JFishLoggerFactory.getLogger(this.getClass());
 	
 	private DbmMappedEntry entry;
 	private boolean debug = false;
 //	private DbmTypeMapping sqlTypeMapping;
-	private JdbcResultSetGetter jdbcResultSetGetter;
+//	private JdbcResultSetGetter jdbcResultSetGetter;
+	private boolean useSmartProperty;
 	
 	public EntryRowMapper(DbmMappedEntry entry, JdbcResultSetGetter jdbcResultSetGetter) {
-		super();
+		this(entry, jdbcResultSetGetter, false);
+	}
+	
+	public EntryRowMapper(DbmMappedEntry entry, JdbcResultSetGetter jdbcResultSetGetter, boolean useSmartProperty) {
+		super(jdbcResultSetGetter, (Class<T>)entry.getEntityClass());
 		this.entry = entry;
-		this.jdbcResultSetGetter = jdbcResultSetGetter;
+		this.useSmartProperty = useSmartProperty;
+//		this.jdbcResultSetGetter = jdbcResultSetGetter;
 	}
 
 
-	public EntryRowMapper(DbmMappedEntry entry, JdbcResultSetGetter jdbcResultSetGetter, boolean debug) {
-		super();
-		this.entry = entry;
+	public EntryRowMapper(DbmMappedEntry entry, JdbcResultSetGetter jdbcResultSetGetter, boolean useSmartProperty, boolean debug) {
+		this(entry, jdbcResultSetGetter, useSmartProperty);
 		this.debug = debug;
-		this.jdbcResultSetGetter = jdbcResultSetGetter;
+//		this.jdbcResultSetGetter = jdbcResultSetGetter;
 	}
 
 
@@ -67,13 +72,19 @@ public class EntryRowMapper<T> implements RowMapper<T>{
 			/*if(!entry.containsColumn(column))
 				continue;*/
 			try {
-				if(entry.containsColumn(column)){
+				if (entry.containsColumn(column)) {
 					field = entry.getFieldByColumnName(column);
 					value = getColumnValue(resutSetWrapper, index, field);
 					if(value!=null){
 						field.setValue(entity, value);
 					}
-				}else{
+				} else if (useSmartProperty) {
+					if(bw==null){
+						bw = this.createBeanWrapper(entity);
+					}
+					this.setValue(resutSetWrapper, bw, rowNum, index, column);
+				}
+				/*else{
 					String propName = toPropertyName(column);
 					if(bw==null){
 						bw = PropertyAccessorFactory.forBeanPropertyAccess(entity);
@@ -84,7 +95,7 @@ public class EntryRowMapper<T> implements RowMapper<T>{
 					value = getColumnValue(resutSetWrapper, index, bw.getPropertyDescriptor(propName), rsmd.getColumnType(index));
 					bw.setPropertyValue(propName, value);
 //					this.setRelatedProperty(rs, index, entity, propName);
-				}
+				}*/
 			} catch (Exception e) {
 				LangUtils.throwBaseException(entry.getEntityClass() + " mapped field["+column+", "+value+"] error : " + e.getMessage(), e);
 			}
