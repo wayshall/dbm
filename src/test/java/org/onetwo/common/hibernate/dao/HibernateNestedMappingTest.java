@@ -16,10 +16,10 @@ import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
 import org.onetwo.common.dbm.model.dao.CompanyDao;
-import org.onetwo.common.dbm.model.entity.CompanyEntity;
-import org.onetwo.common.dbm.model.entity.DepartmentEntity;
-import org.onetwo.common.dbm.model.entity.EmployeeEntity;
-import org.onetwo.common.dbm.model.entity.EmployeeEntity.EmployeeGenders;
+import org.onetwo.common.dbm.model.hib.entity.CompanyEntity;
+import org.onetwo.common.dbm.model.hib.entity.DepartmentEntity;
+import org.onetwo.common.dbm.model.hib.entity.EmployeeEntity;
+import org.onetwo.common.dbm.model.hib.entity.EmployeeEntity.EmployeeGenders;
 import org.onetwo.common.dbm.model.vo.CompanyVO;
 import org.onetwo.common.dbm.model.vo.DepartmentVO;
 import org.onetwo.common.hibernate.HibernateBaseTest;
@@ -27,8 +27,9 @@ import org.onetwo.common.reflect.ReflectUtils;
 import org.onetwo.common.utils.LangOps;
 import org.onetwo.jpa.hibernate.SpecificationQuerys;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.annotation.Rollback;
 
-//@Rollback(false)
+@Rollback(false)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class HibernateNestedMappingTest extends HibernateBaseTest {
 

@@ -1,4 +1,4 @@
-package org.onetwo.common.dbm.model.entity;
+package org.onetwo.common.dbm.model.hib.entity;
 
 import java.util.List;
 
@@ -10,6 +10,7 @@ import javax.persistence.Table;
 
 import org.hibernate.validator.constraints.Length;
 import org.onetwo.common.db.spi.CrudEntityManager;
+import org.onetwo.common.dbm.model.entity.BaseEntity;
 import org.onetwo.dbm.annotation.DbmJsonField;
 import org.onetwo.dbm.utils.Dbms;
 

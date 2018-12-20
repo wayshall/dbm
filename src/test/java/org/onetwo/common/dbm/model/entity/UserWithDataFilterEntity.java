@@ -17,8 +17,8 @@ import org.hibernate.validator.constraints.NotBlank;
 import org.onetwo.common.db.filter.DataQueryParamaterEnhancer;
 import org.onetwo.common.db.filter.IDataQueryParamterEnhancer;
 import org.onetwo.common.db.sqlext.ExtQuery;
-import org.onetwo.common.dbm.model.entity.UserEntity.UserStatus;
 import org.onetwo.common.dbm.model.entity.UserWithDataFilterEntity.AgeIDataQueryParamterEnhancer;
+import org.onetwo.common.dbm.model.hib.entity.UserEntity.UserStatus;
 import org.onetwo.common.utils.CUtils;
 import org.springframework.format.annotation.DateTimeFormat;
 

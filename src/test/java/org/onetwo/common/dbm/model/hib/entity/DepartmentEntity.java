@@ -1,4 +1,4 @@
-package org.onetwo.common.dbm.model.entity;
+package org.onetwo.common.dbm.model.hib.entity;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -8,6 +8,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 import org.hibernate.validator.constraints.Length;
+import org.onetwo.common.dbm.model.entity.BaseEntity;
 
 
 /*****

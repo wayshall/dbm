@@ -16,7 +16,7 @@ import org.onetwo.common.base.DbmBaseTest;
 import org.onetwo.common.convert.Types;
 import org.onetwo.common.db.spi.BaseEntityManager;
 import org.onetwo.common.dbm.model.dao.JsonCompanyDao;
-import org.onetwo.common.dbm.model.entity.CompanyEntity;
+import org.onetwo.common.dbm.model.hib.entity.CompanyEntity;
 import org.onetwo.common.utils.CUtils;
 import org.onetwo.dbm.annotation.DbmJsonField;
 import org.onetwo.dbm.annotation.DbmRowMapper;

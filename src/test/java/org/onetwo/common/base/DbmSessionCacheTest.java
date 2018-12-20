@@ -12,7 +12,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Test;
 import org.onetwo.common.base.DbmSessionCacheTest.DbmSessionCacheContextConfig;
 import org.onetwo.common.dbm.PackageInfo;
-import org.onetwo.common.dbm.model.entity.CompanyEntity;
+import org.onetwo.common.dbm.model.hib.entity.CompanyEntity;
 import org.onetwo.common.dbm.model.service.CompanySerivceImpl;
 import org.onetwo.common.spring.cache.JFishSimpleCacheManagerImpl;
 import org.onetwo.common.spring.config.JFishProfile;

@@ -91,16 +91,18 @@ public class AnnotationScanBasicDynamicQueryObjectRegister implements DynamicQue
 			if(registry.containsBeanDefinition(className)){
 				continue;
 			}
-			BeanDefinition beandef = BeanDefinitionBuilder.rootBeanDefinition(AnnotationDynamicQueryHandlerProxyCreator.class)
+			BeanDefinitionBuilder beandefBuilder = BeanDefinitionBuilder.rootBeanDefinition(AnnotationDynamicQueryHandlerProxyCreator.class)
 					.addConstructorArgValue(repositoryClass)
 					.addConstructorArgValue(methodCache)
 					.setScope(BeanDefinition.SCOPE_SINGLETON)
 //					.setRole(BeanDefinition.ROLE_APPLICATION)
-					.getBeanDefinition();
+//					.getBeanDefinition()
+					;
 			if(defaultQueryProvideManagerClass!=null){
-				beandef.setAttribute(DbmRepositoryRegistarOfEnableDbm.ATTR_DEFAULT_QUERY_PROVIDE_MANAGER_CLASS, defaultQueryProvideManagerClass);
+//				beandef.setAttribute(DbmRepositoryRegistarOfEnableDbm.ATTR_DEFAULT_QUERY_PROVIDE_MANAGER_CLASS, defaultQueryProvideManagerClass);
+				beandefBuilder.addPropertyValue(DbmRepositoryRegistarOfEnableDbm.ATTR_DEFAULT_QUERY_PROVIDE_MANAGER_CLASS, defaultQueryProvideManagerClass);
 			}
-			registry.registerBeanDefinition(className, beandef);
+			registry.registerBeanDefinition(className, beandefBuilder.getBeanDefinition());
 			logger.info("register dao bean: {} ", className);
 		}
 		boolean scaned = !dbmRepositoryClasses.isEmpty();

@@ -1,4 +1,4 @@
-package org.onetwo.common.dbm.model.entity;
+package org.onetwo.common.dbm.model.hib.entity;
 
 import java.util.Date;
 

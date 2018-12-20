@@ -13,8 +13,8 @@ import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.NotBlank;
 import org.onetwo.common.db.TimeRecordableEntity;
-import org.onetwo.common.dbm.model.entity.UserEntity.UserGenders;
-import org.onetwo.common.dbm.model.entity.UserEntity.UserStatus;
+import org.onetwo.common.dbm.model.hib.entity.UserEntity.UserGenders;
+import org.onetwo.common.dbm.model.hib.entity.UserEntity.UserStatus;
 
 import lombok.Data;
 

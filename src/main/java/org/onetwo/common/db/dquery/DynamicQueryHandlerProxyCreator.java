@@ -67,15 +67,15 @@ public class DynamicQueryHandlerProxyCreator implements InitializingBean, Applic
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		Assert.notNull(defaultQueryProvideManagerClass);
+		Assert.notNull(defaultQueryProvideManagerClass, "defaultQueryProvideManagerClass can not be null");
 		
 		QueryProvideManager queryProvideManager = findQueryProvideManager();
 		
 		NamedSqlFileManager namedSqlFileManager = (DbmNamedSqlFileManager)queryProvideManager.getFileNamedQueryManager().getNamedSqlFileManager();
-		Assert.notNull(namedSqlFileManager);
+		Assert.notNull(namedSqlFileManager, "namedSqlFileManager can not be null");
 		
 		DbmSqlFileResource<?> sqlFile = getSqlFile(queryProvideManager.getDataSource());
-		Assert.notNull(sqlFile);
+		Assert.notNull(sqlFile, "sqlFile can not be null");
 
 		logger.info("initialize dynamic query proxy[{}] for : {}", beanName, sqlFile);
 		NamedQueryFile queryFile = namedSqlFileManager.buildSqlFile(sqlFile);

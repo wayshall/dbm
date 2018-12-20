@@ -18,7 +18,7 @@ import org.onetwo.common.db.Magazine.MagazineWithTable;
 import org.onetwo.common.db.sqlext.ExtQuery.K;
 import org.onetwo.common.db.sqlext.ExtQuery.K.IfNull;
 import org.onetwo.common.db.sqlext.ExtQueryUtils.F;
-import org.onetwo.common.dbm.model.entity.UserEntity;
+import org.onetwo.common.dbm.model.hib.entity.UserEntity;
 import org.onetwo.common.utils.CUtils;
 
 

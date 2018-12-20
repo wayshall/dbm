@@ -6,9 +6,9 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.onetwo.common.db.spi.BaseEntityManager;
-import org.onetwo.common.dbm.model.entity.UserEntity;
-import org.onetwo.common.dbm.model.entity.UserEntity.UserGenders;
-import org.onetwo.common.dbm.model.entity.UserEntity.UserStatus;
+import org.onetwo.common.dbm.model.hib.entity.UserEntity;
+import org.onetwo.common.dbm.model.hib.entity.UserEntity.UserGenders;
+import org.onetwo.common.dbm.model.hib.entity.UserEntity.UserStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

@@ -27,11 +27,11 @@ import org.onetwo.common.utils.Page;
 import org.onetwo.dbm.annotation.DbmResultMapping;
 import org.onetwo.dbm.core.spi.DbmInterceptor;
 import org.onetwo.dbm.core.spi.DbmInterceptorChain;
+import org.onetwo.dbm.jdbc.internal.DbmJdbcTemplate;
+import org.onetwo.dbm.jdbc.spi.DbmJdbcOperations;
 import org.onetwo.dbm.query.DbmFileQueryWrapperImpl;
 import org.onetwo.dbm.query.DbmNamedFileQueryFactory;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterUtils;
 
 import com.google.common.collect.ImmutableList;
@@ -43,7 +43,8 @@ import com.google.common.collect.ImmutableList;
 public class HibernateJPAQueryProvideManager implements QueryProvideManager {
 
 	private DataSource dataSource;
-	private NamedParameterJdbcOperations jdbcOperations;
+//	private NamedParameterJdbcOperations jdbcOperations;
+	private DbmJdbcTemplate jdbcOperations;
 	private SqlParamterPostfixFunctionRegistry sqlParamterPostfixFunctionRegistry = new SqlParamterPostfixFunctions();
 	private DbmNamedFileQueryFactory dbmNamedFileQueryFactory;
 	
@@ -56,7 +57,8 @@ public class HibernateJPAQueryProvideManager implements QueryProvideManager {
 	public HibernateJPAQueryProvideManager(DataSource dataSource) {
 		super();
 		this.dataSource = dataSource;
-		this.jdbcOperations = new NamedParameterJdbcTemplate(dataSource);
+//		this.jdbcOperations = new NamedParameterJdbcTemplate(dataSource);
+		this.jdbcOperations = new DbmJdbcTemplate(dataSource);
 		DbmNamedSqlFileManager sqlFileManager = DbmNamedSqlFileManager.createNamedSqlFileManager(true);
 		dbmNamedFileQueryFactory = new HibernateNamedFileQueryFactory(sqlFileManager);
 	}
@@ -83,7 +85,7 @@ public class HibernateJPAQueryProvideManager implements QueryProvideManager {
 	}
 
 	@Override
-	public NamedParameterJdbcOperations getJdbcOperations() {
+	public DbmJdbcOperations getJdbcOperations() {
 		return jdbcOperations;
 	}
 

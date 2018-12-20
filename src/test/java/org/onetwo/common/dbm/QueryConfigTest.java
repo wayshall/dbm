@@ -8,7 +8,7 @@ import org.junit.Test;
 import org.onetwo.common.base.DbmBaseTest;
 import org.onetwo.common.db.spi.BaseEntityManager;
 import org.onetwo.common.dbm.model.dao.UserQueryAnnotationDao;
-import org.onetwo.common.dbm.model.entity.UserEntity;
+import org.onetwo.common.dbm.model.hib.entity.UserEntity;
 import org.onetwo.common.utils.LangOps;
 import org.onetwo.common.utils.Page;
 import org.springframework.beans.factory.annotation.Autowired;
