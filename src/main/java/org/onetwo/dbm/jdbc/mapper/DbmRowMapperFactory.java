@@ -8,6 +8,7 @@ import org.onetwo.common.reflect.ReflectUtils;
 import org.onetwo.common.utils.Assert;
 import org.onetwo.dbm.annotation.DbmResultMapping;
 import org.onetwo.dbm.annotation.DbmRowMapper;
+import org.onetwo.dbm.annotation.DbmRowMapper.MappingModes;
 import org.onetwo.dbm.exception.DbmException;
 import org.onetwo.dbm.jdbc.spi.JdbcResultSetGetter;
 import org.onetwo.dbm.mapping.DbmMappedEntry;
@@ -67,14 +68,21 @@ public class DbmRowMapperFactory extends JdbcDaoRowMapperFactory {
 			/*if(dbmRowMapper.value()==Void.class){
 				return new DbmBeanPropertyRowMapper<>(this.jdbcResultSetGetter,  type);
 			}else */
-			if(dbmRowMapper.value()==Void.class){
-				DbmMappedEntry entry = this.getMappedEntryManager().getReadOnlyEntry(type);
-				rowMapper = new EntryRowMapper<>(entry, this.jdbcResultSetGetter);
-				return rowMapper;
-			}else{
+			if(dbmRowMapper.value()!=Void.class){
 				Assert.isAssignable(RowMapper.class, dbmRowMapper.value());
 				Class<? extends RowMapper<?>> rowMapperClass = (Class<? extends RowMapper<?>>)dbmRowMapper.value();
 				return ReflectUtils.newInstance(rowMapperClass, type);
+			}else if(dbmRowMapper.mappingMode()==MappingModes.ENTITY){
+				DbmMappedEntry entry = this.getMappedEntryManager().getReadOnlyEntry(type);
+				rowMapper = new EntryRowMapper<>(entry, this.jdbcResultSetGetter);
+				return rowMapper;
+			}else if(dbmRowMapper.mappingMode()==MappingModes.SMART_PROPERTY){
+				rowMapper = new DbmBeanPropertyRowMapper<>(this.jdbcResultSetGetter, type);
+				return rowMapper;
+			}else if(dbmRowMapper.mappingMode()==MappingModes.MIXTURE){
+				DbmMappedEntry entry = this.getMappedEntryManager().getReadOnlyEntry(type);
+				rowMapper = new EntryRowMapper<>(entry, this.jdbcResultSetGetter, true);
+				return rowMapper;
 			}
 		}else{
 //			rowMapper = super.getBeanPropertyRowMapper(type);
