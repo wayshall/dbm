@@ -36,6 +36,9 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.data.transaction.ChainedTransactionManager;
 import org.springframework.jdbc.core.SqlProvider;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
+import org.springframework.jdbc.core.namedparam.SqlParameterSourceUtils;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.support.rowset.SqlRowSetMetaData;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -251,6 +254,7 @@ final public class DbmUtils {
 	public static Pair<String, Object> findSqlAndParams(Object[] args){
 		String sql = null;
 		Object params = null;
+		int maxArgSize = 50;
 		for (int i = 0; i < args.length; i++) {
 			Object arg = args[i];
 			if(arg==null){
@@ -273,12 +277,32 @@ final public class DbmUtils {
 					params = ((SqlParametersProvider)arg).getSqlParameterList();
 				}
 			}
-			
+			if (LangUtils.size(params)>maxArgSize) {
+				params = "<<Parameter Size is more than " + maxArgSize + ">>";
+			}
 		}
 		if(sql==null){
 			return null;
 		}
 		return Pair.of(sql, params);
+	}
+	
+
+	/***
+	 * 
+	 * @see SqlParameterSourceUtils#createBatch
+	 * 
+	 * @author weishao zeng
+	 * @param valueMaps
+	 * @return
+	 */
+	public static SqlParameterSource[] createBatch(List<Map<String, ?>> valueMaps) {
+		int size = valueMaps.size();
+		MapSqlParameterSource[] batch = new MapSqlParameterSource[size];
+		for (int i = 0; i < size; i++) {
+			batch[i] = new MapSqlParameterSource(valueMaps.get(i));
+		}
+		return batch;
 	}
 	
 	private DbmUtils(){

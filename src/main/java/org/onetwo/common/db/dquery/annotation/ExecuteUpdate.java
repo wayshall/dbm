@@ -10,5 +10,6 @@ import java.lang.annotation.Target;
 public @interface ExecuteUpdate {
 	
 	boolean isBatch() default false;
+	int batchSize() default 10000;
 
 }

@@ -1,5 +1,7 @@
 package org.onetwo.common.dbm;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.util.List;
 
 import javax.annotation.Resource;
@@ -11,8 +13,8 @@ import org.onetwo.common.date.NiceDate;
 import org.onetwo.common.dbm.model.entity.UserAutoidEntity;
 import org.onetwo.common.dbm.model.entity.UserAutoidEntity.UserStatus;
 import org.onetwo.common.dbm.model.service.UserAutoidServiceImpl;
+import org.onetwo.common.profiling.TimeCounter;
 import org.onetwo.common.utils.Page;
-import org.springframework.test.context.transaction.TransactionConfiguration;
 
 public class BatchInsertTest extends DbmBaseTest {
 
@@ -21,12 +23,16 @@ public class BatchInsertTest extends DbmBaseTest {
 	
 	@Test
 	public void testBatchInsert(){
-		int insertCount = 10;
+		int insertCount = 10000;
 		//精确到秒，否则会有误差，比如2015-05-06 13:49:09.783存储到mysql后会变成2015-05-06 13:49:10，mysql的datetime只能精确到秒
 		String userNamePrefix = "testBatchInsert";
 		NiceDate niceNowSeconde = NiceDate.New().thisSec();
+		TimeCounter t = TimeCounter.start(userNamePrefix);
 		int count = this.userAutoidServiceImpl.daoBatchInsert(userNamePrefix, UserStatus.NORMAL, niceNowSeconde.getTime(), insertCount);
 		Assert.assertEquals(insertCount, count);
+		t.stop();
+		// 如果消耗时间超过30秒，断言失败…… 一万数据通常指需要几秒……
+		assertThat(t.getCostTime()/1000).isLessThan(30);
 		
 		Page<UserAutoidEntity> page = Page.create();
 		this.userAutoidServiceImpl.findUserPage(page, userNamePrefix);

@@ -52,6 +52,7 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 //	private final ExecuteUpdate executeUpdate;
 	private boolean update;
 	private boolean batchUpdate;
+	private int batchSize = -1;
 	private AsCountQuery asCountQuery;
 //	private List<String> parameterNames;
 	
@@ -222,6 +223,7 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 		if(executeUpdate!=null){
 			this.update = true;
 			this.batchUpdate = executeUpdate.isBatch();
+			this.batchSize = executeUpdate.batchSize();
 		}else{
 			this.update = EXECUTE_UPDATE_PREFIX.contains(StringUtils.getFirstWord(this.method.getName()));
 			this.batchUpdate = BATCH_PREFIX.contains(StringUtils.getFirstWord(this.method.getName()));
@@ -231,6 +233,10 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 		}
 	}
 	
+	public int getBatchSize() {
+		return batchSize;
+	}
+
 	public MethodParameter remove(int index){
 		return this.parameters.remove(index);
 	}

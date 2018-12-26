@@ -231,7 +231,7 @@ abstract public class AbstractDynamicQueryHandler implements DynamicQueryHandler
 		t.start();
 		
 		BeanWrapper paramsContextBean = SpringUtils.newBeanMapWrapper(invokeContext.getParsedParams());
-		List<Map<String, Object>> batchValues = LangUtils.newArrayList(batchParameter.size());
+		List<Map<String, ?>> batchValues = LangUtils.newArrayList(batchParameter.size());
 //		SqlParamterPostfixFunctionRegistry sqlFunc = em.getSessionFactory().getServiceRegistry().getSqlParamterPostfixFunctionRegistry();
 		SqlParamterPostfixFunctionRegistry sqlFunc = em.getSqlParamterPostfixFunctionRegistry();
 		ParsedSqlWrapper sqlWrapper = ParsedSqlUtils.parseSql(sv.getParsedSql(), sqlFunc);
@@ -264,9 +264,9 @@ abstract public class AbstractDynamicQueryHandler implements DynamicQueryHandler
 		t.stop();
 		t.restart("insert to db");
 
-		@SuppressWarnings("unchecked")
+//		@SuppressWarnings("unchecked")
 //		int[] counts = jdao.getNamedParameterJdbcTemplate().batchUpdate(sv.getParsedSql(), batchValues.toArray(new HashMap[0]));
-		int[] counts = jdbcOperations.batchUpdate(sv.getParsedSql(), batchValues.toArray(new HashMap[0]));
+		int[] counts = jdbcOperations.batchUpdate(sv.getParsedSql(), batchValues, invokeContext.getDynamicMethod().getBatchSize());
 
 		t.stop();
 		
