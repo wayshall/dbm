@@ -43,12 +43,18 @@ public @interface DbmRowMapper {
 	 */
 	MappingModes mappingMode() default MappingModes.ENTITY;
 	
+	/****
+	 * 用于兼容历史原因造成的映射差异
+	 * @author way
+	 *
+	 */
 	public enum MappingModes {
 		/****
 		 * 用于配置指定的mapper，默认使用EntryRowMapper
  * EntryRowMapper会使用实体的风格映射，即：
  * 如果有使用@Column注解，则按照注解的映射匹配；
  * 如果没有使用注解，则把属性名称转为下划线匹配；
+ * 同时支持实体映射注解，比如@DbmJsonField
 		 */
 		ENTITY,
 		
