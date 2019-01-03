@@ -10,7 +10,6 @@ import org.onetwo.common.db.sqlext.ExtQuery;
 import org.onetwo.common.db.sqlext.ExtQuery.K;
 import org.onetwo.common.db.sqlext.ExtQueryInner;
 import org.onetwo.common.db.sqlext.SQLSymbolManager;
-import org.onetwo.common.db.sqlext.SQLSymbolManagerFactory;
 import org.onetwo.common.utils.LangUtils;
 import org.onetwo.common.utils.StringUtils;
 import org.onetwo.dbm.dialet.DBDialect.LockInfo;
@@ -126,6 +125,9 @@ public class QueryBuilderImpl implements QueryBuilder {
 		return self();
 	}
 	
+	/***
+	 * @param first from 0
+	 */
 	@Override
 	public QueryBuilderImpl limit(int first, int size){
 		this.params.put(K.FIRST_RESULT, first);
@@ -170,8 +172,10 @@ public class QueryBuilderImpl implements QueryBuilder {
 	}
 	
 	protected SQLSymbolManager getSQLSymbolManager(){
-		SQLSymbolManager symbolManager = SQLSymbolManagerFactory.getInstance().getJdbc();
-		return symbolManager;
+		InnerBaseEntityManager em = (InnerBaseEntityManager) baseEntityManager;
+		return em.getSQLSymbolManager();
+		/*SQLSymbolManager symbolManager = SQLSymbolManagerFactory.getInstance().getJdbc();
+		return symbolManager;*/
 	}
 	
 	protected String buildLeftJoin(){
@@ -222,7 +226,7 @@ public class QueryBuilderImpl implements QueryBuilder {
 		extQuery = createExtQuery(entityClass, alias, params);
 		extQuery.build();*/
 		
-		QueryActionImpl queryAction = new QueryActionImpl(baseEntityManager, entityClass, alias, params);
+		QueryActionImpl queryAction = new QueryActionImpl(this, entityClass, alias, params);
 		
 		/*JFishQueryValue qv = JFishQueryValue.create(getSQLSymbolManager().getPlaceHolder(), extQuery.getSql());
 		qv.setResultClass(extQuery.getEntityClass());

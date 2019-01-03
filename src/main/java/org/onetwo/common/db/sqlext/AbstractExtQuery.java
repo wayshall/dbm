@@ -26,7 +26,7 @@ abstract public class AbstractExtQuery implements ExtQueryInner{
 	protected String alias;
 //	protected boolean aliasMainTableName=true;
 	
-	protected QueryNameStrategy queryNameStrategy;
+	private QueryNameStrategy queryNameStrategy;
 	
 	protected Map<Object, Object> params;
 	protected ParamValues paramsValue;
@@ -62,10 +62,10 @@ abstract public class AbstractExtQuery implements ExtQueryInner{
 		this.listeners = (listeners==null?Collections.emptyList():listeners);
 		
 //		this.init(entityClass, this.alias);
-		this.queryNameStrategy = new QueryNameStrategy(alias);
+		this.setQueryNameStrategy(new QueryNameStrategy(alias));
 	}
 	
-	public QueryNameStrategy getQueryNameStrategy() {
+	final public QueryNameStrategy getQueryNameStrategy() {
 		return queryNameStrategy;
 	}
 	public Map<?, ?> getSourceParams() {
@@ -130,7 +130,7 @@ abstract public class AbstractExtQuery implements ExtQueryInner{
 	}
 
 	@SuppressWarnings("unchecked")
-	protected <T> T getValueAndRemoveKeyFromParams(String key, T def){
+	protected <T> T getValueAndRemoveKeyFromParams(Object key, T def){
 		if(!this.params.containsKey(key))
 			return def;
 		T value = (T)this.params.get(key);
@@ -148,7 +148,7 @@ abstract public class AbstractExtQuery implements ExtQueryInner{
 	}
 
 
-	protected boolean hasParams(String key) {
+	protected boolean hasParams(Object key) {
 		return this.params != null && !this.params.isEmpty() && this.params.containsKey(key);
 	}
 
@@ -376,6 +376,10 @@ abstract public class AbstractExtQuery implements ExtQueryInner{
 	public Set<String> getAllParameterFieldNames() {
 		Set<String> fields = ExtQueryUtils.getAllParameterFieldNames(getParams());
 		return fields;
+	}
+	
+	final public void setQueryNameStrategy(QueryNameStrategy queryNameStrategy) {
+		this.queryNameStrategy = queryNameStrategy;
 	}
 	
 }

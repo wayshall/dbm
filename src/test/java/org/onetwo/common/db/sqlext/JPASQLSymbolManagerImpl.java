@@ -23,17 +23,25 @@ public class JPASQLSymbolManagerImpl extends DefaultSQLSymbolManagerImpl {
 				Map<?, ?> params, SQLSymbolManager symbolManager,
 				List<ExtQueryListener> listeners) {
 			super(entityClass, alias, params, symbolManager, listeners);
+			this.setQueryNameStrategy(new JPASelectQueryNameStrategy(this.alias, joinMapped, true));
 		}
 
 		public JPASelectExtQueryImpl(Class<?> entityClass, String alias,
 				Map<?, ?> params, SQLSymbolManager symbolManager) {
 			super(entityClass, alias, params, symbolManager);
+			this.setQueryNameStrategy(new JPASelectQueryNameStrategy(this.alias, joinMapped, true));
 		}
+	}
+	
+	public static class JPASelectQueryNameStrategy extends SelectQueryNameStrategy {
 
-
-		protected String getFromName(Class<?> entityClass){
-			String tableName = entityClass.getSimpleName();
-			return tableName;
+		public JPASelectQueryNameStrategy(String alias, Map<String, String> joinMapped, boolean aliasMainTableName) {
+			super(alias, joinMapped, aliasMainTableName);
 		}
+		
+		public String getFromName(Class<?> entityClass){
+			return entityClass.getSimpleName();
+		}
+		
 	}
 }

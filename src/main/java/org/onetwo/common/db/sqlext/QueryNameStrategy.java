@@ -13,7 +13,7 @@ public class QueryNameStrategy {
 	public static final String[] SQL_KEY_WORKDS = new String[]{" ", ";", ",", "(", ")", "'", "\"\"", "/", "+", "-"};
 
 	protected String alias;
-	protected boolean aliasMainTableName=true;
+	protected boolean aliasMainTableName = true;
 	
 	public QueryNameStrategy(String alias) {
 		this(alias, true);

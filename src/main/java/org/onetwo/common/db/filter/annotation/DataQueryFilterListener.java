@@ -12,12 +12,12 @@ import org.onetwo.common.db.sqlext.ExtQuery;
 import org.onetwo.common.db.sqlext.ExtQuery.K;
 import org.onetwo.common.db.sqlext.ExtQueryInner;
 import org.onetwo.common.db.sqlext.ExtQueryListenerAdapter;
-import org.onetwo.common.exception.BaseException;
 import org.onetwo.common.log.JFishLoggerFactory;
 import org.onetwo.common.reflect.ReflectUtils;
 import org.onetwo.common.spring.Springs;
 import org.onetwo.common.utils.LangUtils;
 import org.onetwo.common.utils.StringUtils;
+import org.onetwo.dbm.exception.DbmException;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 
 import com.google.common.cache.CacheBuilder;
@@ -87,7 +87,7 @@ public class DataQueryFilterListener extends ExtQueryListenerAdapter{
 		String[] fields = dataQueryFilter.fields();
 		String[] values = dataQueryFilter.values();
 		if(fields.length!=values.length)
-			throw new BaseException("the length is not equals of QueryDataFilter");
+			throw new DbmException("the length of fields is not equals the values in QueryDataFilter");
 		int index = 0;
 		Map<?, ?> sourceParams = query.getSourceParams();
 		for(String field : fields){

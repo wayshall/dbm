@@ -8,7 +8,7 @@ import java.util.Map;
  * <br/>
  */
 public class SelectQueryNameStrategy extends QueryNameStrategy {
-	private Map<String, String> joinMapped = new HashMap<>();
+	protected Map<String, String> joinMapped = new HashMap<>();
 
 	public SelectQueryNameStrategy(String alias, Map<String, String> joinMapped, boolean aliasMainTableName) {
 		super(alias, aliasMainTableName);

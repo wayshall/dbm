@@ -20,7 +20,7 @@ public class DbmExtQueryImpl extends SelectExtQueryImpl {
 	public DbmExtQueryImpl(DbmMappedEntry entry, Class<?> entityClass, String alias, Map<?, ?> params, SQLSymbolManager symbolManager, List<ExtQueryListener> listeners) {
 		super(entityClass, alias, params, symbolManager, listeners);
 		this.entry = entry;
-		this.queryNameStrategy = new DbmQueryNameStrategy(entry, alias, this.joinMapped, true);
+		this.setQueryNameStrategy(new DbmQueryNameStrategy(entry, this.alias, this.joinMapped, true));
 	}
 
 

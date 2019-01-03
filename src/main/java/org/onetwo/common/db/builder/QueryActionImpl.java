@@ -20,12 +20,14 @@ public class QueryActionImpl implements QueryAction {
 
 	protected InnerBaseEntityManager baseEntityManager;
 	private SelectExtQuery extQuery;
+	final private QueryBuilder queryBuilder;
 
-	public QueryActionImpl(InnerBaseEntityManager baseEntityManager, Class<?> entityClass, String alias, Map<Object, Object> properties){
-		if(baseEntityManager==null){
+	public QueryActionImpl(QueryBuilderImpl queryBuilder, Class<?> entityClass, String alias, Map<Object, Object> properties){
+		if(queryBuilder.getBaseEntityManager()==null){
 			throw new DbmException("to create QueryAction, the baseEntityManager can not be null!");
 		}
-		this.baseEntityManager = baseEntityManager;
+		this.queryBuilder = queryBuilder;
+		this.baseEntityManager = queryBuilder.getBaseEntityManager();
 		extQuery = getSQLSymbolManager().createSelectQuery(entityClass, alias, properties);
 //		extQuery.build();
 	}
@@ -49,6 +51,7 @@ public class QueryActionImpl implements QueryAction {
 	@Override
 	public <T> T one(){
 		checkOperation();
+//		this.getQueryBuilder().limit(0, 1);
 		return (T)baseEntityManager.selectOne(getExtQuery());
 	}
 	
@@ -109,6 +112,10 @@ public class QueryActionImpl implements QueryAction {
 
 	public InnerBaseEntityManager getBaseEntityManager() {
 		return baseEntityManager;
+	}
+
+	protected QueryBuilder getQueryBuilder() {
+		return queryBuilder;
 	}
 	
 }

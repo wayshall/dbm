@@ -4,6 +4,8 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 import org.onetwo.common.base.DbmSessionCacheTest;
+import org.onetwo.common.db.sqlext.ExtQueryImplTest;
+import org.onetwo.common.db.sqlext.JFishExtQueryImplTest;
 import org.onetwo.common.dbm.BaseCrudEntityManagerTest;
 import org.onetwo.common.dbm.BatchInsertTest;
 import org.onetwo.common.dbm.CompositeIDTest;
@@ -29,6 +31,8 @@ import org.onetwo.common.hibernate.dao.HibernateNestedMappingTest;
 
 @RunWith(Suite.class)
 @SuiteClasses({
+	ExtQueryImplTest.class,
+	JFishExtQueryImplTest.class,
 	DbmDaoTest.class,
 	DbmEntityManagerTest.class,
 	DbmDataFilterTest.class,

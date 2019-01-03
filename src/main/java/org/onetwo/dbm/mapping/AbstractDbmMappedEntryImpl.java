@@ -89,6 +89,7 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 	}*/
 	
 	public AbstractDbmMappedEntryImpl(AnnotationInfo annotationInfo, TableInfo tableInfo, DbmInnerServiceRegistry serviceRegistry) {
+		Assert.notNull(serviceRegistry, "serviceRegistry can not be null");
 		this.dbDialect = serviceRegistry.getDialect();
 		this.entityClass = annotationInfo.getSourceClass();
 		this.annotationInfo = annotationInfo;

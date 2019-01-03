@@ -32,6 +32,13 @@ public interface QueryWrapper {
 	
 	public QueryWrapper setPageParameter(final Page page);
 	
+	/***
+	 * 
+	 * @author weishao zeng
+	 * @param first  from 0
+	 * @param size
+	 * @return
+	 */
 	public QueryWrapper setLimited(final Integer first, final Integer size);
 
 	QueryWrapper setLockInfo(LockInfo lockInfo);

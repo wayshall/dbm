@@ -37,6 +37,13 @@ public interface QueryBuilder {
 	public QueryBuilder select(String... fields);
 	public QueryBuilderImpl unselect(String...fields);
 
+	/***
+	 * 
+	 * @author weishao zeng
+	 * @param first  from 0
+	 * @param size
+	 * @return
+	 */
 	public QueryBuilder limit(int first, int size);
 
 	public QueryBuilder asc(String... fields);

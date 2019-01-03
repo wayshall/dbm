@@ -1,13 +1,23 @@
 package org.onetwo.common.db.sqlext;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.onetwo.common.db.EntityManagerProvider;
+import org.onetwo.common.db.filter.annotation.DataQueryFilterListener;
+import org.onetwo.common.dbm.MockDbmInnerServiceRegistry;
 import org.onetwo.common.utils.Assert;
 import org.onetwo.common.utils.LangUtils;
+import org.onetwo.dbm.core.spi.DbmInnerServiceRegistry;
 import org.onetwo.dbm.query.JFishSQLSymbolManagerImpl;
 
+/****
+ * 用于测试
+ * 
+ * @author way
+ *
+ */
 public class SQLSymbolManagerFactory {
 //	private static SQLSymbolManager JPA;
 //	private static SQLSymbolManager HIBERNATE;
@@ -25,7 +35,12 @@ public class SQLSymbolManagerFactory {
 //		 SQLSymbolManager jpa = new DefaultSQLSymbolManagerImpl(new JPQLDialetImpl());
 //		 SQLSymbolManager hibernate = new DefaultSQLSymbolManagerImpl(new DefaultExtQueryDialetImpl());
 //		 SQLSymbolManager jdbc = new DefaultSQLSymbolManagerImpl(new DefaultExtQueryDialetImpl());
-		 SQLSymbolManager jdbc = new JFishSQLSymbolManagerImpl(new DefaultExtQueryDialetImpl());
+		JFishSQLSymbolManagerImpl jdbc = new JFishSQLSymbolManagerImpl(new DefaultExtQueryDialetImpl());
+		 jdbc.setListeners(Arrays.asList(new DataQueryFilterListener()));
+		 // just for test
+		 DbmInnerServiceRegistry sr = new MockDbmInnerServiceRegistry();
+		 sr.initialize(null);
+		 jdbc.setMappedEntryManager(sr.getMappedEntryManager());
 		 
 		 Map<EntityManagerProvider, SQLSymbolManager> temp = new HashMap<EntityManagerProvider, SQLSymbolManager>();
 //		 temp.put(EntityManagerProvider.JPA, jpa);
