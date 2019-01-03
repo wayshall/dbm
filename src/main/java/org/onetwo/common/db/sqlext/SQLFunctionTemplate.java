@@ -3,7 +3,7 @@ package org.onetwo.common.db.sqlext;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.onetwo.common.utils.MyUtils;
+import org.onetwo.common.utils.CUtils;
 
 /**********
  * from hibernate 
@@ -74,9 +74,8 @@ public class SQLFunctionTemplate implements SQLFunction {
 	}
 	
 
-	@SuppressWarnings("rawtypes")
 	public String render(Object...args) {
-		List argList = MyUtils.asList(args);
+		List<?> argList = CUtils.trimAndexcludeTheClassElement(true, args);
 		StringBuffer buf = new StringBuffer();
 		for ( int i = 0; i < chunks.length; ++i ) {
 			if ( i < paramIndexes.length ) {

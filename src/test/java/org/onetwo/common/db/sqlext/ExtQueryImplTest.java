@@ -52,7 +52,25 @@ public class ExtQueryImplTest {
 		jpa.setListeners(Arrays.asList(new DataQueryFilterListener()));
 		sqlSymbolManagerFactory.register(EntityManagerProvider.JPA, jpa);
 	}
+	
+	
 
+	@Test
+	public void testFunctionRef(){
+		Map<Object, Object> properties = new LinkedHashMap<Object, Object>();
+
+		properties.put("&LOWER(name)", "way");
+		properties.put("&substring(name, 5, 1)", "w");
+		properties.put(K.DEBUG, true);
+
+		ExtQueryInner q = SQLSymbolManagerFactory.getInstance().getJPA().createSelectQuery(Object.class, "mag", properties);
+		q.build();
+		
+		String sql = "select mag from Object mag where lower(mag.name) = :lower_mag_name_0 and substring(mag.name, 5, 1) = :substring_mag_name_5_1_1";
+		Assert.assertEquals(sql.trim(), q.getSql().trim());
+		Assert.assertEquals("{lower_mag_name_0=way, substring_mag_name_5_1_1=w}", q.getParamsValue().getValues().toString());
+	}
+	
 	@Test
 	public void testFindAll(){
 

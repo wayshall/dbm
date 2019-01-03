@@ -39,8 +39,6 @@ public interface ExtQuery {
 		static final Map<Object, Object> ORDER_BY_MAP;
 		static final Map<Object, String> JOIN_MAP;
 
-		public static final String DEBUG = "_EXTQUERY_DEBUG_NAME_KEY";
-		public static final String IF_NULL = ":if-null";
 //		public static final String SQL_QUERY = ":sql-query";
 
 		public static final String NO_PREFIX = ".";//不会加 "ent."
@@ -49,7 +47,6 @@ public interface ExtQuery {
 //		public static final String RAW_FUNC = "#";// raw sql function
 		public static final String PREFIX_REF = "@";//加上 "ent."
 
-		public static final Object QUERY_CONFIG = KeyObject.builder().key(":query_config").build();//":query_config";
 		
 		//FIRST_RESULT，ASC等key因为之前比较常用，先不重构为KeyObject，保持为字符串类型
 		/***
@@ -63,6 +60,9 @@ public interface ExtQuery {
 		public static final Object DESC = ":desc";
 //		public static final String RAW_QL = ":raw-ql";
 
+		public static final Object QUERY_CONFIG = KeyObject.builder().key(":query_tips").build();//":query_config";
+		public static final Object DEBUG = KeyObject.builder().key(":debug").build(); //"_EXTQUERY_DEBUG_NAME_KEY";
+		public static final Object IF_NULL = KeyObject.builder().key(":if-null").build(); //":if-null";
 		public static final Object SELECT = KeyObject.builder().key(":select").build();//":select";
 		public static final Object FOR_UPDATE = KeyObject.builder().key(":for_update").build(); //":for_update";
 		public static final Object UNSELECT = KeyObject.builder().key(":unselect").build(); //":unselect";

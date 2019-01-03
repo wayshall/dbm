@@ -3,7 +3,6 @@ package org.onetwo.common.db.sqlext;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -558,15 +557,4 @@ public class SelectExtQueryImpl extends AbstractExtQuery implements SelectExtQue
 		return lockInfo;
 	}
 
-	public static void main(String[] args) {
-
-		Map<Object, Object> properties = new LinkedHashMap<Object, Object>();
-
-		properties.put("&LOWER(name)", "way");
-		properties.put("&substring(name, 5, 1)", "w");
-
-		ExtQueryInner q = SQLSymbolManagerFactory.getInstance().getJPA().createSelectQuery(Object.class, "mag", properties);
-		q.build();
-		
-	}
 }
