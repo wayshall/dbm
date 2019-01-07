@@ -37,6 +37,11 @@ public class DbmIds {
 		return TX_ID_COUNTER;
 	}
 	
+	/****
+	 * 根据内网ip的后两位创建生成器，其中最后一位为机器id，倒数第二位为数据中心id
+	 * @author weishao zeng
+	 * @return
+	 */
 	public static SnowflakeIdGenerator createIdGeneratorByAddress() {
 		//根据ip地址来创建生成器
 		String[] strs = StringUtils.split(NetUtils.getHostAddress(), ".");

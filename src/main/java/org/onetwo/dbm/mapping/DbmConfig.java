@@ -50,10 +50,18 @@ public interface DbmConfig {
 	 */
 	boolean isAutoProxySessionTransaction();
 	
+	/****
+	 * snowfalke id算法配置，理论上，每个部署实例的机器id应该都不相同，否则不同都机器生成都id会有冲突都可能
+	 * @author weishao zeng
+	 * @return
+	 */
 	SnowflakeIdConfig getSnowflakeId();
 	
 	@Data
 	public class SnowflakeIdConfig {
+		/***
+		 * 自动根据网络ip都最后两位创建
+		 */
 		private boolean auto = true;
 		private long datacenterId = 1;
 		private long machineId = 1;
