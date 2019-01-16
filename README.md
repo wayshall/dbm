@@ -870,6 +870,8 @@ public class CustomDaoTest {
 ```
 
 ## 批量插入
+
+### 使用DbmRepository查询批量插入
 在mybatis里，批量插入非常麻烦，我见过有些人甚至使用for循环生成value语句来批量插入的，这种方法插入的数据量如果很大，生成的sql语句以吨计，如果用jdbc接口执行这条语句，系统必挂无疑。   
 在dbm里，使用批量接口很简单。   
 定义接口：   
@@ -914,12 +916,13 @@ dbm对充血模型提供一定的api支持，如果觉得好玩，可尝试使�
 ### 1、需要在Configuration类配置model所在的包位置
 单独使用dbm的项目，只要model类在@EnableDbm注解所在的配置类的包（包括子包）下面即可，dbm会自动扫描。
 ```Java
-### 2、继承RichModel类
+
 @EnableDbm
 public class DbmSampleApplication {
 }  
 ```    
 
+### 2、继承RichModel类
 ```Java
 
 @Entity
