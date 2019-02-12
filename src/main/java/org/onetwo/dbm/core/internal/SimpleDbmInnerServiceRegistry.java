@@ -158,8 +158,6 @@ public class SimpleDbmInnerServiceRegistry implements DbmInnerServiceRegistry {
 		
 		databaseDialetManager = initializeComponent(databaseDialetManager, DefaultDatabaseDialetManager.class, ()->{
 			DefaultDatabaseDialetManager databaseDialetManager = new DefaultDatabaseDialetManager();
-			databaseDialetManager.register(DataBase.MySQL.getName(), new MySQLDialect());
-			databaseDialetManager.register(DataBase.Oracle.getName(), new OracleDialect());
 			return databaseDialetManager;
 		});
 

@@ -3,6 +3,7 @@ package org.onetwo.dbm.dialet;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.onetwo.common.db.DataBase;
 import org.onetwo.common.exception.BaseException;
 import org.onetwo.common.utils.Assert;
 import org.onetwo.common.utils.RegisterManager;
@@ -12,9 +13,12 @@ public class DefaultDatabaseDialetManager implements RegisterManager<String, DBD
 	final private Map<String, DBDialect> dialetRegister = new ConcurrentHashMap<>();
 	
 	public DefaultDatabaseDialetManager(){
+		register(DataBase.MySQL.getName(), new MySQLDialect());
+		register(DataBase.Oracle.getName(), new OracleDialect());
+		register(DataBase.PostgreSQL.getName(), new PostgreSQLDialet());
 	}
 	
-	public DefaultDatabaseDialetManager register(DBDialect dialet){
+	final public DefaultDatabaseDialetManager register(DBDialect dialet){
 		Assert.notNull(dialet);
 		getRegister().put(dialet.getDbmeta().getDbName(), dialet);
 		return this;
