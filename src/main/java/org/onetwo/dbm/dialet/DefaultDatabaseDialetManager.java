@@ -4,9 +4,9 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.onetwo.common.db.DataBase;
-import org.onetwo.common.exception.BaseException;
 import org.onetwo.common.utils.Assert;
 import org.onetwo.common.utils.RegisterManager;
+import org.onetwo.dbm.exception.DbmException;
 
 public class DefaultDatabaseDialetManager implements RegisterManager<String, DBDialect>{
 	
@@ -31,7 +31,7 @@ public class DefaultDatabaseDialetManager implements RegisterManager<String, DBD
 	public DBDialect getRegistered(String name){
 		Map<String, DBDialect> register = getRegister();
 		if(!register.containsKey(name)){
-			throw new BaseException("can not find register name: " + name);
+			throw new DbmException("can not find register DBDialect: " + name);
 		}
 		return register.get(name);
 	}
