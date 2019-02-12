@@ -676,8 +676,10 @@ dbm内置支持了JPA（Hibernate）实现的QueryProvideManager。
 
 ## 查询映射
 DbmRepository的查询映射无需任何xml配置，只需要遵循规则即可：   
-- 1、  Java类的属性名与sql查询返回的列名一致   
+- 1、  Java类的属性名与sql查询返回的列名一致(不区分大小写)   
 - 2、  或者Java类的属性名采用驼峰命名，而列明采用下划线的方式分隔。如：userName对应user_name   
+默认的映射规则实际上和使用了@DbmRowMapper注解下的SMART_PROPERTY模式一致。
+详见：[注解@DbmRowMapper](#注解@DbmRowMapper)
 
 举例：   
 ### 创建一个DbmRepository接口
@@ -892,17 +894,19 @@ public interface UserAutoidDao {
 ## 其它映射特性
 
 ### 注解@DbmRowMapper
-用于配置DbmRepository类的数据映射器。
+用于配置DbmRepository类的数据映射器，配置指定的mapper，默认为ENTITY模式。
+由于标注为实体的映射规则和Pojo默认的映射规则不一致，导致有时候某些查询返回需要用到两种规则时无法兼容，使用此注解的MIXTURE 混合模式可以兼容两种规则。
 
 - ENTITY模式
-用于配置指定的mapper，默认使用EntryRowMapper
+使用EntryRowMapper映射器。
 EntryRowMapper会使用实体的风格映射，即：
-如果有使用@Column注解，则按照注解的映射匹配；
+如果有@Column注解，则按照注解的映射匹配；
 如果没有使用注解，则把属性名称转为下划线匹配；
 
 - SMART_PROPERTY模式：
-如果不使用此注解，一般都使用DbmBeanPropertyRowMapper映射属性，即：
-自动把bean的属性名称转为小写和下划线两种方式去匹配sql返回的列值
+使用DbmBeanPropertyRowMapper映射属性，即：
+自动把bean的属性名称转为小写和下划线两种方式去匹配sql返回的列值。
+此模式和不使用@DbmRowMapper注解时一致。
 
 - MIXTURE 混合模式：
 先匹配ENTITY模式，如果没有，则匹配SMART_PROPERTY模式
