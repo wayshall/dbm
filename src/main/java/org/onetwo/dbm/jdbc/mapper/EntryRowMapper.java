@@ -6,8 +6,8 @@ import java.sql.SQLException;
 
 import org.onetwo.common.log.JFishLoggerFactory;
 import org.onetwo.common.utils.Assert;
-import org.onetwo.common.utils.LangUtils;
 import org.onetwo.common.utils.StringUtils;
+import org.onetwo.dbm.exception.DbmException;
 import org.onetwo.dbm.jdbc.spi.JdbcResultSetGetter;
 import org.onetwo.dbm.mapping.DbmMappedEntry;
 import org.onetwo.dbm.mapping.DbmMappedField;
@@ -97,7 +97,7 @@ public class EntryRowMapper<T> extends DbmBeanPropertyRowMapper<T> implements Ro
 //					this.setRelatedProperty(rs, index, entity, propName);
 				}*/
 			} catch (Exception e) {
-				LangUtils.throwBaseException(entry.getEntityClass() + " mapped field["+column+", "+value+"] error : " + e.getMessage(), e);
+				throw new DbmException(entry.getEntityClass() + " mapped field["+column+", "+value+"] error : " + e.getMessage(), e);
 			}
 		}	
 		

@@ -9,7 +9,6 @@ import java.util.function.Supplier;
 import javax.sql.DataSource;
 import javax.validation.Validator;
 
-import org.onetwo.common.db.DataBase;
 import org.onetwo.common.db.filequery.SqlParamterPostfixFunctions;
 import org.onetwo.common.db.filter.annotation.DataQueryFilterListener;
 import org.onetwo.common.db.spi.SqlParamterPostfixFunctionRegistry;
@@ -25,8 +24,6 @@ import org.onetwo.dbm.dialet.AbstractDBDialect.DBMeta;
 import org.onetwo.dbm.dialet.DBDialect;
 import org.onetwo.dbm.dialet.DbmetaFetcher;
 import org.onetwo.dbm.dialet.DefaultDatabaseDialetManager;
-import org.onetwo.dbm.dialet.MySQLDialect;
-import org.onetwo.dbm.dialet.OracleDialect;
 import org.onetwo.dbm.event.internal.EdgeEventBus;
 import org.onetwo.dbm.exception.DbmException;
 import org.onetwo.dbm.jdbc.DbmJdbcOperationsProxy;
