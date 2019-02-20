@@ -21,6 +21,7 @@
 - [查询映射](#查询映射)
 - [复杂的嵌套查询映射](#复杂的嵌套查询映射)
 - [自定义实现DbmRepository查询接口](#自定义实现dbmrepository查询接口)
+- [枚举处理](#枚举处理)
 - [其它映射特性](#其它映射特性)
 - [批量插入](#批量插入)
 - [充血模型支持](#充血模型支持)
@@ -252,7 +253,7 @@ CompositeEntity entity = baseEntityManager.load(CompositeEntity.class, cid);
 int deleteCount = baseEntityManager.removeById(CompositeEntity.class, entity.getId());
 ```
 
-## 其它特有的映射
+## 枚举处理
 
 ### 枚举映射
 dbm支持jpa的@Enumerated枚举映射注解，使用方法和jpa一样，默认为EnumType.ORDINAL int值类型映射，可以通过注解属性指定为EnumType.STRING名称映射。
@@ -315,6 +316,16 @@ public class UserEntity {
 	}
 }
 ```
+
+### 枚举属性查询时的处理
+
+- 如果枚举实现了 DbmEnumValueMapping 接口，则取DbmEnumValueMapping#getMappingValue()方法所得的值
+- 通过Querys 和 BaseEntityManager 的api查询时，一般直接取枚举的name()方法所得的值
+- 如果是@DbmRepository 接口，并且用@Param注解指定了enumType属性，则根据配置的取相应的值，但是DbmEnumValueMapping接口优先级更高
+
+## 其它特有的映射
+
+
 
 ### json映射
 有时候，我们需要在数据库的某个字段里存储json格式的数据，又想在获取到数据后转为java对象使用，这时你可以使用 @DbmJsonField 注解，这个注解会在保存实体的时候把对象转化为json字符串，然后在取出数据的时候自动把字符串转化为对象。

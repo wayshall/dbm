@@ -26,6 +26,14 @@ public class NoAutoIdUserService {
 	public int deleteAll(){
 		return this.baseEntityManager.removeAll(UserEntity.class);
 	}
+
+	public void insertWithStatus(int startId, int insertCount, UserStatus status){
+		List<UserEntity> userlist = Stream.iterate(startId, item->item+1).limit(insertCount)
+					.map(i->createUserEntity("testList", i, status))
+					.collect(Collectors.toList());
+		
+		baseEntityManager.getSessionFactory().getSession().batchInsert(userlist);
+	}
 	
 	public void insertList(int startId, int insertCount){
 		List<UserEntity> userlist = Stream.iterate(startId, item->item+1).limit(insertCount)
@@ -43,7 +51,12 @@ public class NoAutoIdUserService {
 			baseEntityManager.save(entity);
 		});
 	}
-	private UserEntity createUserEntity(String userNamePrefix,  int i){
+	
+	public UserEntity createUserEntity(String userNamePrefix,  int i){
+		return createUserEntity(userNamePrefix, i, UserStatus.NORMAL);
+	}
+	
+	public UserEntity createUserEntity(String userNamePrefix,  int i, UserStatus userStatus){
 		UserEntity user = new UserEntity();
 		user.setId(Long.valueOf(i));;
 		user.setUserName(userNamePrefix+"-batch-"+i);
@@ -54,7 +67,7 @@ public class NoAutoIdUserService {
 		user.setEmail("test@qq.com");
 		user.setMobile("137"+i);
 		user.setBirthday(new Date());
-		user.setStatus(UserStatus.NORMAL);
+		user.setStatus(userStatus);
 		return user;
 	}
 }

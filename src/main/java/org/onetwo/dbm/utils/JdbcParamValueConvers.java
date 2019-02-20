@@ -17,6 +17,7 @@ import org.onetwo.common.date.Dates;
 import org.onetwo.common.utils.JFishProperty;
 import org.onetwo.common.utils.JFishPropertyInfoImpl;
 import org.onetwo.dbm.jdbc.spi.JdbcParameterValue;
+import org.onetwo.dbm.mapping.DbmEnumValueMapping;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.jdbc.core.SqlParameterValue;
 import org.springframework.jdbc.core.SqlTypeValue;
@@ -58,7 +59,10 @@ final public class JdbcParamValueConvers {
 	public static Object getActualValue(Object value){
 		if(SqlParameterValue.class.isInstance(value)){
 			return ((SqlParameterValue)value).getValue();
-		}else if(Enum.class.isInstance(value)){
+		} else if (value instanceof DbmEnumValueMapping) {
+			DbmEnumValueMapping dvm = (DbmEnumValueMapping) value;
+			return dvm.getMappingValue();
+		} else if(Enum.class.isInstance(value)){
 			return ((Enum<?>)value).name();
 		}else if(value instanceof LocalDate){
 			final LocalDate localDate = (LocalDate) value;
