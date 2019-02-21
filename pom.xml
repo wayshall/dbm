@@ -7,7 +7,8 @@
   <packaging>jar</packaging>
 
   <name>onetwo-dbm</name>
-  <url>http://maven.apache.org</url>
+  <url>https://github.com/wayshall/dbm</url>
+  <description>onetwo-dbm</description>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -33,7 +34,7 @@
       <url>https://github.com/wayshall/dbm</url>
       <connection>scm:git:ssh://git@github.com/wayshall/dbm.git</connection>
       <developerConnection>scm:git:ssh://git@github.com/wayshall/dbm.git</developerConnection>
-    <tag>onetwo-modules-4.7.2</tag>
+    <tag>onetwo-modules</tag>
   </scm>
 
   <dependencies>
