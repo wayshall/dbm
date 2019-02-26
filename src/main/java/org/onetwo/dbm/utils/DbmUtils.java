@@ -289,8 +289,17 @@ final public class DbmUtils {
 	}
 
 	public static String objectToString(Object obj){
-		if (obj!=null && LangUtils.size(obj) > MAX_PRINTABLE_ARG_SIZE) {
-			return "<<Argutment Size is more than " + MAX_PRINTABLE_ARG_SIZE + ">>";
+		if (obj!=null && obj.getClass().isArray()) {
+			Object[] rawArgs = (Object[]) obj;
+			Object[] args = new Object[rawArgs.length];
+			for (int i = 0; i < rawArgs.length; i++) {
+				if (LangUtils.isMultiple(rawArgs[i]) && LangUtils.size(rawArgs[i]) > MAX_PRINTABLE_ARG_SIZE) {
+					args[i] = "<<Argutment Size is more than " + MAX_PRINTABLE_ARG_SIZE + ">>"; 
+				} else {
+					args[i] = rawArgs[i];
+				}
+			}
+			return LangUtils.toString(args);
 		} else {
 			return LangUtils.toString(obj);
 		}
