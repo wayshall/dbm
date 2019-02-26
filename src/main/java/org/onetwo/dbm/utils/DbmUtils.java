@@ -53,6 +53,8 @@ final public class DbmUtils {
 	
 	private static final Logger logger = JFishLoggerFactory.getLogger(DbmUtils.class);
 	
+	public static final int MAX_PRINTABLE_ARG_SIZE = 50;
+	
 	public final static ConversionService CONVERSION_SERVICE = new DefaultConversionService();
 	
 	private static final String CHAINED_TRANSACTION_MANAGER = "org.springframework.data.transaction.ChainedTransactionManager";
@@ -250,11 +252,10 @@ final public class DbmUtils {
 		return false;
 	}
 	
-
 	public static Pair<String, Object> findSqlAndParams(Object[] args){
 		String sql = null;
 		Object params = null;
-		int maxArgSize = 50;
+		int maxArgSize = MAX_PRINTABLE_ARG_SIZE;
 		for (int i = 0; i < args.length; i++) {
 			Object arg = args[i];
 			if(arg==null){
@@ -285,6 +286,14 @@ final public class DbmUtils {
 			return null;
 		}
 		return Pair.of(sql, params);
+	}
+
+	public static String objectToString(Object obj){
+		if (obj!=null && LangUtils.size(obj) > MAX_PRINTABLE_ARG_SIZE) {
+			return "<<Argutment Size is more than " + MAX_PRINTABLE_ARG_SIZE + ">>";
+		} else {
+			return LangUtils.toString(obj);
+		}
 	}
 	
 

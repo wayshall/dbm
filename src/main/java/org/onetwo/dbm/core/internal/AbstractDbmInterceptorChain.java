@@ -20,6 +20,7 @@ import org.onetwo.dbm.core.spi.DbmInterceptorChain;
 import org.onetwo.dbm.exception.DbmException;
 import org.onetwo.dbm.jdbc.spi.DbmJdbcOperationType;
 import org.onetwo.dbm.jdbc.spi.DbmJdbcOperationType.DatabaseOperationType;
+import org.onetwo.dbm.utils.DbmUtils;
 import org.springframework.core.NestedRuntimeException;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 
@@ -161,7 +162,7 @@ abstract public class AbstractDbmInterceptorChain implements DbmInterceptorChain
 			throw (DbmException) e;
 		}
 		return new DbmException("invoke method error, targetMethod: " + targetMethod + ";"
-				+ "args: " + LangUtils.toString(this.targetArgs), e);
+				+ "args: " + DbmUtils.objectToString(this.targetArgs), e);
 	}
 
 	@Override
