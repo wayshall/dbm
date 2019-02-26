@@ -56,6 +56,7 @@ public class SpecificationQuerys<T> implements Specification<T>, Serializable {
 
 	private SpecificationQuerys(Specification<T> spec) {
 		this.spec = spec;
+		this.sort = Sort.by(new Order[0]);
 	}
 
 	private SpecificationQuerys(Specification<T> spec, Sort sort) {
