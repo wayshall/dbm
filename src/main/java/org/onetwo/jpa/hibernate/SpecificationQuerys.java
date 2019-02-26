@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -145,8 +146,8 @@ public class SpecificationQuerys<T> implements Specification<T>, Serializable {
 		List<T> list = executor.findAll(spec, sort);
 		return list;
 	}
-	public T getOne(JpaSpecificationExecutor<T> executor){
-		T data = executor.findOne(spec);
+	public Optional<T> getOne(JpaSpecificationExecutor<T> executor){
+		Optional<T> data = executor.findOne(spec);
 		return data;
 	}
 	
