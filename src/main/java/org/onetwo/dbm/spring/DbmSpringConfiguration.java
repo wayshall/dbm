@@ -125,7 +125,8 @@ public class DbmSpringConfiguration implements ApplicationContextAware, Initiali
 	}
 	
 	@Bean(name=DbmIds.SNOWFLAKE_BEAN_NAME)
-	public SnowflakeIdGenerator dbmSnowflakeIdGenerator(DbmConfig dbmConfig) {
+	public SnowflakeIdGenerator dbmSnowflakeIdGenerator() {
+		DbmConfig dbmConfig = dbmConfig();
 		SnowflakeIdGenerator sid = null;
 		SnowflakeIdConfig config = dbmConfig.getSnowflakeId();
 		if (config.isAuto()) {
