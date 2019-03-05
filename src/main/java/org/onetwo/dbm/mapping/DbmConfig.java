@@ -60,7 +60,7 @@ public interface DbmConfig {
 	@Data
 	public class SnowflakeIdConfig {
 		/***
-		 * 自动根据网络ip都最后两位创建
+		 * 自动根据网络ip的最后两位创建
 		 */
 		private boolean auto = true;
 		private long datacenterId = 1;
