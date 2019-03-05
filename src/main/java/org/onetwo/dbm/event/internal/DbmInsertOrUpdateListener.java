@@ -1,5 +1,8 @@
 package org.onetwo.dbm.event.internal;
 
+import java.util.Date;
+
+import org.onetwo.common.db.TimeRecordableEntity;
 import org.onetwo.dbm.event.spi.DbmInsertOrUpdateEvent;
 import org.onetwo.dbm.event.spi.DbmSessionEvent;
 import org.onetwo.dbm.exception.EntityInsertException;
@@ -30,6 +33,14 @@ public class DbmInsertOrUpdateListener extends AbstractDbmEventListener {
 				if(entry.isVersionControll()) {
 					versionValue = entry.getVersionField().getValue(entity);
 				}
+				
+				Date createAt = null;
+				TimeRecordableEntity timeEntity = null;
+				if (TimeRecordableEntity.class.isInstance(entity)) {
+					timeEntity = (TimeRecordableEntity) entity;
+					createAt = timeEntity.getCreateAt();
+				}
+				
 				try {
 					es.insert(entity);
 				} catch (EntityInsertException | DuplicateKeyException e) {
@@ -37,6 +48,10 @@ public class DbmInsertOrUpdateListener extends AbstractDbmEventListener {
 					// 失败后把当前version值设置回去
 					if(entry.isVersionControll()) {
 						entry.getVersionField().setValue(entity, versionValue);
+					}
+					// 失败后设置回createAt
+					if (timeEntity!=null) {
+						timeEntity.setCreateAt(createAt);
 					}
 					if(insertOrUpdate.isDynamicUpdate()){
 						updateCount = es.dymanicUpdate(entity);
