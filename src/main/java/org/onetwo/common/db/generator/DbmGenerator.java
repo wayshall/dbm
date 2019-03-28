@@ -25,6 +25,11 @@ import com.google.common.collect.Maps;
  */
 public class DbmGenerator {
 
+	public static DbmGenerator dataSource(DataSource dataSource){
+		DbmGenerator generator = new DbmGenerator(new DbGenerator(dataSource, new FtlEngine()));
+		return generator;
+	}
+
 	public static DbmGenerator createWithDburl(String dburl, String dbusername, String dbpassword){
 		DataSource dataSource = TomcatDataSourceBuilder.newBuilder()
 														.mysql(null, dbusername, dbpassword)
