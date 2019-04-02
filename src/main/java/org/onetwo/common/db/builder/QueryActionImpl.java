@@ -106,6 +106,13 @@ public class QueryActionImpl implements QueryAction {
 		List<T> res = this.getDbmEntityManager().getCurrentSession().findList(convertAsDbmQueryValue(getExtQuery()), rowMapper);
 		return res;
 	}
+	
+	@Override
+	public Number count() {
+		checkOperation();
+		return baseEntityManager.count(getExtQuery());
+	}
+
 	protected DbmEntityManager getDbmEntityManager(){
 		return (DbmEntityManager) getBaseEntityManager();
 	}

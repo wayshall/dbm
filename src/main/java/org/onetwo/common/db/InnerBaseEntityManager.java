@@ -7,7 +7,7 @@ import org.onetwo.common.db.sqlext.SelectExtQuery;
 import org.onetwo.common.utils.Page;
 
 public interface InnerBaseEntityManager extends BaseEntityManager {
-
+	
 	public <T> List<T> select(SelectExtQuery extQuery);
 	public <T> T selectUnique(SelectExtQuery extQuery);
 	public <T> T selectOne(SelectExtQuery extQuery);
@@ -16,4 +16,6 @@ public interface InnerBaseEntityManager extends BaseEntityManager {
 
 	public <T> List<T> findList(DbmQueryValue queryValue);
 	public <T> T findUnique(DbmQueryValue queryValue);
+
+	public Number count(SelectExtQuery extQuery);
 }

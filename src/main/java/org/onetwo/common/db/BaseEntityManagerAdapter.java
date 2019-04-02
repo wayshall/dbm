@@ -102,6 +102,12 @@ public abstract class BaseEntityManagerAdapter implements InnerBaseEntityManager
 	public <T> List<T> selectFieldsToEntity(Class<?> entityClass, Object[] selectFields, Object... properties){
 		throw new UnsupportedOperationException();
 	}
+	
+	public Number count(SelectExtQuery extQuery) {
+		extQuery.build();
+		Number countNumber = (Number)this.findUnique(extQuery.getCountSql(), extQuery.getParamsValue().asMap());
+		return countNumber;
+	}
 
 	@Override
 	public <T> List<T> select(SelectExtQuery extQuery) {

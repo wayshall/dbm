@@ -1,6 +1,7 @@
 package org.onetwo.common.db.builder;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.onetwo.common.utils.Page;
 import org.springframework.jdbc.core.ResultSetExtractor;
@@ -18,6 +19,12 @@ public interface QueryAction {
 	<T> T unique();
 	
 	<T> T one();
+	
+	default public <T> Optional<T> optionalOne() {
+		return Optional.ofNullable(one());
+	}
+	
+	Number count();
 
 	<T> List<T> list();
 	
