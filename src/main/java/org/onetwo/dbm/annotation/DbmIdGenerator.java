@@ -17,6 +17,8 @@ import org.onetwo.dbm.id.CustomIdGenerator;
 public @interface DbmIdGenerator {
 	
 	String name();
+	
+	Class<?> valueType() default Object.class;
 	/****
 	 * try to find in spring context, otherwise new instance
 	 * @author wayshall
@@ -38,5 +40,5 @@ public @interface DbmIdGenerator {
 		DEFAULT,
 		SPRING
 	}
-
+	
 }
