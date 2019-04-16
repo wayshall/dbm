@@ -79,9 +79,11 @@ public class DbmSnowflakeTest extends DbmBaseTest {
 		user.setUserName("snowflake");
 		entityManager.save(user);
 		assertThat(user.getId()).isNotNull();
+//		assertThat(user.getAppCode()).isNotEmpty();
 		
 		SnowflakeIdUserEntity dbuser = entityManager.load(SnowflakeIdUserEntity.class, user.getId());
 		assertThat(dbuser.getUserName()).isEqualTo(user.getUserName());
+//		assertThat(dbuser.getAppCode()).isNotEmpty();
 		
 
 		SnowflakeIdUser2Entity user2 = new SnowflakeIdUser2Entity();
