@@ -9,7 +9,7 @@ import org.onetwo.common.utils.Page;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowMapper;
 
-public interface QueryAction {
+public interface QueryAction<E> {
 
 //	ExtQuery build(Class<?> entityClass, String alias, Map<Object, Object> properties);
 	
@@ -18,21 +18,21 @@ public interface QueryAction {
 	 * @author weishao zeng
 	 * @return
 	 */
-	<T> T unique();
+	E unique();
 	
-	<T> T one();
+	E one();
 	
-	default public <T> Optional<T> optionalOne() {
+	default public Optional<E> optionalOne() {
 		return Optional.ofNullable(one());
 	}
 	
 	Number count();
 
-	<T> List<T> list();
+	List<E> list();
 	
 	<T> List<T> listAs(Class<T> toClass);
 	
-	<T> Page<T> page(Page<T> page);
+	Page<E> page(Page<E> page);
 	
 	<T> T extractAs(ResultSetExtractor<T> rse);
 	

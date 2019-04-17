@@ -182,7 +182,7 @@ public abstract class BaseEntityManagerAdapter implements InnerBaseEntityManager
 	}*/
 
 
-	public <T> T findUnique(QueryBuilder squery) {
+	public <T> T findUnique(QueryBuilder<T> squery) {
 		return findUniqueByProperties((Class<T>)squery.getEntityClass(), squery.getParams());
 	}
 

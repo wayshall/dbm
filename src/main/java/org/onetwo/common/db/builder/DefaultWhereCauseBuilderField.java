@@ -14,7 +14,7 @@ import org.onetwo.common.utils.func.Closure;
 
 
 @SuppressWarnings("unchecked")
-public class DefaultWhereCauseBuilderField extends WhereCauseBuilderField {
+public class DefaultWhereCauseBuilderField<E> extends WhereCauseBuilderField<E> {
 	
 	private String[] fields;
 	private String op;
@@ -22,12 +22,12 @@ public class DefaultWhereCauseBuilderField extends WhereCauseBuilderField {
 	
 	private Supplier<Boolean> whenPredicate;
 
-	public DefaultWhereCauseBuilderField(WhereCauseBuilder squery, String... fields) {
+	public DefaultWhereCauseBuilderField(WhereCauseBuilder<E> squery, String... fields) {
 		super(squery);
 		this.fields = fields;
 	}
 	
-	public DefaultWhereCauseBuilderField(WhereCauseBuilder squery, SingularAttribute<?, ?>... fields) {
+	public DefaultWhereCauseBuilderField(WhereCauseBuilder<E> squery, SingularAttribute<?, ?>... fields) {
 		super(squery);
 		this.fields = Stream.of(fields)
 							.map(f->f.getName())
@@ -35,21 +35,21 @@ public class DefaultWhereCauseBuilderField extends WhereCauseBuilderField {
 							.toArray(new String[0]);
 	}
 
-	public WhereCauseBuilder like(String... values) {
+	public WhereCauseBuilder<E> like(String... values) {
 		this.op = FieldOP.like;
 		this.values = values;
 		this.queryBuilder.addField(this);
 		return queryBuilder;
 	}
 
-	public WhereCauseBuilder notLike(String... values) {
+	public WhereCauseBuilder<E> notLike(String... values) {
 		this.op = FieldOP.not_like;
 		this.values = values;
 		this.queryBuilder.addField(this);
 		return queryBuilder;
 	}
 
-	public DefaultWhereCauseBuilderField when(Supplier<Boolean> predicate) {
+	public DefaultWhereCauseBuilderField<E> when(Supplier<Boolean> predicate) {
 		this.whenPredicate = predicate;
 		return this;
 	}
@@ -59,24 +59,24 @@ public class DefaultWhereCauseBuilderField extends WhereCauseBuilderField {
 	 * @param values
 	 * @return
 	 */
-	public <T> WhereCauseBuilder equalTo(T... values) {
+	public <T> WhereCauseBuilder<E> equalTo(T... values) {
 		return this.doWhenPredicate(()->{
 			this.op = FieldOP.eq;
 			this.values = values;
 		});
 	}
-	public <T> WhereCauseBuilder is(T... values) {
+	public <T> WhereCauseBuilder<E> is(T... values) {
 		return equalTo(values);
 	}
 	
-	public WhereCauseBuilder isNull(boolean isNull) {
+	public WhereCauseBuilder<E> isNull(boolean isNull) {
 		return this.doWhenPredicate(()->{
 			this.op = FieldOP.is_null;
 			this.values = new Object[]{isNull};
 		});
 	}
 	
-	protected WhereCauseBuilder doWhenPredicate(Closure whenAction){
+	protected WhereCauseBuilder<E> doWhenPredicate(Closure whenAction){
 		boolean rs = whenPredicate==null?true:Optional.ofNullable(whenPredicate.get()).orElse(false);
 		if(rs){
 			whenAction.execute();
@@ -91,7 +91,7 @@ public class DefaultWhereCauseBuilderField extends WhereCauseBuilderField {
 	 * @param values
 	 * @return
 	 */
-	public <T> WhereCauseBuilder notEqualTo(T... values) {
+	public <T> WhereCauseBuilder<E> notEqualTo(T... values) {
 		return this.doWhenPredicate(()->{
 			this.op = FieldOP.neq;
 			this.values = values;
@@ -103,7 +103,7 @@ public class DefaultWhereCauseBuilderField extends WhereCauseBuilderField {
 	 * @param values
 	 * @return
 	 */
-	public <T> WhereCauseBuilder greaterThan(T... values) {
+	public <T> WhereCauseBuilder<E> greaterThan(T... values) {
 		return this.doWhenPredicate(()->{
 			this.op = FieldOP.gt;
 			this.values = values;
@@ -115,7 +115,7 @@ public class DefaultWhereCauseBuilderField extends WhereCauseBuilderField {
 		return queryBuilder;*/
 	}
 	
-	public <T> WhereCauseBuilder in(T... values) {
+	public <T> WhereCauseBuilder<E> in(T... values) {
 		return this.doWhenPredicate(()->{
 			this.op = FieldOP.in;
 			this.values = values;
@@ -127,7 +127,7 @@ public class DefaultWhereCauseBuilderField extends WhereCauseBuilderField {
 		return queryBuilder;*/
 	}
 	
-	public <T> WhereCauseBuilder notIn(T... values) {
+	public <T> WhereCauseBuilder<E> notIn(T... values) {
 		return this.doWhenPredicate(()->{
 			this.op = FieldOP.not_in;
 			this.values = values;
@@ -139,7 +139,7 @@ public class DefaultWhereCauseBuilderField extends WhereCauseBuilderField {
 		return queryBuilder;*/
 	}
 	
-	public WhereCauseBuilder dateIn(Date start, Date end) {
+	public WhereCauseBuilder<E> dateIn(Date start, Date end) {
 		return this.doWhenPredicate(()->{
 			this.op = FieldOP.date_in;
 			this.values = new Date[]{start, end};
@@ -156,7 +156,7 @@ public class DefaultWhereCauseBuilderField extends WhereCauseBuilderField {
 	 * @param values
 	 * @return
 	 */
-	public <T> WhereCauseBuilder greaterEqual(T... values) {
+	public <T> WhereCauseBuilder<E> greaterEqual(T... values) {
 		return this.doWhenPredicate(()->{
 			this.op = FieldOP.ge;
 			this.values = values;
@@ -173,7 +173,7 @@ public class DefaultWhereCauseBuilderField extends WhereCauseBuilderField {
 	 * @param values
 	 * @return
 	 */
-	public <T> WhereCauseBuilder lessThan(T... values) {
+	public <T> WhereCauseBuilder<E> lessThan(T... values) {
 		return this.doWhenPredicate(()->{
 			this.op = FieldOP.lt;
 			this.values = values;
@@ -190,7 +190,7 @@ public class DefaultWhereCauseBuilderField extends WhereCauseBuilderField {
 	 * @param values
 	 * @return
 	 */
-	public <T> WhereCauseBuilder lessEqual(T... values) {
+	public <T> WhereCauseBuilder<E> lessEqual(T... values) {
 		return this.doWhenPredicate(()->{
 			this.op = FieldOP.le;
 			this.values = values;
@@ -202,7 +202,7 @@ public class DefaultWhereCauseBuilderField extends WhereCauseBuilderField {
 		return queryBuilder;*/
 	}
 	
-	public WhereCauseBuilder isNull(){
+	public WhereCauseBuilder<E> isNull(){
 		return this.doWhenPredicate(()->{
 			this.op = FieldOP.is_null;
 			this.setValues(true);
@@ -214,7 +214,7 @@ public class DefaultWhereCauseBuilderField extends WhereCauseBuilderField {
 		return queryBuilder;*/
 	}
 	
-	public WhereCauseBuilder isNotNull(){
+	public WhereCauseBuilder<E> isNotNull(){
 		return this.doWhenPredicate(()->{
 			this.op = FieldOP.is_null;
 			this.setValues(false);

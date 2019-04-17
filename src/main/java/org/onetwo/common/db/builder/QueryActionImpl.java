@@ -16,13 +16,13 @@ import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowMapper;
 
 @SuppressWarnings("unchecked")
-public class QueryActionImpl implements QueryAction {
+public class QueryActionImpl<E> implements QueryAction<E> {
 
 	protected InnerBaseEntityManager baseEntityManager;
 	private SelectExtQuery extQuery;
-	final private QueryBuilder queryBuilder;
+	final private QueryBuilder<E> queryBuilder;
 
-	public QueryActionImpl(QueryBuilderImpl queryBuilder, Class<?> entityClass, String alias, Map<Object, Object> properties){
+	public QueryActionImpl(QueryBuilderImpl<E> queryBuilder, Class<?> entityClass, String alias, Map<Object, Object> properties){
 		if(queryBuilder.getBaseEntityManager()==null){
 			throw new DbmException("to create QueryAction, the baseEntityManager can not be null!");
 		}
@@ -49,23 +49,23 @@ public class QueryActionImpl implements QueryAction {
 	}
 	
 	@Override
-	public <T> T one(){
+	public E one(){
 		checkOperation();
 //		this.getQueryBuilder().limit(0, 1);
-		return (T)baseEntityManager.selectOne(getExtQuery());
+		return (E)baseEntityManager.selectOne(getExtQuery());
 	}
 	
 	/***
 	 * 查找唯一结果，如果找不到则返回null，找到多个则抛异常 IncorrectResultSizeDataAccessException，详见：DataAccessUtils.requiredSingleResult
 	 */
 	@Override
-	public <T> T unique(){
+	public E unique(){
 		checkOperation();
-		return (T)baseEntityManager.selectUnique(getExtQuery());
+		return (E)baseEntityManager.selectUnique(getExtQuery());
 	}
 
 	@Override
-	public <T> List<T> list(){
+	public List<E> list(){
 		checkOperation();
 		return baseEntityManager.select(getExtQuery());
 	}
@@ -78,7 +78,7 @@ public class QueryActionImpl implements QueryAction {
 	}
 
 	@Override
-	public <T> Page<T> page(Page<T> page){
+	public Page<E> page(Page<E> page){
 		checkOperation();
 		baseEntityManager.selectPage(page, getExtQuery());
 		return page;
@@ -121,7 +121,7 @@ public class QueryActionImpl implements QueryAction {
 		return baseEntityManager;
 	}
 
-	protected QueryBuilder getQueryBuilder() {
+	protected QueryBuilder<E> getQueryBuilder() {
 		return queryBuilder;
 	}
 	

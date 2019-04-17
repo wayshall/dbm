@@ -20,9 +20,9 @@ import org.onetwo.dbm.dialet.DBDialect.LockInfo;
  * @author wayshall
  *
  */
-public class QueryBuilderImpl implements QueryBuilder {
+public class QueryBuilderImpl<E> implements QueryBuilder<E> {
 	
-	public static class SubQueryBuilder extends QueryBuilderImpl {
+	public static class SubQueryBuilder<SE> extends QueryBuilderImpl<SE> {
 
 		public SubQueryBuilder() {
 			super();
@@ -39,8 +39,8 @@ public class QueryBuilderImpl implements QueryBuilder {
 		return QueryBuilderCreator.from(entityClass);
 	}*/
 
-	public static SubQueryBuilder sub(){
-		SubQueryBuilder q = new SubQueryBuilder();
+	public static <SE> SubQueryBuilder<SE> sub(){
+		SubQueryBuilder<SE> q = new SubQueryBuilder<SE>();
 		return q;
 	}
 
@@ -80,12 +80,12 @@ public class QueryBuilderImpl implements QueryBuilder {
 		return entityClass;
 	}
 	
-	protected QueryBuilderImpl self(){
-		return (QueryBuilderImpl)this;
+	protected QueryBuilderImpl<E> self(){
+		return (QueryBuilderImpl<E>)this;
 	}
 	
-	public WhereCauseBuilder where(){
-		return new DefaultWhereCauseBuilder(this);
+	public WhereCauseBuilder<E> where(){
+		return new DefaultWhereCauseBuilder<>(this);
 	}
 
 	/*@Override
@@ -101,7 +101,7 @@ public class QueryBuilderImpl implements QueryBuilder {
 		return self();
 	}*/
 	
-	protected void checkSubQuery(QueryBuilder subQuery){
+	protected void checkSubQuery(QueryBuilder<E> subQuery){
 		if(!(subQuery instanceof SubQueryBuilder)){
 			LangUtils.throwBaseException("please use SQuery.sub() method to create sub query .");
 		}
@@ -109,18 +109,18 @@ public class QueryBuilderImpl implements QueryBuilder {
 	
 
 	@Override
-	public QueryBuilder lock(LockInfo lock) {
+	public QueryBuilder<E> lock(LockInfo lock) {
 		this.params.put(K.FOR_UPDATE, lock);
 		return self();
 	}
 
 	@Override
-	public QueryBuilderImpl select(String...fields){
+	public QueryBuilderImpl<E> select(String...fields){
 		this.params.put(K.SELECT, fields);
 		return self();
 	}
 	@Override
-	public QueryBuilderImpl unselect(String...fields){
+	public QueryBuilderImpl<E> unselect(String...fields){
 		this.params.put(K.UNSELECT, fields);
 		return self();
 	}
@@ -129,26 +129,26 @@ public class QueryBuilderImpl implements QueryBuilder {
 	 * @param first from 0
 	 */
 	@Override
-	public QueryBuilderImpl limit(int first, int size){
+	public QueryBuilderImpl<E> limit(int first, int size){
 		this.params.put(K.FIRST_RESULT, first);
 		this.params.put(K.MAX_RESULTS, size);
 		return self();
 	}
 	
 	@Override
-	public QueryBuilderImpl asc(String...fields){
+	public QueryBuilderImpl<E> asc(String...fields){
 		this.params.put(K.ASC, fields);
 		return self();
 	}
 	
 	@Override
-	public QueryBuilderImpl desc(String...fields){
+	public QueryBuilderImpl<E> desc(String...fields){
 		this.params.put(K.DESC, fields);
 		return self();
 	}
 	
 	@Override
-	public QueryBuilderImpl distinct(String...fields){
+	public QueryBuilderImpl<E> distinct(String...fields){
 		this.params.put(K.DISTINCT, fields);
 		return self();
 	}
@@ -193,12 +193,12 @@ public class QueryBuilderImpl implements QueryBuilder {
 	}
 
 	@Override
-	public QueryAction toQuery(){
+	public QueryAction<E> toQuery(){
 		return createQueryAction();
 	}
 
 	@Override
-	public QueryAction toSelect(){
+	public QueryAction<E> toSelect(){
 		return createQueryAction();
 	}
 
@@ -217,7 +217,7 @@ public class QueryBuilderImpl implements QueryBuilder {
 		return extQuery.getSql();
 	}*/
 	
-	protected QueryAction createQueryAction(){
+	protected QueryAction<E> createQueryAction(){
 		String leftJoinSql = buildLeftJoin();
 		if(StringUtils.isNotBlank(leftJoinSql)){
 			params.put(K.SQL_JOIN, RawSqlWrapper.wrap(leftJoinSql));
@@ -226,7 +226,7 @@ public class QueryBuilderImpl implements QueryBuilder {
 		extQuery = createExtQuery(entityClass, alias, params);
 		extQuery.build();*/
 		
-		QueryActionImpl queryAction = new QueryActionImpl(this, entityClass, alias, params);
+		QueryActionImpl<E> queryAction = new QueryActionImpl<E>(this, entityClass, alias, params);
 		
 		/*JFishQueryValue qv = JFishQueryValue.create(getSQLSymbolManager().getPlaceHolder(), extQuery.getSql());
 		qv.setResultClass(extQuery.getEntityClass());

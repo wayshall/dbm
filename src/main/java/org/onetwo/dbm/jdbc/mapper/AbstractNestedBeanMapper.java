@@ -181,6 +181,9 @@ abstract public class AbstractNestedBeanMapper<T> {
 	}
 	static class PropertyResultClassMapper extends ResultClassMapper {
 		final private ResultClassMapper parentMapper;
+		/***
+		 * 映射对象所属的父对象的属性
+		 */
 		final private JFishProperty belongToProperty;
 		public PropertyResultClassMapper(ResultClassMapper parentMapper, String idField, String columnPrefix, JFishProperty belongToProperty) {
 			this(parentMapper, idField, columnPrefix, belongToProperty, belongToProperty.getType());
@@ -325,10 +328,17 @@ abstract public class AbstractNestedBeanMapper<T> {
 		
 	}
 	protected static class ResultClassMapper {
+		/****
+		 * 用来决定某一个对象（一行数据）是否是相同的属性，如果此属性的值相同，则无论其它属性是否相同，均视为同一条数据
+		 */
 		private String idPropertyName = "";
+		/***
+		 * 用来决定某一个对象（一行数据）是否是相同的属性，如果此属性的值相同，则无论其它属性是否相同，均视为同一条数据
+		 */
+		private PropertyMeta idProperty;
+		
 		private String columnPrefix = "";
 		private Intro<?> classIntro;
-		private PropertyMeta idProperty;
 		private Map<String, JFishProperty> simpleFields = Maps.newHashMap();
 		private Map<String, PropertyResultClassMapper> complexFields = Maps.newHashMap();
 		protected Map<Integer, BeanWrapper> datas = Maps.newHashMap();
@@ -351,7 +361,7 @@ abstract public class AbstractNestedBeanMapper<T> {
 					idPropertyName = "value";
 				}
 				if(!"value".equals(idPropertyName)){
-					throw new DbmException("the idPropertyName must be 'value' if nested mapped type is a simple type!");
+					throw new DbmException("the value of id property (in @DbmNestedResult) must be 'value' if nested mapped type is a simple type!");
 				}
 				this.idProperty = new PropertyMeta(idPropertyName, mappedClass, true);
 			}
