@@ -1,5 +1,6 @@
 package org.onetwo.common.db.dquery;
 
+import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -23,6 +24,7 @@ import org.onetwo.common.db.spi.SqlParamterPostfixFunctionRegistry;
 import org.onetwo.common.exception.BaseException;
 import org.onetwo.common.log.JFishLoggerFactory;
 import org.onetwo.common.profiling.TimeCounter;
+import org.onetwo.common.reflect.ReflectUtils;
 import org.onetwo.common.spring.SpringUtils;
 import org.onetwo.common.utils.CUtils;
 import org.onetwo.common.utils.LangUtils;
@@ -50,6 +52,8 @@ abstract public class AbstractDynamicQueryHandler implements DynamicQueryHandler
 	private DbmJdbcOperations jdbcOperations;
 	final protected List<Class<?>> proxyInterfaces = new ArrayList<Class<?>>();
 	
+	private MethodHandles.Lookup instanceForDefaultMethods;
+	
 	public AbstractDynamicQueryHandler(QueryProvideManager em, LoadingCache<Method, DynamicMethod> methodCache, Class<?>... proxiedInterfaces){
 		this.em = em;
 		this.methodCache = methodCache;
@@ -75,7 +79,8 @@ abstract public class AbstractDynamicQueryHandler implements DynamicQueryHandler
 
 //	@Override
 	@Override
-	public Object invoke(Object proxy, Method method, Object[] args) {
+	public Object invoke(Object proxyObj, Method method, Object[] args) {
+		Object proxy = getQueryObject();
 		if(Object.class  == method.getDeclaringClass()) {
 			String name = method.getName();
 			if("equals".equals(name)) {
@@ -88,6 +93,14 @@ abstract public class AbstractDynamicQueryHandler implements DynamicQueryHandler
 			} else {
 				throw new IllegalStateException(String.valueOf(method));
 			}
+		} else if(method.isDefault()) {
+			MethodHandles.Lookup lookup = this.instanceForDefaultMethods;
+			if (lookup==null) {
+	            lookup = ReflectUtils.createMethodHandlesLookup(method.getDeclaringClass());
+	            this.instanceForDefaultMethods = lookup;
+			}
+            Object result = ReflectUtils.invokeDefaultMethod(lookup, method, proxy, args);
+            return result;
 		}
 
 		DynamicMethod dmethod = getDynamicMethod(method);

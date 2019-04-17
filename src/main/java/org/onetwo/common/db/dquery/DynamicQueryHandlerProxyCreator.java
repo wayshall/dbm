@@ -83,7 +83,7 @@ public class DynamicQueryHandlerProxyCreator implements InitializingBean, Applic
 		if(!interfaceClass.getName().equals(queryFile.getNamespace())){
 			throw new FileNamedQueryException("namespace error:  interface->" + interfaceClass+", namespace->"+queryFile.getNamespace());
 		}
-//		targetObject = new DynamicQueryHandler(queryProvideManager, methodCache, interfaceClass).getQueryObject();
+//		targetObject = new JDKProxyDynamicQueryHandler(queryProvideManager, methodCache, interfaceClass).getQueryObject();
 		targetObject = new SpringProxyDynamicQueryHandler(queryProvideManager, methodCache, interfaceClass).getQueryObject();
 	}
 	

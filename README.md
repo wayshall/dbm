@@ -559,7 +559,9 @@ public class UserAutoidServiceImpl {
 `
    提示：如果你不想传入 "%userName%"，可以把sql文件里的命名参数“:userName”改成“:userName?likeString”试试，后面的?likeString是调用dbm内置的likeString方法，该方法会自动在传入的参数前后加上'%'。
 `
-
+`
+   注意：从4.7.3开始，dbm的DbmRepository接口支持Java8接口默认方法。
+`
 ### 通过@Query直接在代码里写sql
 虽然本人不喜欢不推荐在代码里写sql，但实际开发中经常遇到很多人都是喜欢简单粗暴，直接在代码里通过注解写sql，所以，新版（4.5.2-SNAPSHOT+）的dbm提供了@Query来支持在代码里写sql。
 
