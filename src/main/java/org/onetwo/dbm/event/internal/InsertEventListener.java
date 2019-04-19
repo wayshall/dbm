@@ -1,5 +1,7 @@
 package org.onetwo.dbm.event.internal;
 
+import java.io.Serializable;
+
 import org.onetwo.dbm.event.spi.DbmInsertEvent;
 import org.onetwo.dbm.event.spi.DbmSessionEvent;
 import org.onetwo.dbm.id.IdentifierGenerator;
@@ -55,10 +57,10 @@ abstract public class InsertEventListener extends AbstractDbmEventListener {
 		}
 	}
 
-	public Object generatedIdentifyBeforeInsert(DbmInsertEvent event, DbmMappedField idField){
+	public Serializable generatedIdentifyBeforeInsert(DbmInsertEvent event, DbmMappedField idField){
 		DbmSessionEventSource es = event.getEventSource();
 		IdentifierGenerator<?> idGenerator = idField.getIdGenerator();
-		Object id = idGenerator.generate(es);
+		Serializable id = idGenerator.generate(es);
 		return id;
 	}
 	
