@@ -50,7 +50,8 @@ abstract public class InsertEventListener extends AbstractDbmEventListener {
 			return ;
 		}
 		for (DbmMappedField idField : entry.getIdentifyFields()) {
-			if (idField.isGeneratedValue()) {
+//			if (idField.isGeneratedValue()) {
+			if (!entry.hasIdentifyValue(entity) && idField.isGeneratedValue()) {
 				Object id = generatedIdentifyBeforeInsert(event, idField);
 				idField.setValue(entity, id);
 			}
