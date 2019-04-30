@@ -365,6 +365,36 @@ class SimpleEntity {
     </dependency>
 ```
 
+### 敏感字段加密映射
+对于一些不适宜明文存储的字段信息，比如api密钥，存储的时候自动加密，获取的时候自动解密，此时可以使用@DbmEncryptField 注解。
+```Java
+@Entity
+@Table(name="TEST_USER")
+public class UserEntity implements Serializable {
+	
+
+	@Id
+	@GeneratedValue(strategy=GenerationType.IDENTITY) 
+	@Column(name="ID")
+	protected Long id;
+	
+	@DbmEncryptField
+	protected String password;
+}
+``` 
+在@DbmRepository 使用这个功能时，可以在插入的参数后面加上后缀函数：
+```sql
+/*****
+ * @name: batchInsert
+ * 批量插入     */
+    insert 
+    into
+        test_user
+        (user_name, password) 
+    values
+        (:user_name, :password?encrypt)
+```
+
 ### @DbmField注解
 @DbmField 注解可自定义一个值转换器，用于从数据库表获取的字段值转换为Java对象的属性值，和把Java对象的属性值转换为数据库表的字段值。   
 @DbmJsonField 注解实际上是包装了@DbmField注解实现的。
