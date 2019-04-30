@@ -6,6 +6,7 @@ import java.util.Map;
 import javax.sql.DataSource;
 
 import org.apache.commons.lang3.StringUtils;
+import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
 import org.onetwo.common.db.dquery.DynamicQueryObjectRegisterListener;
 import org.onetwo.common.spring.Springs;
 import org.onetwo.common.spring.condition.OnMissingBean;
@@ -21,6 +22,8 @@ import org.onetwo.dbm.id.SnowflakeIdGenerator;
 import org.onetwo.dbm.mapping.DbmConfig;
 import org.onetwo.dbm.mapping.DbmConfig.SnowflakeIdConfig;
 import org.onetwo.dbm.mapping.DefaultDbmConfig;
+import org.onetwo.dbm.mapping.converter.EncryptFieldValueConverter;
+import org.onetwo.dbm.mapping.converter.JsonFieldValueConverter;
 import org.onetwo.dbm.stat.SqlExecutedStatis;
 import org.onetwo.dbm.utils.DbmUtils;
 import org.springframework.beans.BeansException;
@@ -205,6 +208,27 @@ public class DbmSpringConfiguration implements ApplicationContextAware, Initiali
 	@Bean
 	public SqlExecutedStatis sqlExecutedStatis(){
 		return new SqlExecutedStatis();
+	}
+	
+//	@Configuration
+	class DbmFieldConverterConfiguration {
+		@Bean
+		public EncryptFieldValueConverter encryptFieldValueConverter(StandardPBEStringEncryptor encryptor) {
+			EncryptFieldValueConverter converter = new EncryptFieldValueConverter();
+			converter.setEncryptor(encryptor);
+			return converter;
+		}
+		@Bean
+		public StandardPBEStringEncryptor standardPBEStringEncryptor() {
+			StandardPBEStringEncryptor encryptor = new StandardPBEStringEncryptor();
+			encryptor.setAlgorithm(dbmConfig.getEncrypt().getAlgorithm());
+			encryptor.setPassword(dbmConfig.getEncrypt().getPassword());
+			return encryptor;
+		}
+		@Bean
+		public JsonFieldValueConverter jsonFieldValueConverter() {
+			return new JsonFieldValueConverter();
+		}
 	}
 	
 	

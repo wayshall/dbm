@@ -67,6 +67,13 @@
       <optional>true</optional>
     </dependency>
     
+	<dependency>
+	    <groupId>org.jasypt</groupId>
+	    <artifactId>jasypt</artifactId>
+	    <version>1.9.2</version>
+	</dependency>
+	    
+    
     <dependency>
       <groupId>org.apache.tomcat</groupId>
       <artifactId>tomcat-jdbc</artifactId>

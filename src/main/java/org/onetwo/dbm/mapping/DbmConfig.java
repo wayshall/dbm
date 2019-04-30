@@ -56,6 +56,7 @@ public interface DbmConfig {
 	 * @return
 	 */
 	SnowflakeIdConfig getSnowflakeId();
+	EncryptConfig getEncrypt();
 	
 	@Data
 	public class SnowflakeIdConfig {
@@ -65,6 +66,12 @@ public interface DbmConfig {
 		private boolean auto = true;
 		private long datacenterId = 1;
 		private long machineId = 1;
+	}
+	
+	@Data
+	public class EncryptConfig {
+		private String algorithm = "PBEWithMD5AndTripleDES";
+		private String password = "zifish-dbm";
 	}
 
 }

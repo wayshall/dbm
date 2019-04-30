@@ -15,7 +15,9 @@ import org.onetwo.common.dbm.model.entity.UserAutoidEntity.UserStatus;
 import org.onetwo.common.dbm.model.service.UserAutoidServiceImpl;
 import org.onetwo.common.profiling.TimeCounter;
 import org.onetwo.common.utils.Page;
+import org.springframework.test.annotation.Rollback;
 
+@Rollback(false)
 public class BatchInsertTest extends DbmBaseTest {
 
 	@Resource
@@ -23,6 +25,7 @@ public class BatchInsertTest extends DbmBaseTest {
 	
 	@Test
 	public void testBatchInsert(){
+		this.userAutoidServiceImpl.removeAll();
 		int insertCount = 10000;
 		//精确到秒，否则会有误差，比如2015-05-06 13:49:09.783存储到mysql后会变成2015-05-06 13:49:10，mysql的datetime只能精确到秒
 		String userNamePrefix = "testBatchInsert";

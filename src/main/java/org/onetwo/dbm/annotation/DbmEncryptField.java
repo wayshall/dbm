@@ -7,23 +7,16 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.onetwo.dbm.mapping.converter.JsonFieldValueConverter;
+import org.onetwo.dbm.mapping.converter.EncryptFieldValueConverter;
 
 /***
- * 标注字段为json字段
+ * 标注字段为加密自动
+ * 存储的时候自动加密，获取的时候自动解密
  * @author way
  *
  */
 @Target({FIELD, METHOD})
 @Retention(RetentionPolicy.RUNTIME)
-@DbmField(converterClass=JsonFieldValueConverter.class)
-public @interface DbmJsonField {
-	
-	/***
-	 * 序列化json的时候是否保存类型信息
-	 * @author weishao zeng
-	 * @return
-	 */
-	boolean storeTyping() default false;
-
+@DbmField(converterClass=EncryptFieldValueConverter.class)
+public @interface DbmEncryptField {
 }

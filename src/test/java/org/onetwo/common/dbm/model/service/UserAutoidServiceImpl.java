@@ -43,6 +43,10 @@ public class UserAutoidServiceImpl implements UserAutoidService {
 		return this.userAutoidDao.removeByUserName(userName);
 	}
 	
+	public void removeAll() {
+		this.baseEntityManager.removeAll(UserAutoidEntity.class);
+	}
+	
 	/* (non-Javadoc)
 	 * @see org.onetwo.test.jorm.model.service.UserAutoidService#deleteAll()
 	 */
