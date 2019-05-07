@@ -59,11 +59,7 @@ public class DbmRowMapperFactory extends JdbcDaoRowMapperFactory {
 	@SuppressWarnings("unchecked")
 	protected RowMapper<?> getBeanPropertyRowMapper0(Class<?> type) {
 		RowMapper<?> rowMapper = null;
-		if(getMappedEntryManager().isSupportedMappedEntry(type)){
-			DbmMappedEntry entry = this.getMappedEntryManager().getEntry(type);
-			rowMapper = new EntryRowMapper<>(entry, this.jdbcResultSetGetter);
-			return rowMapper;
-		}else if(AnnotationUtils.findAnnotation(type, DbmRowMapper.class)!=null){
+		if(AnnotationUtils.findAnnotation(type, DbmRowMapper.class)!=null){
 			DbmRowMapper dbmRowMapper = AnnotationUtils.findAnnotation(type, DbmRowMapper.class);
 			/*if(dbmRowMapper.value()==Void.class){
 				return new DbmBeanPropertyRowMapper<>(this.jdbcResultSetGetter,  type);
@@ -84,7 +80,11 @@ public class DbmRowMapperFactory extends JdbcDaoRowMapperFactory {
 				rowMapper = new EntryRowMapper<>(entry, this.jdbcResultSetGetter, true);
 				return rowMapper;
 			}
-		}else{
+		} else if (getMappedEntryManager().isSupportedMappedEntry(type)){
+			DbmMappedEntry entry = this.getMappedEntryManager().getEntry(type);
+			rowMapper = new EntryRowMapper<>(entry, this.jdbcResultSetGetter);
+			return rowMapper;
+		} else{
 //			rowMapper = super.getBeanPropertyRowMapper(type);
 			rowMapper = new DbmBeanPropertyRowMapper<>(this.jdbcResultSetGetter,  type);
 		}
