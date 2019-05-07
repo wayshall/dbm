@@ -15,13 +15,14 @@
 - [其它特有的映射](#其它特有的映射)
 - [BaseEntityManager接口](#baseentitymanager接口)
 - [CrudEntityManager接口](#crudentitymanager接口)
-- [DbmRepository查询接口](#dbmrepository查询接口)
-- [DbmRepository查询接口的多数据源支持](#dbmrepository查询接口的多数据源支持)
-- [DbmRepository查询接口对其它orm框架的兼容](#dbmrepository查询接口对其它orm框架的兼容)
+- [DbmRepository接口](#dbmrepository接口)
+- [DbmRepository接口的多数据源支持](#dbmrepository接口的多数据源支持)
+- [DbmRepository接口对其它orm框架的兼容](#dbmrepository接口对其它orm框架的兼容)
 - [查询映射](#查询映射)
 - [复杂的嵌套查询映射](#复杂的嵌套查询映射)
-- [自定义实现DbmRepository查询接口](#自定义实现dbmrepository查询接口)
+- [自定义实现DbmRepository接口](#自定义实现dbmrepository接口)
 - [枚举处理](#枚举处理)
+- [json映射](#json映射)
 - [其它映射特性](#其它映射特性)
 - [批量插入](#批量插入)
 - [充血模型支持](#充血模型支持)
@@ -32,15 +33,30 @@
 
 ## 特色
 - 基本的实体增删改查（单表）不需要生成样板代码和sql文件。
+
 - 返回结果不需要手动映射，会根据字段名称自动映射。
+
 - 支持sql语句和接口绑定风格的DAO，但sql不是写在丑陋的xml里，而是直接写在sql文件里，这样用eclipse或者相关支持sql的编辑器打开时，就可以语法高亮，更容易阅读。
+
 - 支持sql脚本修改后重新加载
+
 - 内置支持分页查询。
+
 - 接口支持批量插入
+
 - 使用Java8新增的编译特性，不需要使用类似@Param 的注解标注参数,当然你可以显式使用注解标注参数。
-- 支持多数据源绑定，可以为每个查询接口（DbmRepository）指定具体的数据源
-- 支持不同的数据库绑定，查询接口会根据当前绑定的数据源自动绑定加载对应数据库后缀的sql文件
+
+- Repository接口（用注解@DbmRepository标注了的接口）支持默认方法
+
+- 支持多数据源绑定，可以为每个Repository接口指定具体的数据源
+
+- 支持不同的数据库绑定，Repository接口会根据当前绑定的数据源自动绑定加载对应数据库后缀的sql文件
+
 - 提供充血模型支持
+
+- 支持json映射，直接把数据库的json或者varchar类型（存储内容为json数据）的列映射为Java对象
+
+- 支持敏感字段自动加解密映射
 
    
 ## 示例项目   
@@ -109,7 +125,7 @@ public class UserAutoidEntity {
 
 	//省略getter和setter
 }   
-```   
+```
 ### 注意这里用到了一些jpa的注解，含义和jpa一致：
 - @Entity，表示这是一个映射到数据库表的实体
 - @Table，表示这个实体映射的表
@@ -122,7 +138,7 @@ java的字段名使用驼峰的命名风格，而数据库使用下划线的风�
 后来为了证明我也不是真的很懒，也写了和@Entity、@Table、@Column对应的注解，分别是：@DbmEntity（@Entity和@Table合一），@DbmColumn。。。
 
 
-- 注意：为了保持简单和轻量级，dbm的实体映射只支持单表，不支持多表级联映射。复杂的查询和映射请使用[DbmRepository查询接口](https://github.com/wayshall/dbm#dbmrepository查询接口)
+- 注意：为了保持简单和轻量级，dbm的实体映射只支持单表，不支持多表级联映射。复杂的查询和映射请使用[DbmRepository接口](#dbmrepository接口)
 
 ## id策略
 dbm支持jpa的GenerationType的id策略，此外还提供了通过@DbmIdGenerator自定义的策略：
@@ -323,13 +339,13 @@ public class UserEntity {
 - 通过Querys 和 BaseEntityManager 的api查询时，一般直接取枚举的name()方法所得的值
 - 如果是@DbmRepository 接口，并且用@Param注解指定了enumType属性，则根据配置的取相应的值，但是DbmEnumValueMapping接口优先级更高
 
-## 其它特有的映射
 
 
+## json映射
 
-### json映射
 有时候，我们需要在数据库的某个字段里存储json格式的数据，又想在获取到数据后转为java对象使用，这时你可以使用 @DbmJsonField 注解，这个注解会在保存实体的时候把对象转化为json字符串，然后在取出数据的时候自动把字符串转化为对象。
 示例：
+
 ```Java
 class SimpleEntity {
 	@DbmJsonField
@@ -344,6 +360,7 @@ class SimpleEntity {
 ```
 
 如果该字段是泛型，需要保存类型信息，可以设置storeTyping属性为true
+
 ```Java
 class SimpleEntity {
 	@DbmJsonField(storeTyping=true)
@@ -358,6 +375,7 @@ class SimpleEntity {
 ```
 
 需要添加依赖：
+
 ```xml
     <dependency>
       <groupId>org.onetwo4j</groupId>
@@ -365,12 +383,18 @@ class SimpleEntity {
     </dependency>
 ```
 
+### 
+
+## 其它特有的映射
+
+
+
 ### 敏感字段加密映射
 对于一些不适宜明文存储的字段信息，比如api密钥，存储的时候自动加密，获取的时候自动解密，此时可以使用@DbmEncryptField 注解。
 ```Java
 @Entity
-@Table(name="TEST_USER")
-public class UserEntity implements Serializable {
+@Table(name="TEST_MERCHANT")
+public class MerchantEntity implements Serializable {
 	
 
 	@Id
@@ -379,9 +403,9 @@ public class UserEntity implements Serializable {
 	protected Long id;
 	
 	@DbmEncryptField
-	protected String password;
+	protected String apikey;
 }
-``` 
+```
 在@DbmRepository 使用这个功能时，可以在插入的参数后面加上后缀函数：
 ```sql
 /*****
@@ -389,10 +413,10 @@ public class UserEntity implements Serializable {
  * 批量插入     */
     insert 
     into
-        test_user
-        (user_name, password) 
+        test_merchant
+        (id, apikey) 
     values
-        (:user_name, :password?encrypt)
+        (:id, :apikey?encrypt)
 ```
 
 ### @DbmField注解
@@ -516,19 +540,19 @@ public class UserAutoidEntity {
 
 	//省略getter和setter
 }   
-```   
+```
 然后通过静态变量直接访问crud接口：   
 ```Java    
 
 	UserAutoidEntity.crudManager.save(entity);
 	UserAutoidEntity user = UserAutoidEntity.crudManager.findOne("userName", userName);
 
-```   
+```
 
 
 
-## DbmRepository查询接口
-DbmRepository查询接口支持类似mybatis的sql语句与接口绑定，但sql文件不是写在丑陋的xml里，而是直接写在sql文件里，这样用eclipse或者相关支持sql的编辑器打开时，就可以语法高亮，更容易阅读。
+## DbmRepository接口
+DbmRepository接口支持类似mybatis的sql语句与接口绑定，但sql文件不是写在丑陋的xml里，而是直接写在sql文件里，这样用eclipse或者相关支持sql的编辑器打开时，就可以语法高亮，更容易阅读。
 
 ### 1、定义一个接口   
 包名：test.dao   
@@ -691,7 +715,7 @@ where
 
 - 支持Optional类型的返回值
 
-## DbmRepository查询接口的多数据源支持
+## DbmRepository接口的多数据源支持
 DbmRepository 查询接口还可以通过注解支持绑定不同的数据源，dataSource的值为spring bean的名称：
 ```Java
 @DbmRepository(dataSource="dataSourceName1")
@@ -703,7 +727,7 @@ public interface Datasource2Dao {
 }
 ```
 
-## DbmRepository查询接口对其它orm框架的兼容
+## DbmRepository接口对其它orm框架的兼容
 其它orm框架可以通过实现QueryProvideManager接口，然后通过@DbmRepository注解的queryProviderName或queryProviderClass属性指定特定的QueryProvideManager实现类。从而让DbmRepository查询接口使用其它orm框架，避免不同orm框架共存带来的一些副作用。   
 
 dbm内置支持了JPA（Hibernate）实现的QueryProvideManager。   
@@ -859,7 +883,7 @@ List<CompanyVO> companies = companyDao.findNestedCompanies();
 - 注意：若嵌套类型为NestedType.COLLECTION，而容器的元素为简单类型，则把@DbmNestedResult注解的id属性设置为“value”即可。
 
 
-## 自定义实现DbmRepository查询接口
+## 自定义实现DbmRepository接口
 dbm的Repository查询接口采用了流行的只有接口没有实现类的风格，但有时你需要的查询，可能不只是写一条sql查询出来即可的，尽管你可以把这种逻辑处理定义到Service，但你又觉得这些是数据处理逻辑并不属于Service，并且你希望把这种实现也挂载到已经存在的Repository查询接口，没问题，dbm支持这种做法。
 比如，你已经有了一个名叫UserDao的Repository查询接口，然后你可以自顶一个CustomerUserDao接口：
 ```Java
@@ -926,12 +950,12 @@ public interface UserAutoidDao {
 	public int batchInsert(List<UserAutoidEntity> users);
 }
 
-```   
+```
 定义sql：     
 ![batcchInsert](doc/sql.batcchInsert.jpg)
 
 
-   
+
 搞掂！   
 
 ## 其它映射特性
@@ -966,7 +990,7 @@ dbm对充血模型提供一定的api支持，如果觉得好玩，可尝试使�
 @EnableDbm
 public class DbmSampleApplication {
 }  
-```    
+```
 
 ### 2、继承RichModel类
 ```Java
