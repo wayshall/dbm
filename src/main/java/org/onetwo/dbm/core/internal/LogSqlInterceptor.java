@@ -15,6 +15,10 @@ import org.slf4j.Logger;
 import org.springframework.core.Ordered;
 
 /**
+ * mysql驱动本身可通过配置连接字符串打印sql，详见：
+ * https://dev.mysql.com/doc/connector-j/8.0/en/connector-j-reference-configuration-properties.html
+ * jdbc:mysql://host/db?logger=com.mysql.cj.log.Log&profileSQL=true
+ * 
  * @author wayshall
  * <br/>
  */

@@ -44,7 +44,7 @@ public class ParserContext implements Map<Object, Object> {
 	}
 
 	public void setQueryConfig(QueryConfigData config){
-		Assert.notNull(config);
+		Assert.notNull(config, "QueryConfigData can not be null");
 		QueryConfigData oldConfig = (QueryConfigData)this.context.put(QUERY_CONFIG, config);
 		if(oldConfig!=null){
 			//remove old
