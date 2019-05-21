@@ -10,6 +10,7 @@ import javax.persistence.metamodel.SingularAttribute;
 
 import org.onetwo.common.db.sqlext.ExtQueryUtils;
 import org.onetwo.common.db.sqlext.SQLSymbolManager.FieldOP;
+import org.onetwo.common.utils.StringUtils;
 import org.onetwo.common.utils.func.Closure;
 
 
@@ -38,6 +39,38 @@ public class DefaultWhereCauseBuilderField<E> extends WhereCauseBuilderField<E> 
 	public WhereCauseBuilder<E> like(String... values) {
 		this.op = FieldOP.like;
 		this.values = values;
+		this.queryBuilder.addField(this);
+		return queryBuilder;
+	}
+
+	/***
+	 *  like '%value'
+	 * @author weishao zeng
+	 * @param values
+	 * @return
+	 */
+	public WhereCauseBuilder<E> prelike(String... values) {
+		this.op = FieldOP.like;
+		this.values = Stream.of(values)
+							.map(val -> StringUtils.appendStartWith(val, "%"))
+							.collect(Collectors.toList())
+							.toArray(new String[0]);
+		this.queryBuilder.addField(this);
+		return queryBuilder;
+	}
+
+	/***
+	 *  like 'value%'
+	 * @author weishao zeng
+	 * @param values
+	 * @return
+	 */
+	public WhereCauseBuilder<E> postlike(String... values) {
+		this.op = FieldOP.like;
+		this.values = Stream.of(values)
+							.map(val -> StringUtils.appendEndWith(val, "%"))
+							.collect(Collectors.toList())
+							.toArray(new String[0]);
 		this.queryBuilder.addField(this);
 		return queryBuilder;
 	}
