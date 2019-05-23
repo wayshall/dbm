@@ -14,6 +14,7 @@ import org.onetwo.common.db.generator.ftl.FtlEngine;
 import org.onetwo.common.db.generator.ftl.TomcatDataSourceBuilder;
 import org.onetwo.common.file.FileUtils;
 import org.onetwo.common.utils.LangUtils;
+import org.onetwo.common.utils.StringUtils;
 import org.onetwo.dbm.exception.DbmException;
 import org.springframework.util.Assert;
 
@@ -217,8 +218,9 @@ public class DbmGenerator {
 				String moduleName = c.globalGeneratedConfig().getModuleName();
 				Assert.notNull(moduleName, "moduleName can not be null");
 				
+				String fileName = StringUtils.toCamel(tableShortName, false);
 				String filePath = pageFileBaseDir + "/"+moduleName+"/"+
-				tableShortName.replace('_', '-') + FileUtils.getFileNameWithoutExt(path);
+								fileName + FileUtils.getFileNameWithoutExt(path);
 				return filePath;
 			};
 		};
@@ -231,6 +233,12 @@ public class DbmGenerator {
 		public WebadminGenerator generateController(Class<?> pluginBaseController){
 			context.put("pluginBaseController", pluginBaseController.getName());
 			tableGenerator.controllerTemplate("controller", templateName+"/Controller.java.ftl");
+			return this;
+		}
+		
+		public WebadminGenerator generateVueController(Class<?> pluginBaseController){
+			context.put("pluginBaseController", pluginBaseController.getName());
+			tableGenerator.controllerTemplate("controller", templateName+"/MgrController.java.ftl");
 			return this;
 		}
 		
