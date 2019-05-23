@@ -13,7 +13,7 @@
 - [id策略](#id策略)
 - [复合主键映射](#复合主键映射)
 - [其它特有的映射](#其它特有的映射)
-- [BaseEntityManager接口](#baseentitymanager接口)
+- [BaseEntityManager接口和QueryDSL](#BaseEntityManager接口和QueryDSL)
 - [CrudEntityManager接口](#crudentitymanager接口)
 - [DbmRepository接口](#dbmrepository接口)
 - [DbmRepository接口的多数据源支持](#dbmrepository接口的多数据源支持)
@@ -424,7 +424,7 @@ public class MerchantEntity implements Serializable {
 @DbmJsonField 注解实际上是包装了@DbmField注解实现的。
 
 
-## BaseEntityManager接口
+## BaseEntityManager接口和QueryDSL
 大多数数据库操作都可以通过BaseEntityManager接口来完成。   
 BaseEntityManager可直接注入。   
 
@@ -466,15 +466,6 @@ BaseEntityManager可直接注入。
 		//下面的调用相当于sql条件： where registerTime>=:date1 and registerTime<:date2
 		entityManager.findList(UserEntity.class, "registerTime:date in", new Object[]{date1, date2})
 		
-		//使用 querys dsl api，效果和上面一样
-		UserAutoidEntity queryUser = Querys.from(entityManager, UserAutoidEntity.class)
-											.where()
-												.field("mobile").is(newMobile)
-												.field("status").is(UserStatus.NORMAL)
-											.end()
-											.toQuery()
-											.one();
-		assertThat(queryUser, is(user));
 		
 	}
 ```
@@ -519,6 +510,48 @@ property_name3条件被忽略了。
 BaseEntityManager的属性查询支持如下操作符：   
 =, >, <, !=, in, not in, date in, is null, like, not like
 
+### Query DSL API
+dbm还提供了一个专门用于构建查询的dsl api
+```Java
+
+//使用 querys dsl api
+UserAutoidEntity queryUser = Querys.from(entityManager, UserAutoidEntity.class)
+									.where()
+										.field("mobile").is(newMobile)
+										.field("status").is(UserStatus.NORMAL)
+									.end()
+									.toQuery()
+									.one();
+assertThat(queryUser, is(user));
+```
+
+注意：
+4.7.3后，query dsl api 已集成到 BaseEntityManager 接口，可以通过 BaseEntityManager 直接创建查询：
+```Java
+public Optional<User> findBy(String month, Long userId) {
+		return baseEntityManager.query(User.class)
+								.where()
+									.field("month").is(month)
+									.field("userId").is(userId)
+								.toQuery()
+								.optionalOne();
+	}
+```
+
+通过链式api和Java8 的 Stream api，你可以创建出这样的查询代码：
+```Java
+public List<User> findList(String month, Long userId) {
+	return baseEntityManager.query(DuesDetailEntity.class)
+							.where()
+								.field("duesMonth").is(month)
+								.field("userId").is(userId)
+							.toQuery()
+							.list()
+							.stream()
+							.map(user -> user.asBean(UserVO.class)) //把实体转换为VO
+							.collect(Collectors.toList());
+}
+```
 
 ## CrudEntityManager接口
 CrudEntityManager是在BaseEntityManager基础上封装crud的接口，是给喜欢简单快捷的人使用的。   

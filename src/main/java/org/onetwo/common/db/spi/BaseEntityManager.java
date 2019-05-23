@@ -136,7 +136,14 @@ public interface BaseEntityManager {
 	 */
 	public <T> List<T> findList(Class<T> entityClass, Object... properties);
 	public <T> List<T> findListByProperties(Class<T> entityClass, Map<Object, Object> properties);
-	public <T> List<T> findList(QueryBuilder squery);
+	
+	/***
+	 * @deprecated 不建议使用此方法，直接用Querys dsl api
+	 * @author weishao zeng
+	 * @param squery
+	 * @return
+	 */
+	public <T> List<T> findList(QueryBuilder<T> squery);
 
 	public <T> List<T> selectFields(Class<?> entityClass, Object[] selectFields, Object... properties);
 	public <T> List<T> selectFieldsToEntity(Class<?> entityClass, Object[] selectFields, Object... properties);
@@ -144,9 +151,19 @@ public interface BaseEntityManager {
 
 	public <T> Page<T> findPage(final Class<T> entityClass, final Page<T> page, Object... properties);
 
-	public <T> Page<T> findPageByProperties(final Class<T>  entityClass, final Page<T> page, Map<Object, Object> properties);
+	public <T> Page<T> findPageByProperties(final Class<T> entityClass, final Page<T> page, Map<Object, Object> properties);
 	
-	public <T> Page<T> findPage(final Page<T> page, QueryBuilder query);
+	/***
+	 * 此方法是提供给一些把QueryBuilder作为固化为实例的查询参数所用
+	 * 
+	 * @deprecated 不建议使用此方法，直接用Querys dsl api
+	 * @author weishao zeng
+	 * @param page
+	 * @param query
+	 * @return
+	 */
+	@Deprecated
+	public <T> Page<T> findPage(final Page<T> page, QueryBuilder<T> query);
 	
 	public <T> Page<T> findPage(Page<T> page, DbmQueryValue squery);
 	
@@ -180,5 +197,7 @@ public interface BaseEntityManager {
 	public <T> T narrowAs(Class<T> entityManagerClass);
 	
 	public DbmSessionFactory getSessionFactory();
+	
+	<T> QueryBuilder<T> query(Class<T> entityClass);
 
 }

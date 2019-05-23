@@ -83,12 +83,12 @@ public abstract class BaseEntityManagerAdapter implements InnerBaseEntityManager
 		return logicDeleteEntity;
 	}
 	
-	public <T> List<T> findList(QueryBuilder squery) {
+	public <T> List<T> findList(QueryBuilder<T> squery) {
 		return findListByProperties((Class<T>)squery.getEntityClass(), squery.getParams());
 	}
 
 	@Override
-	public <T> Page<T> findPage(final Page<T> page, QueryBuilder squery){
+	public <T> Page<T> findPage(final Page<T> page, QueryBuilder<T> squery){
 		findPageByProperties((Class<T>)squery.getEntityClass(), page, squery.getParams());
 		return page;
 	}

@@ -230,8 +230,8 @@ public class DbmEntityManagerImpl extends BaseEntityManagerAdapter implements Qu
 	
 
 	@Override
-	public QueryBuilder createQueryBuilder(Class<?> entityClass) {
-		QueryBuilder query = Querys.from(this, entityClass);
+	public <T> QueryBuilder<T> query(Class<T> entityClass) {
+		QueryBuilder<T> query = Querys.<T>from(this, entityClass);
 		return query;
 	}
 	
