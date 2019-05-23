@@ -529,7 +529,7 @@ assertThat(queryUser, is(user));
 4.7.3后，query dsl api 已集成到 BaseEntityManager 接口，可以通过 BaseEntityManager 直接创建查询：
 ```Java
 public Optional<User> findBy(String month, Long userId) {
-		return baseEntityManager.query(User.class)
+		return baseEntityManager.from(User.class)
 								.where()
 									.field("month").is(month)
 									.field("userId").is(userId)
@@ -541,15 +541,15 @@ public Optional<User> findBy(String month, Long userId) {
 通过链式api和Java8 的 Stream api，你可以创建出这样的查询代码：
 ```Java
 public List<User> findList(String month, Long userId) {
-	return baseEntityManager.query(DuesDetailEntity.class)
-							.where()
-								.field("duesMonth").is(month)
-								.field("userId").is(userId)
-							.toQuery()
-							.list()
-							.stream()
-							.map(user -> user.asBean(UserVO.class)) //把实体转换为VO
-							.collect(Collectors.toList());
+	return baseEntityManager.from(DuesDetailEntity.class)
+						.where()
+							.field("duesMonth").is(month)
+							.field("userId").is(userId)
+						.toQuery()
+						.list()
+						.stream()
+						.map(user -> user.asBean(UserVO.class)) //把实体转换为VO
+						.collect(Collectors.toList());
 }
 ```
 

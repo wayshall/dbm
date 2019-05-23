@@ -230,7 +230,7 @@ public class DbmEntityManagerImpl extends BaseEntityManagerAdapter implements Qu
 	
 
 	@Override
-	public <T> QueryBuilder<T> query(Class<T> entityClass) {
+	public <T> QueryBuilder<T> from(Class<T> entityClass) {
 		QueryBuilder<T> query = Querys.<T>from(this, entityClass);
 		return query;
 	}

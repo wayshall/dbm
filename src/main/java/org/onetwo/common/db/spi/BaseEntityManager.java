@@ -198,6 +198,6 @@ public interface BaseEntityManager {
 	
 	public DbmSessionFactory getSessionFactory();
 	
-	<T> QueryBuilder<T> query(Class<T> entityClass);
+	<T> QueryBuilder<T> from(Class<T> entityClass);
 
 }

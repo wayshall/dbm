@@ -153,8 +153,8 @@ abstract public class DbmCrudServiceImpl<T, PK extends Serializable> extends Bas
 		return dem.getCurrentSession().getMappedEntryManager().getEntry(entityClass);
 	}
 	
-	protected QueryBuilder<T> query(){
+	protected QueryBuilder<T> from(){
 		DbmEntityManager dem = (DbmEntityManager)this.getBaseEntityManager();
-		return dem.query(entityClass);
+		return dem.from(entityClass);
 	}
 }
