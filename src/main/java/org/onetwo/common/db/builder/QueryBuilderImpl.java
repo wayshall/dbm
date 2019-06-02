@@ -39,10 +39,10 @@ public class QueryBuilderImpl<E> implements QueryBuilder<E> {
 		return QueryBuilderCreator.from(entityClass);
 	}*/
 
-	public static <SE> SubQueryBuilder<SE> sub(){
+	/*public static <SE> SubQueryBuilder<SE> sub(){
 		SubQueryBuilder<SE> q = new SubQueryBuilder<SE>();
 		return q;
-	}
+	}*/
 
 	protected InnerBaseEntityManager baseEntityManager;
 	protected String alias;
