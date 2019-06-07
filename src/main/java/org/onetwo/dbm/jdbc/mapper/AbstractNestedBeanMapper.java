@@ -461,7 +461,7 @@ abstract public class AbstractNestedBeanMapper<T> {
 		}
 		
 //		public Object mapResult(Map<String, Integer> names, ResultSetWrappingSqlRowSet resutSetWrapper){
-		public Object mapResult(Map<String, Integer> names, ColumnValueGetter columnValueGetter){
+		public Object mapResult(Map<String, Integer> names, ColumnValueGetter columnValueGetter, int rowNum){
 			Integer hash = null;
 			Object entity = null;
 			BeanWrapper bw = null;
@@ -501,7 +501,7 @@ abstract public class AbstractNestedBeanMapper<T> {
 			}
 			entity = bw.getWrappedInstance();
 			for(PropertyResultClassMapper pm : this.complexFields.values()){
-				Object propertyValue = pm.mapResult(names, columnValueGetter);
+				Object propertyValue = pm.mapResult(names, columnValueGetter, rowNum);
 				pm.linkToParent(bw, propertyValue);
 			}
 			return afterMapResult(entity, hash, isNew);

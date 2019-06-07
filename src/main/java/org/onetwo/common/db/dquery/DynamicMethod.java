@@ -123,7 +123,7 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 		return returnClass;
 	}
 	
-	@SuppressWarnings("rawtypes")
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	final public Class<?> getActualComponentType(){
 		Class compClass = ReflectUtils.getGenricType(method.getGenericReturnType(), 0);
 		if(isReturnOptional()){

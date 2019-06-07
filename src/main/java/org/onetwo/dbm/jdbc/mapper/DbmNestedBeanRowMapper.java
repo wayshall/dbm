@@ -32,7 +32,7 @@ public class DbmNestedBeanRowMapper<T> extends AbstractNestedBeanMapper<T> imple
 		Map<String, Integer> names = DbmUtils.lookupColumnNames(rsmd);
 		
 		ColumnValueGetter columnValueGetter = new ResultSetColumnValueGetter(resutSetWrapper, jdbcResultSetGetter);
-		T mappedObject = (T)this.resultClassMapper.mapResult(names, columnValueGetter);
+		T mappedObject = (T)this.resultClassMapper.mapResult(names, columnValueGetter, rowNum);
 		return mappedObject;
 	}
 

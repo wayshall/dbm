@@ -113,13 +113,13 @@ public class DbmBeanPropertyRowMapper<T> implements RowMapper<T> {
 		for (int index = 1; index <= columnCount; index++) {
 			String column = DbmUtils.lookupColumnName(rsmd, index);
 //			String field = lowerCaseName(column.replaceAll(" ", ""));
-			this.setValue(resutSetWrapper, bw, rowNumber, index, column);
+			this.setColumnValue(resutSetWrapper, bw, rowNumber, index, column);
 		}
 
 		return mappedObject;
 	}
 	
-	protected void setValue(ResultSetWrappingSqlRowSet resutSetWrapper, 
+	public void setColumnValue(ResultSetWrappingSqlRowSet resutSetWrapper, 
 							BeanWrapper bw, 
 							int rowNumber, 
 							int columnIndex, 
