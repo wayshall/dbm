@@ -8,11 +8,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.onetwo.common.log.JFishLoggerFactory;
 import org.onetwo.dbm.jdbc.JdbcUtils;
 import org.onetwo.dbm.jdbc.spi.JdbcResultSetGetter;
 import org.onetwo.dbm.utils.DbmUtils;
-import org.slf4j.Logger;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.NotWritablePropertyException;
@@ -25,12 +23,12 @@ import org.springframework.jdbc.support.rowset.SqlRowSetMetaData;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
-public class DbmBeanPropertyRowMapper<T> implements DataRowMapper<T> {
-	final protected Logger logger = JFishLoggerFactory.getLogger(this.getClass());
+public class DbmBeanPropertyRowMapper<T> extends DbmDataRowMapper<T> implements DataRowMapper<T>, DataColumnMapper {
+//	final protected Logger logger = JFishLoggerFactory.getLogger(this.getClass());
 	
 	protected ConversionService conversionService = DbmUtils.CONVERSION_SERVICE;
 //	private DbmTypeMapping sqlTypeMapping;
-	protected JdbcResultSetGetter jdbcResultSetGetter;
+//	protected JdbcResultSetGetter jdbcResultSetGetter;
 	
 	
 	protected boolean primitivesDefaultedForNullValue = true;
@@ -43,8 +41,9 @@ public class DbmBeanPropertyRowMapper<T> implements DataRowMapper<T> {
 	}*/
 
 	public DbmBeanPropertyRowMapper(JdbcResultSetGetter jdbcResultSetGetter, Class<T> mappedClass) {
+		super(jdbcResultSetGetter);
 		this.mappedClass = mappedClass;
-		this.jdbcResultSetGetter = jdbcResultSetGetter;
+//		this.jdbcResultSetGetter = jdbcResultSetGetter;
 		this.initialize(mappedClass);
 	}
 

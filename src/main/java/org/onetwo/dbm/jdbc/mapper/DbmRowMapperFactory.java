@@ -99,8 +99,12 @@ public class DbmRowMapperFactory extends JdbcDaoRowMapperFactory {
 			return super.createRowMapper(invokeContext);
 		}
 		DbmResultMapping dbmCascadeResult = dmethod.getMethod().getAnnotation(DbmResultMapping.class);
-		DbmNestedBeanRowMapper<?> rowMapper = new DbmNestedBeanRowMapper<>(jdbcResultSetGetter, dmethod.getComponentClass(), dbmCascadeResult);
+		DbmNestedBeanRowMapper<?> rowMapper = new DbmNestedBeanRowMapper<>(this, dmethod.getComponentClass(), dbmCascadeResult);
 		return rowMapper;
+	}
+
+	public JdbcResultSetGetter getJdbcResultSetGetter() {
+		return jdbcResultSetGetter;
 	}
 	
 }

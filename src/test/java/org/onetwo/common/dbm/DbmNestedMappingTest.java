@@ -18,6 +18,7 @@ import org.onetwo.common.base.DbmBaseTest;
 import org.onetwo.common.dbm.model.dao.CompanyDao;
 import org.onetwo.common.dbm.model.hib.entity.CompanyEntity;
 import org.onetwo.common.dbm.model.hib.entity.DepartmentEntity;
+import org.onetwo.common.dbm.model.hib.entity.DepartmentEntity.DepartStatus;
 import org.onetwo.common.dbm.model.hib.entity.EmployeeEntity;
 import org.onetwo.common.dbm.model.hib.entity.EmployeeEntity.EmployeeGenders;
 import org.onetwo.common.dbm.model.vo.CompanyVO;
@@ -103,6 +104,7 @@ public class DbmNestedMappingTest extends DbmBaseTest {
 		departments.stream().forEach(depart->{
 			assertThat(depart.getCompany()).isNotNull();
 			assertThat(depart.getCompany().getId()).isEqualTo(depart.getCompanyId());
+			assertThat(depart.getStatus()).isEqualTo(DepartStatus.ENABLED);
 
 			assertThat(depart.getEmployees()).isNotNull();
 			depart.getEmployees().stream().forEach(employee->{
@@ -210,6 +212,7 @@ public class DbmNestedMappingTest extends DbmBaseTest {
 		department.setName("部门-"+index);
 		department.setEmployeeNumber(10);
 		department.setCompanyId(companyId);
+		department.setStatus(DepartStatus.ENABLED);
 		dbmEntityManager.save(department);
 		List<EmployeeEntity> employees = LangOps.ntimesMap(10, i->{
 			return createEmployee(department.getId(), i);
