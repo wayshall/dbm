@@ -9,12 +9,11 @@ import org.onetwo.dbm.jdbc.internal.ResultSetColumnValueGetter;
 import org.onetwo.dbm.jdbc.spi.ColumnValueGetter;
 import org.onetwo.dbm.jdbc.spi.JdbcResultSetGetter;
 import org.onetwo.dbm.utils.DbmUtils;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.rowset.ResultSetWrappingSqlRowSet;
 import org.springframework.jdbc.support.rowset.SqlRowSetMetaData;
 import org.springframework.util.Assert;
 
-public class DbmNestedBeanRowMapper<T> extends AbstractNestedBeanMapper<T> implements RowMapper<T> {
+public class DbmNestedBeanRowMapper<T> extends AbstractNestedBeanMapper<T> implements DataRowMapper<T> {
 
 	protected JdbcResultSetGetter jdbcResultSetGetter;
 	

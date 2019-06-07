@@ -20,13 +20,12 @@ import org.springframework.beans.PropertyAccessorFactory;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.dao.DataRetrievalFailureException;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.rowset.ResultSetWrappingSqlRowSet;
 import org.springframework.jdbc.support.rowset.SqlRowSetMetaData;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
-public class DbmBeanPropertyRowMapper<T> implements RowMapper<T> {
+public class DbmBeanPropertyRowMapper<T> implements DataRowMapper<T> {
 	final protected Logger logger = JFishLoggerFactory.getLogger(this.getClass());
 	
 	protected ConversionService conversionService = DbmUtils.CONVERSION_SERVICE;
@@ -123,7 +122,7 @@ public class DbmBeanPropertyRowMapper<T> implements RowMapper<T> {
 							BeanWrapper bw, 
 							int rowNumber, 
 							int columnIndex, 
-							String column) throws SQLException {
+							String column) {
 		String field = JdbcUtils.lowerCaseName(column);
 		PropertyDescriptor pd = this.mappedFields.get(field);
 		if (pd != null) {
@@ -164,7 +163,7 @@ public class DbmBeanPropertyRowMapper<T> implements RowMapper<T> {
 		}
 	}
 	
-	protected Object getColumnValue(ResultSetWrappingSqlRowSet rs, int index, PropertyDescriptor pd) throws SQLException {
+	protected Object getColumnValue(ResultSetWrappingSqlRowSet rs, int index, PropertyDescriptor pd) {
 //		return jdbcResultSetGetter.getColumnValue(rs, index, pd);
 		return jdbcResultSetGetter.getColumnValue(rs, index, pd.getPropertyType());
 		/*JFishProperty jproperty = Intro.wrap(pd.getWriteMethod().getDeclaringClass()).getJFishProperty(pd.getName(), false);

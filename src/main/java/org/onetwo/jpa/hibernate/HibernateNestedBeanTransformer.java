@@ -31,7 +31,7 @@ public class HibernateNestedBeanTransformer<T> extends AbstractNestedBeanMapper<
 		
 		Map<String, Integer> names = initNames(aliases);
 		ColumnValueGetter columnValueGetter = new HibernateColumnValueGetter(tuple);
-		Object mappedObject = this.resultClassMapper.mapResult(names, columnValueGetter);
+		Object mappedObject = this.resultClassMapper.mapResult(names, columnValueGetter, -1);
 		return mappedObject;
 	}
 	
