@@ -232,7 +232,8 @@ public class MultipCommentsSqlFileParser implements NamedQueryInfoParser {
 				continue;
 			}else if(lineLexer.getLineToken()==LineToken.CONTENT){
 				String value = StringUtils.join(lineLexer.getLineBuf(), " ");
-				buf.append(value).append(" ");
+//				buf.append(value).append(" ");
+				buf.append(value).append('\n');
 			}else{
 				throw new FileNamedQueryException("error syntax: " + lineLexer.getLineToken());
 			}
