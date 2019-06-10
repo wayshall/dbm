@@ -117,7 +117,7 @@ public class EntryRowMapper<T> extends DbmBeanPropertyRowMapper<T> implements Ro
 //				if(bw==null){
 //					bw = this.createBeanWrapper(entity);
 //				}
-				this.setColumnValue(resutSetWrapper, bw, rowNumber, columnIndex, column);
+				super.setColumnValue(resutSetWrapper, bw, rowNumber, columnIndex, column);
 			}
 		} catch (Exception e) {
 			throw new DbmException(entry.getEntityClass() + " mapped field["+column+", "+value+"] error : " + e.getMessage(), e);
