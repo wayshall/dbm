@@ -164,6 +164,12 @@ public class BaseCrudEntityManager<T, PK extends Serializable> implements CrudEn
 
 	@Transactional
 	@Override
+	public void dymanicUpdate(T entity) {
+		getBaseEntityManager().dymanicUpdate(entity);
+	}
+
+	@Transactional
+	@Override
 	public void persist(T entity) {
 		getBaseEntityManager().persist(entity);
 	}
@@ -188,13 +194,13 @@ public class BaseCrudEntityManager<T, PK extends Serializable> implements CrudEn
 
 	@Transactional(readOnly=true)
 	@Override
-	public List<T> findListByProperties(QueryBuilder query) {
+	public List<T> findListByProperties(QueryBuilder<T> query) {
 		return getBaseEntityManager().findList(query);
 	}
 
 	@Transactional(readOnly=true)
 	@Override
-	public void findPage(final Page<T> page, QueryBuilder query) {
+	public void findPage(final Page<T> page, QueryBuilder<T> query) {
 		getBaseEntityManager().findPage(page, query);
 	}
 
