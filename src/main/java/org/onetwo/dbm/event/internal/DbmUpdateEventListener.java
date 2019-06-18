@@ -42,11 +42,14 @@ public class DbmUpdateEventListener extends UpdateEventListener {
 		}else{
 //			count = this.executeJdbcUpdate(es, entry.makeUpdate(entity));
 			if(LangUtils.isMultiple(entity)){
-				Collection<Object> entityCol = CUtils.toCollection(entity);
+				/*Collection<Object> entityCol = CUtils.toCollection(entity);
 				for(Object e : entityCol){
 					throwIfMultiple(entity, e);
 					count += updateSingleEntity(false, es, entry, e);
-				}
+				}*/
+				// 当传入多个实体的时候，根据配置决定是否启用批量操作
+				JdbcStatementContext<List<Object[]>> updates = entry.makeUpdate(entity);
+				count = this.executeJdbcUpdate(es, updates);
 			}else{
 				count = this.updateSingleEntity(false, es, entry, entity);
 			}

@@ -1,5 +1,6 @@
 package org.onetwo.common.dbm.model.service;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
@@ -149,6 +150,18 @@ public class UserAutoidServiceImpl implements UserAutoidService {
 
 	public List<UserAutoidEntity> findUserList(String status){
 		return this.userAutoidDao2.findUserList(status);
+	}
+	
+	public List<UserAutoidEntity> findAllByUserNamePrefix(String userNamePrefix) {
+		return baseEntityManager.from(UserAutoidEntity.class)
+							.where()
+								.field("userName").postlike(userNamePrefix)
+							.toQuery()
+							.list();
+	}
+	
+	public int batchUpdate(Collection<UserAutoidEntity> users ) {
+		return baseEntityManager.getSessionFactory().getSession().batchUpdate(users);
 	}
 	
 }

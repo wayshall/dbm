@@ -42,6 +42,18 @@ public class BatchInsertTest extends DbmBaseTest {
 		Assert.assertEquals(Math.min(insertCount, page.getResult().size()), page.getResult().size());
 		page.getResult().stream().forEach(u->Assert.assertTrue(u.getUserName().contains(userNamePrefix)));
 		
+		List<UserAutoidEntity> dbUsers = this.userAutoidServiceImpl.findAllByUserNamePrefix(userNamePrefix);
+		String updateUserNamePrefix = "batchUpdateUserName-";
+		dbUsers.forEach(u -> {
+			u.setUserName(updateUserNamePrefix);
+		});
+		int updateCount = this.userAutoidServiceImpl.batchUpdate(dbUsers);
+		assertThat(updateCount).isEqualTo(dbUsers.size());
+		List<UserAutoidEntity> updatedUsers = this.userAutoidServiceImpl.findAllByUserNamePrefix(updateUserNamePrefix);
+		assertThat(updatedUsers.size()).isEqualTo(dbUsers.size());
+		updatedUsers.forEach(u -> {
+			assertThat(u.getUserName().startsWith(updateUserNamePrefix)).isTrue();
+		});
 		
 		String userNamePrefix2 = userNamePrefix + "2"; 
 		count = this.userAutoidServiceImpl.daoBatchInsert2(userNamePrefix2, insertCount);
@@ -49,7 +61,11 @@ public class BatchInsertTest extends DbmBaseTest {
 		
 		count = this.userAutoidServiceImpl.removeByUserName("%"+userNamePrefix+"%");
 		System.out.println("delete count: " + count);
-		Assert.assertTrue(count==insertCount*2);
+		Assert.assertTrue(count==insertCount);
+
+		count = this.userAutoidServiceImpl.removeByUserName("%"+updateUserNamePrefix+"%");
+		System.out.println("delete count: " + count);
+		Assert.assertTrue(count==insertCount);
 	}
 	
 	@Test

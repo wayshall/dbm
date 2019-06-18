@@ -1,5 +1,7 @@
 package org.onetwo.common.dbm.model.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.util.Date;
 import java.util.List;
 
@@ -46,9 +48,9 @@ public class UserAutoidServiceTest extends DbmBaseTest {
 		//精确到秒，否则会有误差，比如2015-05-06 13:49:09.783存储到mysql后会变成2015-05-06 13:49:10，mysql的datetime只能精确到秒
 		NiceDate niceNowSeconde = NiceDate.New(now).thisSec();
 		System.out.println("niceNowSeconde: " + niceNowSeconde.formatDateTimeMillis());
-		int count = 10;
+		int count = 100;
 		int insertCount = userAutoidServiceImpl.saveList(userNamePrefix, niceNowSeconde.getTime(), count);
-		Assert.assertEquals(10, insertCount);
+		assertThat(insertCount).isEqualTo(count);
 		
 		List<UserAutoidEntity> userlist = userAutoidServiceImpl.findUserAutoIdEntity(userNamePrefix, niceNowSeconde.getTime());
 		Assert.assertEquals(count, userlist.size());
