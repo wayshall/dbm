@@ -17,6 +17,7 @@ import org.onetwo.common.log.JFishLoggerFactory;
 import org.onetwo.common.reflect.ReflectUtils;
 import org.onetwo.common.spring.Springs;
 import org.onetwo.common.utils.Page;
+import org.onetwo.dbm.core.spi.DbmEntityManager;
 import org.slf4j.Logger;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -192,12 +193,22 @@ public class BaseCrudEntityManager<T, PK extends Serializable> implements CrudEn
 		return (T)getBaseEntityManager().findOne(entityClass, properties);
 	}
 
+	/***
+	 * 
+	 * @deprecated 不建议使用此方法，直接用Querys dsl api
+	 */
+	@Deprecated
 	@Transactional(readOnly=true)
 	@Override
 	public List<T> findListByProperties(QueryBuilder<T> query) {
 		return getBaseEntityManager().findList(query);
 	}
 
+	/***
+	 * 
+	 * @deprecated 不建议使用此方法，直接用Querys dsl api
+	 */
+	@Deprecated
 	@Transactional(readOnly=true)
 	@Override
 	public void findPage(final Page<T> page, QueryBuilder<T> query) {
@@ -233,5 +244,9 @@ public class BaseCrudEntityManager<T, PK extends Serializable> implements CrudEn
 						.toQuery()
 						.page(page);
 	}
-	
+
+	protected QueryBuilder<T> from(){
+		DbmEntityManager dem = (DbmEntityManager)this.getBaseEntityManager();
+		return dem.from(entityClass);
+	}
 }
