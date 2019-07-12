@@ -11,6 +11,7 @@ import java.util.stream.Stream;
 
 import org.onetwo.common.db.builder.QueryBuilder;
 import org.onetwo.common.db.builder.Querys;
+import org.onetwo.common.db.builder.WhereCauseBuilder;
 import org.onetwo.common.db.spi.BaseEntityManager;
 import org.onetwo.common.db.spi.CrudEntityManager;
 import org.onetwo.common.log.JFishLoggerFactory;
@@ -245,8 +246,8 @@ public class BaseCrudEntityManager<T, PK extends Serializable> implements CrudEn
 						.page(page);
 	}
 
-	protected QueryBuilder<T> from(){
+	protected WhereCauseBuilder<T> where(){
 		DbmEntityManager dem = (DbmEntityManager)this.getBaseEntityManager();
-		return dem.from(entityClass);
+		return dem.from(entityClass).where();
 	}
 }
