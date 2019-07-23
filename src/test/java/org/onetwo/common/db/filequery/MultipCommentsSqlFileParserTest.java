@@ -23,24 +23,45 @@ public class MultipCommentsSqlFileParserTest {
 		CommonNamespaceProperties np = new CommonNamespaceProperties("org.onetwo.common.jfishdbm.model.dao.UserAutoidDao");
 		parser.parseToNamedQueryFile(np, f);
 		Assert.assertEquals(4, np.getNamedProperties().size());
-		Assert.assertEquals("insert into test_user_autoid (birthday, email, gender, mobile, nick_name, password, status, user_name) values (:birthday, :email, :gender, :mobile, :nickName, :password, :status.value, :userName) ", np.getNamedProperty("batchInsert").getValue());
-		Assert.assertEquals("insert into test_user_autoid (birthday, email, gender, mobile, nick_name, password, status, user_name) values (:allBirthday, :email, :gender, :mobile, :nickName, :password, :status, :userName) ", np.getNamedProperty("batchInsert2").getValue());
 		
-		
-		String exceptedString = "delete from test_user_autoid where 1=1 "
-				+ "[#if userName?has_content] and user_name like :userName?likeString [/#if] "
-				+ "[#if nickName?has_content] and nickName like :nickName?likeString [/#if] ";
-		
+		String exceptedString = "insert into test_user_autoid (birthday, email, gender, mobile, nick_name, password, status, user_name) values (:birthday, :email, :gender, :mobile, :nickName, :password?encrypt, :status.value, :userName)\n";
 //		System.out.println("sql:\n"+exceptedString);
-//		System.out.println("sql:\n"+np.getNamedProperty("removeByUserName").getValue());
+//		System.out.println("sql:\n"+np.getNamedProperty("batchInsert").getValue());
+		Assert.assertEquals(exceptedString, np.getNamedProperty("batchInsert").getValue());
+		
+		exceptedString = "insert into test_user_autoid (birthday, email, gender, mobile, nick_name, password, status, user_name)\nvalues (:allBirthday, :email, :gender, :mobile, :nickName, :password?encrypt, :status, :userName)\n";
+		System.out.println("sql:\n"+exceptedString);
+		System.out.println("sql:\n"+np.getNamedProperty("batchInsert2").getValue());
+		Assert.assertEquals(exceptedString, np.getNamedProperty("batchInsert2").getValue());
+		
+		
+		exceptedString = "delete from test_user_autoid where 1=1 "
+				+ "[#if userName?has_content] and user_name like :userName?likeString [/#if]\n"
+				+ "[#if nickName?has_content] and nickName like :nickName?likeString\n[/#if] ";
+		
+		System.out.println("sql:\n"+exceptedString);
+		System.out.println("sql:\n"+np.getNamedProperty("removeByUserName").getValue());
 		
 		Assert.assertEquals(exceptedString, 
 				np.getNamedProperty("removeByUserName").getValue());
 		
 
-		exceptedString = "delete from test_user_autoid where 1=1 "
-				+ "[#if userName?has_content] and user_name like :userName?likeString [/#if] "
-				+ "[#if nickName?has_content] and nickName like :nickName?likeString [/#if] ";
+	}
+	
+	@Test
+	public void testDirectiveWithSpace(){
+		String fileName = FileUtils.getResourcePath("sql/org.onetwo.common.dbm.model.dao.UserAutoidDao.jfish.sql");
+		List<String> lines = FileUtils.readAsList(fileName);
+		System.out.println("line:"+lines);
+		MultipCommentsSqlFileParser parser = new MultipCommentsSqlFileParser();
+		ResourceAdapter<File> f = FileUtils.adapterResource(new File(fileName));
+
+		CommonNamespaceProperties np = new CommonNamespaceProperties("org.onetwo.common.jfishdbm.model.dao.UserAutoidDao");
+		parser.parseToNamedQueryFile(np, f);
+		
+		String exceptedString = "delete from test_user_autoid where 1=1\n"
+				+ "[#if userName?has_content] and user_name like :userName?likeString\n[/#if] "
+				+ "[#if nickName?has_content] and nickName like :nickName?likeString\n[/#if] ";
 		System.out.println("sql:\n"+exceptedString);
 		System.out.println("sql:\n"+np.getNamedProperty("removeByUserNameWithSpace").getValue());
 		
