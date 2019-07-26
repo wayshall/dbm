@@ -21,7 +21,6 @@ import org.onetwo.common.db.spi.NamedQueryInfo;
 import org.onetwo.common.db.spi.QueryProvideManager;
 import org.onetwo.common.db.spi.QueryWrapper;
 import org.onetwo.common.db.spi.SqlParamterPostfixFunctionRegistry;
-import org.onetwo.common.exception.BaseException;
 import org.onetwo.common.log.JFishLoggerFactory;
 import org.onetwo.common.profiling.TimeCounter;
 import org.onetwo.common.reflect.ReflectUtils;
@@ -259,7 +258,7 @@ abstract public class AbstractDynamicQueryHandler implements DynamicQueryHandler
 //					value = DbmUtils.convertSqlParameterValue(paramBean.getPropertyDescriptor(parameter.getProperty()), value, em.getSqlTypeMapping());
 				}else{
 					if(!paramsContextBean.isReadableProperty(parameter.getProperty()))
-						throw new BaseException("batch execute parameter["+parameter.getProperty()+"] not found in bean["+val+"]'s properties or params");
+						throw new DbmException("batch execute parameter["+parameter.getProperty()+"] not found in bean["+val+"]'s properties or params");
 				}
 				
 				if(value==null && paramsContextBean.isReadableProperty(parameter.getProperty()))

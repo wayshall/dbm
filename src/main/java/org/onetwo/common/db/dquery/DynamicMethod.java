@@ -40,7 +40,7 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 	}
 
 	public static final List<String> EXECUTE_UPDATE_PREFIX = LangUtils.newArrayList("save", "update", "remove", "delete", "insert", "create");
-	public static final List<String> BATCH_PREFIX = LangUtils.newArrayList("batch");
+	public static final List<String> BATCH_PREFIX = LangUtils.newArrayList("batch", "batchUpdate", "batchInsert", "batchSave");
 //	public static final String FIELD_NAME_SPERATOR = "By";
 	
 //	private final Method method;
