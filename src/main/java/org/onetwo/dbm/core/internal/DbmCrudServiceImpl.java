@@ -8,7 +8,6 @@ import java.util.Map;
 import javax.validation.ValidationException;
 
 import org.onetwo.common.db.BaseCrudEntityManager;
-import org.onetwo.common.db.builder.QueryBuilder;
 import org.onetwo.common.db.spi.BaseEntityManager;
 import org.onetwo.common.exception.BusinessException;
 import org.onetwo.common.spring.Springs;
@@ -153,8 +152,4 @@ abstract public class DbmCrudServiceImpl<T, PK extends Serializable> extends Bas
 		return dem.getCurrentSession().getMappedEntryManager().getEntry(entityClass);
 	}
 	
-	protected QueryBuilder<T> from(){
-		DbmEntityManager dem = (DbmEntityManager)this.getBaseEntityManager();
-		return dem.from(entityClass);
-	}
 }

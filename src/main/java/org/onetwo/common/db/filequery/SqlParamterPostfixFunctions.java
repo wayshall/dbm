@@ -39,6 +39,9 @@ public class SqlParamterPostfixFunctions implements SqlParamterPostfixFunctionRe
 		register(new String[]{"like", "likeString"}, new SqlParamterPostfixFunction(){
 			@Override
 			public Object toSqlParameterValue(String paramName, Object value) {
+				if (value==null) {
+					value = "";
+				}
 				return ExtQueryUtils.getLikeString(value.toString());
 			}
 		});
@@ -47,6 +50,9 @@ public class SqlParamterPostfixFunctions implements SqlParamterPostfixFunctionRe
 		register(new String[]{"prelike", "preLikeString"}, new SqlParamterPostfixFunction(){
 			@Override
 			public Object toSqlParameterValue(String paramName, Object value) {
+				if (value==null) {
+					value = "";
+				}
 				return StringUtils.appendStartWith(value.toString(), "%");
 			}
 		});
@@ -54,6 +60,9 @@ public class SqlParamterPostfixFunctions implements SqlParamterPostfixFunctionRe
 		register(new String[]{"postlike", "postLikeString"}, new SqlParamterPostfixFunction(){
 			@Override
 			public Object toSqlParameterValue(String paramName, Object value) {
+				if (value==null) {
+					value = "";
+				}
 				return StringUtils.appendEndWith(value.toString(), "%");
 			}
 		});
