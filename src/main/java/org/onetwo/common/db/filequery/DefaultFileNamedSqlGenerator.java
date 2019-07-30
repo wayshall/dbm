@@ -1,5 +1,6 @@
 package org.onetwo.common.db.filequery;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -9,6 +10,7 @@ import org.onetwo.common.db.filequery.func.SqlFunctionDialet;
 import org.onetwo.common.db.spi.FileNamedSqlGenerator;
 import org.onetwo.common.db.spi.FileSqlParserType;
 import org.onetwo.common.db.spi.NamedQueryInfo;
+import org.onetwo.common.db.spi.QueryContextVariable;
 import org.onetwo.common.db.sql.DynamicQuery;
 import org.onetwo.common.db.sql.DynamicQueryFactory;
 import org.onetwo.common.db.sqlext.ExtQueryUtils;
@@ -64,8 +66,16 @@ public class DefaultFileNamedSqlGenerator implements FileNamedSqlGenerator {
 		this.resultClass = resultClass;
 		this.ascFields = ascFields;
 		this.desFields = desFields;
-		this.params = LangUtils.emptyIfNull(params);
+		this.params = new HashMap<>();
 		this.sqlFunctionDialet = sqlFunctionDialet;
+		
+		this.params.putAll(LangUtils.emptyIfNull(params));
+		QueryContextVariable[] vars = parserContext.getQueryInfo().getQueryConfig().getVariables();
+		if (vars!=null) {
+			for(QueryContextVariable v : vars) {
+				this.params.put(v.varName(), v);
+			}
+		}
 	}
 
 	@Override

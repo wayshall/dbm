@@ -17,15 +17,20 @@ import org.springframework.util.Assert;
 public class ParserContext implements Map<Object, Object> {
 	
 	public static ParserContext create(NamedQueryInfo queryInfo, Object...params){
-		if(LangUtils.isEmpty(params))
-			return new ParserContext(queryInfo, new HashMap<Object, Object>());
-		return new ParserContext(queryInfo, CUtils.asMap(params));
+		ParserContext ctx = null;
+		if(LangUtils.isEmpty(params)) {
+			ctx = new ParserContext(queryInfo, new HashMap<Object, Object>());
+		} else {
+			ctx = new ParserContext(queryInfo, CUtils.asMap(params));
+		}
+		ctx.setQueryConfig(queryInfo.getQueryConfig());
+		return ctx;
 	}
 
 
-	public static final String CONTEXT_KEY = ParserContextFunctionSet.CONTEXT_KEY;//helper ParserContextFunctionSet
+	public static final String CONTEXT_KEY = ParserContextFunctionSet.CONTEXT_KEY;//_func; helper ParserContextFunctionSet
 	public static final String QUERY_CONFIG = "_queryConfig";
-	public static final String QUERY_CONFIG_FUNC = "_queryfunc";
+//	private static final String QUERY_CONFIG_FUNC = "_queryfunc";
 	public static final String DB_KEY = SqlFunctionFactory.CONTEXT_KEY;
 	public static final String PARSER_ACCESS_KEY = NamedQueryInfo.FRAGMENT_KEY;
 	
@@ -43,7 +48,7 @@ public class ParserContext implements Map<Object, Object> {
 		return queryInfo;
 	}
 
-	public void setQueryConfig(QueryConfigData config){
+	final public void setQueryConfig(QueryConfigData config){
 		Assert.notNull(config, "QueryConfigData can not be null");
 		QueryConfigData oldConfig = (QueryConfigData)this.context.put(QUERY_CONFIG, config);
 		if(oldConfig!=null){
@@ -70,10 +75,10 @@ public class ParserContext implements Map<Object, Object> {
 		}
 	}
 	
-	public QueryConfigData getQueryConfig(){
+	/*public QueryConfigData getQueryConfig(){
 		QueryConfigData config = (QueryConfigData)context.get(QUERY_CONFIG);
 		return config==null?ParsedSqlUtils.EMPTY_CONFIG:config;
-	}
+	}*/
 	public int size() {
 		return context.size();
 	}

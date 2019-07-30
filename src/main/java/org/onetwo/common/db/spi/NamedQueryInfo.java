@@ -67,7 +67,7 @@ public class NamedQueryInfo implements Cloneable{
 
 	private boolean nativeSql = true;
 	
-	private QueryConfigData queryConfig = ParsedSqlUtils.EMPTY_CONFIG;
+	private QueryConfigData queryConfig;// = new QueryConfigData(); //ParsedSqlUtils.EMPTY_CONFIG;
 
 	public String getNamespace() {
 		return namespace;
