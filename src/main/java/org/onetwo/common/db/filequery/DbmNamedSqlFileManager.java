@@ -1,9 +1,7 @@
 package org.onetwo.common.db.filequery;
 
-import java.util.Arrays;
-
-import org.onetwo.common.db.spi.NamedQueryInfo;
 import org.onetwo.common.db.spi.NamedQueryFileListener;
+import org.onetwo.common.db.spi.NamedQueryInfo;
 import org.onetwo.common.spring.ftl.TemplateParser;
 import org.onetwo.dbm.exception.FileNamedQueryException;
 
@@ -35,10 +33,10 @@ public class DbmNamedSqlFileManager extends BaseNamedSqlFileManager {
 		super(watchSqlFile, listener);
 //		this.databaseType = conf.getDatabaseType();
 //		this.setSqlFileParser(new MultipCommentsSqlFileParser());
-		this.setQueryInfoParsers(Arrays.asList(
+		/*this.setQueryInfoParsers(Arrays.asList(
 									new MultipCommentsSqlFileParser(),
 									new AnnotationBasedQueryInfoParser()
-								));
+								));*/
 		this.sqlStatmentParser = sqlStatmentParser;
 	}
 

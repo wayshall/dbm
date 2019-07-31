@@ -14,11 +14,11 @@ import org.onetwo.common.db.spi.SqlDirectiveExtractor;
 import org.onetwo.common.log.JFishLoggerFactory;
 import org.onetwo.common.propconf.JFishProperties;
 import org.onetwo.common.propconf.ResourceAdapter;
-import org.onetwo.common.spring.Springs;
 import org.onetwo.dbm.exception.FileNamedQueryException;
 import org.slf4j.Logger;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.PropertyAccessorFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.common.collect.ImmutableList;
 
@@ -101,6 +101,8 @@ public class MultipCommentsSqlFileParser implements NamedQueryInfoParser {
 //	protected SqlDirectiveExtractor sqlDirectiveExtractor = new SimpleDirectiveExtractor();
 	protected List<SqlDirectiveExtractor> sqlDirectiveExtractors = ImmutableList.of(new SimpleDirectiveExtractor(), 
 																					new CustomDirectiveExtractor("-- >", "[", "]"));
+	@Autowired(required=false)
+	private List<QueryGlobalVariable> queryGlobalVariable;
 	
 	@Override
 	public void parseToNamedQueryFile(NamedQueryFile namespaceInfo, ResourceAdapter<?> sqlFile) {
@@ -138,9 +140,8 @@ public class MultipCommentsSqlFileParser implements NamedQueryInfoParser {
 	protected QueryConfigData createQueryConfigData() {
 		QueryConfigData config = new QueryConfigData();
 		
-		if (Springs.getInstance().isActive()) {
-			List<QueryGlobalVariable> globals = Springs.getInstance().getBeans(QueryGlobalVariable.class);
-			config.setVariables(globals.toArray(new QueryGlobalVariable[0]));
+		if (queryGlobalVariable!=null) {
+			config.setVariables(queryGlobalVariable.toArray(new QueryGlobalVariable[0]));
 		}
 		
 		return config;
