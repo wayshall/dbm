@@ -676,6 +676,9 @@ sql模板使用的实际上是freemarker模板引擎，因此freemarker支持的
 
 - @foreach
 - @str
+- @where
+- @set
+- @dateRange
 
 #### foreach指令
 foreach指令可以在sql，循环可遍历的参数，并用joiner连接起来，比如当传入ids是个列表，我们需要在sql进入in查询时：
