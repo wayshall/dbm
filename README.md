@@ -681,7 +681,10 @@ sql模板使用的实际上是freemarker模板引擎，因此freemarker支持的
 - @dateRange
 
 #### foreach指令
-foreach指令可以在sql，循环可遍历的参数，并用joiner连接起来，比如当传入ids是个列表，我们需要在sql进入in查询时：
+foreach 遍历指令
+
+可以在sql，循环可遍历的参数，并用joiner连接起来，比如当传入ids是个列表，我们需要在sql进入in查询时：
+
 ```sql
 /***
  * @name: findPermissions
@@ -719,7 +722,10 @@ select
 ```
 
 #### str指令
-@str指令可以帮助去掉sql动态生成条件查询时，自动加上where，或者去掉多余的and或者or关键字，比如：
+@str 字符串指令
+
+可以在sql动态生成条件查询时，自动插入指定字符，同时去掉头尾多余的字符，比如动态插入where和去掉多余的and或者or：
+
 ```sql
 /****
  * @name: findUsers
@@ -748,8 +754,9 @@ select
 
 
 ### where指令
-where指令可以帮助去掉sql动态生成条件查询时，自动加上where，或者去掉多余的and或者or关键字，它是@str指令的包装。
+where指令可以在sql动态生成条件查询时，自动加上where，或者去掉多余的and或者or关键字，它是@str指令的包装。
 @str指令一节里的sql可以用where指令写成这样：
+
 ```sql
 /****
  * @name: findUsersWithWhere
@@ -872,6 +879,8 @@ where
 
 - 支持Optional类型的返回值
 
+
+
 ## DbmRepository接口的多数据源支持
 DbmRepository 查询接口还可以通过注解支持绑定不同的数据源，dataSource的值为spring bean的名称：
 ```Java
@@ -884,10 +893,12 @@ public interface Datasource2Dao {
 }
 ```
 
-## DbmRepository接口对其它orm框架的兼容
-其它orm框架可以通过实现QueryProvideManager接口，然后通过@DbmRepository注解的queryProviderName或queryProviderClass属性指定特定的QueryProvideManager实现类。从而让DbmRepository查询接口使用其它orm框架，避免不同orm框架共存带来的一些副作用。   
 
-dbm内置支持了JPA（Hibernate）实现的QueryProvideManager。   
+
+## DbmRepository接口对其它orm框架的兼容
+DbmRepository 的查询接口是可以独立于dbm使用的，其它orm框架可以通过实现QueryProvideManager接口，然后通过 @DbmRepository 注解的queryProviderName或queryProviderClass属性指定特定的QueryProvideManager实现类。从而让DbmRepository查询接口使用其它orm框架，避免不同orm框架共存带来的一些副作用。    
+
+dbm内置了JPA（Hibernate）实现的QueryProvideManager。   
 但一个一个地把DbmRepository接口设置成相同的实现的QueryProvideManager实现的是不明智，只是没有意义的重复劳动，所以dbm另外提供了@EnableDbmRepository注解，单独激活和配置DbmRepository默认的QueryProvideManager。
 ```Java
 @EnableDbmRepository(value="org.onetwo.common.hibernate.dao", 
@@ -903,7 +914,7 @@ DbmRepository的查询映射无需任何xml配置，只需要遵循规则即可�
 - 1、  Java类的属性名与sql查询返回的列名一致(不区分大小写)   
 - 2、  或者Java类的属性名采用驼峰命名，而列明采用下划线的方式分隔。如：userName对应user_name   
 默认的映射规则实际上和使用了@DbmRowMapper注解下的SMART_PROPERTY模式一致。
-详见：[注解@DbmRowMapper](#注解@DbmRowMapper)
+详见：[注解@DbmRowMapper](#注解dbmrowmapper)
 
 举例：   
 ### 创建一个DbmRepository接口
@@ -957,12 +968,15 @@ where
     comp.name in (:names)
 [/#if]
 ```
+
+
 ### 调用代码
 ```Java
 List<CompanyVO> companies = this.companyDao.findCompaniesByLikeName("测试公司");
 companies = this.companyDao.findCompaniesByNames(Collections.emptyList());
 companies = this.companyDao.findCompaniesByNames(Arrays.asList("测试公司-1", "测试公司-2"));
 ```
+
 
 ## 复杂的嵌套查询映射
 有时，我们会使用join语句，查询出一个复杂的数据列表，比如包含了company、department和employee三个表。
@@ -1009,8 +1023,8 @@ public class EmployeeVO  {
 }
 ```
 解释：   
-- @DbmResultMapping注解表明，查询返回的结果需要复杂的嵌套映射
-- @DbmNestedResult注解告诉dbm，返回的CompanyVO对象中，哪些属性是需要复杂的嵌套映射的。property用于指明具体的属性名称，columnPrefix用于指明，需要把返回的结果集中，哪些前缀的列都映射到property指定的属性里，默认会使用property。nestedType标识该属性的嵌套类型，有三个值，ASSOCIATION表示一对一的关联对象，COLLECTION表示一对多的集合对象，MAP也是一对多，但该属性的类型是个Map类型。id属性可选，配置了可一定程度上加快映射速度。
+- @DbmResultMapping 注解表明，查询返回的结果需要复杂的嵌套映射
+- @DbmNestedResult 注解告诉dbm，返回的CompanyVO对象中，哪些属性是需要复杂的嵌套映射的。property用于指明具体的属性名称，columnPrefix用于指明，需要把返回的结果集中，哪些前缀的列都映射到property指定的属性里，默认会使用property。nestedType标识该属性的嵌套类型，有三个值，ASSOCIATION表示一对一的关联对象，COLLECTION表示一对多的集合对象，MAP也是一对多，但该属性的类型是个Map类型。id属性可选，配置了可一定程度上加快映射速度。
 
 ### 对应的sql
 ```sql
@@ -1032,12 +1046,16 @@ left join
 left join
     employee emply on emply.department_id=depart.id
 ```
+
+
 ### 调用
 ```Java
 List<CompanyVO> companies = companyDao.findNestedCompanies();
 ```
 
-- 注意：若嵌套类型为NestedType.COLLECTION，而容器的元素为简单类型，则把@DbmNestedResult注解的id属性设置为“value”即可。
+- 注意：若嵌套类型为NestedType.COLLECTION，而容器的元素为简单类型，则把@DbmNestedResult 注解的id属性设置为“value”即可。
+
+
 
 
 ## 自定义实现DbmRepository接口
@@ -1076,7 +1094,7 @@ public interface UserDao extends CustomUserDao {
 }
 
 ```
-这样，当你注入Userdao，并调用batchInsert方法时，实际调用的就会是CustomUserDaoImpl的batchInsert方法了：
+这样，当你注入UserDao，并调用batchInsert方法时，实际调用的就会是CustomUserDaoImpl的batchInsert方法了：
 ```Java
 public class CustomDaoTest {
 	
@@ -1093,6 +1111,8 @@ public class CustomDaoTest {
 
 }
 ```
+
+
 
 ## 批量插入
 
