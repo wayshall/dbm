@@ -673,6 +673,7 @@ public interface UserDao {
 ### sql模板文件的语法和指令支持
 sql模板使用的实际上是freemarker模板引擎，因此freemarker支持的语法都可以使用。
 另外增加了一些特定的指令以帮助处理sql，包括：
+
 - @foreach
 - @str
 
@@ -715,7 +716,7 @@ select
 ```
 
 #### str指令
-@str指令可以帮助去掉sql动态生成条件查询时多余的and或者or关键字，比如：
+@str指令可以帮助去掉sql动态生成条件查询时，自动加上where，或者去掉多余的and或者or关键字，比如：
 ```sql
 /****
  * @name: findUsers
@@ -737,8 +738,58 @@ select
     [/@str]
 ```
 - insertPrefix 属性：当指令里面的sql条件不为空的时候，会自动把insertPrefix属性的字符串插入，这里就是where
+
 - trimPrefixs 属性：如果生成的sql片段以trimPrefixs指定的单词开始时，则会自动被去掉。支持指定多个单词，|为分隔符。
+
 - trimSuffixs 属性：如果生成的sql片段以trimSuffixs指定的单词结束时，则会自动被去掉。支持指定多个单词，|为分隔符。
+
+
+### where指令
+where指令可以帮助去掉sql动态生成条件查询时，自动加上where，或者去掉多余的and或者or关键字，它是@str指令的包装。
+@str指令一节里的sql可以用where指令写成这样：
+```sql
+/****
+ * @name: findUsersWithWhere
+ */
+    select
+        *
+    from
+        TEST_USER u
+    [@where]
+        [#if query.userName?has_content]
+            u.user_name = :query.userName
+        [/#if]
+        [#if query.age??]
+            and u.age = :query.age
+        [/#if]
+        [#if query.status??]
+            and u.status = :query.status or 
+        [/#if]
+    [/@where]
+```
+### set指令
+set  指令与where指令类似，只是@str指令的包装，用于sql更新语句：
+```sql
+/***
+ * @name: updateUsersWithSet
+ */
+    update
+        TEST_USER 
+    [@set]
+        [#if query.userName?has_content]
+            user_name = :query.userName, 
+        [/#if]
+        [#if query.age??]
+            age = :query.age, 
+        [/#if]
+        [#if query.status??]
+            status = :query.status,
+        [/#if]
+    [/@set]
+    where 
+        id = :query.id
+```
+
 
 ### 其他特性
 

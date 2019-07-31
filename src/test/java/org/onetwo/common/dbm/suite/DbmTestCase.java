@@ -4,6 +4,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 import org.onetwo.common.base.DbmSessionCacheTest;
+import org.onetwo.common.db.filequery.DefaultFileNamedSqlGeneratorTest;
 import org.onetwo.common.db.filequery.MultipCommentsSqlFileParserTest;
 import org.onetwo.common.db.sqlext.ExtQueryImplTest;
 import org.onetwo.common.db.sqlext.JFishExtQueryImplTest;
@@ -34,6 +35,7 @@ import org.onetwo.common.hibernate.dao.HibernateNestedMappingTest;
 @RunWith(Suite.class)
 @SuiteClasses({
 	MultipCommentsSqlFileParserTest.class,
+	DefaultFileNamedSqlGeneratorTest.class,
 	ExtQueryImplTest.class,
 	JFishExtQueryImplTest.class,
 	DbmDaoTest.class,

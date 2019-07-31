@@ -60,7 +60,8 @@ public class DefaultFileNamedSqlGeneratorTest {
 		ParsedSqlContext sqlAndValues = sqlGen.generatSql();
 		System.out.println("sql: " + sqlAndValues.getParsedSql());
 		System.out.println("values: " + sqlAndValues.asMap());
-		String sql = "select * from TEST_USER u \n";
+		String sql = "select * from TEST_USER u\n"
+				+ " ";
 		assertThat(sqlAndValues.getParsedSql()).isEqualTo(sql);
 		
 		/*user = new UserVersionEntity();
@@ -123,6 +124,49 @@ public class DefaultFileNamedSqlGeneratorTest {
 				+ "where u.user_name = :query.userName    and u.status = :query.status ";
 		assertThat(sqlAndValues.getParsedSql()).isEqualTo(sql);
 	}
+
+
+	@Test
+	public void testFindUsersWithWhere() {
+		String file = "sql/org.onetwo.common.dbm.model.dao.SqlFileParser.jfish.sql";
+		SpringResourceAdapterImpl sqlFile = new SpringResourceAdapterImpl(SpringUtils.classpath(file));
+		NamedQueryFile namedQueryFile = sqlFileManager.buildSqlFile(sqlFile);
+		
+		UserVersionEntity user = new UserVersionEntity();
+		user.setAge(11);
+		Map<Object, Object> params = Maps.newHashMap();
+		params.put("query", user);
+		
+		ParserContext parserContext = ParserContext.create(namedQueryFile.getNamedProperty("findUsersWithWhere"));
+		FileNamedSqlGenerator sqlGen = new DefaultFileNamedSqlGenerator(false, 
+													sqlFileManager.getSqlStatmentParser(), 
+													parserContext, 
+													params, 
+													Optional.empty());
+		ParsedSqlContext sqlAndValues = sqlGen.generatSql();
+		System.out.println("sql: " + sqlAndValues.getParsedSql());
+		System.out.println("values: " + sqlAndValues.asMap());
+		String sql = "select * from TEST_USER u where  u.age = :query.age\n";
+		assertThat(sqlAndValues.getParsedSql()).isEqualTo(sql);
+		
+		
+		user = new UserVersionEntity();
+		user.setUserName("testUserName");
+		user.setStatus(UserStatus.NORMAL);
+		params = Maps.newHashMap();
+		params.put("query", user);
+		parserContext = ParserContext.create(namedQueryFile.getNamedProperty("findUsersWithWhere"));
+		sqlGen = new DefaultFileNamedSqlGenerator(false, 
+													sqlFileManager.getSqlStatmentParser(), 
+													parserContext, 
+													params, 
+													Optional.empty());
+		sqlAndValues = sqlGen.generatSql();
+		System.out.println("sql: " + sqlAndValues.getParsedSql());
+		System.out.println("values: " + sqlAndValues.asMap());
+		sql = "select * from TEST_USER u where u.user_name = :query.userName    and u.status = :query.status \n";
+		assertThat(sqlAndValues.getParsedSql()).isEqualTo(sql);
+	}
 	
 	@Test
 	public void testUpdateUser() {
@@ -170,5 +214,50 @@ public class DefaultFileNamedSqlGeneratorTest {
 		assertThat(sqlAndValues.getParsedSql()).isEqualTo(sql);
 	}
 
+	@Test
+	public void testUpdateUserWithSet() {
+		String file = "sql/org.onetwo.common.dbm.model.dao.SqlFileParser.jfish.sql";
+		SpringResourceAdapterImpl sqlFile = new SpringResourceAdapterImpl(SpringUtils.classpath(file));
+		NamedQueryFile namedQueryFile = sqlFileManager.buildSqlFile(sqlFile);
+		
+		UserVersionEntity user = new UserVersionEntity();
+		user.setId(1L);
+		user.setAge(11);
+		Map<Object, Object> params = Maps.newHashMap();
+		params.put("query", user);
+		
+		ParserContext parserContext = ParserContext.create(namedQueryFile.getNamedProperty("updateUsersWithSet"));
+		FileNamedSqlGenerator sqlGen = new DefaultFileNamedSqlGenerator(false, 
+													sqlFileManager.getSqlStatmentParser(), 
+													parserContext, 
+													params, 
+													Optional.empty());
+		ParsedSqlContext sqlAndValues = sqlGen.generatSql();
+		System.out.println("sql: " + sqlAndValues.getParsedSql());
+		System.out.println("values: " + sqlAndValues.asMap());
+		String sql = "update TEST_USER\n"
+				+ "set age = :query.age where id = :query.id\n";
+		assertThat(sqlAndValues.getParsedSql()).isEqualTo(sql);
+		
+		
+		user = new UserVersionEntity();
+		user.setId(1L);
+		user.setUserName("testUserName");
+		user.setStatus(UserStatus.NORMAL);
+		params = Maps.newHashMap();
+		params.put("query", user);
+		parserContext = ParserContext.create(namedQueryFile.getNamedProperty("updateUsersWithSet"));
+		sqlGen = new DefaultFileNamedSqlGenerator(false, 
+													sqlFileManager.getSqlStatmentParser(), 
+													parserContext, 
+													params, 
+													Optional.empty());
+		sqlAndValues = sqlGen.generatSql();
+		System.out.println("sql: " + sqlAndValues.getParsedSql());
+		System.out.println("values: " + sqlAndValues.asMap());
+		sql = "update TEST_USER\n"
+				+ "set user_name = :query.userName,    status = :query.status where id = :query.id\n";
+		assertThat(sqlAndValues.getParsedSql()).isEqualTo(sql);
+	}
 }
 
