@@ -670,6 +670,76 @@ public interface UserDao {
 }
 ```
 
+### sql模板文件的语法和指令支持
+sql模板使用的实际上是freemarker模板引擎，因此freemarker支持的语法都可以使用。
+另外增加了一些特定的指令以帮助处理sql，包括：
+- @foreach
+- @str
+
+#### foreach指令
+foreach指令可以在sql，循环可遍历的参数，并用joiner连接起来，比如当传入ids是个列表，我们需要在sql进入in查询时：
+```sql
+/***
+ * @name: findPermissions
+ * @parser: template
+ * 
+ */
+  select 
+      t.*
+    from 
+        data t
+   [#if ids??]
+    where
+        t.id in (
+	        [@foreach list=ids joiner=', '; id, index]
+	            #{id}
+	        [/@foreach]
+        )
+   [/#if]
+```
+- list 属性：可遍历的参数
+- joiner 属性：连接字符
+- id：遍历的时候，引用每个正在遍历的元素的变量名
+- index：当前遍历的索引
+当然，这里只是为了演示foreach指令的用法，实际上，dbm的sql参数可以直接支持list参数类型，当传入的参数是个列表的时候，会自动分解参数。
+上面的语句实际上可直接写成： 
+```sql
+select 
+      t.*
+    from 
+        data t
+   [#if ids??]
+    where
+        t.id in ( :ids )
+   [/#if]
+```
+
+#### str指令
+@str指令可以帮助去掉sql动态生成条件查询时多余的and或者or关键字，比如：
+```sql
+/****
+ * @name: findUsers
+ */
+    select
+        *
+    from
+        TEST_USER u
+    [@str insertPrefix='where' trimPrefixs='and | or' trimSuffixs='and | or']
+        [#if query.userName?has_content]
+            u.user_name = :query.userName
+        [/#if]
+        [#if query.age??]
+            and u.age = :query.age
+        [/#if]
+        [#if query.status??]
+            and u.status = :query.status or 
+        [/#if]
+    [/@str]
+```
+- insertPrefix 属性：当指令里面的sql条件不为空的时候，会自动把insertPrefix属性的字符串插入，这里就是where
+- trimPrefixs 属性：如果生成的sql片段以trimPrefixs指定的单词开始时，则会自动被去掉。支持指定多个单词，|为分隔符。
+- trimSuffixs 属性：如果生成的sql片段以trimSuffixs指定的单词结束时，则会自动被去掉。支持指定多个单词，|为分隔符。
+
 ### 其他特性
 
 

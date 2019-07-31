@@ -32,7 +32,7 @@ public class ParserContext implements Map<Object, Object> {
 	public static final String QUERY_CONFIG = "_queryConfig";
 //	private static final String QUERY_CONFIG_FUNC = "_queryfunc";
 	public static final String DB_KEY = SqlFunctionFactory.CONTEXT_KEY;
-	public static final String PARSER_ACCESS_KEY = NamedQueryInfo.FRAGMENT_KEY;
+//	public static final String PARSER_ACCESS_KEY = NamedQueryInfo.FRAGMENT_KEY;
 	
 	private Map<Object, Object> context;
 	final private NamedQueryInfo queryInfo;
