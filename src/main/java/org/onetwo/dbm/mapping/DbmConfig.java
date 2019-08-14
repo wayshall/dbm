@@ -56,15 +56,22 @@ public interface DbmConfig {
 	 * @return
 	 */
 	SnowflakeIdConfig getSnowflakeId();
+	EncryptConfig getEncrypt();
 	
 	@Data
 	public class SnowflakeIdConfig {
 		/***
-		 * 自动根据网络ip都最后两位创建
+		 * 自动根据网络ip的最后两位创建
 		 */
 		private boolean auto = true;
 		private long datacenterId = 1;
 		private long machineId = 1;
+	}
+	
+	@Data
+	public class EncryptConfig {
+		private String algorithm = "PBEWithMD5AndTripleDES";
+		private String password = "zifish-dbm";
 	}
 
 }

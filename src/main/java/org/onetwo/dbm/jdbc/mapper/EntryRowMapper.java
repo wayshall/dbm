@@ -56,22 +56,23 @@ public class EntryRowMapper<T> extends DbmBeanPropertyRowMapper<T> implements Ro
 		SqlRowSetMetaData rsmd = resutSetWrapper.getMetaData();
 		int columnCount = resutSetWrapper.getMetaData().getColumnCount();
 
-		DbmMappedField field;
+//		DbmMappedField field;
 		String column = null;
 		T entity = entry.newInstance();
-		Object value = null;
-		BeanWrapper bw = null;
+//		Object value = null;
+		BeanWrapper bw = this.createBeanWrapper(entity);
 		
 		long start = 0;
 		if(debug){
 			start = System.currentTimeMillis();
 		}
 		for (int index = 1; index <= columnCount; index++) {
-			value = null;
+//			value = null;
 			column = DbmUtils.lookupColumnName(rsmd, index);
 			/*if(!entry.containsColumn(column))
 				continue;*/
-			try {
+			this.setColumnValue(resutSetWrapper, bw, rowNum, index, column);
+			/*try {
 				if (entry.containsColumn(column)) {
 					field = entry.getFieldByColumnName(column);
 					value = getColumnValue(resutSetWrapper, index, field);
@@ -79,26 +80,14 @@ public class EntryRowMapper<T> extends DbmBeanPropertyRowMapper<T> implements Ro
 						field.setValue(entity, value);
 					}
 				} else if (useSmartProperty) {
-					if(bw==null){
-						bw = this.createBeanWrapper(entity);
-					}
+//					if(bw==null){
+//						bw = this.createBeanWrapper(entity);
+//					}
 					this.setValue(resutSetWrapper, bw, rowNum, index, column);
 				}
-				/*else{
-					String propName = toPropertyName(column);
-					if(bw==null){
-						bw = PropertyAccessorFactory.forBeanPropertyAccess(entity);
-						bw.setAutoGrowNestedPaths(true);
-					}
-					if(!bw.isWritableProperty(propName))
-						continue;
-					value = getColumnValue(resutSetWrapper, index, bw.getPropertyDescriptor(propName), rsmd.getColumnType(index));
-					bw.setPropertyValue(propName, value);
-//					this.setRelatedProperty(rs, index, entity, propName);
-				}*/
 			} catch (Exception e) {
 				throw new DbmException(entry.getEntityClass() + " mapped field["+column+", "+value+"] error : " + e.getMessage(), e);
-			}
+			}*/
 		}	
 		
 		if(debug){
@@ -107,6 +96,32 @@ public class EntryRowMapper<T> extends DbmBeanPropertyRowMapper<T> implements Ro
 		}
 		
 		return entity;
+	}
+	
+	public void setColumnValue(ResultSetWrappingSqlRowSet resutSetWrapper, 
+			BeanWrapper bw, 
+			int rowNumber, 
+			int columnIndex, 
+			String column) {
+		DbmMappedField field;
+		Object value = null;
+		Object entity = bw.getWrappedInstance();
+		try {
+			if (entry.containsColumn(column)) {
+				field = entry.getFieldByColumnName(column);
+				value = getColumnValue(resutSetWrapper, columnIndex, field);
+				if(value!=null){
+					field.setValue(entity, value);
+				}
+			} else if (useSmartProperty) {
+//				if(bw==null){
+//					bw = this.createBeanWrapper(entity);
+//				}
+				super.setColumnValue(resutSetWrapper, bw, rowNumber, columnIndex, column);
+			}
+		} catch (Exception e) {
+			throw new DbmException(entry.getEntityClass() + " mapped field["+column+", "+value+"] error : " + e.getMessage(), e);
+		}
 	}
 	
 	protected String toPropertyName(final String column){

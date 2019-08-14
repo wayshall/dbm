@@ -1,6 +1,8 @@
-package org.onetwo.dbm.mapping;
+package org.onetwo.dbm.mapping.converter;
 
 import org.onetwo.common.jackson.JsonMapper;
+import org.onetwo.dbm.mapping.DbmFieldValueConverter;
+import org.onetwo.dbm.mapping.DbmMappedField;
 
 /**
  * @author wayshall

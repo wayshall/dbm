@@ -31,16 +31,15 @@ public class SnowflakeIdUserEntity extends BaseEntity {
 	@Length(min=1, max=50)
 	protected String userName;
 	
-
 	@DbmEntity(table="TEST_USER")
 	@Data
 	@EqualsAndHashCode(callSuper=true)
 	public static class SnowflakeIdUser2Entity extends BaseEntity {
 	
 		@Id  
-		@GeneratedValue(strategy = GenerationType.AUTO, generator="snowflake") 
-		@DbmIdGenerator(name="snowflake", generatorClass=SnowflakeGenerator.class)
-		protected Long id;
+		@GeneratedValue(strategy = GenerationType.AUTO, generator="snowflakeIdUser2") 
+		@DbmIdGenerator(name="snowflakeIdUser2", generatorClass=SnowflakeGenerator.class, valueType=String.class)
+		protected String id;
 		@Length(min=1, max=50)
 		protected String userName;
 		

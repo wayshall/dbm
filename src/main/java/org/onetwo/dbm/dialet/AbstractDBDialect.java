@@ -53,7 +53,12 @@ abstract public class AbstractDBDialect implements InnerDBDialet, DBDialect {
 	
 	private SqlFunctionDialet sqlFunctionDialet;
 	
-	private Set<String> keywrods = Sets.newHashSet();
+	/***
+	 * 摘取了部分常用的保留字
+	 * https://dev.mysql.com/doc/refman/8.0/en/keywords.html
+	 */
+	private Set<String> keywrods = Sets.newHashSet("key", "keys", "order", "all", "code", "column", "data", "desc", "user", 
+													"group", "hour", "month", "options", "plugin", "plugins", "range", "year");
 	
 	public AbstractDBDialect(DBMeta dbmeta) {
 		super();
@@ -62,7 +67,7 @@ abstract public class AbstractDBDialect implements InnerDBDialet, DBDialect {
 //		this.dataBaseConfig = dataBaseConfig;
 		this.sqlFunctionDialet = SqlFunctionFactory.getSqlFunctionDialet(dbmeta.getDataBase());
 		
-		addKeyword("key");
+//		addKeyword("key");
 	}
 	
 	final protected AbstractDBDialect addKeyword(String kw){

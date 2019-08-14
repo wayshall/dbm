@@ -5,10 +5,9 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.HashSet;
 
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.JdbcUtils;
 
-public class HashsetRowMapper implements RowMapper<HashSet<?>> {
+public class HashsetRowMapper implements DataRowMapper<HashSet<?>> {
 
 	@Override
 	public HashSet<?> mapRow(ResultSet rs, int rowNum) throws SQLException {

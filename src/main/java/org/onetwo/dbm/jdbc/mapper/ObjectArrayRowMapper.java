@@ -4,10 +4,9 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.JdbcUtils;
 
-public class ObjectArrayRowMapper implements RowMapper<Object[]> {
+public class ObjectArrayRowMapper implements DataRowMapper<Object[]> {
 
 	@Override
 	public Object[] mapRow(ResultSet rs, int rowNum) throws SQLException {

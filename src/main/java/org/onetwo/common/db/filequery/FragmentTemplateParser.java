@@ -23,6 +23,21 @@ public class FragmentTemplateParser implements TemplateHashModel {
 		this.query = query;
 	}
 	
+	/***
+	 * 在sql里引用访问的变量名称 fragment
+	 * @author weishao zeng
+	 * @return
+	 */
+	public String getVarName() {
+		return NamedQueryInfo.FRAGMENT_KEY;
+	}
+	
+	/***
+	 * 是否带命名空间，即是否包含了'.'符号，如果有包含点号，返回true，否则返回false
+	 * @author weishao zeng
+	 * @param key
+	 * @return
+	 */
 	private boolean isNamespaceScope(String key){
 //		return key.startsWith(AbstractPropertiesManager.NAME_PREFIX);
 		return key.indexOf(NamedQueryInfo.DOT_KEY)!=-1;
@@ -34,9 +49,16 @@ public class FragmentTemplateParser implements TemplateHashModel {
 		return key.substring(start, end);
 	}
 
+	/***
+	 * findUserPage.fragment.subWhere
+	 * 
+	 * @author weishao zeng
+	 * @param key
+	 */
 	private void checkKeyIfNamespaceScope(String key){
 		String qname = getQueryName(key);
 		String subkey = key.substring(qname.length()+DOT.length());
+		// 跨命名空间访问片段时，必须以fragment开头，如：fragment.subWhere
 		if(!subkey.startsWith(NamedQueryInfo.FRAGMENT_KEY)){
 			throw new FileNamedQueryException("only can access "+NamedQueryInfo.FRAGMENT_KEY+" of query, error key: " + key);
 		}
@@ -47,6 +69,7 @@ public class FragmentTemplateParser implements TemplateHashModel {
 	@Override
 	public TemplateModel get(String key) throws TemplateModelException {
 		String value = null;
+		// 是否带命名空间，即是否包含了'.'符号
 		if(isNamespaceScope(key)){
 //			String qname = getQueryName(key);
 //			JFishNamedFileQueryInfo queryInfo = (JFishNamedFileQueryInfo)query.getNamespaceInfo().getNamedProperty(qname);

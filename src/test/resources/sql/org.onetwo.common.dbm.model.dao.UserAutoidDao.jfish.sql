@@ -34,7 +34,7 @@
         test_user_autoid
         (birthday, email, gender, mobile, nick_name, password, status, user_name) 
     values
-        (:birthday, :email, :gender, :mobile, :nickName, :password, :status.value, :userName)
+        (:birthday, :email, :gender, :mobile, :nickName, :password?encrypt, :status.value, :userName)
 
 /*****
  * @name: batchInsert2
@@ -46,5 +46,5 @@
         (birthday, email, gender, mobile, nick_name, password, status, user_name) 
 --多个参数的批量插入
     values
-        (:allBirthday, :email, :gender, :mobile, :nickName, :password, :status, :userName)
+        (:allBirthday, :email, :gender, :mobile, :nickName, :password?encrypt, :status, :userName)
         

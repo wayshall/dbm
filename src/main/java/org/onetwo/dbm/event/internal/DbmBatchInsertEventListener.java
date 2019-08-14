@@ -1,7 +1,6 @@
 package org.onetwo.dbm.event.internal;
 
 
-import java.io.Serializable;
 import java.util.List;
 
 import org.onetwo.common.utils.LangUtils;
@@ -56,12 +55,12 @@ public class DbmBatchInsertEventListener extends DbmInsertEventListener{
 			throw new DbmException("the source object must be a multiple object : "+entity.getClass());
 		}
 		if(entry.isEntity() && entry.hasGeneratedValueIdField()){
-			Serializable id = null;
+//			Serializable id = null;
 			List<Object> list = LangUtils.asList(entity);
 			for(Object en : list){
 //				id = generatedIdentifyBeforeInsert(event, entry);
 				setIdIfNecessary(event, entry, en);
-				entry.setId(en, id);
+//				entry.setId(en, id);
 			}
 		}
 	}

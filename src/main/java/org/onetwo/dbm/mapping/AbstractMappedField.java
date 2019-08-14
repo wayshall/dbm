@@ -6,7 +6,6 @@ import java.util.List;
 
 import javax.persistence.Enumerated;
 
-import org.onetwo.common.reflect.ReflectUtils;
 import org.onetwo.common.spring.SpringUtils;
 import org.onetwo.common.utils.Assert;
 import org.onetwo.common.utils.JFishProperty;
@@ -104,7 +103,7 @@ abstract public class AbstractMappedField implements DbmMappedField{
 		}*/
 		if(this.dbmFieldAnnotation!=null){
 			Class<? extends DbmFieldValueConverter> converterClass = this.dbmFieldAnnotation.converterClass();
-			DbmFieldValueConverter converter = ReflectUtils.newInstance(converterClass);
+			DbmFieldValueConverter converter = DbmUtils.createDbmBean(converterClass);
 			compositedConverter.addFieldValueConverter(converter);
 		}
 		this.fieldValueConverter = compositedConverter;

@@ -8,11 +8,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.onetwo.common.log.JFishLoggerFactory;
 import org.onetwo.dbm.jdbc.JdbcUtils;
 import org.onetwo.dbm.jdbc.spi.JdbcResultSetGetter;
 import org.onetwo.dbm.utils.DbmUtils;
-import org.slf4j.Logger;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.NotWritablePropertyException;
@@ -20,18 +18,17 @@ import org.springframework.beans.PropertyAccessorFactory;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.dao.DataRetrievalFailureException;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.rowset.ResultSetWrappingSqlRowSet;
 import org.springframework.jdbc.support.rowset.SqlRowSetMetaData;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
-public class DbmBeanPropertyRowMapper<T> implements RowMapper<T> {
-	final protected Logger logger = JFishLoggerFactory.getLogger(this.getClass());
+public class DbmBeanPropertyRowMapper<T> extends DbmDataRowMapper<T> implements DataRowMapper<T>, DataColumnMapper {
+//	final protected Logger logger = JFishLoggerFactory.getLogger(this.getClass());
 	
 	protected ConversionService conversionService = DbmUtils.CONVERSION_SERVICE;
 //	private DbmTypeMapping sqlTypeMapping;
-	protected JdbcResultSetGetter jdbcResultSetGetter;
+//	protected JdbcResultSetGetter jdbcResultSetGetter;
 	
 	
 	protected boolean primitivesDefaultedForNullValue = true;
@@ -44,8 +41,9 @@ public class DbmBeanPropertyRowMapper<T> implements RowMapper<T> {
 	}*/
 
 	public DbmBeanPropertyRowMapper(JdbcResultSetGetter jdbcResultSetGetter, Class<T> mappedClass) {
+		super(jdbcResultSetGetter);
 		this.mappedClass = mappedClass;
-		this.jdbcResultSetGetter = jdbcResultSetGetter;
+//		this.jdbcResultSetGetter = jdbcResultSetGetter;
 		this.initialize(mappedClass);
 	}
 
@@ -113,17 +111,17 @@ public class DbmBeanPropertyRowMapper<T> implements RowMapper<T> {
 		for (int index = 1; index <= columnCount; index++) {
 			String column = DbmUtils.lookupColumnName(rsmd, index);
 //			String field = lowerCaseName(column.replaceAll(" ", ""));
-			this.setValue(resutSetWrapper, bw, rowNumber, index, column);
+			this.setColumnValue(resutSetWrapper, bw, rowNumber, index, column);
 		}
 
 		return mappedObject;
 	}
 	
-	protected void setValue(ResultSetWrappingSqlRowSet resutSetWrapper, 
+	public void setColumnValue(ResultSetWrappingSqlRowSet resutSetWrapper, 
 							BeanWrapper bw, 
 							int rowNumber, 
 							int columnIndex, 
-							String column) throws SQLException {
+							String column) {
 		String field = JdbcUtils.lowerCaseName(column);
 		PropertyDescriptor pd = this.mappedFields.get(field);
 		if (pd != null) {
@@ -164,7 +162,7 @@ public class DbmBeanPropertyRowMapper<T> implements RowMapper<T> {
 		}
 	}
 	
-	protected Object getColumnValue(ResultSetWrappingSqlRowSet rs, int index, PropertyDescriptor pd) throws SQLException {
+	protected Object getColumnValue(ResultSetWrappingSqlRowSet rs, int index, PropertyDescriptor pd) {
 //		return jdbcResultSetGetter.getColumnValue(rs, index, pd);
 		return jdbcResultSetGetter.getColumnValue(rs, index, pd.getPropertyType());
 		/*JFishProperty jproperty = Intro.wrap(pd.getWriteMethod().getDeclaringClass()).getJFishProperty(pd.getName(), false);

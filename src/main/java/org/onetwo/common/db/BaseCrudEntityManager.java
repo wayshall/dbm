@@ -11,12 +11,14 @@ import java.util.stream.Stream;
 
 import org.onetwo.common.db.builder.QueryBuilder;
 import org.onetwo.common.db.builder.Querys;
+import org.onetwo.common.db.builder.WhereCauseBuilder;
 import org.onetwo.common.db.spi.BaseEntityManager;
 import org.onetwo.common.db.spi.CrudEntityManager;
 import org.onetwo.common.log.JFishLoggerFactory;
 import org.onetwo.common.reflect.ReflectUtils;
 import org.onetwo.common.spring.Springs;
 import org.onetwo.common.utils.Page;
+import org.onetwo.dbm.core.spi.DbmEntityManager;
 import org.slf4j.Logger;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -164,6 +166,12 @@ public class BaseCrudEntityManager<T, PK extends Serializable> implements CrudEn
 
 	@Transactional
 	@Override
+	public void dymanicUpdate(T entity) {
+		getBaseEntityManager().dymanicUpdate(entity);
+	}
+
+	@Transactional
+	@Override
 	public void persist(T entity) {
 		getBaseEntityManager().persist(entity);
 	}
@@ -186,15 +194,25 @@ public class BaseCrudEntityManager<T, PK extends Serializable> implements CrudEn
 		return (T)getBaseEntityManager().findOne(entityClass, properties);
 	}
 
+	/***
+	 * 
+	 * @deprecated 不建议使用此方法，直接用Querys dsl api
+	 */
+	@Deprecated
 	@Transactional(readOnly=true)
 	@Override
-	public List<T> findListByProperties(QueryBuilder query) {
+	public List<T> findListByProperties(QueryBuilder<T> query) {
 		return getBaseEntityManager().findList(query);
 	}
 
+	/***
+	 * 
+	 * @deprecated 不建议使用此方法，直接用Querys dsl api
+	 */
+	@Deprecated
 	@Transactional(readOnly=true)
 	@Override
-	public void findPage(final Page<T> page, QueryBuilder query) {
+	public void findPage(final Page<T> page, QueryBuilder<T> query) {
 		getBaseEntityManager().findPage(page, query);
 	}
 
@@ -227,5 +245,9 @@ public class BaseCrudEntityManager<T, PK extends Serializable> implements CrudEn
 						.toQuery()
 						.page(page);
 	}
-	
+
+	protected WhereCauseBuilder<T> where(){
+		DbmEntityManager dem = (DbmEntityManager)this.getBaseEntityManager();
+		return dem.from(entityClass).where();
+	}
 }

@@ -83,12 +83,12 @@ public abstract class BaseEntityManagerAdapter implements InnerBaseEntityManager
 		return logicDeleteEntity;
 	}
 	
-	public <T> List<T> findList(QueryBuilder squery) {
+	public <T> List<T> findList(QueryBuilder<T> squery) {
 		return findListByProperties((Class<T>)squery.getEntityClass(), squery.getParams());
 	}
 
 	@Override
-	public <T> Page<T> findPage(final Page<T> page, QueryBuilder squery){
+	public <T> Page<T> findPage(final Page<T> page, QueryBuilder<T> squery){
 		findPageByProperties((Class<T>)squery.getEntityClass(), page, squery.getParams());
 		return page;
 	}
@@ -101,6 +101,12 @@ public abstract class BaseEntityManagerAdapter implements InnerBaseEntityManager
 	@Override
 	public <T> List<T> selectFieldsToEntity(Class<?> entityClass, Object[] selectFields, Object... properties){
 		throw new UnsupportedOperationException();
+	}
+	
+	public Number count(SelectExtQuery extQuery) {
+		extQuery.build();
+		Number countNumber = (Number)this.findUnique(extQuery.getCountSql(), extQuery.getParamsValue().asMap());
+		return countNumber;
 	}
 
 	@Override
@@ -176,7 +182,7 @@ public abstract class BaseEntityManagerAdapter implements InnerBaseEntityManager
 	}*/
 
 
-	public <T> T findUnique(QueryBuilder squery) {
+	public <T> T findUnique(QueryBuilder<T> squery) {
 		return findUniqueByProperties((Class<T>)squery.getEntityClass(), squery.getParams());
 	}
 

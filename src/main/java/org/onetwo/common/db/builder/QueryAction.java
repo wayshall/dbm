@@ -1,12 +1,15 @@
 package org.onetwo.common.db.builder;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.List;
+import java.util.Optional;
 
 import org.onetwo.common.utils.Page;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowMapper;
 
-public interface QueryAction {
+public interface QueryAction<E> {
 
 //	ExtQuery build(Class<?> entityClass, String alias, Map<Object, Object> properties);
 	
@@ -15,17 +18,39 @@ public interface QueryAction {
 	 * @author weishao zeng
 	 * @return
 	 */
-	<T> T unique();
+	E unique();
 	
-	<T> T one();
+	E one();
+	
+	default public Optional<E> optionalOne() {
+		return Optional.ofNullable(one());
+	}
+	
+	Number count();
 
-	<T> List<T> list();
+	List<E> list();
 	
 	<T> List<T> listAs(Class<T> toClass);
 	
-	<T> Page<T> page(Page<T> page);
+	Page<E> page(Page<E> page);
 	
 	<T> T extractAs(ResultSetExtractor<T> rse);
 	
 	<T> List<T> listWith(RowMapper<T> rowMapper);
+	
+	default <T> List<T> listWith(SingleArgRowMapper<T> rowMapper) {
+		return listWith((RowMapper<T>)rowMapper);
+	}
+	
+	@FunctionalInterface
+	public interface SingleArgRowMapper<T> extends RowMapper<T> {
+
+		@Override
+		default T mapRow(ResultSet rs, int rowNum) throws SQLException {
+			return mapRow(rs);
+		}
+
+		T mapRow(ResultSet rs) throws SQLException;
+		
+	}
 }

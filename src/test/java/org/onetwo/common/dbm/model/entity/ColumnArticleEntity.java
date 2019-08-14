@@ -33,6 +33,9 @@ public class ColumnArticleEntity {
 	@Column(name="is_headline")
 	boolean headline;
 	
+	/***
+	 * 辅助属性，加上@Transient注解
+	 */
 	@Transient
 	ColumnArticleId id;
 	
@@ -44,6 +47,8 @@ public class ColumnArticleEntity {
 		this.columnId = id.getColumnId();
 		this.articleId = id.getArticleId();
 	}
+	
+	
 
 	@SuppressWarnings("serial")
 	@Data
@@ -53,4 +58,40 @@ public class ColumnArticleEntity {
 		Long columnId;
 		Long articleId;
 	}
+
+
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		ColumnArticleEntity other = (ColumnArticleEntity) obj;
+		if (articleId == null) {
+			if (other.articleId != null)
+				return false;
+		} else if (!articleId.equals(other.articleId))
+			return false;
+		if (columnId == null) {
+			if (other.columnId != null)
+				return false;
+		} else if (!columnId.equals(other.columnId))
+			return false;
+		return true;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((articleId == null) ? 0 : articleId.hashCode());
+		result = prime * result + ((columnId == null) ? 0 : columnId.hashCode());
+		return result;
+	}
+
+
+
 }

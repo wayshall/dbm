@@ -11,65 +11,66 @@ import org.onetwo.common.utils.Page;
 
 public interface CrudEntityManager<T, PK extends Serializable> {
 	
-	public int batchInsert(Collection<T> entities);
+	int batchInsert(Collection<T> entities);
  
-	public T load(PK id);
+	T load(PK id);
 	
-	public T findById(PK id);
+	T findById(PK id);
 	
-	public Optional<T> findOptionalById(PK id);
+	Optional<T> findOptionalById(PK id);
 
 	/*****
 	 * insert or update
 	 * @param entity
 	 * @return
 	 */
-	public T save(T entity);
+	T save(T entity);
 
-	public void update(T entity);
-	public void persist(T entity);
+	void update(T entity);
+	void dymanicUpdate(T entity);
+	void persist(T entity);
 	
-//	public T createNew(T entity);
+//	T createNew(T entity);
 
-//	public T updateAttributes(T entity);
+//	T updateAttributes(T entity);
 
-	public T remove(T entity);
+	T remove(T entity);
 	
-	public void removes(Collection<T> entities);
+	void removes(Collection<T> entities);
 
-	public T removeById(PK id);
-	public Collection<T> removeByIds(PK[] id);
+	T removeById(PK id);
+	Collection<T> removeByIds(PK[] id);
 
-	public int removeAll();
+	int removeAll();
 
-	public List<T> findAll();
+	List<T> findAll();
 
-	public Number countRecord(Map<Object, Object> properties);
+	Number countRecord(Map<Object, Object> properties);
 
-	public Number countRecord(Object... params);
+	Number countRecord(Object... params);
 
-	public List<T> findListByProperties(Object... properties);
+	List<T> findListByProperties(Object... properties);
 
-	public List<T> findListByProperties(Map<Object, Object> properties);
+	List<T> findListByProperties(Map<Object, Object> properties);
 	
-	public List<T> findListByProperties(QueryBuilder squery);
+	List<T> findListByProperties(QueryBuilder<T> squery);
 	
-	public List<T> findListByExample(Object example);
+	List<T> findListByExample(Object example);
 
-	public Page<T> findPage(final Page<T> page, Object... properties);
+	Page<T> findPage(final Page<T> page, Object... properties);
 
-	public Page<T> findPage(final Page<T> page, Map<Object, Object> properties);
+	Page<T> findPage(final Page<T> page, Map<Object, Object> properties);
 	
-	public Page<T> findPageByExample(final Page<T> page, Object example);
+	Page<T> findPageByExample(final Page<T> page, Object example);
 	
-	public void findPage(final Page<T> page, QueryBuilder query);
+	void findPage(final Page<T> page, QueryBuilder<T> query);
 
-	public T findUnique(Object... properties);
+	T findUnique(Object... properties);
 	
-	public T findUnique(Map<Object, Object> properties);
+	T findUnique(Map<Object, Object> properties);
 	
-	public T findOne(Object... properties);
+	T findOne(Object... properties);
 	
-	public BaseEntityManager getBaseEntityManager();
+	BaseEntityManager getBaseEntityManager();
 
 }

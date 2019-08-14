@@ -6,6 +6,9 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.onetwo.dbm.jdbc.mapper.DataRowMapper;
+import org.onetwo.dbm.jdbc.mapper.DataRowMapper.NoDataRowMapper;
+
 /**********
  * ENTITY模式
  * 用于配置指定的mapper，默认使用EntryRowMapper
@@ -34,7 +37,7 @@ public @interface DbmRowMapper {
 	 * @author wayshall
 	 * @return
 	 */
-	Class<?> value() default Void.class;
+	Class<? extends DataRowMapper<?>> value() default NoDataRowMapper.class;
 	
 	/***
 	 * 映射模式

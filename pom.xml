@@ -2,16 +2,17 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>org.onetwo4j</groupId>
-  <version>4.7.2</version>
+  <version>4.7.3-SNAPSHOT</version>
   <artifactId>onetwo-dbm</artifactId>
   <packaging>jar</packaging>
 
   <name>onetwo-dbm</name>
-  <url>http://maven.apache.org</url>
+  <url>https://github.com/wayshall/dbm</url>
+  <description>onetwo-dbm</description>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <onetwo.version>4.7.2</onetwo.version>
+    <onetwo.version>4.7.3-SNAPSHOT</onetwo.version>
     <java.version>1.8</java.version>
   </properties>
   
@@ -33,7 +34,7 @@
       <url>https://github.com/wayshall/dbm</url>
       <connection>scm:git:ssh://git@github.com/wayshall/dbm.git</connection>
       <developerConnection>scm:git:ssh://git@github.com/wayshall/dbm.git</developerConnection>
-    <tag>onetwo-modules-4.7.2</tag>
+    <tag>onetwo-modules</tag>
   </scm>
 
   <dependencies>
@@ -65,6 +66,13 @@
       <artifactId>onetwo-jackson</artifactId>
       <optional>true</optional>
     </dependency>
+    
+	<dependency>
+	    <groupId>org.jasypt</groupId>
+	    <artifactId>jasypt</artifactId>
+	    <version>1.9.2</version>
+	</dependency>
+	    
     
     <dependency>
       <groupId>org.apache.tomcat</groupId>
@@ -155,6 +163,12 @@
     <dependency>
         <groupId>org.hibernate</groupId>
         <artifactId>hibernate-validator</artifactId>
+    </dependency>
+        
+    <dependency>
+        <groupId>org.jsoup</groupId>
+        <artifactId>jsoup</artifactId>
+        <version>1.11.3</version>
     </dependency>
     
     <dependency>

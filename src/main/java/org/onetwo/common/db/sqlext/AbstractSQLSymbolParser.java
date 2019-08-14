@@ -115,8 +115,9 @@ abstract public class AbstractSQLSymbolParser implements HqlSymbolParser{
 			if(i!=list.size()-1)
 				hql.append(" or ");
 		}
-		if(mutiValue)
+		if(mutiValue) {
 			hql.append(") ");
+		}
 		
 		return hql.toString();
 	}

@@ -3,15 +3,15 @@ package org.onetwo.common.db.builder;
 import javax.persistence.metamodel.SingularAttribute;
 
 
-public interface WhereCauseBuilder {
-	WhereCauseBuilder debug();
+public interface WhereCauseBuilder<E> {
+	WhereCauseBuilder<E> debug();
 
-	WhereCauseBuilder or(QueryBuilder subQuery);
+	WhereCauseBuilder<E> or(QueryBuilder<E> subQuery);
 
-	WhereCauseBuilder and(QueryBuilder subQuery);
+	WhereCauseBuilder<E> and(QueryBuilder<E> subQuery);
 
 
-	WhereCauseBuilder addFields(Object entity);
+	WhereCauseBuilder<E> addFields(Object entity);
 	/***
 	 * 
 	 * @author weishao zeng
@@ -19,21 +19,21 @@ public interface WhereCauseBuilder {
 	 * @param useLikeIfStringVlue 当属性的值为string类型时，是否使用like查询
 	 * @return
 	 */
-	WhereCauseBuilder addFields(Object entity, boolean useLikeIfStringVlue);
+	WhereCauseBuilder<E> addFields(Object entity, boolean useLikeIfStringVlue);
 	
-	WhereCauseBuilder addField(WhereCauseBuilderField field);
+	WhereCauseBuilder<E> addField(WhereCauseBuilderField<E> field);
 
-	WhereCauseBuilder ignoreIfNull();
+	WhereCauseBuilder<E> ignoreIfNull();
 	
-	WhereCauseBuilder disabledDataFilter();
+	WhereCauseBuilder<E> disabledDataFilter();
 
-	WhereCauseBuilder throwIfNull();
+	WhereCauseBuilder<E> throwIfNull();
 
-	WhereCauseBuilder calmIfNull();
+	WhereCauseBuilder<E> calmIfNull();
 
-	DefaultWhereCauseBuilderField field(String... fields);
-	DefaultWhereCauseBuilderField field(SingularAttribute<?, ?>... fields);
+	DefaultWhereCauseBuilderField<E> field(String... fields);
+	DefaultWhereCauseBuilderField<E> field(SingularAttribute<?, ?>... fields);
 	
-	QueryBuilder end();
-	QueryAction toQuery();
+	QueryBuilder<E> end();
+	QueryAction<E> toQuery();
 }

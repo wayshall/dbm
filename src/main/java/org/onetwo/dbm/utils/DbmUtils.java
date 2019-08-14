@@ -19,6 +19,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.onetwo.common.log.JFishLoggerFactory;
 import org.onetwo.common.reflect.ReflectUtils;
 import org.onetwo.common.spring.SpringUtils;
+import org.onetwo.common.spring.Springs;
 import org.onetwo.common.utils.CUtils;
 import org.onetwo.common.utils.LangUtils;
 import org.onetwo.dbm.annotation.DbmFieldListeners;
@@ -70,7 +71,7 @@ final public class DbmUtils {
 		Class<? extends DbmEntityFieldListener>[] flClasses = listenersAnntation.value();
 		List<DbmEntityFieldListener> fieldListeners = Lists.newArrayList();
 		for(Class<? extends DbmEntityFieldListener> flClass : flClasses){
-			DbmEntityFieldListener fl = ReflectUtils.newInstance(flClass);
+			DbmEntityFieldListener fl = DbmUtils.createDbmBean(flClass); // ReflectUtils.newInstance(flClass);
 			fieldListeners.add(fl);
 		}
 		return fieldListeners;
@@ -303,6 +304,21 @@ final public class DbmUtils {
 			batch[i] = new MapSqlParameterSource(valueMaps.get(i));
 		}
 		return batch;
+	}
+	
+	public static <T> T createDbmBean(Class<T> clazz) {
+		T bean;
+		if (Springs.getInstance().isInitialized()) {
+			bean = Springs.getInstance().getBean(clazz);
+			// 如果找不到则自动创建，并注入
+			if (bean==null) {
+				bean = ReflectUtils.newInstance(clazz);
+				Springs.getInstance().autoInject(bean);
+			}
+		} else {
+			bean = ReflectUtils.newInstance(clazz);
+		}
+		return bean;
 	}
 	
 	private DbmUtils(){
