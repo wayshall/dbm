@@ -13,11 +13,10 @@ import org.onetwo.common.db.sqlext.ExtQuery.K;
 import org.onetwo.common.db.sqlext.ExtQueryInner;
 import org.onetwo.common.db.sqlext.ExtQueryListenerAdapter;
 import org.onetwo.common.log.JFishLoggerFactory;
-import org.onetwo.common.reflect.ReflectUtils;
-import org.onetwo.common.spring.Springs;
 import org.onetwo.common.utils.LangUtils;
 import org.onetwo.common.utils.StringUtils;
 import org.onetwo.dbm.exception.DbmException;
+import org.onetwo.dbm.utils.DbmUtils;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 
 import com.google.common.cache.CacheBuilder;
@@ -45,11 +44,12 @@ public class DataQueryFilterListener extends ExtQueryListenerAdapter{
 																												return NULL_ENHANCER;
 																											}
 																											Class<? extends IDataQueryParamterEnhancer> enhancerCls = dqpe.value();
-																											boolean useSpringContext = Springs.getInstance().isInitialized();
+																											/*boolean useSpringContext = Springs.getInstance().isInitialized();
 																											IDataQueryParamterEnhancer enhancer = useSpringContext?Springs.getInstance().getBean(enhancerCls):null;
 																											if(enhancer==null){
 																												enhancer = ReflectUtils.newInstance(enhancerCls);
-																											}
+																											}*/
+																											IDataQueryParamterEnhancer enhancer = DbmUtils.createDbmBean(enhancerCls);
 																											return enhancer;
 																										}
 																										

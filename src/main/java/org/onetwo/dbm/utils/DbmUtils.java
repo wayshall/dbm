@@ -71,7 +71,7 @@ final public class DbmUtils {
 		Class<? extends DbmEntityFieldListener>[] flClasses = listenersAnntation.value();
 		List<DbmEntityFieldListener> fieldListeners = Lists.newArrayList();
 		for(Class<? extends DbmEntityFieldListener> flClass : flClasses){
-			DbmEntityFieldListener fl = ReflectUtils.newInstance(flClass);
+			DbmEntityFieldListener fl = DbmUtils.createDbmBean(flClass); // ReflectUtils.newInstance(flClass);
 			fieldListeners.add(fl);
 		}
 		return fieldListeners;
