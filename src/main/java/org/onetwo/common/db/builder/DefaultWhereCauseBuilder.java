@@ -31,6 +31,12 @@ public class DefaultWhereCauseBuilder<E> implements WhereCauseBuilder<E> {
 	public DefaultWhereCauseBuilder<E> addFields(Object entity){
 		return addFields(entity, true);
 	}
+
+	@Override
+	public DefaultWhereCauseBuilder<E> operatorFields(String[] operatorFields, Object[] values) {
+		this.params.put(operatorFields, values);
+		return this;
+	}
 	
 	public DefaultWhereCauseBuilder<E> addFields(Object entity, boolean useLikeIfStringVlue){
 		DbmSessionFactory sf = queryBuilder.getBaseEntityManager().getSessionFactory();

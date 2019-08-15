@@ -12,6 +12,8 @@ public interface WhereCauseBuilder<E> {
 
 
 	WhereCauseBuilder<E> addFields(Object entity);
+	
+	WhereCauseBuilder<E> operatorFields(String[] operatorFields, Object[] values);
 	/***
 	 * 
 	 * @author weishao zeng
