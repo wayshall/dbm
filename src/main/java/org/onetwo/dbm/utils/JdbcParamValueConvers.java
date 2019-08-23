@@ -60,8 +60,8 @@ final public class JdbcParamValueConvers {
 		if(SqlParameterValue.class.isInstance(value)){
 			return ((SqlParameterValue)value).getValue();
 		} else if (value instanceof DbmEnumValueMapping) {
-			DbmEnumValueMapping dvm = (DbmEnumValueMapping) value;
-			return dvm.getMappingValue();
+			DbmEnumValueMapping<?> dvm = (DbmEnumValueMapping<?>) value;
+			return dvm.getEnumMappingValue();
 		} else if(Enum.class.isInstance(value)){
 			return ((Enum<?>)value).name();
 		}else if(value instanceof LocalDate){

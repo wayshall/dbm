@@ -13,7 +13,7 @@ import javax.persistence.TemporalType;
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.NotBlank;
-import org.onetwo.dbm.mapping.DbmEnumValueMapping;
+import org.onetwo.dbm.mapping.DbmEnumIntMapping;
 import org.springframework.format.annotation.DateTimeFormat;
 
 
@@ -85,7 +85,7 @@ public class UserEntity {
 	}
 	
 
-	public static enum UserGenders implements DbmEnumValueMapping {
+	public static enum UserGenders implements DbmEnumIntMapping {
 		FEMALE("女性", 10),
 		MALE("男性", 11);
 		

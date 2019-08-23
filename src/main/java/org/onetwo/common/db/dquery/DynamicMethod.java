@@ -258,7 +258,7 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 	private Object convertQueryValue(Param name, Object val){
 		if (name!=null && val instanceof Enum) {
 			if (val instanceof DbmEnumValueMapping) {
-				val = ((DbmEnumValueMapping)val).getMappingValue();
+				val = ((DbmEnumValueMapping<?>)val).getEnumMappingValue();
 			} else {
 				Enum<?> enumValue = (Enum<?>)val;
 				val = name.enumType()==EnumType.ORDINAL?enumValue.ordinal():enumValue.name();

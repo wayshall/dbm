@@ -11,7 +11,7 @@ import javax.persistence.Table;
 
 import org.hibernate.validator.constraints.Length;
 import org.onetwo.common.dbm.model.entity.BaseEntity;
-import org.onetwo.dbm.mapping.DbmEnumValueMapping;
+import org.onetwo.dbm.mapping.DbmEnumIntMapping;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -30,7 +30,7 @@ import lombok.Getter;
 public class DepartmentEntity extends BaseEntity {
 	
 	@AllArgsConstructor
-	public static enum DepartStatus implements DbmEnumValueMapping {
+	public static enum DepartStatus implements DbmEnumIntMapping {
 		ENABLED(1),
 		DISABLED(-1);
 		

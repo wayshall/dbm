@@ -31,9 +31,10 @@ public class CompositedFieldValueConverter implements DbmFieldValueConverter {
 			}else if(etype==DbmEnumType.STRING){
 				actualValue = Types.convertValue(value.toString(), field.getPropertyInfo().getType());
 			}else if(etype == DbmEnumType.MAPPING) {
-				DbmEnumValueMapping[] values = (DbmEnumValueMapping[]) field.getPropertyInfo().getType().getEnumConstants();
-				DbmEnumValueMapping valueMapping = Stream.of(values)
-														.filter(dvm->Integer.valueOf(dvm.getMappingValue()).equals(value))
+				DbmEnumValueMapping<?>[] values = (DbmEnumValueMapping[]) field.getPropertyInfo().getType().getEnumConstants();
+				DbmEnumValueMapping<?> valueMapping = Stream.of(values)
+//														.filter(dvm->Integer.valueOf(dvm.getMappingValue()).equals(value))
+														.filter(dvm->dvm.getEnumMappingValue().equals(value))
 														.findFirst()
 														.orElseThrow(()-> {
 															return new DbmException("error enum mapping value: " + value);
@@ -58,7 +59,7 @@ public class CompositedFieldValueConverter implements DbmFieldValueConverter {
 			}else if(etype==DbmEnumType.STRING){
 				actualValue = enumValue.name();
 			}else if(etype == DbmEnumType.MAPPING) {
-				DbmEnumValueMapping mapping = (DbmEnumValueMapping)value;
+				DbmEnumIntMapping mapping = (DbmEnumIntMapping)value;
 				actualValue = mapping.getMappingValue();
 			}else{
 				throw new DbmException("error enum type: " + etype);
