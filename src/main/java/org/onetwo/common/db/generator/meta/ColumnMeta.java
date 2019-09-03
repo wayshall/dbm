@@ -71,6 +71,15 @@ public class ColumnMeta {
 		return mappingClass;
 	}
 	
+	public String getMappingJavaClassLabel(){
+		Class<?> mappingClass = getMappingJavaClass();
+		String label = mappingClass.getSimpleName();
+		if (isJsonType()) {
+			label = Map.class.getName() + "<String, String>";
+		}
+		return label;
+	}
+	
 	public String getCommentName(){
 		return commentName;
 	}
@@ -130,6 +139,10 @@ public class ColumnMeta {
 	public boolean isEmailType(){
 //		return this.commentsInfo.containsKey("email类型");
 		return this.isUiType(UITypes.KEY_EMAIL);
+	}
+	
+	public boolean isJsonType(){
+		return this.isUiType(UITypes.KEY_JSON);
 	}
 	
 	public boolean isUrlType(){

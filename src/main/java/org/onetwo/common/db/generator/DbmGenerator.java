@@ -51,9 +51,13 @@ public class DbmGenerator {
 	
 	private DbGenerator dbGenerator;
 	private String projectPath = FileUtils.getMavenProjectDir().getPath();
-	private String pageFileBaseDir = LangUtils.toString("${0}/src/main/resources/templates", this.projectPath);
 	private String resourceDir = LangUtils.toString("${0}/src/main/resources", this.projectPath);
 	private String javaSrcDir = LangUtils.toString("${0}/src/main/java", this.projectPath);
+	private String pageFileBaseDir = LangUtils.toString("${0}/src/main/resources/templates", this.projectPath);
+	
+	private String testJavaSrcDir = LangUtils.toString("${0}/src/test/java", this.projectPath);
+	private String testResourceDir = LangUtils.toString("${0}/src/test/resources", this.projectPath);
+	private String testPageFileBaseDir = LangUtils.toString("${0}/src/test/resources/templates", this.projectPath);
 	
 	private String javaBasePackage;
 	private String moduleName = "";
@@ -111,6 +115,23 @@ public class DbmGenerator {
 				.pageFileBaseDir(pageFileBaseDir)
 				.resourceDir(resourceDir)
 				.javaSrcDir(javaSrcDir)
+				.javaBasePackage(javaBasePackage)
+				.moduleName(moduleName)
+				.defaultTableContexts()
+				.end()
+			.end();
+		});
+	}
+	
+	public DbmGenerator mavenProjectTestDir(){
+		Assert.hasText(javaBasePackage, "javaBasePackage not set!");
+		return configGenerator(dbGenerator->{
+			dbGenerator.stripTablePrefix(stripTablePrefix)
+			.globalConfig()
+				.projectPath(projectPath)
+				.pageFileBaseDir(testPageFileBaseDir)
+				.resourceDir(testResourceDir)
+				.javaSrcDir(testJavaSrcDir)
 				.javaBasePackage(javaBasePackage)
 				.moduleName(moduleName)
 				.defaultTableContexts()
