@@ -3,10 +3,12 @@ package org.onetwo.common.db.filequery;
 import java.util.Date;
 import java.util.Map;
 
+import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
 import org.onetwo.common.convert.Types;
 import org.onetwo.common.db.spi.SqlParamterPostfixFunctionRegistry;
 import org.onetwo.common.db.sqlext.ExtQueryUtils;
 import org.onetwo.common.exception.BaseException;
+import org.onetwo.common.spring.Springs;
 import org.onetwo.common.utils.JodatimeUtils;
 import org.onetwo.common.utils.LangUtils;
 import org.onetwo.common.utils.StringUtils;
@@ -37,6 +39,9 @@ public class SqlParamterPostfixFunctions implements SqlParamterPostfixFunctionRe
 		register(new String[]{"like", "likeString"}, new SqlParamterPostfixFunction(){
 			@Override
 			public Object toSqlParameterValue(String paramName, Object value) {
+				if (value==null) {
+					value = "";
+				}
 				return ExtQueryUtils.getLikeString(value.toString());
 			}
 		});
@@ -45,6 +50,9 @@ public class SqlParamterPostfixFunctions implements SqlParamterPostfixFunctionRe
 		register(new String[]{"prelike", "preLikeString"}, new SqlParamterPostfixFunction(){
 			@Override
 			public Object toSqlParameterValue(String paramName, Object value) {
+				if (value==null) {
+					value = "";
+				}
 				return StringUtils.appendStartWith(value.toString(), "%");
 			}
 		});
@@ -52,6 +60,9 @@ public class SqlParamterPostfixFunctions implements SqlParamterPostfixFunctionRe
 		register(new String[]{"postlike", "postLikeString"}, new SqlParamterPostfixFunction(){
 			@Override
 			public Object toSqlParameterValue(String paramName, Object value) {
+				if (value==null) {
+					value = "";
+				}
 				return StringUtils.appendEndWith(value.toString(), "%");
 			}
 		});
@@ -59,8 +70,8 @@ public class SqlParamterPostfixFunctions implements SqlParamterPostfixFunctionRe
 		register(new String[]{"atStartOfDate"}, new SqlParamterPostfixFunction(){
 			@Override
 			public Object toSqlParameterValue(String paramName, Object value) {
-				if(Date.class.isInstance(value)){
-					throw new DbmException(paramName+" is not a date, can not invoke startOfDate");
+				if(!Date.class.isInstance(value)){
+					throw new DbmException(paramName+" is not a date, can not invoke atStartOfDate");
 				}
 				Date date = Types.convertValue(value, Date.class);
 				return JodatimeUtils.atStartOfDate(date);
@@ -70,8 +81,8 @@ public class SqlParamterPostfixFunctions implements SqlParamterPostfixFunctionRe
 		register(new String[]{"atEndOfDate"}, new SqlParamterPostfixFunction(){
 			@Override
 			public Object toSqlParameterValue(String paramName, Object value) {
-				if(Date.class.isInstance(value)){
-					throw new DbmException(paramName+" is not a date, can not invoke endOfDate");
+				if(!Date.class.isInstance(value)){
+					throw new DbmException(paramName+" is not a date, can not invoke atEndOfDate");
 				}
 				Date date = Types.convertValue(value, Date.class);
 				return JodatimeUtils.atEndOfDate(date);
@@ -79,11 +90,22 @@ public class SqlParamterPostfixFunctions implements SqlParamterPostfixFunctionRe
 		});
 
 		register(new String[]{"atStartOfNextDate"}, (paramName, value)->{
-			if(Date.class.isInstance(value)){
+			if(!Date.class.isInstance(value)){
 				throw new DbmException(paramName+" is not a date, can not invoke atStartOfNextDate");
 			}
 			Date date = Types.convertValue(value, Date.class);
 			return JodatimeUtils.atStartOfDate(date, 1);
+		});
+
+		register(new String[]{"encrypt"}, (paramName, value)->{
+			if (value==null) {
+				return null;
+			}
+			if(!String.class.isInstance(value)){
+				throw new DbmException("the encrypt field[" + paramName + "] must be String type!");
+			}
+			StandardPBEStringEncryptor encryptor = Springs.getInstance().getBean(StandardPBEStringEncryptor.class);
+			return encryptor.encrypt(value.toString());
 		});
 
 		/*register("inlist", new SqlParamterPostfixFunction(){

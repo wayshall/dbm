@@ -4,4 +4,6 @@ public interface QueryContextVariable {
 	
 	String varName();
 
+	public interface QueryGlobalVariable extends QueryContextVariable {
+	}
 }

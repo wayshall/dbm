@@ -13,8 +13,7 @@ import javax.persistence.TemporalType;
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.NotBlank;
-import org.onetwo.common.spring.dozer.DozerMapping;
-import org.onetwo.dbm.mapping.DbmEnumValueMapping;
+import org.onetwo.dbm.mapping.DbmEnumIntMapping;
 import org.springframework.format.annotation.DateTimeFormat;
 
 
@@ -25,7 +24,6 @@ import org.springframework.format.annotation.DateTimeFormat;
 @Entity
 @Table(name="TEST_USER")
 //@TableGenerator(table=Constant.SEQ_TABLE_NAME, pkColumnName="GEN_NAME",valueColumnName="GEN_VALUE", pkColumnValue="SEQ_ADMIN_USER", allocationSize=50, initialValue=1, name="UserEntityGenerator")
-@DozerMapping
 public class UserEntity {
 	
 	/*****
@@ -87,7 +85,7 @@ public class UserEntity {
 	}
 	
 
-	public static enum UserGenders implements DbmEnumValueMapping {
+	public static enum UserGenders implements DbmEnumIntMapping {
 		FEMALE("女性", 10),
 		MALE("男性", 11);
 		

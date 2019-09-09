@@ -8,6 +8,8 @@ import org.onetwo.common.db.filequery.SimpleSqlFileLineLexer.LineToken;
 import org.onetwo.common.db.spi.NamedQueryFile;
 import org.onetwo.common.db.spi.NamedQueryInfo;
 import org.onetwo.common.db.spi.NamedQueryInfoParser;
+import org.onetwo.common.db.spi.QueryConfigData;
+import org.onetwo.common.db.spi.QueryContextVariable.QueryGlobalVariable;
 import org.onetwo.common.db.spi.SqlDirectiveExtractor;
 import org.onetwo.common.log.JFishLoggerFactory;
 import org.onetwo.common.propconf.JFishProperties;
@@ -16,6 +18,7 @@ import org.onetwo.dbm.exception.FileNamedQueryException;
 import org.slf4j.Logger;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.PropertyAccessorFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.common.collect.ImmutableList;
 
@@ -98,6 +101,8 @@ public class MultipCommentsSqlFileParser implements NamedQueryInfoParser {
 //	protected SqlDirectiveExtractor sqlDirectiveExtractor = new SimpleDirectiveExtractor();
 	protected List<SqlDirectiveExtractor> sqlDirectiveExtractors = ImmutableList.of(new SimpleDirectiveExtractor(), 
 																					new CustomDirectiveExtractor("-- >", "[", "]"));
+	@Autowired(required=false)
+	private List<QueryGlobalVariable> queryGlobalVariable;
 	
 	@Override
 	public void parseToNamedQueryFile(NamedQueryFile namespaceInfo, ResourceAdapter<?> sqlFile) {
@@ -132,6 +137,16 @@ public class MultipCommentsSqlFileParser implements NamedQueryInfoParser {
 		
 	}
 	
+	protected QueryConfigData createQueryConfigData() {
+		QueryConfigData config = new QueryConfigData();
+		
+		if (queryGlobalVariable!=null) {
+			config.setVariables(queryGlobalVariable.toArray(new QueryGlobalVariable[0]));
+		}
+		
+		return config;
+	}
+	
 	protected void parseQueryStatement(SimpleSqlFileLineLexer lineLexer,
 										NamedQueryFile namespaceInfo, ResourceAdapter<?> f){
 		List<String> comments = lineLexer.getLineBuf();
@@ -153,6 +168,7 @@ public class MultipCommentsSqlFileParser implements NamedQueryInfoParser {
 			bean = new NamedQueryInfo();
 			bean.setDbmNamedQueryFile(namespaceInfo);
 			bean.setSrcfile(f);
+			bean.setQueryConfig(createQueryConfigData());
 
 			bean.setName(name);
 			bean.setConfig(config);
@@ -232,7 +248,8 @@ public class MultipCommentsSqlFileParser implements NamedQueryInfoParser {
 				continue;
 			}else if(lineLexer.getLineToken()==LineToken.CONTENT){
 				String value = StringUtils.join(lineLexer.getLineBuf(), " ");
-				buf.append(value).append(" ");
+//				buf.append(value).append(" ");
+				buf.append(value).append('\n');
 			}else{
 				throw new FileNamedQueryException("error syntax: " + lineLexer.getLineToken());
 			}

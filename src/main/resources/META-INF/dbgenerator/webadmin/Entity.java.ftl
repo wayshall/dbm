@@ -56,7 +56,9 @@ public class ${entityClassName} extends BaseEntity  {
     <#if !column.nullable>
     @NotNull
     </#if>
-    <#if column.mapping.isStringType()>
+    <#if column.isJsonType()>
+    @org.onetwo.dbm.annotation.DbmJsonField
+    <#elseif column.mapping.isStringType()>
     @NotBlank
     @Length(max=${column.columnSize})
     @SafeHtml
@@ -65,7 +67,7 @@ public class ${entityClassName} extends BaseEntity  {
     <#elseif column.isUrlType()>
     @URL
     </#if>
-    ${column.mappingJavaClass.simpleName} ${column.propertyName};
+    ${column.mappingJavaClassLabel} ${column.propertyName};
     
 </#if>
 </#list>

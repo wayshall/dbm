@@ -14,6 +14,7 @@ import org.onetwo.common.db.generator.ftl.FtlEngine;
 import org.onetwo.common.db.generator.ftl.TomcatDataSourceBuilder;
 import org.onetwo.common.file.FileUtils;
 import org.onetwo.common.utils.LangUtils;
+import org.onetwo.common.utils.StringUtils;
 import org.onetwo.dbm.exception.DbmException;
 import org.springframework.util.Assert;
 
@@ -24,6 +25,11 @@ import com.google.common.collect.Maps;
  * <br/>
  */
 public class DbmGenerator {
+
+	public static DbmGenerator dataSource(DataSource dataSource){
+		DbmGenerator generator = new DbmGenerator(new DbGenerator(dataSource, new FtlEngine()));
+		return generator;
+	}
 
 	public static DbmGenerator createWithDburl(String dburl, String dbusername, String dbpassword){
 		DataSource dataSource = TomcatDataSourceBuilder.newBuilder()
@@ -45,9 +51,13 @@ public class DbmGenerator {
 	
 	private DbGenerator dbGenerator;
 	private String projectPath = FileUtils.getMavenProjectDir().getPath();
-	private String pageFileBaseDir = LangUtils.toString("${0}/src/main/resources/templates", this.projectPath);
 	private String resourceDir = LangUtils.toString("${0}/src/main/resources", this.projectPath);
 	private String javaSrcDir = LangUtils.toString("${0}/src/main/java", this.projectPath);
+	private String pageFileBaseDir = LangUtils.toString("${0}/src/main/resources/templates", this.projectPath);
+	
+	private String testJavaSrcDir = LangUtils.toString("${0}/src/test/java", this.projectPath);
+	private String testResourceDir = LangUtils.toString("${0}/src/test/resources", this.projectPath);
+	private String testPageFileBaseDir = LangUtils.toString("${0}/src/test/resources/templates", this.projectPath);
 	
 	private String javaBasePackage;
 	private String moduleName = "";
@@ -105,6 +115,23 @@ public class DbmGenerator {
 				.pageFileBaseDir(pageFileBaseDir)
 				.resourceDir(resourceDir)
 				.javaSrcDir(javaSrcDir)
+				.javaBasePackage(javaBasePackage)
+				.moduleName(moduleName)
+				.defaultTableContexts()
+				.end()
+			.end();
+		});
+	}
+	
+	public DbmGenerator mavenProjectTestDir(){
+		Assert.hasText(javaBasePackage, "javaBasePackage not set!");
+		return configGenerator(dbGenerator->{
+			dbGenerator.stripTablePrefix(stripTablePrefix)
+			.globalConfig()
+				.projectPath(projectPath)
+				.pageFileBaseDir(testPageFileBaseDir)
+				.resourceDir(testResourceDir)
+				.javaSrcDir(testJavaSrcDir)
 				.javaBasePackage(javaBasePackage)
 				.moduleName(moduleName)
 				.defaultTableContexts()
@@ -212,8 +239,9 @@ public class DbmGenerator {
 				String moduleName = c.globalGeneratedConfig().getModuleName();
 				Assert.notNull(moduleName, "moduleName can not be null");
 				
+				String fileName = StringUtils.toCamel(tableShortName, false);
 				String filePath = pageFileBaseDir + "/"+moduleName+"/"+
-				tableShortName.replace('_', '-') + FileUtils.getFileNameWithoutExt(path);
+								fileName + FileUtils.getFileNameWithoutExt(path);
 				return filePath;
 			};
 		};
@@ -226,6 +254,12 @@ public class DbmGenerator {
 		public WebadminGenerator generateController(Class<?> pluginBaseController){
 			context.put("pluginBaseController", pluginBaseController.getName());
 			tableGenerator.controllerTemplate("controller", templateName+"/Controller.java.ftl");
+			return this;
+		}
+		
+		public WebadminGenerator generateVueController(Class<?> pluginBaseController){
+			context.put("pluginBaseController", pluginBaseController.getName());
+			tableGenerator.controllerTemplate("controller", templateName+"/MgrController.java.ftl");
 			return this;
 		}
 		

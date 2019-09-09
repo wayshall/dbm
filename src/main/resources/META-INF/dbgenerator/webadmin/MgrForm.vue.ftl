@@ -145,6 +145,8 @@ export default {
     </#if>
 </#list>
     handleClose() {
+      // 清除验证信息
+      this.$refs.dataForm.resetFields()
       this.visibleStatus = false
       return true
     },

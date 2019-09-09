@@ -31,7 +31,8 @@ public class DefaultDbmConfig implements DbmConfig {
 	
 	private boolean autoProxySessionTransaction = false;
 	
-	private SnowflakeIdConfig snowflakeId =new SnowflakeIdConfig();
+	private SnowflakeIdConfig snowflakeId = new SnowflakeIdConfig();
+	private EncryptConfig encrypt = new EncryptConfig();
 
 	public DefaultDbmConfig(){
 	}

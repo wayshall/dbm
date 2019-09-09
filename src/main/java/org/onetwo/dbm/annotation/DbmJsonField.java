@@ -7,7 +7,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.onetwo.dbm.mapping.JsonFieldValueConverter;
+import org.onetwo.dbm.mapping.converter.JsonFieldValueConverter;
 
 /***
  * 标注字段为json字段

@@ -21,6 +21,7 @@ import org.onetwo.common.db.filequery.SqlParamterPostfixFunctions;
 import org.onetwo.common.db.filequery.func.SqlFunctionDialet;
 import org.onetwo.common.db.spi.CreateQueryCmd;
 import org.onetwo.common.db.spi.FileNamedQueryFactory;
+import org.onetwo.common.db.spi.NamedQueryInfoParser;
 import org.onetwo.common.db.spi.QueryProvideManager;
 import org.onetwo.common.db.spi.QueryWrapper;
 import org.onetwo.common.db.spi.SqlParamterPostfixFunctionRegistry;
@@ -32,6 +33,8 @@ import org.onetwo.dbm.jdbc.internal.DbmJdbcTemplate;
 import org.onetwo.dbm.jdbc.spi.DbmJdbcOperations;
 import org.onetwo.dbm.query.DbmFileQueryWrapperImpl;
 import org.onetwo.dbm.query.DbmNamedFileQueryFactory;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterUtils;
 
@@ -41,7 +44,7 @@ import com.google.common.collect.ImmutableList;
  * @author wayshall
  * <br/>
  */
-public class HibernateJPAQueryProvideManager implements QueryProvideManager {
+public class HibernateJPAQueryProvideManager implements QueryProvideManager, InitializingBean {
 
 	private DataSource dataSource;
 //	private NamedParameterJdbcOperations jdbcOperations;
@@ -53,16 +56,28 @@ public class HibernateJPAQueryProvideManager implements QueryProvideManager {
 	private EntityManager entityManager;
 	
 	private Collection<DbmInterceptor> interceptors = ImmutableList.of(new StripNullDbmInterceptor());
-	
+
+	@Autowired
+	private List<NamedQueryInfoParser> namedQueryInfoParsers;
 	
 	public HibernateJPAQueryProvideManager(DataSource dataSource) {
 		super();
 		this.dataSource = dataSource;
 //		this.jdbcOperations = new NamedParameterJdbcTemplate(dataSource);
 		this.jdbcOperations = new DbmJdbcTemplate(dataSource);
+		/*DbmNamedSqlFileManager sqlFileManager = DbmNamedSqlFileManager.createNamedSqlFileManager(true);
+		dbmNamedFileQueryFactory = new HibernateNamedFileQueryFactory(sqlFileManager);*/
+	}
+	
+
+	@Override
+	public void afterPropertiesSet() throws Exception {
 		DbmNamedSqlFileManager sqlFileManager = DbmNamedSqlFileManager.createNamedSqlFileManager(true);
+		sqlFileManager.setQueryInfoParsers(namedQueryInfoParsers);
 		dbmNamedFileQueryFactory = new HibernateNamedFileQueryFactory(sqlFileManager);
 	}
+
+
 
 	@Override
 	public Collection<DbmInterceptor> getRepositoryInterceptors() {

@@ -2,6 +2,8 @@ package org.onetwo.common.dbm.model.hib.entity;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -9,6 +11,12 @@ import javax.persistence.Table;
 
 import org.hibernate.validator.constraints.Length;
 import org.onetwo.common.dbm.model.entity.BaseEntity;
+import org.onetwo.dbm.mapping.DbmEnumIntMapping;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 
 
 /*****
@@ -17,7 +25,18 @@ import org.onetwo.common.dbm.model.entity.BaseEntity;
 @SuppressWarnings("serial")
 @Entity
 @Table(name="department")
+@Data
+@EqualsAndHashCode(callSuper=true)
 public class DepartmentEntity extends BaseEntity {
+	
+	@AllArgsConstructor
+	public static enum DepartStatus implements DbmEnumIntMapping {
+		ENABLED(1),
+		DISABLED(-1);
+		
+		@Getter
+		final private int mappingValue;
+	}
 	
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY) 
@@ -27,6 +46,9 @@ public class DepartmentEntity extends BaseEntity {
 	protected String name;
 	protected Integer employeeNumber;
 	protected Long companyId;
+	
+	@Enumerated(EnumType.ORDINAL)
+	protected DepartStatus status;
   
 	public DepartmentEntity(){
 	}

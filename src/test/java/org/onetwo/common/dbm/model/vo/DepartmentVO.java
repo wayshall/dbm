@@ -2,7 +2,17 @@ package org.onetwo.common.dbm.model.vo;
 
 import java.util.List;
 
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 
+import org.onetwo.common.dbm.model.hib.entity.DepartmentEntity.DepartStatus;
+import org.onetwo.dbm.annotation.DbmRowMapper;
+import org.onetwo.dbm.annotation.DbmRowMapper.MappingModes;
+
+import lombok.Data;
+
+@Data
+@DbmRowMapper(mappingMode=MappingModes.ENTITY)
 public class DepartmentVO {
 	
 	protected Long id;
@@ -15,6 +25,10 @@ public class DepartmentVO {
 	
 
 	protected List<String> employeeNames;
+	
+
+	@Enumerated(EnumType.ORDINAL)
+	protected DepartStatus status;
   
 	public DepartmentVO(){
 	}

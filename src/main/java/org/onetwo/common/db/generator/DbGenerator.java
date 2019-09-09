@@ -77,6 +77,10 @@ public class DbGenerator {
 		return this;
 	}
 	
+	public DatabaseMetaDialet databaseMetaDialet() {
+		return dialet;
+	}
+
 	public DbGenerator dialet(DatabaseMetaDialet dialet){
 		this.dialet = dialet;
 		return this;

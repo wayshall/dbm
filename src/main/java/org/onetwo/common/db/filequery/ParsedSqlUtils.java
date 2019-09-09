@@ -4,7 +4,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
-import org.onetwo.common.db.spi.QueryConfigData;
 import org.onetwo.common.db.spi.SqlParamterPostfixFunctionRegistry;
 import org.onetwo.common.reflect.ReflectUtils;
 import org.onetwo.common.utils.LangUtils;
@@ -17,7 +16,7 @@ import org.springframework.jdbc.core.namedparam.ParsedSql;
 final public class ParsedSqlUtils {
 	public static final String SQL_POST_FIX_FUNC_MARK = "?";
 
-	public static final QueryConfigData EMPTY_CONFIG = new QueryConfigData(){
+	/*public static final QueryConfigData EMPTY_CONFIG = new QueryConfigData(){
 		
 		{
 			setVariables(ParserContextFunctionSet.getInstance());
@@ -26,7 +25,7 @@ final public class ParsedSqlUtils {
 		public void setLikeQueryFields(List<String> likeQueryFields) {
 			throw new UnsupportedOperationException();
 		}
-	};
+	};*/
 
 	@SuppressWarnings("unchecked")
 	public static class ParsedSqlWrapper {

@@ -8,7 +8,7 @@ import org.onetwo.dbm.dialet.DBDialect.LockInfo;
  * @author way
  *
  */
-public interface QueryBuilder {
+public interface QueryBuilder<E> {
 
 	public String getAlias();
 	
@@ -16,7 +16,7 @@ public interface QueryBuilder {
 
 	public Class<?> getEntityClass();
 	
-	public WhereCauseBuilder where();
+	public WhereCauseBuilder<E> where();
 
 	/*public QueryBuilder debug();
 
@@ -34,8 +34,8 @@ public interface QueryBuilder {
 
 	public DefaultQueryBuilderField field(String... fields);*/
 
-	public QueryBuilder select(String... fields);
-	public QueryBuilderImpl unselect(String...fields);
+	public QueryBuilder<E> select(String... fields);
+	public QueryBuilder<E> unselect(String...fields);
 
 	/***
 	 * 
@@ -44,14 +44,14 @@ public interface QueryBuilder {
 	 * @param size
 	 * @return
 	 */
-	public QueryBuilder limit(int first, int size);
+	public QueryBuilder<E> limit(int first, int size);
 
-	public QueryBuilder asc(String... fields);
+	public QueryBuilder<E> asc(String... fields);
 
-	public QueryBuilder desc(String... fields);
+	public QueryBuilder<E> desc(String... fields);
 
-	public QueryBuilder distinct(String... fields);
-	public QueryBuilder lock(LockInfo lock);
+	public QueryBuilder<E> distinct(String... fields);
+	public QueryBuilder<E> lock(LockInfo lock);
 	
 	public QueryBuilderJoin leftJoin(String table, String alias);
 
@@ -60,8 +60,8 @@ public interface QueryBuilder {
 	 * alias toSelect
 	 * @return
 	 */
-	public QueryAction toQuery();
-	public QueryAction toSelect();
+	public QueryAction<E> toQuery();
+	public QueryAction<E> toSelect();
 	
 	public int delete();
 	

@@ -22,7 +22,7 @@ public class HibernateNestedBeanTransformer<T> extends AbstractNestedBeanMapper<
 	private Map<String, Integer> names;
 	
 	public HibernateNestedBeanTransformer(Class<T> mappedClass, DbmResultMapping dbmResultMapping) {
-		super(mappedClass, dbmResultMapping);
+		super(null, mappedClass, dbmResultMapping);
 	}
 
 	@Override
@@ -31,7 +31,7 @@ public class HibernateNestedBeanTransformer<T> extends AbstractNestedBeanMapper<
 		
 		Map<String, Integer> names = initNames(aliases);
 		ColumnValueGetter columnValueGetter = new HibernateColumnValueGetter(tuple);
-		Object mappedObject = this.resultClassMapper.mapResult(names, columnValueGetter);
+		Object mappedObject = this.resultClassMapper.mapResult(null, names, columnValueGetter, -1);
 		return mappedObject;
 	}
 	

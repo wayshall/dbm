@@ -68,7 +68,7 @@ public class IdGeneratorFactory {
 		GeneratorCreator creator = dg.creator();
 		if (creator==GeneratorCreator.SPRING) {
 			CustomIdGenerator<? extends Serializable> customIdGenerator = Springs.getInstance().getBean(dg.generatorClass());
-			IdentifierGenerator<? extends Serializable> idGenerator = new CustomerIdGeneratorAdapter<>(dg.name(), customIdGenerator);
+			IdentifierGenerator<? extends Serializable> idGenerator = new CustomerIdGeneratorAdapter<>(dg.name(), customIdGenerator, dg.valueType());
 			return Optional.of(idGenerator);
 		}
 		
@@ -86,7 +86,7 @@ public class IdGeneratorFactory {
 			SpringUtils.getMapToBean().injectBeanProperties(jsonMap, customIdGenerator);
 		}
 		customIdGenerator.initGenerator();
-		IdentifierGenerator<? extends Serializable> idGenerator = new CustomerIdGeneratorAdapter<>(dg.name(), customIdGenerator);
+		IdentifierGenerator<? extends Serializable> idGenerator = new CustomerIdGeneratorAdapter<>(dg.name(), customIdGenerator, dg.valueType());
 		return Optional.of(idGenerator);
 	}
 

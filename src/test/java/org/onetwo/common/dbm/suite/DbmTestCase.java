@@ -4,6 +4,8 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 import org.onetwo.common.base.DbmSessionCacheTest;
+import org.onetwo.common.db.filequery.DefaultFileNamedSqlGeneratorTest;
+import org.onetwo.common.db.filequery.MultipCommentsSqlFileParserTest;
 import org.onetwo.common.db.sqlext.ExtQueryImplTest;
 import org.onetwo.common.db.sqlext.JFishExtQueryImplTest;
 import org.onetwo.common.dbm.BaseCrudEntityManagerTest;
@@ -17,6 +19,7 @@ import org.onetwo.common.dbm.DbmEntityManagerTest;
 import org.onetwo.common.dbm.DbmLongVersionTest;
 import org.onetwo.common.dbm.DbmNestedMappingTest;
 import org.onetwo.common.dbm.DbmSnowflakeTest;
+import org.onetwo.common.dbm.EncryptFieldTest;
 import org.onetwo.common.dbm.InQueryWithArrayTest;
 import org.onetwo.common.dbm.JsonFieldTest;
 import org.onetwo.common.dbm.QueryConfigTest;
@@ -31,6 +34,8 @@ import org.onetwo.common.hibernate.dao.HibernateNestedMappingTest;
 
 @RunWith(Suite.class)
 @SuiteClasses({
+	MultipCommentsSqlFileParserTest.class,
+	DefaultFileNamedSqlGeneratorTest.class,
 	ExtQueryImplTest.class,
 	JFishExtQueryImplTest.class,
 	DbmDaoTest.class,
@@ -58,7 +63,8 @@ import org.onetwo.common.hibernate.dao.HibernateNestedMappingTest;
 	InQueryWithArrayTest.class,
 	
 	HibernateNestedMappingTest.class,
-	UserQueryHibernateDaoTest.class
+	UserQueryHibernateDaoTest.class,
+	EncryptFieldTest.class
 //	RichModelTest.class
 })
 public class DbmTestCase {

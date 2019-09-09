@@ -40,7 +40,7 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 	}
 
 	public static final List<String> EXECUTE_UPDATE_PREFIX = LangUtils.newArrayList("save", "update", "remove", "delete", "insert", "create");
-	public static final List<String> BATCH_PREFIX = LangUtils.newArrayList("batch");
+	public static final List<String> BATCH_PREFIX = LangUtils.newArrayList("batch", "batchUpdate", "batchInsert", "batchSave");
 //	public static final String FIELD_NAME_SPERATOR = "By";
 	
 //	private final Method method;
@@ -123,7 +123,7 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 		return returnClass;
 	}
 	
-	@SuppressWarnings("rawtypes")
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	final public Class<?> getActualComponentType(){
 		Class compClass = ReflectUtils.getGenricType(method.getGenericReturnType(), 0);
 		if(isReturnOptional()){
@@ -258,7 +258,7 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 	private Object convertQueryValue(Param name, Object val){
 		if (name!=null && val instanceof Enum) {
 			if (val instanceof DbmEnumValueMapping) {
-				val = ((DbmEnumValueMapping)val).getMappingValue();
+				val = ((DbmEnumValueMapping<?>)val).getEnumMappingValue();
 			} else {
 				Enum<?> enumValue = (Enum<?>)val;
 				val = name.enumType()==EnumType.ORDINAL?enumValue.ordinal():enumValue.name();

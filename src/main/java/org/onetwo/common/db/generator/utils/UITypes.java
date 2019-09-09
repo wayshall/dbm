@@ -12,6 +12,7 @@ public class UITypes {
 	public static final String KEY_LONG_TEXT = "长文本";
 	public static final String KEY_RICH_TEXT = "富文本";
 	public static final String KEY_EMAIL = "email";
+	public static final String KEY_JSON = "json";
 	public static final String KEY_URL = "url";
 	public static final String KEY_ASSOCIATION = "关联类型";
 

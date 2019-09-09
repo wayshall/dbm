@@ -16,6 +16,7 @@ import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.NotBlank;
 import org.onetwo.common.db.spi.CrudEntityManager;
+import org.onetwo.dbm.annotation.DbmEncryptField;
 import org.onetwo.dbm.utils.Dbms;
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -58,6 +59,7 @@ public class UserAutoidEntity implements Serializable {
 	/*****
 	 * 
 	 */
+	@DbmEncryptField
 	protected String password;
   
   

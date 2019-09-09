@@ -20,6 +20,7 @@ import org.onetwo.common.db.filequery.DbmNamedSqlFileManager;
 import org.onetwo.common.db.filequery.func.SqlFunctionDialet;
 import org.onetwo.common.db.spi.CreateQueryCmd;
 import org.onetwo.common.db.spi.FileNamedQueryFactory;
+import org.onetwo.common.db.spi.NamedQueryInfoParser;
 import org.onetwo.common.db.spi.QueryProvideManager;
 import org.onetwo.common.db.spi.QueryWrapper;
 import org.onetwo.common.db.spi.SqlParamterPostfixFunctionRegistry;
@@ -44,6 +45,7 @@ import org.onetwo.dbm.query.DbmQueryWrapperImpl;
 import org.onetwo.dbm.utils.DbmLock;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
 
 //@SuppressWarnings({"rawtypes", "unchecked"})
 public class DbmEntityManagerImpl extends BaseEntityManagerAdapter implements QueryProvideManager, DbmEntityManager, InitializingBean , DisposableBean {
@@ -56,6 +58,9 @@ public class DbmEntityManagerImpl extends BaseEntityManagerAdapter implements Qu
 	private FileNamedQueryFactory fileNamedQueryFactory;
 //	private boolean watchSqlFile = false;
 //	private SqlParamterPostfixFunctionRegistry sqlParamterPostfixFunctionRegistry;
+	
+	@Autowired
+	private List<NamedQueryInfoParser> namedQueryInfoParsers;
 	
 	public DbmEntityManagerImpl(DbmSessionFactory sessionFactory){
 		this.sessionFactory = sessionFactory;
@@ -103,6 +108,7 @@ public class DbmEntityManagerImpl extends BaseEntityManagerAdapter implements Qu
 //		this.fileNamedQueryFactory = SpringUtils.getBean(applicationContext, FileNamedQueryFactory.class);
 		//每个sessionFatory对应一个DbmNamedSqlFileManager，避免多sf时查找到别的sf的namedQuery
 		DbmNamedSqlFileManager sqlFileManager = DbmNamedSqlFileManager.createNamedSqlFileManager(sessionFactory.getDataBaseConfig().isWatchSqlFile());
+		sqlFileManager.setQueryInfoParsers(namedQueryInfoParsers);
 		DbmNamedFileQueryFactory fq = new DbmNamedFileQueryFactory(sqlFileManager);
 		this.fileNamedQueryFactory = fq;
 			
@@ -230,8 +236,8 @@ public class DbmEntityManagerImpl extends BaseEntityManagerAdapter implements Qu
 	
 
 	@Override
-	public QueryBuilder createQueryBuilder(Class<?> entityClass) {
-		QueryBuilder query = Querys.from(this, entityClass);
+	public <T> QueryBuilder<T> from(Class<T> entityClass) {
+		QueryBuilder<T> query = Querys.<T>from(this, entityClass);
 		return query;
 	}
 	

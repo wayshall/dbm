@@ -9,7 +9,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.SingleColumnRowMapper;
 
 @SuppressWarnings("rawtypes")
-public class UnknowTypeRowMapper implements RowMapper {
+public class UnknowTypeRowMapper implements DataRowMapper {
 
 	@Override
 	public Object mapRow(ResultSet rs, int rowNum) throws SQLException {
