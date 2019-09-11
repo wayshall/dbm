@@ -561,11 +561,11 @@ public Optional<User> findBy(String month, Long userId) {
 								.where()
                                 .field("age").is(12)
                                 .field("userName").when(()->userName!=null).like(userName) // userName不为null的时候，userName条件才会被生成
-                                    .or()
-                                        .field("email").prelike("qq.com")
-                                        .field("mobile").is("13666666666")
-								.toQuery()
-								.optionalOne();
+                                .or()
+                                    .field("email").prelike("qq.com")
+                                    .field("mobile").is("13666666666")
+				.toQuery()
+				.optionalOne();
 	}
 ```
 
