@@ -4,6 +4,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 import org.onetwo.common.base.DbmSessionCacheTest;
+import org.onetwo.common.db.builder.QuerysTest;
 import org.onetwo.common.db.filequery.DefaultFileNamedSqlGeneratorTest;
 import org.onetwo.common.db.filequery.MultipCommentsSqlFileParserTest;
 import org.onetwo.common.db.sqlext.ExtQueryImplTest;
@@ -38,6 +39,7 @@ import org.onetwo.common.hibernate.dao.HibernateNestedMappingTest;
 	DefaultFileNamedSqlGeneratorTest.class,
 	ExtQueryImplTest.class,
 	JFishExtQueryImplTest.class,
+	QuerysTest.class,
 	DbmDaoTest.class,
 	DbmEntityManagerTest.class,
 	DbmDataFilterTest.class,
