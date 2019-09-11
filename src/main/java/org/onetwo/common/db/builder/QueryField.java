@@ -17,4 +17,13 @@ public interface QueryField {
 	public Object getValue();
 
 	public String getFieldName();
+	/***
+	 * 可用querys.when代替
+	 * 单独控制每个条件是否忽略null，占坑
+	 * @author weishao zeng
+	 * @return
+	 
+	public default IfNull getIfNull() {
+		return null;
+	}*/
 }

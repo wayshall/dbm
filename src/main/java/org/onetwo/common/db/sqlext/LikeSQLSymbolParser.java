@@ -9,7 +9,7 @@ import org.onetwo.common.exception.ServiceException;
 
 
 /***
- * 可用于解释一般的操作符，如=,<,> ……
+ * 
  * @author weishao
  *
  */

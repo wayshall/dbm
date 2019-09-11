@@ -66,6 +66,16 @@ abstract public class AbstractSQLSymbolParser implements HqlSymbolParser{
 		}
 	}*/
 	
+
+	final protected IfNull getIfNull(QueryField qfield){
+		return qfield.getExtQuery().getIfNull();
+		/*IfNull ifNull = qfield.getIfNull();
+		if (ifNull==null) {
+			ifNull = qfield.getExtQuery().getIfNull();
+		}
+		return ifNull;*/
+	}
+	
 	public String parse(String actualOperator, QueryField qfield){
 		if(StringUtils.isBlank(actualOperator))
 			LangUtils.throwBaseException("symbol can not be blank : " + actualOperator);
@@ -73,7 +83,7 @@ abstract public class AbstractSQLSymbolParser implements HqlSymbolParser{
 		String field = qfield.getActualFieldName();
 		Object value = qfield.getValue();
 		ParamValues paramValues = qfield.getExtQuery().getParamsValue();
-		IfNull ifNull = qfield.getExtQuery().getIfNull();
+		IfNull ifNull = getIfNull(qfield);
 		
 		List list = convertValues(field, value, ifNull, true);
 		

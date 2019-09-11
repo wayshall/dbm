@@ -24,7 +24,7 @@ public class InSymbolParser extends CommonSQLSymbolParser implements HqlSymbolPa
 		String field = context.getActualFieldName();
 		Object value = context.getValue();
 		ParamValues paramValues = context.getExtQuery().getParamsValue();
-		IfNull ifNull = context.getExtQuery().getIfNull();
+		IfNull ifNull = getIfNull(context);
 		
 		/*if(value==null || (value instanceof String && StringUtils.isBlank(value.toString())))
 			return null;

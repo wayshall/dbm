@@ -23,6 +23,29 @@ public interface ExtQuery {
 			super();
 			this.key = key;
 		}
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			KeyObject other = (KeyObject) obj;
+			if (key == null) {
+				if (other.key != null)
+					return false;
+			} else if (!key.equals(other.key))
+				return false;
+			return true;
+		}
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((key == null) ? 0 : key.hashCode());
+			return result;
+		}
 	}
 	
 	/****
@@ -52,12 +75,12 @@ public interface ExtQuery {
 		/***
 		 *  from 0
 		 */
-		public static final Object FIRST_RESULT = ":firstResult";
-		public static final Object MAX_RESULTS = ":maxResults";
-		public static final Object OR = ":or";
-		public static final Object AND = ":and";
-		public static final Object ASC = ":asc";
-		public static final Object DESC = ":desc";
+		public static final Object FIRST_RESULT = KeyObject.builder().key(":firstResult").build(); // ":firstResult";
+		public static final Object MAX_RESULTS = KeyObject.builder().key(":maxResults").build(); // ":maxResults";
+		public static final Object OR = KeyObject.builder().key(":or").build(); // ":or";
+		public static final Object AND = KeyObject.builder().key(":and").build(); //":and";
+		public static final Object ASC = KeyObject.builder().key(":asc").build(); // ":asc";
+		public static final Object DESC = KeyObject.builder().key(":desc").build(); // ":desc";
 //		public static final String RAW_QL = ":raw-ql";
 
 		public static final Object QUERY_CONFIG = KeyObject.builder().key(":query_tips").build();//":query_config";
