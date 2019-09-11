@@ -558,7 +558,7 @@ public List<User> findList(String month, Long userId) {
 // 下面代码生成的sql条件：(age = 12 and userName like %test%) or (email like %qq.com and mobile=136666666) 
 public Optional<User> findBy(String month, Long userId) {
 		return baseEntityManager.from(User.class)
-								.where()
+				.where()
                                 .field("age").is(12)
                                 .field("userName").when(()->userName!=null).like(userName) // userName不为null的时候，userName条件才会被生成
                                 .or()
