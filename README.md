@@ -553,6 +553,24 @@ public List<User> findList(String month, Long userId) {
 }
 ```
 
+动态条件和or 查询：
+```Java
+// 下面代码生成的sql条件：(age = 12 and userName like %test%) or (email like %qq.com and mobile=136666666) 
+public Optional<User> findBy(String month, Long userId) {
+		return baseEntityManager.from(User.class)
+				.where()
+                                .field("age").is(12)
+                                .field("userName").when(()->userName!=null).like(userName) // userName不为null的时候，userName条件才会被生成
+                                .or()
+                                    .field("email").prelike("qq.com")
+                                    .field("mobile").is("13666666666")
+				.toQuery()
+				.optionalOne();
+	}
+```
+
+
+
 ## CrudEntityManager接口
 CrudEntityManager是在BaseEntityManager基础上封装crud的接口，是给喜欢简单快捷的人使用的。   
 CrudEntityManager实例可在数据源已配置的情况下通过简单的方法获取：

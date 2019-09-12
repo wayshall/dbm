@@ -136,6 +136,22 @@ public class ExtQueryImplTest {
 	}
 	
 	@Test
+	public void testLikeWithoutPersent(){
+
+		this.properties.put("name:like", "way");
+		this.properties.put(K.DEBUG, true);
+		ExtQueryInner q = sqlSymbolManagerFactory.getJPA().createSelectQuery(Magazine.class, "mag", properties);
+		q.build();
+		
+		String sql = "select mag from Magazine mag where mag.name like :mag_name0 order by mag.id desc";
+		String paramsting = "{mag_name0=%way%}";
+//		System.out.println("testNull2: " + q.getSql().trim());
+//		System.out.println("testNull2: " + q.getParamsValue().getValues().toString());
+		Assert.assertEquals(sql.trim(), q.getSql().trim());
+		Assert.assertEquals(paramsting, q.getParamsValue().getValues().toString());
+	}
+	
+	@Test
 	public void testLike2(){
 
 		this.properties.put("name:=~", "way%");
@@ -597,7 +613,7 @@ public class ExtQueryImplTest {
 	@Test
 	public void testAnd(){
 		properties.put("name:like", "way");
-		properties.put(":and", CUtils.asMap(new String[]{"age"}, new Object[]{17, 18}));
+		properties.put(K.AND, CUtils.asMap(new String[]{"age"}, new Object[]{17, 18}));
 
 		ExtQueryInner q = sqlSymbolManagerFactory.getJPA().createSelectQuery(Magazine.class, "mag", properties);
 		q.build();
@@ -643,12 +659,12 @@ public class ExtQueryImplTest {
 		and1.put("columns.id", 1);
 		
 		or1.put("columnId", 111);
-		or1.put(":or", and1);
+		or1.put(K.OR, and1);
 		
 		properties.put("siteId", 1);
 		properties.put("title:like", "sdsd");
 		
-		properties.put(":and", or1);
+		properties.put(K.AND, or1);
 		
 		ExtQueryInner q = sqlSymbolManagerFactory.getJPA().createSelectQuery(Object.class, properties);
 		q.build();

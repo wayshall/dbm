@@ -181,27 +181,31 @@ abstract public class AbstractExtQuery implements ExtQueryInner{
 			Object fields = entry.getKey();
 			Object values = entry.getValue();
 
-			if (K.ASC.equals(fields) || K.DESC.equals(fields) || LangUtils.isEmpty(fields))
+			if (K.ASC.equals(fields) || K.DESC.equals(fields) || LangUtils.isEmpty(fields)) {
 				continue;
+			}
 			
 			/*if(ExtQueryUtils.isContinueByCauseValue(values, ifNull)){
 				continue;
 			}*/
 
 			if (K.OR.equals(fields)) {
-				if (!Map.class.isAssignableFrom(values.getClass()))
+				if (!Map.class.isAssignableFrom(values.getClass())) {
 					throw new ServiceException("sub query's vaue must be map!");
+				}
 				Map<?, ?> subParams = (Map<?, ?>) values;
 				h = this.buildWhere(subParams, true);
 				where.append("or ");
 			} else if(K.AND.equals(fields)){
-				if (!Map.class.isAssignableFrom(values.getClass()))
+				if (!Map.class.isAssignableFrom(values.getClass())) {
 					throw new ServiceException("sub query's vaue must be map!");
+				}
 				Map<?, ?> subParams = (Map<?, ?>) values;
 				h = this.buildWhere(subParams, true);
 				
-				if(!first)
+				if(!first) {
 					where.append("and ");
+				}
 			} /*else if(K.RAW_QL.equals(fields)){
 				if (!values.getClass().isArray() && !List.class.isAssignableFrom(values.getClass()) && !String.class.isAssignableFrom(values.getClass()))
 					throw new ServiceException("raw-ql args error: " + values);
@@ -267,11 +271,12 @@ abstract public class AbstractExtQuery implements ExtQueryInner{
 
 			Object v = null;
 			try {
-				if (fieldList.size() == 1){
-					if(valueList.size()==1)
+				if (fieldList.size() == 1) {
+					if(valueList.size()==1) {
 						v = valueList.get(0);
-					else
+					} else {
 						v = values;
+					}
 				}else{
 					v = valueList.get(i);
 				}

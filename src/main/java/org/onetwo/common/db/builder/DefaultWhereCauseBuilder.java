@@ -6,19 +6,36 @@ import javax.persistence.metamodel.SingularAttribute;
 
 import org.onetwo.common.db.builder.QueryBuilderImpl.SubQueryBuilder;
 import org.onetwo.common.db.sqlext.ExtQuery.K;
+import org.onetwo.common.db.sqlext.ExtQuery.KeyObject;
 import org.onetwo.common.reflect.ReflectUtils;
 import org.onetwo.common.utils.LangUtils;
 import org.onetwo.dbm.core.spi.DbmSessionFactory;
 import org.onetwo.dbm.mapping.DbmMappedEntry;
 
+import com.google.common.collect.Maps;
+
 public class DefaultWhereCauseBuilder<E> implements WhereCauseBuilder<E> {
 	final protected QueryBuilderImpl<E> queryBuilder;
 	final protected Map<Object, Object> params;
+	private DefaultWhereCauseBuilder<E> parent;
+	private KeyObject keyObject;
 	
 	public DefaultWhereCauseBuilder(QueryBuilderImpl<E> queryBuilder) {
 		super();
 		this.queryBuilder = queryBuilder;
 		this.params = queryBuilder.getParams();
+	}
+	
+	private DefaultWhereCauseBuilder(DefaultWhereCauseBuilder<E> parent, KeyObject keyObject) {
+		super();
+		this.parent = parent;
+		this.queryBuilder = parent.queryBuilder;
+		this.params = Maps.newLinkedHashMap();
+		this.keyObject = keyObject;
+	}
+	
+	Map<Object, Object> getParams() {
+		return params;
 	}
 
 	@Override
@@ -112,6 +129,16 @@ public class DefaultWhereCauseBuilder<E> implements WhereCauseBuilder<E> {
 	public DefaultWhereCauseBuilderField<E> field(String...fields){
 		return new DefaultWhereCauseBuilderField<>(this, fields);
 	}
+	
+	@Override
+	public WhereCauseBuilder<E> or() {
+		return new DefaultWhereCauseBuilder<>(this, (KeyObject)K.OR);
+	}
+	
+	@Override
+	public WhereCauseBuilder<E> and() {
+		return new DefaultWhereCauseBuilder<>(this, (KeyObject)K.AND);
+	}
 
 	@Override
 	public DefaultWhereCauseBuilderField<E> field(SingularAttribute<?, ?>... fields) {
@@ -120,6 +147,10 @@ public class DefaultWhereCauseBuilder<E> implements WhereCauseBuilder<E> {
 
 	@Override
 	public QueryBuilder<E> end(){
+		if (parent!=null && !params.isEmpty()) {
+			parent.getParams().put(keyObject, params);
+			return parent.end();
+		}
 		return queryBuilder;
 	}
 

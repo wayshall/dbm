@@ -6,14 +6,32 @@ import javax.persistence.metamodel.SingularAttribute;
 public interface WhereCauseBuilder<E> {
 	WhereCauseBuilder<E> debug();
 
+	/****
+	 * @deprecated instead of {@link #or()}
+	 * 
+	 * @author weishao zeng
+	 * @param subQuery
+	 * @return
+	 */
+	@Deprecated
 	WhereCauseBuilder<E> or(QueryBuilder<E> subQuery);
 
+	/***
+	 * @deprecated instead of {@link #and()}
+	 * @author weishao zeng
+	 * @param subQuery
+	 * @return
+	 */
+	@Deprecated
 	WhereCauseBuilder<E> and(QueryBuilder<E> subQuery);
 
 
 	WhereCauseBuilder<E> addFields(Object entity);
 	
 	WhereCauseBuilder<E> operatorFields(String[] operatorFields, Object[] values);
+	
+	WhereCauseBuilder<E> or();
+	WhereCauseBuilder<E> and();
 	/***
 	 * 
 	 * @author weishao zeng
