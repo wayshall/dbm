@@ -23,6 +23,7 @@
 - [自定义实现DbmRepository接口](#自定义实现dbmrepository接口)
 - [枚举处理](#枚举处理)
 - [json映射](#json映射)
+- [敏感字段加密映射](#敏感字段加密映射)
 - [其它映射特性](#其它映射特性)
 - [批量插入](#批量插入)
 - [充血模型支持](#充血模型支持)
@@ -383,13 +384,10 @@ class SimpleEntity {
     </dependency>
 ```
 
-### 
-
-## 其它特有的映射
 
 
 
-### 敏感字段加密映射
+## 敏感字段加密映射
 对于一些不适宜明文存储的字段信息，比如api密钥，存储的时候自动加密，获取的时候自动解密，此时可以使用@DbmEncryptField 注解。
 ```Java
 @Entity
@@ -418,6 +416,29 @@ public class MerchantEntity implements Serializable {
     values
         (:id, :apikey?encrypt)
 ```
+
+
+
+**注意**
+
+- dbm的敏感字段加密功能依赖jasypt
+
+- 你可以通过下面属性配置jasypt的StandardPBEStringEncryptor 
+
+  ```yaml
+  dbm: 
+  	encrypt: 
+  		algorithm: PBEWithMD5AndTripleDES #默认加密算法
+  		password: test #密钥
+  ```
+
+  
+
+
+
+## 其它特有的映射
+
+
 
 ### @DbmField注解
 @DbmField 注解可自定义一个值转换器，用于从数据库表获取的字段值转换为Java对象的属性值，和把Java对象的属性值转换为数据库表的字段值。   
