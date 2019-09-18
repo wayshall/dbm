@@ -96,6 +96,9 @@ abstract public class AbstractMappedField implements DbmMappedField{
 		if(enumType!=null){
 			compositedConverter.addFieldValueConverter(CompositedFieldValueConverter.ENUM_CONVERTER);
 		}
+		/*if (getName().equals("appCode") && getEntry().getEntityName().equals("org.onetwo.common.dbm.model.hib.entity.UserEntity")) {
+			System.out.println("test");
+		}*/
 		this.dbmFieldAnnotation = propertyInfo.getAnnotation(DbmField.class);
 		this.jsonFieldAnnotation = propertyInfo.getAnnotation(DbmJsonField.class);
 		/*if(jsonFieldAnnotation != null){
@@ -105,6 +108,11 @@ abstract public class AbstractMappedField implements DbmMappedField{
 			Class<? extends DbmFieldValueConverter> converterClass = this.dbmFieldAnnotation.converterClass();
 			DbmFieldValueConverter converter = DbmUtils.createDbmBean(converterClass);
 			compositedConverter.addFieldValueConverter(converter);
+			/*this.dbmFieldAnnotation.forEach(f -> {
+				Class<? extends DbmFieldValueConverter> converterClass = f.converterClass();
+				DbmFieldValueConverter converter = DbmUtils.createDbmBean(converterClass);
+				compositedConverter.addFieldValueConverter(converter);
+			});*/
 		}
 		this.fieldValueConverter = compositedConverter;
 		
