@@ -450,14 +450,14 @@ public class UserEntity implements Serializable {
 	
 	private String mobile;
 	
-    @DbmBindValueToField(name="mobile") //查询实体时，此字段的值来自mobile字段
-    @Transient //此字段无需保存到数据库
+        @DbmBindValueToField(name="mobile") //查询实体时，此字段的值来自mobile字段
+        @Transient //此字段无需保存到数据库
 	@DbmSensitiveField(leftPlainTextSize=7, on=SensitiveOns.SELECT)
 	// 保留手机号码只显示左边7位，如13612345678，取出脱敏后mobile的值为：1361234****
 	private String mobileUnsensitive;
 	
 	@DbmSensitiveField(leftPlainTextSize=1, sensitiveIndexOf="@",  on=SensitiveOns.SELECT)
-	// 邮件地址左边保留一个长度的字符，@后面的字符都保留，其余用星号代替，如test@gmail.com，取出脱敏后为：te**@gmail.com
+	// 邮件地址左边保留一个长度的字符，@后面的字符都保留，其余用星号代替，如test@gmail.com，取出脱敏后为：t***@gmail.com
 	private String email;
 }
 ```
