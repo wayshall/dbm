@@ -17,7 +17,7 @@ public class SpringAnnotationFinderTest {
 
 	@Test
 	public void test() {
-		Method field = ReflectUtils.getReadMethod(UserEntity.class, "appCode", String.class);
+		Method field = ReflectUtils.getReadMethod(UserEntity.class, "appCodeUnsensitive", String.class);
 		SpringAnnotationFinder finder = new SpringAnnotationFinder();
 		DbmField dbmfield = finder.getAnnotation(field, DbmField.class);
 		assertThat(dbmfield).isNotNull();
