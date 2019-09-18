@@ -1,5 +1,6 @@
 package org.onetwo.dbm.mapping;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.onetwo.common.utils.JFishProperty;
@@ -103,5 +104,19 @@ public interface DbmMappedField {
 	DbmJsonField getJsonFieldAnnotation();
 	
 	boolean isMappingGenerated();
+	
+	/***
+	 * 获取绑定到此字段的所有字段
+	 * @author weishao zeng
+	 * @return
+	 */
+	Collection<DbmMappedField> getBindedFields();
+
+	/***
+	 * 获取此字段绑定的字段
+	 * @author weishao zeng
+	 * @return
+	 */
+	DbmMappedField getBindToField();
 	
 }

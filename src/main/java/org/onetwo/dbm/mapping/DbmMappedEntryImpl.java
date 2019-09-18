@@ -30,18 +30,19 @@ public class DbmMappedEntryImpl extends AbstractDbmMappedEntryImpl implements Db
 
 	protected Collection<DbmMappedField> getInsertableFields(){
 		List<DbmMappedField> insertables = new ArrayList<DbmMappedField>();
-		for(DbmMappedField field : getMappedColumns().values()){
-			if(field.getColumn().isInsertable())
+		for (DbmMappedField field : getMappedColumns().values()) {
+			if (field.getColumn()!=null && field.getColumn().isInsertable()) {
 				insertables.add(field);
+			}
 		}
 		return insertables;
 	}
 	
 	public List<DbmMappedField> getUpdateableFields(){
 		List<DbmMappedField> updatables = new ArrayList<DbmMappedField>();
-		for(DbmMappedField col : getMappedColumns().values()){
-			if(col.getColumn().isUpdatable()) {
-				updatables.add(col);
+		for (DbmMappedField field : getMappedColumns().values()){
+			if (field.getColumn()!=null && field.getColumn().isUpdatable()) {
+				updatables.add(field);
 			}
 		}
 		return updatables;
@@ -50,10 +51,16 @@ public class DbmMappedEntryImpl extends AbstractDbmMappedEntryImpl implements Db
 
 	public Collection<DbmMappedField> getSelectableField() {
 		List<DbmMappedField> cols = LangUtils.newArrayList();
-		for(DbmMappedField col : this.getMappedColumns().values()){
-			if(col.getColumn().isLazy())
+		for(DbmMappedField field : this.getMappedColumns().values()){
+			if (field.getColumn()==null) {
 				continue;
-			cols.add(col);
+			}
+			if (field.getColumn().isLazy()) {
+				continue;
+			}
+			if (field.getColumn().isSelectable()) {
+				cols.add(field);
+			}
 		}
 		return cols;
 	}

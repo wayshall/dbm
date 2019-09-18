@@ -24,6 +24,7 @@
 - [枚举处理](#枚举处理)
 - [json映射](#json映射)
 - [敏感字段映射](#敏感字段映射)
+- [字段绑定](#字段绑定)
 - [其它映射特性](#其它映射特性)
 - [批量插入](#批量插入)
 - [充血模型支持](#充血模型支持)
@@ -447,9 +448,13 @@ public class UserEntity implements Serializable {
 	@Column(name="ID")
 	private Long id;
 	
+	private String mobile;
+	
+    @DbmBindValueToField(name="mobile") //查询实体时，此字段的值来自mobile字段
+    @Transient //此字段无需保存到数据库
 	@DbmSensitiveField(leftPlainTextSize=7, on=SensitiveOns.SELECT)
 	// 保留手机号码只显示左边7位，如13612345678，取出脱敏后mobile的值为：1361234****
-	private String mobile;
+	private String mobileUnsensitive;
 	
 	@DbmSensitiveField(leftPlainTextSize=1, sensitiveIndexOf="@",  on=SensitiveOns.SELECT)
 	// 邮件地址左边保留一个长度的字符，@后面的字符都保留，其余用星号代替，如test@gmail.com，取出脱敏后为：te**@gmail.com
@@ -467,6 +472,10 @@ DbmSensitiveField 属性解释如下：
 - replacementString: 替换敏感数据的字符串，默认为星号
 
 
+### 字段绑定
+@DbmBindValueToField 注解可以帮某个字段的值绑定到另一个字段，绑定后，实体查询时，此字段的值将会取自绑定的值。例子可以参考 [脱敏映射](#脱敏映射) 
+
+
 
 
 ## 其它特有的映射
@@ -476,6 +485,8 @@ DbmSensitiveField 属性解释如下：
 ### @DbmField注解
 @DbmField 注解可自定义一个值转换器，用于从数据库表获取的字段值转换为Java对象的属性值，和把Java对象的属性值转换为数据库表的字段值。   
 @DbmJsonField 注解实际上是包装了@DbmField注解实现的。
+
+
 
 
 ## BaseEntityManager接口和QueryDSL

@@ -11,6 +11,7 @@ import org.onetwo.common.dbm.model.hib.entity.UserEntity;
 import org.onetwo.common.dbm.model.hib.entity.UserEntity.UserGenders;
 import org.onetwo.common.utils.JodatimeUtils;
 
+//@Commit
 public class DbmSensitiveFieldTest extends DbmBaseTest {
 
 	@Resource
@@ -35,7 +36,8 @@ public class DbmSensitiveFieldTest extends DbmBaseTest {
 		assertThat(user.getId()).isEqualTo(10000000000L);
 		
 		UserEntity dbUser = entityManager.findById(UserEntity.class, user.getId());
-		assertThat(dbUser.getAppCode()).isEqualTo("test*******");
+		assertThat(dbUser.getAppCode()).isEqualTo("test1234567");
+		assertThat(dbUser.getAppCodeUnsensitive()).isEqualTo("test*******");
 		
 	}
 

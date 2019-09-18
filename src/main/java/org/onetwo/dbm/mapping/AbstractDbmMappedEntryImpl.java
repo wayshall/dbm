@@ -20,6 +20,7 @@ import org.onetwo.common.spring.SpringUtils;
 import org.onetwo.common.utils.ArrayUtils;
 import org.onetwo.common.utils.Assert;
 import org.onetwo.common.utils.LangUtils;
+import org.onetwo.dbm.annotation.DbmBindValueToField;
 import org.onetwo.dbm.annotation.DbmEntityListeners;
 import org.onetwo.dbm.annotation.DbmFieldListeners;
 import org.onetwo.dbm.annotation.DbmValidatorEnabled;
@@ -56,6 +57,7 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 //	private boolean queryableOnly;
 	private AnnotationInfo annotationInfo;
 
+//	protected Map<String, Collection<DbmMappedField>> bindedFields = new LinkedHashMap<>();
 	protected Map<String, AbstractMappedField> mappedFields = new LinkedHashMap<String, AbstractMappedField>();
 	protected Map<String, AbstractMappedField> mappedColumns = new HashMap<String, AbstractMappedField>();
 	private Class<?> idClass = null;
@@ -306,6 +308,17 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 		return field;
 	}
 	
+	/***
+	 * 获取指定字段绑定的字段
+	 * @author weishao zeng
+	 * @param fieldName
+	 * @return
+	 */
+	public Collection<DbmMappedField> getBindedFieldsByFieldName(String fieldName) {
+//		return this.bindedFields.get(fieldName);
+		return this.getField(fieldName).getBindedFields();
+	}
+	
 	@Override
 	public Object getFieldValue(Object entity, String fieldName){
 		return getField(fieldName).getValue(entity);
@@ -340,11 +353,18 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 	 */
 	@Override
 	public void buildEntry() {
+		if (this.freezing) {
+			logger.warn("entry has buit and freezing : {}", getEntityName());
+			return ;
+		}
+		
 		this.checkEntry();
 		
 		for(AbstractMappedField field : this.mappedFields.values()){
-			if(field.getColumn()!=null)
+			if (field.getColumn()!=null) {
 				this.mappedColumns.put(field.getColumn().getName().toLowerCase(), field);
+			}
+			processBindFields(field);
 		}
 
 		this.mappedFields = Collections.unmodifiableMap(this.mappedFields);
@@ -354,6 +374,26 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 		buildStaticSQL(tableInfo);
 		
 //		freezing();
+	}
+	
+	protected void processBindFields(AbstractMappedField field) {
+		DbmBindValueToField bindFieldInfo = field.getPropertyInfo().getAnnotation(DbmBindValueToField.class);
+		if (bindFieldInfo!=null) {
+			AbstractMappedField bindToField = this.mappedFields.get(bindFieldInfo.name());
+			if (bindToField==null) {
+				throw new DbmException("the bind field[" + bindFieldInfo.name() + "] not found, "
+										+ "entity: [" + getEntityName() + "], field: [" + field.getName() + "]");
+			}
+			field.setBindToField(bindToField);
+//			Collection<DbmMappedField> bindedFields = this.bindedFields.get(bindField.getName());
+			Collection<DbmMappedField> bindedFields = bindToField.getBindedFields();
+			if (bindedFields==null) {
+				bindedFields = new ArrayList<>();
+//				this.bindedFields.put(bindField.getName(), bindedFields);
+				bindToField.setBindedFields(bindedFields);
+			}
+			bindedFields.add(field);
+		}
 	}
 
 	protected void buildStaticSQL(TableInfo taboleInfo){
