@@ -429,12 +429,12 @@ public class MerchantEntity implements Serializable {
 
   ```yaml
   dbm: 
-  	encrypt: 
-  		algorithm: PBEWithMD5AndTripleDES #默认加密算法
-  		password: test #密钥
+      encrypt: 
+          algorithm: PBEWithMD5AndTripleDES #默认加密算法
+          password: test #密钥
   ```
 
-  ### 脱敏映射
+### 脱敏映射
 对于另一些字段，我们可能并不需要加解密，而只是在存储或者获取的时候，按照一定的规则脱敏。比如手机号码取出的时候自动对后面四位打上星号，或者邮件地址只显示第一个字符和@后面的字符，则可以使用 @DbmSensitiveField 注解进行脱敏映射。
 ```Java
 @Entity
@@ -456,6 +456,7 @@ public class UserEntity implements Serializable {
 ```
 
 **解释**
+
 DbmSensitiveField 属性解释如下：
 - on: 表示进行脱敏的时机，有两个选择：STORE（保存到数据库的时候），SELECT（从数据库获取出来转换为java对象的时候）
 - leftPlainTextSize: 脱敏时需要左边保持明文的字符长度
