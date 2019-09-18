@@ -448,9 +448,11 @@ public class UserEntity implements Serializable {
 	private Long id;
 	
 	@DbmSensitiveField(rightPlainTextSize=4, on=SensitiveOns.SELECT)
+	// 保留手机号码最后（右边）4位
 	private String mobile;
 	
 	@DbmSensitiveField(leftPlainTextSize=1, sensitiveIndexOf="@",  on=SensitiveOns.SELECT)
+	// 邮件地址左边保留一个长度的字符，@后面的字符都保留，其余用星号代替
 	private String email;
 }
 ```
