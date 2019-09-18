@@ -71,7 +71,7 @@ JDK 1.8+
 spring 4.0+
 
 ## maven
-当前snapshot版本：4.7.2-SNAPSHOT
+当前snapshot版本：4.7.4-SNAPSHOT
 
 若使用snapshot版本，请添加snapshotRepository仓储：
 ```xml
@@ -90,7 +90,7 @@ spring 4.0+
 <dependency>
     <groupId>org.onetwo4j</groupId>
     <artifactId>onetwo-dbm</artifactId>
-    <version>4.7.2-SNAPSHOT</version>
+    <version>4.7.4-SNAPSHOT</version>
 </dependency>
 
 ```
@@ -472,8 +472,20 @@ DbmSensitiveField 属性解释如下：
 - replacementString: 替换敏感数据的字符串，默认为星号
 
 
+
+**注意**
+
+此功能从 4.7.4 版本开始支持
+
+
+
+
 ### 字段绑定
 @DbmBindValueToField 注解可以帮某个字段的值绑定到另一个字段，绑定后，实体查询时，此字段的值将会取自绑定的值。例子可以参考 [脱敏映射](#脱敏映射) 
+
+**注意**
+
+此功能从 4.7.4 版本开始支持
 
 
 
