@@ -447,12 +447,12 @@ public class UserEntity implements Serializable {
 	@Column(name="ID")
 	private Long id;
 	
-	@DbmSensitiveField(rightPlainTextSize=4, on=SensitiveOns.SELECT)
-	// 保留手机号码最后（右边）4位
+	@DbmSensitiveField(leftPlainTextSize=7, on=SensitiveOns.SELECT)
+	// 保留手机号码只显示左边7位，如13612345678，取出脱敏后mobile的值为：1361234****
 	private String mobile;
 	
 	@DbmSensitiveField(leftPlainTextSize=1, sensitiveIndexOf="@",  on=SensitiveOns.SELECT)
-	// 邮件地址左边保留一个长度的字符，@后面的字符都保留，其余用星号代替
+	// 邮件地址左边保留一个长度的字符，@后面的字符都保留，其余用星号代替，如test@gmail.com，取出脱敏后为：te**@gmail.com
 	private String email;
 }
 ```

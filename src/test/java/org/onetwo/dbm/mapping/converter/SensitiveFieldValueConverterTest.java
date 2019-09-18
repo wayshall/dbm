@@ -38,6 +38,14 @@ public class SensitiveFieldValueConverterTest {
 		assertThat(unsensitive).isEqualTo("*******1234");
 		
 
+		sensitive = "13666661234";
+		info.setLeftPlainTextSize(7);
+		info.setRightPlainTextSize(0);
+		info.setSensitiveEndOf("");
+		unsensitive = converter.unsensitiveString(info, sensitive);
+		assertThat(unsensitive).isEqualTo("1366666****");
+		
+
 		sensitive = "441827198802027777";
 		info.setLeftPlainTextSize(4);
 		info.setRightPlainTextSize(4);

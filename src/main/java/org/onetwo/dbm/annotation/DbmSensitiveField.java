@@ -42,7 +42,7 @@ public @interface DbmSensitiveField {
 	int rightPlainTextSize() default 0;
 	
 	/***
-	 * 当不想整个字段进行脱敏的时候，此属性表示某个指定的字符索引作为脱敏的结束索引，当这个属性不为空的时候
+	 * 当不想整个字段进行脱敏的时候，此属性表示某个指定的字符索引作为脱敏的结束索引
 	 * @author weishao zeng
 	 * @return
 	 */
