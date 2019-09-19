@@ -11,7 +11,7 @@
  Target Server Version : 50726
  File Encoding         : 65001
 
- Date: 30/04/2019 13:19:19
+ Date: 18/09/2019 11:56:59
 */
 
 SET NAMES utf8mb4;
@@ -32,7 +32,7 @@ CREATE TABLE `company`  (
   `ext_info` varchar(2000) CHARACTER SET utf8 COLLATE utf8_bin NULL DEFAULT NULL,
   `build_at` datetime(0) NULL DEFAULT NULL,
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 409 CHARACTER SET = utf8 COLLATE = utf8_bin ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 680 CHARACTER SET = utf8 COLLATE = utf8_bin ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for department
@@ -45,8 +45,9 @@ CREATE TABLE `department`  (
   `employee_number` int(11) NULL DEFAULT NULL COMMENT '员工数量',
   `create_at` datetime(0) NULL DEFAULT NULL,
   `update_at` datetime(0) NULL DEFAULT NULL,
+  `status` int(11) NULL DEFAULT NULL,
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1501 CHARACTER SET = utf8 COLLATE = utf8_bin ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 4101 CHARACTER SET = utf8 COLLATE = utf8_bin ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for employee
@@ -62,7 +63,7 @@ CREATE TABLE `employee`  (
   `create_at` datetime(0) NULL DEFAULT NULL,
   `update_at` datetime(0) NULL DEFAULT NULL,
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 15001 CHARACTER SET = utf8 COLLATE = utf8_bin ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 41001 CHARACTER SET = utf8 COLLATE = utf8_bin ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for gen_ids
@@ -124,6 +125,7 @@ CREATE TABLE `test_user`  (
   `appCode` varchar(255) CHARACTER SET utf8 COLLATE utf8_bin NULL DEFAULT NULL,
   `userName` varchar(255) CHARACTER SET utf8 COLLATE utf8_bin NULL DEFAULT NULL,
   `data_version` bigint(20) NULL DEFAULT NULL,
+  `address_list` json NULL COMMENT ' 类型：json',
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `id_UNIQUE`(`id`) USING BTREE
 ) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_bin ROW_FORMAT = Compact;
@@ -147,6 +149,20 @@ CREATE TABLE `test_user_autoid`  (
   `app_code` varchar(20) CHARACTER SET utf8 COLLATE utf8_bin NULL DEFAULT NULL,
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `id_UNIQUE`(`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 170179 CHARACTER SET = utf8 COLLATE = utf8_bin ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 217344 CHARACTER SET = utf8 COLLATE = utf8_bin ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Table structure for wx_access_token
+-- ----------------------------
+DROP TABLE IF EXISTS `wx_access_token`;
+CREATE TABLE `wx_access_token`  (
+  `id` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `wx_appid` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `access_token` varchar(512) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `expires_in` bigint(11) NOT NULL,
+  `create_at` datetime(0) NOT NULL,
+  `update_at` datetime(0) NOT NULL,
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_bin ROW_FORMAT = Compact;
 
 SET FOREIGN_KEY_CHECKS = 1;

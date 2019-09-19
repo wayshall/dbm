@@ -367,19 +367,23 @@ public class DbmMappedEntryBuilder implements MappedEntryBuilder, RegisterManage
 	 */
 
 	protected AbstractMappedField createAndBuildMappedField(DbmMappedEntry entry, JFishProperty prop){
-		if(ignoreMappedField(prop))
+		/*if(ignoreMappedField(prop)) {
 			return null;
+		}*/
 		
 		AbstractMappedField mfield = newMappedField(entry, prop);
 		this.buildMappedField(mfield);
 		
-		BaseColumnInfo col = this.buildColumnInfo(entry.getTableInfo(), mfield);
-		
-		//设置关系
-		if(col!=null){
-			mfield.setColumn(col);
-			if(entry.getTableInfo()!=null){
-				entry.getTableInfo().addColumn(col);
+		// transient
+		if (!ignoreMappedField(prop)) {
+			BaseColumnInfo col = this.buildColumnInfo(entry.getTableInfo(), mfield);
+			
+			//设置关系
+			if(col!=null){
+				mfield.setColumn(col);
+				if(entry.getTableInfo()!=null){
+					entry.getTableInfo().addColumn(col);
+				}
 			}
 		}
 		return mfield;

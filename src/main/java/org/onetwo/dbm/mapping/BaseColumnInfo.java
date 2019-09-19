@@ -16,6 +16,7 @@ abstract public class BaseColumnInfo extends Propertable{
 
 	private boolean insertable = true;
 	private boolean updatable = true;
+	private boolean selectable = true;
 
 	protected boolean primaryKey;
 	protected boolean referencedKey;
@@ -119,6 +120,14 @@ abstract public class BaseColumnInfo extends Propertable{
 	
 	public boolean isLazy(){
 		return FetchType.LAZY.equals(this.fetchType);
+	}
+
+	public boolean isSelectable() {
+		return selectable;
+	}
+
+	public void setSelectable(boolean selectable) {
+		this.selectable = selectable;
 	}
 	
 }

@@ -20,6 +20,14 @@ public interface DbmMappedEntryMeta {
 
 
 	DbmMappedField getFieldByColumnName(String columnName);
+	
+	/****
+	 * 通过@DbmBindValueToField 注解绑定到此字段的其它字段
+	 * @author weishao zeng
+	 * @param fieldName
+	 * @return
+	 */
+	Collection<DbmMappedField> getBindedFieldsByFieldName(String fieldName);
 
 
 	DbmMappedEntryMeta addMappedField(AbstractMappedField field);

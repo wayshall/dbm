@@ -1,6 +1,7 @@
 package org.onetwo.dbm.mapping;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -62,6 +63,12 @@ abstract public class AbstractMappedField implements DbmMappedField{
 	private DbmFieldValueConverter fieldValueConverter;
 	final private boolean mappingGenerated;
 	
+	private Collection<DbmMappedField> bindedFields;
+	/***
+	 * 绑定到了哪个字段
+	 */
+	private DbmMappedField bindToField;
+	
 	public AbstractMappedField(DbmMappedEntry entry, JFishProperty propertyInfo) {
 		super();
 		this.entry = entry;
@@ -96,6 +103,9 @@ abstract public class AbstractMappedField implements DbmMappedField{
 		if(enumType!=null){
 			compositedConverter.addFieldValueConverter(CompositedFieldValueConverter.ENUM_CONVERTER);
 		}
+		/*if (getName().equals("appCode") && getEntry().getEntityName().equals("org.onetwo.common.dbm.model.hib.entity.UserEntity")) {
+			System.out.println("test");
+		}*/
 		this.dbmFieldAnnotation = propertyInfo.getAnnotation(DbmField.class);
 		this.jsonFieldAnnotation = propertyInfo.getAnnotation(DbmJsonField.class);
 		/*if(jsonFieldAnnotation != null){
@@ -105,6 +115,11 @@ abstract public class AbstractMappedField implements DbmMappedField{
 			Class<? extends DbmFieldValueConverter> converterClass = this.dbmFieldAnnotation.converterClass();
 			DbmFieldValueConverter converter = DbmUtils.createDbmBean(converterClass);
 			compositedConverter.addFieldValueConverter(converter);
+			/*this.dbmFieldAnnotation.forEach(f -> {
+				Class<? extends DbmFieldValueConverter> converterClass = f.converterClass();
+				DbmFieldValueConverter converter = DbmUtils.createDbmBean(converterClass);
+				compositedConverter.addFieldValueConverter(converter);
+			});*/
 		}
 		this.fieldValueConverter = compositedConverter;
 		
@@ -137,6 +152,26 @@ abstract public class AbstractMappedField implements DbmMappedField{
 	public void setValue(Object entity, Object value){
 		Object actaulValue = this.fieldValueConverter.forJava(this, value);;
 		propertyInfo.setValue(entity, actaulValue);
+		
+		// 同时设置此字段绑定的字段的值
+		processBindedFieldOnSetValue(entity, actaulValue);
+	}
+	
+	/***
+	 * 设置通过@DbmBindValueToField 注解绑定到此字段的其它字段的值
+	 * 
+	 * @author weishao zeng
+	 * @param entity
+	 * @param value
+	 */
+	protected void processBindedFieldOnSetValue(Object entity, Object value) {
+		Collection<DbmMappedField> bindedFields = this.getBindedFields();
+		if (LangUtils.isEmpty(bindedFields)) {
+			return ;
+		}
+		for(DbmMappedField field : bindedFields) {
+			field.setValue(entity, value);
+		}
 	}
 	
 	
@@ -144,6 +179,13 @@ abstract public class AbstractMappedField implements DbmMappedField{
 	public Object getValue(Object entity){
 		Assert.notNull(entity);
 		Object value = null;
+		
+		// 如果绑定到了某个字段，则从这个字段里获取值
+		if (this.bindToField!=null) {
+			value = this.bindToField.getValue(entity);
+			return value;
+		}
+		
 		// 处理复合主键的情况
 //		if (!propertyInfo.getType().equals(entity.getClass())) {
 		if (this.getEntry().isCompositePK()) {
@@ -333,6 +375,22 @@ abstract public class AbstractMappedField implements DbmMappedField{
 
 	public DbmJsonField getJsonFieldAnnotation() {
 		return jsonFieldAnnotation;
+	}
+
+	public Collection<DbmMappedField> getBindedFields() {
+		return bindedFields;
+	}
+
+	public void setBindedFields(Collection<DbmMappedField> bindedFields) {
+		this.bindedFields = bindedFields;
+	}
+
+	public DbmMappedField getBindToField() {
+		return bindToField;
+	}
+
+	public void setBindToField(DbmMappedField bindToField) {
+		this.bindToField = bindToField;
 	}
 	
 }

@@ -9,10 +9,14 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.NotBlank;
+import org.onetwo.dbm.annotation.DbmBindValueToField;
+import org.onetwo.dbm.annotation.DbmSensitiveField;
+import org.onetwo.dbm.annotation.DbmSensitiveField.SensitiveOns;
 import org.onetwo.dbm.mapping.DbmEnumIntMapping;
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -80,6 +84,7 @@ public class UserEntity {
 	
 	//系统代码
 	protected String appCode;
+	protected String appCodeUnsensitive;
   
 	public UserEntity(){
 	}
@@ -243,6 +248,16 @@ public class UserEntity {
 		return appCode;
 	}
 
+	@DbmSensitiveField(leftPlainTextSize=4, on=SensitiveOns.SELECT)
+	@DbmBindValueToField(name="appCode")
+	@Transient
+	public String getAppCodeUnsensitive() {
+		return appCodeUnsensitive;
+	}
+
+	public void setAppCodeUnsensitive(String appCodeUnsensitive) {
+		this.appCodeUnsensitive = appCodeUnsensitive;
+	}
 
 	public void setAppCode(String appCode) {
 		this.appCode = appCode;

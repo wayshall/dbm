@@ -23,7 +23,8 @@
 - [自定义实现DbmRepository接口](#自定义实现dbmrepository接口)
 - [枚举处理](#枚举处理)
 - [json映射](#json映射)
-- [敏感字段加密映射](#敏感字段加密映射)
+- [敏感字段映射](#敏感字段映射)
+- [字段绑定](#字段绑定)
 - [其它映射特性](#其它映射特性)
 - [批量插入](#批量插入)
 - [充血模型支持](#充血模型支持)
@@ -57,7 +58,7 @@
 
 - 支持json映射，直接把数据库的json或者varchar类型（存储内容为json数据）的列映射为Java对象
 
-- 支持敏感字段自动加解密映射
+- 支持敏感字段映射
 
    
 ## 示例项目   
@@ -70,7 +71,7 @@ JDK 1.8+
 spring 4.0+
 
 ## maven
-当前snapshot版本：4.7.2-SNAPSHOT
+当前snapshot版本：4.7.4-SNAPSHOT
 
 若使用snapshot版本，请添加snapshotRepository仓储：
 ```xml
@@ -89,7 +90,7 @@ spring 4.0+
 <dependency>
     <groupId>org.onetwo4j</groupId>
     <artifactId>onetwo-dbm</artifactId>
-    <version>4.7.2-SNAPSHOT</version>
+    <version>4.7.4-SNAPSHOT</version>
 </dependency>
 
 ```
@@ -387,7 +388,9 @@ class SimpleEntity {
 
 
 
-## 敏感字段加密映射
+## 敏感字段映射
+
+### 加解密映射
 对于一些不适宜明文存储的字段信息，比如api密钥，存储的时候自动加密，获取的时候自动解密，此时可以使用@DbmEncryptField 注解。
 ```Java
 @Entity
@@ -427,12 +430,63 @@ public class MerchantEntity implements Serializable {
 
   ```yaml
   dbm: 
-  	encrypt: 
-  		algorithm: PBEWithMD5AndTripleDES #默认加密算法
-  		password: test #密钥
+      encrypt: 
+          algorithm: PBEWithMD5AndTripleDES #默认加密算法
+          password: test #密钥
   ```
 
-  
+### 脱敏映射
+对于另一些字段，我们可能并不需要加解密，而只是在存储或者获取的时候，按照一定的规则脱敏。比如手机号码取出的时候自动对后面四位打上星号，或者邮件地址只显示第一个字符和@后面的字符，则可以使用 @DbmSensitiveField 注解进行脱敏映射。
+```Java
+@Entity
+@Table(name="TEST_USER")
+public class UserEntity implements Serializable {
+	
+
+	@Id
+	@GeneratedValue(strategy=GenerationType.IDENTITY) 
+	@Column(name="ID")
+	private Long id;
+	
+	private String mobile;
+	
+        @DbmBindValueToField(name="mobile") //查询实体时，此字段的值来自mobile字段
+        @Transient //此字段无需保存到数据库
+	@DbmSensitiveField(leftPlainTextSize=7, on=SensitiveOns.SELECT)
+	// 保留手机号码只显示左边7位，如13612345678，取出脱敏后mobile的值为：1361234****
+	private String mobileUnsensitive;
+	
+	@DbmSensitiveField(leftPlainTextSize=1, sensitiveIndexOf="@",  on=SensitiveOns.SELECT)
+	// 邮件地址左边保留一个长度的字符，@后面的字符都保留，其余用星号代替，如test@gmail.com，取出脱敏后为：t***@gmail.com
+	private String email;
+}
+```
+
+**解释**
+
+DbmSensitiveField 属性解释如下：
+- on: 表示进行脱敏的时机，有两个选择：STORE（保存到数据库的时候），SELECT（从数据库获取出来转换为java对象的时候）
+- leftPlainTextSize: 脱敏时需要左边保持明文的字符长度
+- rightPlainTextSize: 脱敏时需要右边保持明文的字符长度
+- sensitiveIndexOf: 当不想整个字段进行脱敏的时候，此属性表示某个指定的字符索引作为脱敏的结束索引。比如邮件脱敏，@字符后面的保留时，此属性值可以写为"@"
+- replacementString: 替换敏感数据的字符串，默认为星号
+
+
+
+**注意**
+
+此功能从 4.7.4 版本开始支持
+
+
+
+
+### 字段绑定
+@DbmBindValueToField 注解可以帮某个字段的值绑定到另一个字段，绑定后，实体查询时，此字段的值将会取自绑定的值。例子可以参考 [脱敏映射](#脱敏映射) 
+
+**注意**
+
+此功能从 4.7.4 版本开始支持
+
 
 
 
@@ -443,6 +497,8 @@ public class MerchantEntity implements Serializable {
 ### @DbmField注解
 @DbmField 注解可自定义一个值转换器，用于从数据库表获取的字段值转换为Java对象的属性值，和把Java对象的属性值转换为数据库表的字段值。   
 @DbmJsonField 注解实际上是包装了@DbmField注解实现的。
+
+
 
 
 ## BaseEntityManager接口和QueryDSL
