@@ -221,8 +221,8 @@ public class DbmSpringConfiguration implements ApplicationContextAware, Initiali
 		@Bean
 		public StandardPBEStringEncryptor standardPBEStringEncryptor() {
 			StandardPBEStringEncryptor encryptor = new StandardPBEStringEncryptor();
-			encryptor.setAlgorithm(dbmConfig.getEncrypt().getAlgorithm());
-			encryptor.setPassword(dbmConfig.getEncrypt().getPassword());
+			encryptor.setAlgorithm(dbmConfig().getEncrypt().getAlgorithm());
+			encryptor.setPassword(dbmConfig().getEncrypt().getPassword());
 			return encryptor;
 		}
 		@Bean

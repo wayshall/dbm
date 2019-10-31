@@ -160,8 +160,7 @@ abstract public class AbstractDbmInterceptorChain implements DbmInterceptorChain
 		if (e instanceof DbmException) {
 			throw (DbmException) e;
 		}
-		return new DbmException("invoke method error, targetMethod: " + targetMethod + ";"
-				+ "args: " + LangUtils.toString(this.targetArgs), e);
+		return new DbmException("invoke method error, targetMethod: " + targetMethod, e);
 	}
 
 	@Override
