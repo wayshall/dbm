@@ -319,13 +319,12 @@ public class DbmMappedEntryBuilder implements MappedEntryBuilder, RegisterManage
 		String colName = null;
 		DbmColumn jc = field.getPropertyInfo().getAnnotation(DbmColumn.class);
 		int sqlType = DBUtils.TYPE_UNKNOW;
-		if(jc!=null){
+		if (jc!=null) {
 			colName = jc.name();
 			sqlType = jc.sqlType();
-		}else{
-			colName = field.getName();
-			colName = StringUtils.convert2UnderLineName(colName);
 		}
+		
+		colName = convertColumnName(field, colName);
 
 		if (sqlType==DBUtils.TYPE_UNKNOW) {
 			sqlType = dialect.getTypeMapping().getType(field.getPropertyInfo().getType());
@@ -333,12 +332,20 @@ public class DbmMappedEntryBuilder implements MappedEntryBuilder, RegisterManage
 		ColumnInfo col = new ColumnInfo(tableInfo, colName, sqlType);
 		col.setJavaType(field.getPropertyInfo().getType());
 		col.setPrimaryKey(field.isIdentify());
-		if(field.isIdentify()){
+		if (field.isIdentify()) {
 			col.setInsertable(!field.isIdentityStrategy());
 			col.setUpdatable(!field.isIdentityStrategy());
 		}
 		
 		return col;
+	}
+	
+	protected String convertColumnName(DbmMappedField field, String colName) {
+		if (StringUtils.isBlank(colName)) {
+			colName = field.getName();
+			colName = StringUtils.convert2UnderLineName(colName);
+		} 
+		return colName;
 	}
 	
 	/*protected void buildPKColumnInfo(AbstractMappedField field, ColumnInfo col){

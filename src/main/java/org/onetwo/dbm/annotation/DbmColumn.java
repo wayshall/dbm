@@ -10,7 +10,7 @@ import org.onetwo.dbm.utils.DBUtils;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface DbmColumn {
 	
-	String name();
+	String name() default "";
 	
 	/***
 	 * @see java.sql.Types

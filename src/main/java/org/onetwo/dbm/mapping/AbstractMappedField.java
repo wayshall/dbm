@@ -131,7 +131,8 @@ abstract public class AbstractMappedField implements DbmMappedField{
 		if(enumType!=null){
 			actualType = this.enumType.getJavaType();
 		}else if(this.jsonFieldAnnotation !=null ){
-			actualType = String.class;
+//			actualType = String.class;
+			actualType = this.jsonFieldAnnotation.convertibleJavaType().getJavaType();
 		}
 		this.actualMappingColumnType = actualType;
 	}

@@ -25,14 +25,20 @@ public class JsonFieldValueConverter implements DbmFieldValueConverter {
 
 	@Override
 	public Object forJava(DbmMappedField field, Object fieldValue) {
-		return getActaulJsonMapper(field).fromJson(fieldValue.toString(), field.getPropertyInfo().getType());
+		return getActaulJsonMapper(field).fromJson(fieldValue, field.getPropertyInfo().getType());
 	}
 
 	@Override
 	public Object forStore(DbmMappedField field, Object fieldValue) {
 		JsonMapper jsonMapper = getActaulJsonMapper(field);
 //		field.getColumnType()
-		return jsonMapper.toJson(fieldValue);
+		Object value = null;
+		if (byte[].class==field.getColumnType()) {
+			value = jsonMapper.toJsonBytes(fieldValue);
+		} else {
+			value = jsonMapper.toJson(fieldValue);
+		}
+		return value;
 	}
 	
 	private JsonMapper getActaulJsonMapper(DbmMappedField field) {
