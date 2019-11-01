@@ -30,7 +30,9 @@ public class JsonFieldValueConverter implements DbmFieldValueConverter {
 
 	@Override
 	public Object forStore(DbmMappedField field, Object fieldValue) {
-		return getActaulJsonMapper(field).toJson(fieldValue);
+		JsonMapper jsonMapper = getActaulJsonMapper(field);
+//		field.getColumnType()
+		return jsonMapper.toJson(fieldValue);
 	}
 	
 	private JsonMapper getActaulJsonMapper(DbmMappedField field) {

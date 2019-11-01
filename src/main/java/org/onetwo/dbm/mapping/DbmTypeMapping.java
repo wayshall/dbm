@@ -48,6 +48,7 @@ public class DbmTypeMapping {
 		map(java.sql.Time.class, JDBCType.TIME);
 		map(java.sql.Timestamp.class, JDBCType.TIMESTAMP);
 		map(byte[].class, JDBCType.BINARY);
+		map(Byte[].class, JDBCType.BINARY);
 		
 	}
 

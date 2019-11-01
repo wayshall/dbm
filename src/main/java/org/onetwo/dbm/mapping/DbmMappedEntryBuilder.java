@@ -29,6 +29,7 @@ import org.onetwo.dbm.exception.DbmException;
 import org.onetwo.dbm.id.StrategyType;
 import org.onetwo.dbm.jpa.GeneratedValueIAttrs;
 import org.onetwo.dbm.query.DbmQueryableMappedEntryImpl;
+import org.onetwo.dbm.utils.DBUtils;
 import org.slf4j.Logger;
 import org.springframework.core.Ordered;
 import org.springframework.core.type.AnnotationMetadata;
@@ -317,14 +318,18 @@ public class DbmMappedEntryBuilder implements MappedEntryBuilder, RegisterManage
 		
 		String colName = null;
 		DbmColumn jc = field.getPropertyInfo().getAnnotation(DbmColumn.class);
+		int sqlType = DBUtils.TYPE_UNKNOW;
 		if(jc!=null){
 			colName = jc.name();
+			sqlType = jc.sqlType();
 		}else{
 			colName = field.getName();
 			colName = StringUtils.convert2UnderLineName(colName);
 		}
-		
-		int sqlType = dialect.getTypeMapping().getType(field.getPropertyInfo().getType());
+
+		if (sqlType==DBUtils.TYPE_UNKNOW) {
+			sqlType = dialect.getTypeMapping().getType(field.getPropertyInfo().getType());
+		}
 		ColumnInfo col = new ColumnInfo(tableInfo, colName, sqlType);
 		col.setJavaType(field.getPropertyInfo().getType());
 		col.setPrimaryKey(field.isIdentify());

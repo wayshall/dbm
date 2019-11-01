@@ -150,6 +150,7 @@ abstract public class AbstractMappedField implements DbmMappedField{
 	
 	@Override
 	public void setValue(Object entity, Object value){
+		value = DbmUtils.convertFromSqlParameterValue(this, value);
 		Object actaulValue = this.fieldValueConverter.forJava(this, value);;
 		propertyInfo.setValue(entity, actaulValue);
 		
