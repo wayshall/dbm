@@ -27,16 +27,21 @@ public class SimpleDBLocker {
 	private BaseEntityManager baseEntityManager;
 	private String tableName = "dbm_lock";
 	
-	private String lockTableCreateSql = "create table " + tableName + " (\r\n" + 
-			"   id                   varchar(32) not null,\r\n" + 
-			"   lock_at              datetime,\r\n" + 
-			"   release_at           datetime,\r\n" + 
-			"   primary key (id)\r\n" + 
-			")";
-	
-	
 	
 	public SimpleDBLocker() {
+	}
+
+	public void setTableName(String tableName) {
+		this.tableName = tableName;
+	}
+	
+	public String getLockTableCreateSql() {
+		return "create table " + tableName + " ( " + 
+				"   id                   varchar(32) not null, " + 
+				"   lock_at              datetime, " + 
+				"   release_at           datetime, " + 
+				"   primary key (id) " + 
+				")";
 	}
 
 	@Transactional
@@ -45,7 +50,7 @@ public class SimpleDBLocker {
 		Optional<TableMeta> tableOpt = sf.getDatabaseMetaDialet().findTableMeta(tableName);
 		if (!tableOpt.isPresent()) {
 			sf.getSession()
-				.createDbmQuery(lockTableCreateSql)
+				.createDbmQuery(getLockTableCreateSql())
 				.executeUpdate();
 		}
 		LockerEntity locker = baseEntityManager.findById(LockerEntity.class, lockerId);
