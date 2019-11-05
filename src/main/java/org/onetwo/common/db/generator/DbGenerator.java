@@ -7,11 +7,9 @@ import java.util.stream.Stream;
 
 import javax.sql.DataSource;
 
-import org.onetwo.common.db.DataBase;
 import org.onetwo.common.db.generator.GlobalConfig.OutfilePathFunc;
 import org.onetwo.common.db.generator.dialet.DatabaseMetaDialet;
-import org.onetwo.common.db.generator.dialet.MysqlMetaDialet;
-import org.onetwo.common.db.generator.dialet.OracleMetaDialet;
+import org.onetwo.common.db.generator.dialet.DelegateDatabaseMetaDialet;
 import org.onetwo.common.db.generator.mapping.ColumnMapping;
 import org.onetwo.common.db.generator.mapping.ColumnMapping.ColumnAttrValueFunc;
 import org.onetwo.common.db.generator.meta.ColumnMeta;
@@ -19,8 +17,6 @@ import org.onetwo.common.db.generator.meta.TableMeta;
 import org.onetwo.common.file.FileUtils;
 import org.onetwo.common.utils.Assert;
 import org.onetwo.common.utils.StringUtils;
-import org.onetwo.dbm.exception.DbmException;
-import org.onetwo.dbm.jdbc.JdbcUtils;
 
 import com.google.common.collect.Lists;
 
@@ -53,21 +49,22 @@ public class DbGenerator {
 		super();
 		this.dataSource = dataSource;
 		this.templateEngine = ftlGenerator;
-		DataBase db = JdbcUtils.getDataBase(dataSource);
+		this.dialet = new DelegateDatabaseMetaDialet(dataSource);
+		/*DataBase db = JdbcUtils.getDataBase(dataSource);
 		if(db==DataBase.MySQL){
 			mysql();
 		}else if(db==DataBase.Oracle){
 			oracle();
 		}else{
 			throw new DbmException("unsupported database : " + db);
-		}
+		}*/
 	}
 	public DbGenerator templateEngine(TemplateEngine templateEngine){
 		this.templateEngine = templateEngine;
 		return this;
 	}
 	
-	final public DbGenerator mysql(){
+	/*final public DbGenerator mysql(){
 		this.dialet = new MysqlMetaDialet(dataSource);
 		return this;
 	}
@@ -75,8 +72,12 @@ public class DbGenerator {
 	final public DbGenerator oracle(){
 		this.dialet = new OracleMetaDialet(dataSource);
 		return this;
-	}
+	}*/
 	
+	public DataSource getDataSource() {
+		return dataSource;
+	}
+
 	public DatabaseMetaDialet databaseMetaDialet() {
 		return dialet;
 	}

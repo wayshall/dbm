@@ -34,7 +34,7 @@ public interface BaseEntityManager {
 	 * @param id
 	 * @param lock
 	 * @param timeoutInMillis lock forevaer if null, support: oracle, not support: mysql
-	 * @return
+	 * @return return the target or null if not found
 	 */
 	public <T> T lock(Class<T> entityClass, Serializable id, DbmLock lock, Integer timeoutInMillis);
 	
