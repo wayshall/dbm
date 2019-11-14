@@ -29,6 +29,7 @@ import org.onetwo.dbm.exception.UpdateCountException;
 import org.onetwo.dbm.jdbc.JdbcUtils;
 import org.onetwo.dbm.jdbc.spi.SqlParametersProvider;
 import org.onetwo.dbm.mapping.DbmEntityFieldListener;
+import org.onetwo.dbm.mapping.DbmMappedField;
 import org.onetwo.dbm.spring.EnableDbm;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.ListableBeanFactory;
@@ -36,6 +37,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.data.transaction.ChainedTransactionManager;
+import org.springframework.jdbc.core.SqlParameterValue;
 import org.springframework.jdbc.core.SqlProvider;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
@@ -319,6 +321,30 @@ final public class DbmUtils {
 			bean = ReflectUtils.newInstance(clazz);
 		}
 		return bean;
+	}
+	
+	public static SqlParameterValue convert2SqlParameterValue(DbmMappedField field, Object value){
+		return new DbmSqlParameterValue(field.getColumn().getSqlType(), value);
+	}
+	
+	public static Object convertFromSqlParameterValue(DbmMappedField field, Object sqlParametableValue){
+		Object val = sqlParametableValue;
+		if (sqlParametableValue instanceof SqlParameterValue) {
+			SqlParameterValue spv = (SqlParameterValue) sqlParametableValue;
+			val = spv.getValue();
+		}
+		return val;
+	}
+	
+	public static class DbmSqlParameterValue extends SqlParameterValue {
+
+		public DbmSqlParameterValue(int sqlType, Object value) {
+			super(sqlType, value);
+		}
+		
+		public String toString() {
+			return getValue()==null?"NULL":getValue().toString();
+		}
 	}
 	
 	private DbmUtils(){

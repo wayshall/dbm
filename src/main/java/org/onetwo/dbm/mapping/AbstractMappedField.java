@@ -131,7 +131,8 @@ abstract public class AbstractMappedField implements DbmMappedField{
 		if(enumType!=null){
 			actualType = this.enumType.getJavaType();
 		}else if(this.jsonFieldAnnotation !=null ){
-			actualType = String.class;
+//			actualType = String.class;
+			actualType = this.jsonFieldAnnotation.convertibleJavaType().getJavaType();
 		}
 		this.actualMappingColumnType = actualType;
 	}
@@ -150,6 +151,7 @@ abstract public class AbstractMappedField implements DbmMappedField{
 	
 	@Override
 	public void setValue(Object entity, Object value){
+		value = DbmUtils.convertFromSqlParameterValue(this, value);
 		Object actaulValue = this.fieldValueConverter.forJava(this, value);;
 		propertyInfo.setValue(entity, actaulValue);
 		

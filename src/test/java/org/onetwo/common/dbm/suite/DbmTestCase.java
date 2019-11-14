@@ -30,6 +30,7 @@ import org.onetwo.common.dbm.TransactionalListenerTest;
 import org.onetwo.common.dbm.UserDbmIdEntityTest;
 import org.onetwo.common.dbm.UserOptionDaoTest;
 import org.onetwo.common.dbm.UserTableIdEntityTest;
+import org.onetwo.common.dbm.locker.SimpleDBLockerTest;
 import org.onetwo.common.dbm.model.service.UserAutoidServiceTest;
 import org.onetwo.common.hibernate.UserQueryHibernateDaoTest;
 import org.onetwo.common.hibernate.dao.HibernateNestedMappingTest;
@@ -72,7 +73,8 @@ import org.onetwo.dbm.utils.SpringAnnotationFinderTest;
 	
 	HibernateNestedMappingTest.class,
 	UserQueryHibernateDaoTest.class,
-	EncryptFieldTest.class
+	EncryptFieldTest.class,
+	SimpleDBLockerTest.class
 //	RichModelTest.class
 })
 public class DbmTestCase {

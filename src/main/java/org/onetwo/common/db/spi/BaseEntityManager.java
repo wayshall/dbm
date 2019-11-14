@@ -12,6 +12,7 @@ import org.onetwo.common.db.builder.QueryBuilder;
 import org.onetwo.common.db.sqlext.SQLSymbolManager;
 import org.onetwo.common.utils.Page;
 import org.onetwo.dbm.core.spi.DbmSessionFactory;
+import org.onetwo.dbm.dialet.DBDialect.LockInfo;
 import org.onetwo.dbm.utils.DbmLock;
 
 /****
@@ -27,15 +28,23 @@ public interface BaseEntityManager {
 	public <T> T findById(Class<T> entityClass, Serializable id);
 	
 	/***
-	 * 
+	 * @see org.onetwo.dbm.dialet.DBDialect$LockInfo
 	 * @author wayshall
 	 * @param entityClass
 	 * @param id
 	 * @param lock
-	 * @param timeoutInMillis lock forevaer if null
-	 * @return
+	 * @param timeoutInMillis lock forevaer if null, support: oracle, not support: mysql
+	 * @return return the target or null if not found
 	 */
 	public <T> T lock(Class<T> entityClass, Serializable id, DbmLock lock, Integer timeoutInMillis);
+	
+	default <T> T lockWrite(Class<T> entityClass, Serializable id) {
+		return lock(entityClass, id, DbmLock.PESSIMISTIC_WRITE, LockInfo.WAIT_FOREVER);
+	}
+	
+	default <T> T lockRead(Class<T> entityClass, Serializable id) {
+		return lock(entityClass, id, DbmLock.PESSIMISTIC_READ, LockInfo.WAIT_FOREVER);
+	}
 
 	public <T> T save(T entity);
 	public <T> Collection<T> saves(Collection<T> entities);

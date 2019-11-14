@@ -127,27 +127,39 @@ abstract public class AbstractDbmInterceptorChain implements DbmInterceptorChain
 			DbmInterceptor interceptor = iterator.next();
 			result = interceptor.intercept(this);
 		}else{
-			if(actualInvoker!=null){
-				result = actualInvoker.get();
-			}else{
-				if (!targetMethod.isAccessible()){
-					targetMethod.setAccessible(true);
-				}
-				try {
-					result = targetMethod.invoke(targetObject, targetArgs);
-					state = STATE_FINISH;
-				} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-					state = STATE_EXCEPTION;
-					throwable = e;
-					throw convertRuntimeException(e);
-				}
+			try {
+				invokeTarget();
+				state = STATE_FINISH;
+			} catch (Exception e) {
+				state = STATE_EXCEPTION;
+				throwable = e;
+				throw convertRuntimeException(e);
 			}
 		}
 		return result;
 	}
 	
+	private void invokeTarget() {
+		if(actualInvoker!=null){
+			result = actualInvoker.get();
+			state = STATE_FINISH;
+		}else{
+			if (!targetMethod.isAccessible()){
+				targetMethod.setAccessible(true);
+			}
+			try {
+				result = targetMethod.invoke(targetObject, targetArgs);
+				state = STATE_FINISH;
+			} catch (Exception e) {
+				state = STATE_EXCEPTION;
+				throwable = e;
+				throw convertRuntimeException(e);
+			}
+		}
+	}
+	
 	private RuntimeException convertRuntimeException(Exception e){
-		if(e instanceof InvocationTargetException){
+		if (e instanceof InvocationTargetException) {
 			InvocationTargetException ite = (InvocationTargetException)e;
 			Throwable target = ite.getTargetException();
 			if(target instanceof NestedRuntimeException){
@@ -155,13 +167,14 @@ abstract public class AbstractDbmInterceptorChain implements DbmInterceptorChain
 			}else if (target instanceof DbmException) {
 				throw (DbmException) target;
 			}
+		} else if ( e instanceof RuntimeException) {
+			throw (RuntimeException) e;
 		}
 		
-		if (e instanceof DbmException) {
+		/*if (e instanceof DbmException) {
 			throw (DbmException) e;
-		}
-		return new DbmException("invoke method error, targetMethod: " + targetMethod + ";"
-				+ "args: " + LangUtils.toString(this.targetArgs), e);
+		}*/
+		return new DbmException("invoke method error, targetMethod: " + targetMethod, e);
 	}
 
 	@Override
