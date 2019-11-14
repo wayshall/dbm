@@ -1,7 +1,14 @@
 # dbm
 ------
 基于spring jdbc实现的轻量级orm   
+
+项目github地址：[ dbm ]( https://github.com/wayshall/dbm )
+
+
+
 交流群：  604158262
+
+
 
 ## 目录
 - [特色](#特色)
