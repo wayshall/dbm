@@ -22,7 +22,8 @@
 - [其它特有的映射](#其它特有的映射)
 - [BaseEntityManager接口和QueryDSL](#BaseEntityManager接口和QueryDSL)
 - [CrudEntityManager接口](#crudentitymanager接口)
-- [DbmRepository接口](#dbmrepository接口)
+- [DbmRepository动态sql查询接口](#DbmRepository动态sql查询接口)
+- [动态sql查询的语法和指令](#动态sql查询的语法和指令)
 - [DbmRepository接口的多数据源支持](#dbmrepository接口的多数据源支持)
 - [DbmRepository接口对其它orm框架的兼容](#dbmrepository接口对其它orm框架的兼容)
 - [查询映射](#查询映射)
@@ -686,7 +687,7 @@ public class UserAutoidEntity {
 
 
 
-## DbmRepository接口
+## DbmRepository动态sql查询接口
 DbmRepository接口支持类似mybatis的sql语句与接口绑定，但sql文件不是写在丑陋的xml里，而是直接写在sql文件里，这样用eclipse或者相关支持sql的编辑器打开时，就可以语法高亮，更容易阅读。
 
 ### 1、定义一个接口   
@@ -772,8 +773,28 @@ public interface UserDao {
 }
 ```
 
-### sql模板文件的语法和指令支持
+## 动态sql查询的语法和指令
+
+### 常用指令
 sql模板使用的实际上是freemarker模板引擎，因此freemarker支持的语法都可以使用。
+一般比较常用到的指令如下：
+- if 指令
+```sql
+[#if 条件表达式]
+......
+[/#if]
+```
+- list 迭代指令
+```sql
+[#list 可迭代的变量 as item]
+......t.column_name = ${item.property1}
+[/#list]
+```
+条件表达式除了通常的逻辑判断外，还有一些比较常用到的表达式：
+- 变量??,双问号，用于判断一个变量是否存在
+- 变量?has_content，用于判断变量是有内容，比如字符串的话，相等于判断是否为空。
+
+### dbm扩展指令
 另外增加了一些特定的指令以帮助处理sql，包括：
 
 - @foreach
