@@ -165,7 +165,7 @@ abstract public class BaseMetaDialet implements DatabaseMetaDialet {
 				}*/
 				String isNullable  = rs.getString("IS_NULLABLE");
 				int columnSize = rs.getInt("COLUMN_SIZE");
-				ColumnMapping mapping = getMetaMapping().getRequiredColumnMapping(sqlType);
+				ColumnMapping mapping = getMetaMapping().getRequiredColumnMapping(colName, sqlType);
 				logger.info("mapping -> colunm: {}, sqltype: {}", colName, mapping);
 				ColumnMeta meta = new ColumnMeta(table, colName, mapping);
 				meta.setComment(remark);
