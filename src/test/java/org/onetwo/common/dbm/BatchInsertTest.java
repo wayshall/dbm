@@ -29,7 +29,7 @@ public class BatchInsertTest extends DbmBaseTest {
 		int insertCount = 1000;
 		//精确到秒，否则会有误差，比如2015-05-06 13:49:09.783存储到mysql后会变成2015-05-06 13:49:10，mysql的datetime只能精确到秒
 		String userNamePrefix = "testBatchInsert";
-		NiceDate niceNowSeconde = NiceDate.New().thisSec();
+		NiceDate niceNowSeconde = NiceDate.New().preciseAtSec();
 		TimeCounter t = TimeCounter.start(userNamePrefix);
 		int count = this.userAutoidServiceImpl.daoBatchInsert(userNamePrefix, UserStatus.NORMAL, niceNowSeconde.getTime(), insertCount);
 		Assert.assertEquals(insertCount, count);
@@ -73,7 +73,7 @@ public class BatchInsertTest extends DbmBaseTest {
 		int insertCount = 10;
 		//精确到秒，否则会有误差，比如2015-05-06 13:49:09.783存储到mysql后会变成2015-05-06 13:49:10，mysql的datetime只能精确到秒
 		String userNamePrefix = "testQuerySwitcher";
-		NiceDate niceNowSeconde = NiceDate.New().thisSec();
+		NiceDate niceNowSeconde = NiceDate.New().preciseAtSec();
 		int count = this.userAutoidServiceImpl.daoBatchInsert(userNamePrefix, UserStatus.NORMAL, niceNowSeconde.getTime(), insertCount);
 		Assert.assertEquals(insertCount, count);
 		

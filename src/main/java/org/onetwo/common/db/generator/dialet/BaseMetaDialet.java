@@ -81,7 +81,7 @@ abstract public class BaseMetaDialet implements DatabaseMetaDialet {
 	
 	public TableMeta getTableMeta(String tableName){
 		return findTableMeta(tableName).orElseThrow(() -> {
-			return new DbmException("not table found: " + tableName);	
+			return new DbmException("table not found: " + tableName);	
 		});
 	}
 
