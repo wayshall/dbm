@@ -27,6 +27,7 @@ import org.onetwo.common.utils.JFishProperty;
 import org.onetwo.common.utils.LangUtils;
 import org.onetwo.common.utils.StringUtils;
 import org.onetwo.dbm.annotation.DbmEntity;
+import org.onetwo.dbm.annotation.DbmId;
 import org.onetwo.dbm.core.spi.DbmInnerServiceRegistry;
 import org.onetwo.dbm.dialet.DBDialect;
 import org.onetwo.dbm.exception.DbmException;
@@ -45,6 +46,7 @@ import org.onetwo.dbm.mapping.version.IntegerVersionableType;
 import org.onetwo.dbm.mapping.version.LongVersionableType;
 import org.onetwo.dbm.mapping.version.MySqlDateVersionableType;
 import org.onetwo.dbm.mapping.version.VersionableType;
+import org.onetwo.dbm.utils.SpringAnnotationFinder;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.classreading.MetadataReader;
 
@@ -135,7 +137,8 @@ public class JPAMappedEntryBuilder extends DbmMappedEntryBuilder {
 		Class<?> entityClass = ReflectUtils.getObjectClass(entity);
 		Optional<Field> idField = Intro.wrap(entityClass).getAllFields()
 								.stream()
-								.filter(f->f.getAnnotation(Id.class)!=null)
+								.filter(f->f.getAnnotation(Id.class)!=null || 
+										SpringAnnotationFinder.INSTANCE.getAnnotation(f, DbmId.class)!=null)
 								.findAny();
 							
 		return buildMappedEntry(entityClass, !idField.isPresent());
@@ -185,7 +188,7 @@ public class JPAMappedEntryBuilder extends DbmMappedEntryBuilder {
 
 	@Override
 	protected void buildMappedField(DbmMappedField mfield){
-		if (mfield.getPropertyInfo().hasAnnotation(Id.class)) {
+		if (mfield.getPropertyInfo().hasAnnotation(Id.class) || mfield.getPropertyInfo().hasAnnotation(DbmId.class)) {
 			mfield.setIdentify(true);
 			this.buildIdGeneratorsOnField(mfield);
 		} else if (mfield.isMappingGenerated()) {

@@ -225,6 +225,25 @@ public class UserEntity implements Serializable {
 }
 ```
 
+
+### @SnowFlakeId 注解
+
+4.7.4 版本后，使用内置的snowFlakeId生成主键id时，可直接使用 @SnowflakeId 简化配置：
+
+```Java
+@Entity
+@Table(name="t_user")
+public class UserEntity {
+	@SnowflakeId 
+	protected Long id;
+}
+```
+
+
+
+
+
+
 ## 复合主键映射
 jpa支持三种复合主键映射策略，dbm目前只支持一种： @IdClass 映射。
 映射方法如下：
@@ -1260,7 +1279,10 @@ public interface UserAutoidDao {
 
 ## 其它映射特性
 
+
+
 ### 注解@DbmRowMapper
+
 用于配置DbmRepository类的数据映射器，配置指定的mapper，默认为ENTITY模式。
 由于标注为实体的映射规则和Pojo默认的映射规则不一致，导致有时候某些查询返回需要用到两种规则时无法兼容，使用此注解的MIXTURE 混合模式可以兼容两种规则。
 

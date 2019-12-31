@@ -7,6 +7,7 @@ import javax.persistence.Id;
 import org.hibernate.validator.constraints.Length;
 import org.onetwo.dbm.annotation.DbmEntity;
 import org.onetwo.dbm.annotation.DbmIdGenerator;
+import org.onetwo.dbm.annotation.SnowflakeId;
 import org.onetwo.dbm.id.SnowflakeGenerator;
 import org.onetwo.dbm.jpa.BaseEntity;
 
@@ -24,9 +25,10 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper=true)
 public class SnowflakeIdUserEntity extends BaseEntity {
 
-	@Id  
-	@GeneratedValue(strategy = GenerationType.AUTO, generator="snowflake") 
-	@DbmIdGenerator(name="snowflake", generatorClass=SnowflakeGenerator.class)
+//	@Id  
+//	@GeneratedValue(strategy = GenerationType.AUTO, generator="snowflake") 
+//	@DbmIdGenerator(name="snowflake", generatorClass=SnowflakeGenerator.class)
+	@SnowflakeId
 	protected Long id;
 	@Length(min=1, max=50)
 	protected String userName;
