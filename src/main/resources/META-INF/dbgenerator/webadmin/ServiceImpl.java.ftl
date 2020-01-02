@@ -20,7 +20,6 @@ package ${_globalConfig.getJavaLocalPackage(_tableContext.localPackage)};
 import java.util.Collection;
 
 import org.onetwo.common.db.spi.BaseEntityManager;
-import org.onetwo.common.db.builder.Querys;
 import org.onetwo.common.utils.Page;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
