@@ -276,9 +276,10 @@ public class DbGenerator {
 		}
 		
 
-		public DbTableGenerator controllerTemplate(String templatePath){
-			return controllerTemplate("web", templatePath);
-		}
+		/*
+		 * public DbTableGenerator controllerTemplate(String templatePath){ return
+		 * controllerTemplate("web", templatePath); }
+		
 		public DbTableGenerator controllerTemplate(String controllerPackage, String templatePath){
 			TableGeneratedConfig config = new TableGeneratedConfig(tableName, templatePath);
 			config.outfilePathFunc(c->{
@@ -292,21 +293,23 @@ public class DbGenerator {
 							);
 			tableGeneratedConfig.add(config);
 			return this;
-		}
+		} */
 		
 		public DbTableGenerator serviceImplTemplate(String templatePath){
-			return serviceImplTemplate("service.impl", templatePath);
+			return javaClassTemplate("service.impl", templatePath);
 		}
-		public DbTableGenerator serviceImplTemplate(String servicePackage, String templatePath){
+		
+		public DbTableGenerator javaClassTemplate(String javaClassPackage, String templatePath){
 			TableGeneratedConfig config = new TableGeneratedConfig(tableName, templatePath);
 			config.outfilePathFunc(c->{
-									c.setLocalPackage(servicePackage);
+									c.setLocalPackage(javaClassPackage);
 									String tableShortName = c.tableNameStripStart(c.globalGeneratedConfig().getStripTablePrefix());
-									String servicePath = servicePackage.replace('.', '/');
+									String servicePath = javaClassPackage.replace('.', '/');
 									servicePath = StringUtils.appendArroundWith(servicePath, "/");
-									String filePath = c.globalGeneratedConfig().getFullModulePackagePath()+servicePath+
-									StringUtils.toClassName(tableShortName)+
-									FileUtils.getFileNameWithoutExt(templatePath);
+									String filePath = c.globalGeneratedConfig().getFullModulePackagePath() + 
+																				servicePath +
+																				StringUtils.toClassName(tableShortName)+
+																				FileUtils.getFileNameWithoutExt(templatePath);
 									return filePath;
 								}
 							);

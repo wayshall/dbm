@@ -36,7 +36,7 @@ public class ${serviceImplClassName} {
     private BaseEntityManager baseEntityManager;
     
     public Page<${entityClassName}> findPage(Page<${entityClassName}> page, ${entityClassName} ${_tableContext.propertyName}){
-        return Querys.from(baseEntityManager, ${entityClassName}.class)
+        return baseEntityManager.from(${entityClassName}.class)
                 	.where()
             		  .addFields(${_tableContext.propertyName})
             		  .ignoreIfNull()
@@ -45,8 +45,9 @@ public class ${serviceImplClassName} {
             		.page(page);
     }
     
-    public void save(${entityClassName} entity) {
+    public ${entityClassName} save(${entityClassName} entity) {
 		baseEntityManager.persist(entity);
+		return entity;
 	}
 
 	public void update(${entityClassName} entity) {

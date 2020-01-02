@@ -253,13 +253,13 @@ public class DbmGenerator {
 		
 		public WebadminGenerator generateController(Class<?> pluginBaseController){
 			context.put("pluginBaseController", pluginBaseController.getName());
-			tableGenerator.controllerTemplate("controller", templateName+"/Controller.java.ftl");
+			tableGenerator.javaClassTemplate("controller", templateName+"/Controller.java.ftl");
 			return this;
 		}
 		
 		public WebadminGenerator generateVueController(Class<?> pluginBaseController){
 			context.put("pluginBaseController", pluginBaseController.getName());
-			tableGenerator.controllerTemplate("controller", templateName+"/MgrController.java.ftl");
+			tableGenerator.javaClassTemplate("controller", templateName+"/MgrController.java.ftl");
 			return this;
 		}
 		
