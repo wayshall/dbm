@@ -1,4 +1,4 @@
-<#import "helper.ftl" as helper>
+<#import "../webadmin/helper.ftl" as helper>
 
 <#assign hasFileType=false/>
 <#assign hasSelectType=false/>
