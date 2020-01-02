@@ -41,6 +41,7 @@ import org.onetwo.dbm.mapping.MappedEntryManager;
 import org.onetwo.dbm.query.DbmQuery;
 import org.onetwo.dbm.query.DbmQueryImpl;
 import org.onetwo.dbm.query.DbmQueryWrapperImpl;
+import org.onetwo.dbm.utils.DbmErrors;
 import org.onetwo.dbm.utils.DbmLock;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.ColumnMapRowMapper;
@@ -63,6 +64,7 @@ public class DbmSessionImpl extends AbstractDbmSession implements DbmSessionEven
 	final private long id;
 	final private Date timestamp = new Date();
 	private SessionTransactionType transactionType;
+	private boolean closed = false;
 
 	public DbmSessionImpl(DbmSessionFactory sessionFactory, long id, DbmTransaction transaction){
 		Assert.notNull(sessionFactory);
@@ -76,9 +78,20 @@ public class DbmSessionImpl extends AbstractDbmSession implements DbmSessionEven
 		return id;
 	}
 
+	protected void errorIfClosed() {
+		if (isClosed()) {
+			throw new DbmException(DbmErrors.ERR_SESSION_IS_CLOSED);
+		}
+	}
+	
+	public boolean isClosed() {
+		return closed;
+	}
+
 	@Override
 	public void close() {
-		
+		this.transaction = null;
+		this.closed = true;
 	}
 
 	public boolean useContextTransactional() {
@@ -102,6 +115,7 @@ public class DbmSessionImpl extends AbstractDbmSession implements DbmSessionEven
 	}
 
 	public DbmTransaction getTransaction() {
+		this.errorIfClosed();
 		return transaction;
 	}
 
@@ -111,6 +125,8 @@ public class DbmSessionImpl extends AbstractDbmSession implements DbmSessionEven
 	}
 	
 	public synchronized DbmTransaction beginTransaction(TransactionDefinition definition) {
+		this.errorIfClosed();
+		
 		if(this.transactionType==SessionTransactionType.CONTEXT_MANAGED 
 //				|| this.transactionType==SessionTransactionType.PROXY
 			){
@@ -247,6 +263,7 @@ public class DbmSessionImpl extends AbstractDbmSession implements DbmSessionEven
 	}*/
 	
 	protected void fireEvents(DbmSessionEvent event){
+		this.errorIfClosed();
 		getDialect().getDbmEventListenerManager().fireEvents(event);
 		/*DbmEventListener[] listeners = getDialect().getDbmEventListenerManager().getListeners(event.getAction());
 		for(DbmEventListener listern : listeners){
@@ -408,6 +425,7 @@ public class DbmSessionImpl extends AbstractDbmSession implements DbmSessionEven
 	}
 	
 	public <T> T findUnique(String sql, Object[] args, RowMapper<T> row){
+		this.errorIfClosed();
 		T result = null;
 		try{
 			result = this.getDbmJdbcOperations().queryForObject(sql, args, row);
@@ -507,6 +525,7 @@ public class DbmSessionImpl extends AbstractDbmSession implements DbmSessionEven
 	}
 	
 	public DbmQuery createDbmQuery(String sql, Class<?> entityClass){
+		this.errorIfClosed();
 		return new DbmQueryImpl(this, sql, entityClass);
 	}
 	

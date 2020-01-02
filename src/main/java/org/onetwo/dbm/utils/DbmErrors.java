@@ -13,7 +13,8 @@ import lombok.Getter;
 public enum DbmErrors implements ErrorType {
 	ERR_DBM("dbm error"),
 	ERR_LOCK_ID_NOT_FOUND("locker id not found!"),
-	ERR_LOCK_TIMEOUT("locker was timed-out!")
+	ERR_LOCK_TIMEOUT("locker was timed-out!"),
+	ERR_SESSION_IS_CLOSED("Session is closed!")
 	;
 	
 	@Getter
