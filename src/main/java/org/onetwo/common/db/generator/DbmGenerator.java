@@ -9,6 +9,7 @@ import java.util.function.Function;
 import javax.sql.DataSource;
 
 import org.onetwo.common.db.generator.DbGenerator.DbTableGenerator;
+import org.onetwo.common.db.generator.DbGenerator.DbTableGenerator.TableGeneratedConfig;
 import org.onetwo.common.db.generator.GlobalConfig.OutfilePathFunc;
 import org.onetwo.common.db.generator.ftl.FtlEngine;
 import org.onetwo.common.db.generator.ftl.TomcatDataSourceBuilder;
@@ -142,9 +143,9 @@ public class DbmGenerator {
 	}
 	
 	public DbmGenerator pluginProjectDir(String pluginName){
-		if (StringUtils.isBlank(moduleName)) {
-			moduleName(pluginName);
-		}
+		/*
+		 * if (StringUtils.isBlank(moduleName)) { moduleName(pluginName); }
+		 */
 		this.mavenProjectDir();
 		pageFileBaseDir = LangUtils.toString("${0}/src/main/resources/META-INF/resources/webftls/"+pluginName, this.projectPath);
 		this.dbGenerator.globalConfig().pageFileBaseDir(pageFileBaseDir);
@@ -177,10 +178,11 @@ public class DbmGenerator {
 		return webadmin;
 	}
 
-	public VuePageGenerator vueGenerator(String tableName){
+	public VuePageGenerator vueGenerator(String tableName, String vueModuleName){
 		DbTableGenerator tableGenerator = dbGenerator.table(tableName);
 		vueGenerator = new VuePageGenerator();
 		vueGenerator.tableGenerator = tableGenerator;
+		vueGenerator.vueModuleName = vueModuleName;
 //		vueGenerator.vueBaseDir = vueBaseDir;
 		return vueGenerator;
 	}
@@ -287,6 +289,7 @@ public class DbmGenerator {
 		private String templateName = templateBasePath + "vue";
 //		String vueBaseDir;
 		String viewDir = "/src/views";
+		String vueModuleName;
 
 		Function<String, OutfilePathFunc> vueFileNameFuncCreator = path -> {
 			return c->{
@@ -294,7 +297,7 @@ public class DbmGenerator {
 				String tableShortName = c.tableNameStripStart(c.globalGeneratedConfig().getStripTablePrefix());
 				String pageFileBaseDir = c.globalGeneratedConfig().getPageFileBaseDir();
 				Assert.notNull(pageFileBaseDir, "pageFileBaseDir can not be null");
-				String moduleName = c.globalGeneratedConfig().getModuleName();
+				String moduleName = viewModuleName(c);
 				Assert.notNull(moduleName, "moduleName can not be null");
 				
 				String fileName = StringUtils.toCamel(tableShortName, false);
@@ -306,6 +309,10 @@ public class DbmGenerator {
 				return filePath;
 			};
 		};
+		
+		private String viewModuleName(TableGeneratedConfig c) {
+			return StringUtils.isNotBlank(vueModuleName)?vueModuleName:c.globalGeneratedConfig().getModuleName();
+		}
 		
 		public VuePageGenerator generateVueCrud(){
 			this.generateVueJsApi();
@@ -336,7 +343,7 @@ public class DbmGenerator {
 					String tableShortName = c.tableNameStripStart(c.globalGeneratedConfig().getStripTablePrefix());
 					String projectDir = c.globalGeneratedConfig().getProjectPath();
 					Assert.notNull(projectDir, "projectDir can not be null");
-					String moduleName = c.globalGeneratedConfig().getModuleName();
+					String moduleName = viewModuleName(c);
 					Assert.notNull(moduleName, "moduleName can not be null");
 
 					String fileName = StringUtils.toCamel(tableShortName, false);

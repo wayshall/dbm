@@ -20,7 +20,7 @@ package ${_globalConfig.getJavaLocalPackage(_tableContext.localPackage)};
 
 import org.onetwo.boot.core.web.controller.DateInitBinder;
 import org.onetwo.common.utils.Page;
-import org.onetwo.plugins.admin.view.PageRequest;
+import org.onetwo.common.utils.PageRequest;
 import org.onetwo.ext.permission.api.annotation.ByPermissionClass;
 import org.onetwo.ext.permission.api.PermissionType;
 import org.onetwo.ext.permission.api.annotation.PermissionMeta;
