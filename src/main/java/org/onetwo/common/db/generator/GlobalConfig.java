@@ -3,26 +3,28 @@ package org.onetwo.common.db.generator;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.onetwo.common.db.generator.DbGenerator.DbTableGenerator.TableGeneratedConfig;
 import org.onetwo.common.utils.StringUtils;
 
 import com.google.common.collect.Maps;
 
 public class GlobalConfig {
-	public static final String TABLE_CONTEXT_KEY = "_tableContext";
+//	public static final String TABLE_CONTEXT_KEY = "_tableContext";
 	public static final String GLOBAL_CONTEXT_KEY = "_globalConfig";
 
 	public static interface OutfilePathFunc {
-		String getOutFileName(TableGeneratedConfig tableConfig);
+
+		String getOutFileName(GeneratedContext genContext);
 	}
+	
 
 	/*public static interface ControllerPathGenerator {
 		String getControllerPath(TableGeneratedConfig tableConfig);
 	}*/
 
-	public static interface TableContextCreator {
-		Map<String, Object> createContexts(TableGeneratedConfig tableConfig);
-	}
+	/*
+	 * public static interface TableContextCreator { Map<String, Object>
+	 * createContexts(TableGeneratedConfig tableConfig); }
+	 */
 	
 	private HashMap<String, Object> rootContext = Maps.newHashMap();
 
@@ -36,7 +38,7 @@ public class GlobalConfig {
 	
 	private OutfilePathFunc outFileNameFunc;
 //	private ControllerPathGenerator controllerPathGenerator;
-	private DefaultTableContexts defaultTableContexts = new DefaultTableContexts(this);
+//	private DefaultTableContexts defaultTableContexts = new DefaultTableContexts(this);
 	
 	private final DbGenerator dbGenerator;
 	
@@ -145,13 +147,12 @@ public class GlobalConfig {
 		return this;
 	}*/
 
-	TableContextCreator getTableContextCreator() {
-		return defaultTableContexts;
-	}
-
-	public DefaultTableContexts defaultTableContexts() {
-		return defaultTableContexts;
-	}
+	/*
+	 * TableContextCreator getTableContextCreator() { return defaultTableContexts; }
+	 * 
+	 * public DefaultTableContexts defaultTableContexts() { return
+	 * defaultTableContexts; }
+	 */
 
 	public String getModuleName() {
 		return moduleName;

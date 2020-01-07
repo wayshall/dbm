@@ -4,7 +4,7 @@
 <#assign hasSelectType=false/>
 <#assign dataFormName="dataForm"/>
 <#assign apiName="${table.propertyName}Api"/>
-<#assign formComponentName="${table.propertyName}MgrForm"/>
+<#assign formComponentName="${table.propertyName}Form"/>
 <#assign moduleName="${_globalConfig.getModuleName()}"/>
 <template>
   <el-dialog :title="title" :visible.sync="visible" :close-on-click-modal="false" :before-close="handleClose">
@@ -61,7 +61,7 @@
 </template>
 
 <script>
-import * as ${apiName} from '@/api/${moduleName}/${apiName}'
+import * as ${apiName} from '@/api/${vueModuleName}/${apiName}'
 <#if hasFileType>
 import fileInput from '@/components/xui/fileInput'
 </#if>
@@ -71,7 +71,7 @@ import xselect from '@/components/xui/xselect'
 //  import { exchangeLinebreak } from '@/filters'
 
 export default {
-  name: '${_tableContext.className}MgrForm',
+  name: '${_tableContext.className}Form',
   components: {
 <#if hasFileType>
     fileInput,
