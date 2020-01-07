@@ -1,4 +1,4 @@
-<#assign requestPath="${_globalConfig.requestModulePath}/${_tableContext.propertyName}"/>
+<#assign requestPath="/${vueModuleName}/${_tableContext.propertyName}"/>
 <#assign idName="${table.primaryKey.javaName}"/>
 import request from '@/utils/request'
 import qs from 'qs'

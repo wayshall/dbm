@@ -19,11 +19,12 @@ import org.onetwo.common.utils.Assert;
 import org.onetwo.common.utils.StringUtils;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 public class DbGenerator {
 	//TableContextCreator
-	private static final String TABLE_CONTEXT_KEY = GlobalConfig.TABLE_CONTEXT_KEY;
-	private static final String TABLE_KEY = "table";
+//	private static final String TABLE_CONTEXT_KEY = "_tableContext";
+//	private static final String TABLE_KEY = "table";
 	
 	public static DbGenerator newGenerator(DataSource dataSource){
 		return new DbGenerator(dataSource);
@@ -157,17 +158,6 @@ public class DbGenerator {
 		return results;
 	}
 	
-	public List<GeneratedResult<String>> generateString(Map<String, Object> context){
-		templateEngine.afterPropertiesSet();
-		Assert.notNull(dialet, "dialet can not be null!");
-		List<GeneratedResult<String>> results = Lists.newArrayList();
-		tableGenerators.forEach(table->{
-			GeneratedResult<String> r = table.generateString(dialet, templateEngine, context);
-			results.add(r);
-		});
-		return results;
-	}
-
 	
 	public class ColumnMappingBuilder {
 		private ColumnMapping metaMapping;
@@ -192,17 +182,23 @@ public class DbGenerator {
 		}
 		
 	}
+	
 	public class DbTableGenerator {
 		
 		private String tableName;
 		private List<TableGeneratedConfig> tableGeneratedConfig = Lists.newArrayList();
 		private TableMeta tableMeta = null;
+		private Map<String, Object> tableContext = Maps.newHashMap();
 		
 
 		public DbTableGenerator(String tableName) {
 			super();
 			this.tableName = tableName;
 			this.tableMeta = dialet.getTableMeta(tableName);
+		}
+		
+		public Map<String, Object> context() {
+			return tableContext;
 		}
 		
 		public TableMetaConfig meta(){
@@ -228,7 +224,8 @@ public class DbGenerator {
 		}
 		
 		public DbTableGenerator pageTemplate(String templatePath){
-			OutfilePathFunc outFileNameFunc = c->{
+			OutfilePathFunc outFileNameFunc = ctx->{
+				TableGeneratedConfig c = ctx.getConfig();
 				String tableShortName = c.tableNameStripStart(c.globalGeneratedConfig().getStripTablePrefix());
 				String pageFileBaseDir = c.globalGeneratedConfig().getPageFileBaseDir();
 				Assert.notNull(pageFileBaseDir, "pageFileBaseDir can not be null");
@@ -257,7 +254,8 @@ public class DbGenerator {
 		
 		public DbTableGenerator mybatisDaoXmlTemplate(String templatePath){
 			TableGeneratedConfig config = new TableGeneratedConfig(tableName, templatePath);
-			config.outfilePathFunc(c->{
+			config.outfilePathFunc(ctx->{
+										TableGeneratedConfig c = ctx.getConfig();
 										String filePath = c.globalGeneratedConfig().getFullModulePackageNameAsPath();
 										filePath =  "/mybatis/dao/" + filePath + "/dao";
 										filePath = this.getResourceDirOutfilePathByModule(c, filePath, templatePath);
@@ -302,14 +300,14 @@ public class DbGenerator {
 		public DbTableGenerator javaClassTemplate(String javaClassPackage, String templatePath){
 			TableGeneratedConfig config = new TableGeneratedConfig(tableName, templatePath);
 			config.outfilePathFunc(c->{
-									c.setLocalPackage(javaClassPackage);
-									String tableShortName = c.tableNameStripStart(c.globalGeneratedConfig().getStripTablePrefix());
+									c.getConfig().setLocalPackage(javaClassPackage);
+									String tableShortName = c.getConfig().tableNameStripStart(globalConfig.getStripTablePrefix());
 									String servicePath = javaClassPackage.replace('.', '/');
 									servicePath = StringUtils.appendArroundWith(servicePath, "/");
-									String filePath = c.globalGeneratedConfig().getFullModulePackagePath() + 
-																				servicePath +
-																				StringUtils.toClassName(tableShortName)+
-																				FileUtils.getFileNameWithoutExt(templatePath);
+									String filePath = globalConfig.getFullModulePackagePath() + 
+																	servicePath +
+																	StringUtils.toClassName(tableShortName)+
+																	FileUtils.getFileNameWithoutExt(templatePath);
 									return filePath;
 								}
 							);
@@ -364,57 +362,40 @@ public class DbGenerator {
 		}
 
 		private GeneratedResult<File> generate(DatabaseMetaDialet dialet, TemplateEngine ftlGenerator, Map<String, Object> outContext){
-			if(outContext!=null)
-				globalConfig.putAll(outContext);
+			GeneratedContext genContext = new GeneratedContext();
+			genContext.putAll(globalConfig.getRootContext());
+			genContext.putAll(tableContext);
+			if(outContext!=null) {
+				genContext.putAll(outContext);
+			}
 			
 			TableMeta tableMeta = dialet.getTableMeta(tableName);
 			tableMeta.setStripPrefix(globalConfig.getStripTablePrefix());
-			globalConfig.put(TABLE_KEY, tableMeta);
+			genContext.setTable(tableMeta);
 			
 			List<File> files = Lists.newArrayList();
 			tableGeneratedConfig.stream().forEach(config->{
 				Assert.hasText(config.templatePath);
 				
 //				Assert.hasText(config.outfilePath);
+				genContext.setConfig(config);
 				OutfilePathFunc outFileNameFunc = config.outfilePathFunc==null?globalConfig.getOutFileNameFunc():config.outfilePathFunc;
-				Assert.notNull(outFileNameFunc, "no outFileNameFunc");
-				String outfilePath = outFileNameFunc.getOutFileName(config);
+				Assert.notNull(outFileNameFunc, "outFileNameFunc can not be null");
 				
-				Map<String, Object> tableContext = globalConfig.getTableContextCreator().createContexts(config);
-				if(tableContext!=null){
-					globalConfig.put(TABLE_CONTEXT_KEY, tableContext);
-				}
-				File file = ftlGenerator.generateFile(globalConfig.getRootContext(), config.templatePath, outfilePath);
+				/*
+				 * Map<String, Object> tableContext =
+				 * globalConfig.getTableContextCreator().createContexts(config);
+				 * if(tableContext!=null){ genContext.setTableContext(tableContext); }
+				 */
+				String outfilePath = outFileNameFunc.getOutFileName(genContext);
+				
+				genContext.initBasicContext();
+				File file = ftlGenerator.generateFile(genContext, config.templatePath, outfilePath);
 				files.add(file);
 			});
 			return new GeneratedResult<File>(tableName, files);
 		}
 
-		private GeneratedResult<String> generateString(DatabaseMetaDialet dialet, TemplateEngine ftlGenerator, Map<String, Object> outContext){
-			if(outContext!=null)
-				globalConfig.putAll(outContext);
-			
-			TableMeta tableMeta = dialet.getTableMeta(tableName);
-			globalConfig.put(TABLE_KEY, tableMeta);
-			
-			List<String> contents = Lists.newArrayList();
-			tableGeneratedConfig.stream().forEach(config->{
-				Assert.hasText(config.templatePath);
-				
-//				Assert.hasText(config.outfilePath);
-				/*OutfilePathFunc outFileNameFunc = config.outfilePathFunc==null?globalGeneratedConfig.getOutFileNameFunc():config.outfilePathFunc;
-				Assert.notNull(outFileNameFunc, "no outFileNameFunc");
-				String outfilePath = outFileNameFunc.getOutFileName(config);*/
-				
-				Map<String, Object> tableContext = globalConfig.getTableContextCreator().createContexts(config);
-				if(tableContext!=null){
-					globalConfig.put(TABLE_CONTEXT_KEY, tableContext);
-				}
-				String content = ftlGenerator.generateString(globalConfig.getRootContext(), config.templatePath);
-				contents.add(content);
-			});
-			return new GeneratedResult<String>(tableName, contents);
-		}
 		
 		public class TableMetaConfig {
 			final private TableMeta tableMeta;
@@ -505,6 +486,18 @@ public class DbGenerator {
 
 			public String getTableName() {
 				return tableName;
+			}
+
+			public String getTableNameWithoutPrefix() {
+				return tableNameStripStart(globalConfig.getStripTablePrefix());
+			}
+
+			public String getClassName() {
+				return StringUtils.toClassName(getTableNameWithoutPrefix());
+			}
+
+			public String getPropertyName() {
+				return StringUtils.toPropertyName(getTableNameWithoutPrefix());
 			}
 
 			public String tableNameStripStart(String stripChars) {

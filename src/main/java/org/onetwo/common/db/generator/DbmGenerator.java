@@ -99,6 +99,7 @@ public class DbmGenerator {
 
 	public DbmGenerator pageFileBaseDir(String pageFileBaseDir) {
 		this.pageFileBaseDir = pageFileBaseDir;
+		this.dbGenerator.globalConfig().pageFileBaseDir(pageFileBaseDir);
 		return this;
 	}
 
@@ -114,13 +115,13 @@ public class DbmGenerator {
 			dbGenerator.stripTablePrefix(stripTablePrefix)
 			.globalConfig()
 				.projectPath(projectPath)
-				.pageFileBaseDir(pageFileBaseDir)
+//				.pageFileBaseDir(pageFileBaseDir)
 				.resourceDir(resourceDir)
 				.javaSrcDir(javaSrcDir)
 				.javaBasePackage(javaBasePackage)
 				.moduleName(moduleName)
-				.defaultTableContexts()
-				.end()
+//				.defaultTableContexts()
+//				.end()
 			.end();
 		});
 	}
@@ -136,8 +137,8 @@ public class DbmGenerator {
 				.javaSrcDir(testJavaSrcDir)
 				.javaBasePackage(javaBasePackage)
 				.moduleName(moduleName)
-				.defaultTableContexts()
-				.end()
+//				.defaultTableContexts()
+//				.end()
 			.end();
 		});
 	}
@@ -183,6 +184,7 @@ public class DbmGenerator {
 		vueGenerator = new VuePageGenerator();
 		vueGenerator.tableGenerator = tableGenerator;
 		vueGenerator.vueModuleName = vueModuleName;
+		tableGenerator.context().put("vueModuleName", vueModuleName);
 //		vueGenerator.vueBaseDir = vueBaseDir;
 		return vueGenerator;
 	}
@@ -292,7 +294,8 @@ public class DbmGenerator {
 		String vueModuleName;
 
 		Function<String, OutfilePathFunc> vueFileNameFuncCreator = path -> {
-			return c->{
+			return ctx->{
+				TableGeneratedConfig c = ctx.getConfig();
 //				Assert.hasText(vueBaseDir, "vueBaseDir must be has text!");
 				String tableShortName = c.tableNameStripStart(c.globalGeneratedConfig().getStripTablePrefix());
 				String pageFileBaseDir = c.globalGeneratedConfig().getPageFileBaseDir();
@@ -301,11 +304,15 @@ public class DbmGenerator {
 				Assert.notNull(moduleName, "moduleName can not be null");
 				
 				String fileName = StringUtils.toCamel(tableShortName, false);
+				// Mgr.vue
+				String fileNameWithoutExt = FileUtils.getFileNameWithoutExt(path);
+				// remove Mgr
+				fileNameWithoutExt = StringUtils.trimStartWith(fileNameWithoutExt, "Mgr");
 				String filePath = pageFileBaseDir + 
 									viewDir +
 									"/"+moduleName+"/"+
 									fileName + 
-									FileUtils.getFileNameWithoutExt(path);
+									fileNameWithoutExt;
 				return filePath;
 			};
 		};
@@ -315,7 +322,7 @@ public class DbmGenerator {
 		}
 		
 		public VuePageGenerator generateVueCrud(){
-			this.generateVueJsApi();
+			this.generateVueJsApi("/src/api");
 			this.generateVueMgr();
 			this.generateVueMgrForm();
 			return this;
@@ -331,23 +338,24 @@ public class DbmGenerator {
 			String mgrPath = templateName+"/Mgr.vue.ftl";
 			tableGenerator.pageTemplate(mgrPath, vueFileNameFuncCreator.apply(mgrPath));
 			
-			String formPath = templateName+"/MgrForm.vue.ftl";
+			String formPath = templateName+"/Form.vue.ftl";
 			tableGenerator.pageTemplate(formPath, vueFileNameFuncCreator.apply(formPath));
 			return this;
 		}
 		
-		public VuePageGenerator generateVueJsApi(){
-			String apiDir = "/src/api";
+		public VuePageGenerator generateVueJsApi(String apiDir){
+//			String apiDir = "/src/api";
 			Function<String, OutfilePathFunc> outFileNameFuncCreator = path -> {
-				return c->{
+				return ctx->{
+					TableGeneratedConfig c = ctx.getConfig();
 					String tableShortName = c.tableNameStripStart(c.globalGeneratedConfig().getStripTablePrefix());
-					String projectDir = c.globalGeneratedConfig().getProjectPath();
-					Assert.notNull(projectDir, "projectDir can not be null");
+					String pageFileBaseDir = c.globalGeneratedConfig().getPageFileBaseDir();
+					Assert.notNull(pageFileBaseDir, "pageFileBaseDir can not be null");
 					String moduleName = viewModuleName(c);
 					Assert.notNull(moduleName, "moduleName can not be null");
 
 					String fileName = StringUtils.toCamel(tableShortName, false);
-					String filePath = projectDir + 
+					String filePath = pageFileBaseDir + 
 									apiDir + 
 									"/"+moduleName+"/"+
 									fileName + 
