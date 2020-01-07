@@ -107,7 +107,7 @@ public interface BaseEntityManager {
 	 * @author wayshall
 	 * @param entity
 	 */
-	public void delete(ILogicDeleteEntity entity);
+//	public void delete(ILogicDeleteEntity entity);
 
 	/***
 	 * 逻辑删除
@@ -116,7 +116,7 @@ public interface BaseEntityManager {
 	 * @param id
 	 * @return
 	 */
-	public <T extends ILogicDeleteEntity> T deleteById(Class<T> entityClass, Serializable id);
+//	public <T extends ILogicDeleteEntity> T deleteById(Class<T> entityClass, Serializable id);
 
 	public <T> List<T> findAll(Class<T> entityClass);
 

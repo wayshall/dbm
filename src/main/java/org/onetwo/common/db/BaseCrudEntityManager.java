@@ -118,30 +118,65 @@ public class BaseCrudEntityManager<T, PK extends Serializable> implements CrudEn
 		getBaseEntityManager().findPage(entityClass, page, properties);
 		return page;
 	}
-
+//	
+//	public void delete(ILogicDeleteEntity entity){
+//		entity.deleted();
+//		this.save(entity);
+//	}
+//
+//	public <T extends ILogicDeleteEntity> T deleteById(Class<T> entityClass, Serializable id){
+//		Object entity = this.findById(entityClass, id);
+//		if(entity==null)
+//			return null;
+//		if(!ILogicDeleteEntity.class.isAssignableFrom(entity.getClass())){
+//			throw new ServiceException("实体不支持逻辑删除，请实现相关接口！");
+//		}
+//		T logicDeleteEntity = (T) entity;
+//		logicDeleteEntity.deleted();
+//		this.save(logicDeleteEntity);
+//		return logicDeleteEntity;
+//	}
 	@Transactional(readOnly=true)
 	@Override
 	public T load(PK id) {
 		return (T)getBaseEntityManager().load(entityClass, id);
 	}
 
+	/****
+	 * 删除数据
+	 * 与BaseEntityManager不同，执行此方法时，若实体实现了逻辑删除接口ILogicDeleteEntity，则只是更新状态
+	 */
 	@Transactional
 	@Override
 	public T remove(T entity) {
-		getBaseEntityManager().remove(entity);
+		if (entity instanceof ILogicDeleteEntity) {
+			((ILogicDeleteEntity)entity).deleted();
+			getBaseEntityManager().update(entity);
+		} else {
+			getBaseEntityManager().remove(entity);
+		}
 		return entity;
 	}
 
+	/***
+	 * 删除数据
+	 * 与BaseEntityManager不同，执行此方法时，若实体实现了逻辑删除接口ILogicDeleteEntity，则只是更新状态
+	 */
 	@Transactional
 	@Override
 	public void removes(Collection<T> entities) {
-		getBaseEntityManager().removes(entities);
+		entities.forEach(entity -> remove(entity));
 	}
 
+	/***
+	 * 删除数据
+	 * 与BaseEntityManager不同，执行此方法时，若实体实现了逻辑删除接口ILogicDeleteEntity，则只是更新状态
+	 */
 	@Transactional
 	@Override
 	public T removeById(PK id) {
-		return (T)getBaseEntityManager().removeById(entityClass, id);
+		T entity = load(id);
+		return remove(entity);
 	}
 	
 	@Transactional
