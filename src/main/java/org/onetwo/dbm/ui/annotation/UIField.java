@@ -20,5 +20,7 @@ public @interface UIField {
 	 * @return
 	 */
 	String label();
-	
+	boolean listable() default true;
+	boolean insertable() default true;
+	boolean updatable() default true;
 }
