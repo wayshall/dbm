@@ -18,7 +18,7 @@ public class JdbcRowEntryImpl extends AbstractDbmMappedEntryImpl {
 
 	@Override
 	public void buildEntry() {
-		for(AbstractMappedField field : this.mappedFields.values()){
+		for(DbmMappedField field : this.mappedFields.values()){
 			if(field.getColumn()!=null)
 				this.mappedColumns.put(field.getColumn().getName().toLowerCase(), field);
 		}

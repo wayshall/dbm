@@ -7,8 +7,8 @@ import org.onetwo.common.annotation.AnnotationInfo;
 
 public interface DbmMappedEntryMeta {
 
-	Collection<AbstractMappedField> getFields();
-	Collection<AbstractMappedField> getFields(DbmMappedFieldType... type);
+	Collection<DbmMappedField> getFields();
+	Collection<DbmMappedField> getFields(DbmMappedFieldType... type);
 	
 	DbmMappedField getField(String fieldName);
 	

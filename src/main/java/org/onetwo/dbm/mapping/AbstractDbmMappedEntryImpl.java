@@ -12,6 +12,7 @@ import java.util.Map;
 
 import javax.persistence.IdClass;
 
+import org.apache.commons.lang3.StringUtils;
 import org.onetwo.common.annotation.AnnotationInfo;
 import org.onetwo.common.db.TimeRecordableEntity;
 import org.onetwo.common.log.JFishLoggerFactory;
@@ -58,8 +59,8 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 	private AnnotationInfo annotationInfo;
 
 //	protected Map<String, Collection<DbmMappedField>> bindedFields = new LinkedHashMap<>();
-	protected Map<String, AbstractMappedField> mappedFields = new LinkedHashMap<String, AbstractMappedField>();
-	protected Map<String, AbstractMappedField> mappedColumns = new HashMap<String, AbstractMappedField>();
+	protected Map<String, DbmMappedField> mappedFields = new LinkedHashMap<>();
+	protected Map<String, DbmMappedField> mappedColumns = new HashMap<>();
 	private Class<?> idClass = null;
 	private List<DbmMappedField> identifyFields = Lists.newArrayList();
 	private DbmMappedField versionField;
@@ -91,13 +92,21 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 	}*/
 	
 	public AbstractDbmMappedEntryImpl(AnnotationInfo annotationInfo, TableInfo tableInfo, DbmInnerServiceRegistry serviceRegistry) {
+		this(null, annotationInfo, tableInfo, serviceRegistry);
+	}
+	
+	public AbstractDbmMappedEntryImpl(String entityName, AnnotationInfo annotationInfo, TableInfo tableInfo, DbmInnerServiceRegistry serviceRegistry) {
 		Assert.notNull(serviceRegistry, "serviceRegistry can not be null");
 		this.dbDialect = serviceRegistry.getDialect();
 		this.entityClass = annotationInfo.getSourceClass();
 		this.annotationInfo = annotationInfo;
 		this.sqlTypeMapping = serviceRegistry.getTypeMapping();
 //		this.serviceRegistry = serviceRegistry;
-		this.entityName = this.entityClass.getName();
+		if (StringUtils.isBlank(entityName)) {
+			this.entityName = this.entityClass.getName();
+		} else {
+			this.entityName = entityName;
+		}
 		this.tableInfo = tableInfo;
 		IdClass idclass = annotationInfo.getAnnotation(IdClass.class);
 		if (idclass!=null) {
@@ -126,6 +135,10 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 			Assert.notNull(entityValidator, "no entity validator config!");
 		}
 //		this.buildIdGenerators();
+	}
+	
+	final protected void setEntityName(String entityName) {
+		this.entityName = entityName;
 	}
 	
 	/*protected void putEntrySQLBuilder(SqlBuilderType type, EntrySQLBuilder builder){
@@ -188,17 +201,17 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 		return sqlTypeMapping;
 	}
 
-	public Collection<AbstractMappedField> getFields(){
+	public Collection<DbmMappedField> getFields(){
 		return this.mappedFields.values();
 	}
 	
-	public Collection<AbstractMappedField> getFields(DbmMappedFieldType... types){
-		List<AbstractMappedField> flist = new ArrayList<AbstractMappedField>(mappedFields.values().size());
+	public Collection<DbmMappedField> getFields(DbmMappedFieldType... types){
+		List<DbmMappedField> flist = new ArrayList<>(mappedFields.values().size());
 		if(LangUtils.isEmpty(types)){
 			Collections.sort(flist, SORT_BY_LENGTH);
 			return flist;
 		}
-		for(AbstractMappedField field : mappedFields.values()){
+		for(DbmMappedField field : mappedFields.values()){
 			if(ArrayUtils.contains(types, field.getMappedFieldType())){
 				flist.add(field);
 			}
@@ -360,7 +373,7 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 		
 		this.checkEntry();
 		
-		for(AbstractMappedField field : this.mappedFields.values()){
+		for(DbmMappedField field : this.mappedFields.values()){
 			if (field.getColumn()!=null) {
 				this.mappedColumns.put(field.getColumn().getName().toLowerCase(), field);
 			}
@@ -376,10 +389,10 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 //		freezing();
 	}
 	
-	protected void processBindFields(AbstractMappedField field) {
+	protected void processBindFields(DbmMappedField field) {
 		DbmBindValueToField bindFieldInfo = field.getPropertyInfo().getAnnotation(DbmBindValueToField.class);
 		if (bindFieldInfo!=null) {
-			AbstractMappedField bindToField = this.mappedFields.get(bindFieldInfo.name());
+			DbmMappedField bindToField = this.mappedFields.get(bindFieldInfo.name());
 			if (bindToField==null) {
 				throw new DbmException("the bind field[" + bindFieldInfo.name() + "] not found, "
 										+ "entity: [" + getEntityName() + "], field: [" + field.getName() + "]");
@@ -850,12 +863,12 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 	}
 	
 	@Override
-	public Map<String, AbstractMappedField> getMappedFields() {
+	public Map<String, DbmMappedField> getMappedFields() {
 		return mappedFields;
 	}
 	
 
-	public Map<String, AbstractMappedField> getMappedColumns() {
+	public Map<String, DbmMappedField> getMappedColumns() {
 		return mappedColumns;
 	}
 

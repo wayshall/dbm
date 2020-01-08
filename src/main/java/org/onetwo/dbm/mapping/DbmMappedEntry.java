@@ -85,8 +85,8 @@ public interface DbmMappedEntry extends DbmMappedEntryMeta {
 
 	JdbcStatementContext<List<Object[]>> makeDymanicUpdate(Object entity);
 
-	Map<String, AbstractMappedField> getMappedFields();
-	Map<String, AbstractMappedField> getMappedColumns();
+	Map<String, DbmMappedField> getMappedFields();
+	Map<String, DbmMappedField> getMappedColumns();
 
 	/*boolean isQueryableOnly();
 

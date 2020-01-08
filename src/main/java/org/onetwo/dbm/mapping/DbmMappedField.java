@@ -119,4 +119,7 @@ public interface DbmMappedField {
 	 */
 	DbmMappedField getBindToField();
 	
+	void setBindToField(DbmMappedField field);
+	void setBindedFields(Collection<DbmMappedField> fields);
+	
 }
