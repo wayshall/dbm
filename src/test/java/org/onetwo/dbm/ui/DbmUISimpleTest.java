@@ -34,6 +34,13 @@ public class DbmUISimpleTest extends DbmBaseTest {
 		assertThat(classMeta).isNotNull();
 		assertThat(classMeta.getFieldMap().size()).isEqualTo(3);
 	}
+
+	@Test
+	public void testUIClassWithTable() {
+		UIClassMeta classMeta = uiClassMetaManager.getByTable("TEST_USER");
+		assertThat(classMeta).isNotNull();
+		assertThat(classMeta.getFieldMap().size()).isEqualTo(3);
+	}
 	
 	@SuppressWarnings("unchecked")
 	@Test
@@ -49,5 +56,6 @@ public class DbmUISimpleTest extends DbmBaseTest {
 		}).findAny();
 		assertThat(normal).isPresent();
 	}
+	
 
 }

@@ -15,4 +15,5 @@ import java.lang.annotation.Target;
 public @interface UIClass {
 	
 	String name() default "";
+	String label();
 }

@@ -29,15 +29,15 @@
       </template>
 
       <el-table-column align="center" width="80" type="selection"/>
-  <#list table.columns as column>
-    <#if column.isDateType()>
-      <el-table-column align="center" label="${(column.comments[0])!''}" width="100">
+  <#list UIClassMeta.listableFields as field>
+    <#if field.column.isDateType()>
+      <el-table-column align="center" label="${(field.label)!''}" width="100">
         <template slot-scope="scope">
-          <span>{{ scope.row.${column.javaName} | formatDateInMillis }}</span>
+          <span>{{ scope.row.${field.column.javaName} | formatDateInMillis }}</span>
         </template>
       </el-table-column>
     <#else>
-      <el-table-column align="center" label="${(column.comments[0])!''}" prop="${column.javaName}" width="100"/>
+      <el-table-column align="center" label="${(field.label)!''}" prop="${field.column.javaName}" width="100"/>
     </#if>
   </#list>
     </layout-table>

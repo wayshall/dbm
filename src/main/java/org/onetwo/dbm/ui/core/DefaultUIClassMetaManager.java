@@ -4,7 +4,12 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
+import javax.persistence.Table;
+
 import org.apache.commons.lang3.StringUtils;
+import org.onetwo.common.db.generator.dialet.DatabaseMetaDialet;
+import org.onetwo.common.db.generator.dialet.DelegateDatabaseMetaDialet;
+import org.onetwo.common.db.generator.meta.TableMeta;
 import org.onetwo.common.reflect.ReflectUtils;
 import org.onetwo.common.spring.utils.JFishResourcesScanner;
 import org.onetwo.dbm.core.spi.DbmSessionFactory;
@@ -36,23 +41,26 @@ public class DefaultUIClassMetaManager implements InitializingBean, UIClassMetaM
 	
 	@Autowired
 	private DbmSessionFactory dbmSessionFactory;
+	private DatabaseMetaDialet databaseMetaDialet;
 	private MappedEntryManager mappedEntryManager;
 	private Cache<Class<?>, UIClassMeta> entryCaches = CacheBuilder.newBuilder().build();
 
 	private JFishResourcesScanner resourcesScanner = new JFishResourcesScanner();
 	private String[] packagesToScan;
 	private Map<String, String> uiclassMap = Maps.newConcurrentMap();
+	private Map<String, String> uiclassTableMap = Maps.newConcurrentMap();
 	
 	
 	@Override
 	public void afterPropertiesSet() throws Exception {
 		Assert.notEmpty(packagesToScan, "packagesToScan can not be empty");
 		this.mappedEntryManager = dbmSessionFactory.getMappedEntryManager();
+		this.databaseMetaDialet = new DelegateDatabaseMetaDialet(dbmSessionFactory.getDataSource());
 		
 		resourcesScanner.scan((metadataReader, res, index)->{
 			if( metadataReader.getAnnotationMetadata().hasAnnotation(UIClass.class.getName()) ){
-				Map<String, Object> attrs = metadataReader.getAnnotationMetadata().getAnnotationAttributes(UIClass.class.getName());
-				String name = (String)attrs.get("name");
+				Map<String, Object> uiclassAttrs = metadataReader.getAnnotationMetadata().getAnnotationAttributes(UIClass.class.getName());
+				String name = (String)uiclassAttrs.get("name");
 				if (StringUtils.isBlank(name)) {
 					name = metadataReader.getClassMetadata().getClassName();
 				}
@@ -61,9 +69,27 @@ public class DefaultUIClassMetaManager implements InitializingBean, UIClassMetaM
 					throw new DbmUIException("duplicate ui name: " + name);
 				}
 				uiclassMap.put(name, metadataReader.getClassMetadata().getClassName());
+				
+
+				Map<String, Object> tableAttrs = metadataReader.getAnnotationMetadata().getAnnotationAttributes(Table.class.getName());
+				String tableName = (String)tableAttrs.get("name");
+				if (StringUtils.isNotBlank(tableName)) {
+					uiclassTableMap.put(tableName.toLowerCase(), metadataReader.getClassMetadata().getClassName());
+				}
 			}
 			return null;
 		}, packagesToScan);
+	}
+	
+
+	public UIClassMeta getByTable(String tableName) {
+		tableName = tableName.toLowerCase();
+		if (!uiclassTableMap.containsKey(tableName)) {
+			throw new DbmUIException("ui class not found for table: " + tableName);
+		}
+		String className = uiclassTableMap.get(tableName);
+		Class<?> uiclass = ReflectUtils.loadClass(className);
+		return get(uiclass);
 	}
 
 	public UIClassMeta get(String uiname) {
@@ -92,12 +118,19 @@ public class DefaultUIClassMetaManager implements InitializingBean, UIClassMetaM
 			throw new DbmUIException("ui class must be a dbm entity: " + uiclass);
 		}
 		
+		UIClass uiclassAnno = entry.getAnnotationInfo().getAnnotation(UIClass.class);
+		
+		TableMeta table = databaseMetaDialet.getTableMeta(entry.getTableInfo().getName());
 		UIClassMeta entityMeta = new UIClassMeta();
+		entityMeta.setLabel(uiclassAnno.label());
 		entityMeta.setName(entry.getEntityName());
+		entityMeta.setMappedEntry(entry);
+		entityMeta.setTable(table);
 		
 		entry.getFields().forEach(field -> {
 			buildField(field).ifPresent(uifield -> {
 				uifield.setClassMeta(entityMeta);
+				uifield.setColumn(table.getColumn(field.getColumn().getName()));
 				entityMeta.addField(uifield);
 			});
 		});
@@ -116,6 +149,7 @@ public class DefaultUIClassMetaManager implements InitializingBean, UIClassMetaM
 										.insertable(uifield.insertable())
 										.listable(uifield.listable())
 										.updatable(uifield.updatable())
+										.dbmField(field)
 										.build();
 
 		UISelect uiselect = field.getPropertyInfo().getAnnotation(UISelect.class);

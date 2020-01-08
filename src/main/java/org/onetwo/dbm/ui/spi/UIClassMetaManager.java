@@ -9,6 +9,7 @@ import org.onetwo.dbm.ui.meta.UIClassMeta;
 
 public interface UIClassMetaManager {
 
+	UIClassMeta getByTable(String tableName);
 	UIClassMeta get(String uiname);
 	UIClassMeta get(Class<?> uiclass);
 }

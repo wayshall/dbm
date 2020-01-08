@@ -3,6 +3,7 @@ package org.onetwo.common.db.generator;
 import java.io.File;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -14,9 +15,12 @@ import org.onetwo.common.db.generator.GlobalConfig.OutfilePathFunc;
 import org.onetwo.common.db.generator.ftl.FtlEngine;
 import org.onetwo.common.db.generator.ftl.TomcatDataSourceBuilder;
 import org.onetwo.common.file.FileUtils;
+import org.onetwo.common.spring.Springs;
 import org.onetwo.common.utils.LangUtils;
 import org.onetwo.common.utils.StringUtils;
 import org.onetwo.dbm.exception.DbmException;
+import org.onetwo.dbm.ui.meta.UIClassMeta;
+import org.onetwo.dbm.ui.spi.UIClassMetaManager;
 import org.springframework.util.Assert;
 
 import com.google.common.collect.Maps;
@@ -185,8 +189,20 @@ public class DbmGenerator {
 		vueGenerator.tableGenerator = tableGenerator;
 		vueGenerator.vueModuleName = vueModuleName;
 		tableGenerator.context().put("vueModuleName", vueModuleName);
+		getUIClassMeta(tableName).ifPresent(meta -> {
+			tableGenerator.context().put("UIClassMeta", meta);
+		});
 //		vueGenerator.vueBaseDir = vueBaseDir;
 		return vueGenerator;
+	}
+	
+	private Optional<UIClassMeta> getUIClassMeta(String tableName) {
+		UIClassMeta meta = null;
+		UIClassMetaManager uiClassMetaManager = Springs.getInstance().getBean(UIClassMetaManager.class); 
+		if (uiClassMetaManager!=null) {
+			meta = uiClassMetaManager.getByTable(tableName);
+		}
+		return Optional.ofNullable(meta);
 	}
 	
 	/****
@@ -238,9 +254,9 @@ public class DbmGenerator {
 			if(context!=DbmGenerator.this.context){
 				DbmGenerator.this.context.putAll(context);
 			}
-			if(webadmin!=null){
+			if(webadmin!=null || vueGenerator!=null){
 				List<GeneratedResult<File>> resullt = dbGenerator.generate(context);
-				System.out.println("webadmin result: " + resullt);
+				System.out.println("generate result: " + resullt);
 			}
 		}
 	}
@@ -268,6 +284,11 @@ public class DbmGenerator {
 		
 		public WebadminGenerator generateEntity(){
 			tableGenerator.entityTemplate(templateName+"/Entity.java.ftl");
+			return this;
+		}
+		
+		public WebadminGenerator generateUIEntity(){
+			tableGenerator.entityTemplate(templateName+"/UIEntity.java.ftl");
 			return this;
 		}
 		

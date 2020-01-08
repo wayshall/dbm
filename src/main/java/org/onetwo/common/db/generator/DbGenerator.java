@@ -348,8 +348,11 @@ public class DbGenerator {
 		
 		private String getJavaSrcOutfilePathByType(TableGeneratedConfig c, String typePath, String templatePath, String fileNamePostfix){
 			String tableShortName = c.tableNameStripStart(c.globalGeneratedConfig().getStripTablePrefix());
-			String filePath = c.globalGeneratedConfig().getFullModulePackagePath()+ typePath+ "/" + 
-			StringUtils.toClassName(tableShortName)+ (fileNamePostfix==null?FileUtils.getFileNameWithoutExt(templatePath):fileNamePostfix);
+			String filePath = c.globalGeneratedConfig().getFullModulePackagePath() + 
+								typePath+ "/" + 
+								StringUtils.toClassName(tableShortName) + 
+								//Entity Service Dao
+								(fileNamePostfix==null?FileUtils.getFileNameWithoutExt(templatePath):fileNamePostfix);
 			return filePath;
 		}
 		

@@ -30,7 +30,7 @@ import lombok.EqualsAndHashCode;
 @Table(name="TEST_USER")
 @Data
 @EqualsAndHashCode(callSuper=true)
-@UIClass(name = "TestUser")
+@UIClass(name = "TestUser", label = "用户")
 public class UserUIEntity extends BaseEntity {
 
     @SnowflakeId

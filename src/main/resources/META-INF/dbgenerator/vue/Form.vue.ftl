@@ -9,46 +9,48 @@
 <template>
   <el-dialog :title="title" :visible.sync="visible" :close-on-click-modal="false" :before-close="handleClose">
     <el-form ref="${dataFormName}" :rules="rules" :model="dataModel" label-position="left" label-width="100px" style="width: 400px; margin-left:50px;">
-   <#list table.columns as column>
-      <el-form-item label="${(column.comments[0])!''}" prop="${column.javaName}">
-      <#if column.mapping.isNumberType()==true>
-        <el-input-number v-model="dataModel.${column.javaName}" :min="1" :max="10" label="${(column.comments[0])!''}"<#if column.mapping.isSqlFloat()==true> :precision="2"</#if>/>
-      <#elseif column.mapping.isSqlTimestamp()==true>
+   <#list UIClassMeta.formFields as field>
+      <el-form-item label="${(field.label)!''}" prop="${field.column.javaName}">
+      <#if field.column.mapping.isNumberType()==true>
+        <el-input-number
+          v-model="dataModel.${field.column.javaName}"
+          :min="1" :max="10"
+          label="${(field.label)!''}"
+          :disabled="${field.formDisabledValue}"
+          <#if field.column.mapping.isSqlFloat()==true> :precision="2"</#if>/>
+      <#elseif field.column.mapping.isSqlTimestamp()==true>
         <el-date-picker
-          v-model="dataModel.${column.javaName}"
+          v-model="dataModel.${field.column.javaName}"
           type="datetime"
           placeholder="选择日期时间">
         </el-date-picker>
-      <#elseif column.mapping.isSqlTime()==true>
+      <#elseif field.column.mapping.isSqlTime()==true>
         <el-time-picker
-          v-model="dataModel.${column.javaName}"
+          v-model="dataModel.${field.column.javaName}"
           placeholder="选择时间>
        </el-time-picker>
-      <#elseif column.mapping.isSqlDate()==true>
+      <#elseif field.column.mapping.isSqlDate()==true>
         <el-date-picker
-          v-model="dataModel.${column.javaName}"
+          v-model="dataModel.${field.column.javaName}"
           type="date"
           placeholder="选择日期">
         </el-date-picker>
-      <#elseif column.mapping.isBooleanType()==true>
+      <#elseif field.column.mapping.isBooleanType()==true>
         <el-switch
-          v-model="dataModel.${column.javaName}"
+          v-model="dataModel.${field.column.javaName}"
           active-color="#13ce66"
           inactive-color="#ff4949">
         </el-switch>
-      <#elseif column.isDictType()==true>
-        <xselect v-model="dataModel.${column.javaName}" :data="${column.javaName}Options"/>
+      <#elseif field.column.isDictType()==true>
+        <xselect v-model="dataModel.${field.column.javaName}" :data="${field.column.javaName}Options"/>
         <#assign hasSelectType=true/>
-      <#elseif column.isDbDictType()>
-        <xselect v-model="dataModel.${column.javaName}" :data="${column.javaName}Options" url="/web-admin/dictionary/combobox/${column.commentsInfo['字典代码']}.json"/>
-        <#assign hasSelectType=true/>
-      <#elseif column.isFileType()==true>
-        <file-input v-model="dataModel.${column.javaName}File"/>
+      <#elseif field.column.isFileType()==true>
+        <file-input v-model="dataModel.${field.column.javaName}File"/>
         <#assign hasFileType=true/>
-      <#elseif column.isAssociationType()==true>
-        <el-input v-model="dataModel.${column.javaName}" placeholder="请输入${(column.comments[0])!''}"/>
+      <#elseif field.column.isAssociationType()==true>
+        <el-input v-model="dataModel.${field.column.javaName}" placeholder="请输入${(field.label)!''}"/>
       <#else>
-        <el-input v-model="dataModel.${column.javaName}" placeholder="请输入${(column.comments[0])!''}"/>
+        <el-input v-model="dataModel.${field.column.javaName}" placeholder="请输入${(field.label)!''}"/>
       </#if>
       </el-form-item>
   </#list>
@@ -160,7 +162,7 @@ export default {
             this.$nextTick(() => {
               // this.getList()
               this.$emit('finishHandle', {
-                statusModel: this.statusMode,
+                statusMode: this.statusMode,
                 resposne: res
               })
               this.visibleStatus = false
@@ -169,7 +171,7 @@ export default {
           }).catch(err => {
             console.log(`execute ${'$'}{methodName} error: ${'$'}{err}`)
             this.$emit('finishHandle', {
-              statusModel: this.statusMode,
+              statusMode: this.statusMode,
               error: err
             })
             this.visibleStatus = false
