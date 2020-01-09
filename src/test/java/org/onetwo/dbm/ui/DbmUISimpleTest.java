@@ -10,6 +10,7 @@ import org.onetwo.common.base.DbmBaseTest;
 import org.onetwo.common.dbm.model.hib.entity.UserEntity.UserStatus;
 import org.onetwo.dbm.ui.entity.UserUIEntity;
 import org.onetwo.dbm.ui.meta.UIClassMeta;
+import org.onetwo.dbm.ui.meta.UIFieldMeta;
 import org.onetwo.dbm.ui.spi.UIClassMetaManager;
 import org.onetwo.dbm.ui.spi.UISelectDataProviderService;
 import org.onetwo.dbm.ui.vo.EnumDataVO;
@@ -32,21 +33,24 @@ public class DbmUISimpleTest extends DbmBaseTest {
 	public void testUIClass() {
 		UIClassMeta classMeta = uiClassMetaManager.get(UserUIEntity.class);
 		assertThat(classMeta).isNotNull();
-		assertThat(classMeta.getFieldMap().size()).isEqualTo(3);
+		assertThat(classMeta.getFields().size()).isEqualTo(3);
+		UIFieldMeta status = classMeta.getField("status");
+		assertThat(status).isNotNull();
+		assertThat(status.getSelect()).isNotNull();
 	}
 
 	@Test
 	public void testUIClassWithTable() {
 		UIClassMeta classMeta = uiClassMetaManager.getByTable("TEST_USER");
 		assertThat(classMeta).isNotNull();
-		assertThat(classMeta.getFieldMap().size()).isEqualTo(3);
+		assertThat(classMeta.getFields().size()).isEqualTo(3);
 	}
 	
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testSelectData() {
 		UISelectDataRequest request = UISelectDataRequest.builder()
-													.uiname("TestUser")
+													.entity("TestUser")
 													.field("status")
 													.build();
 		List<EnumDataVO> enumDatas = (List<EnumDataVO>)selectDataProviderService.getDatas(request);

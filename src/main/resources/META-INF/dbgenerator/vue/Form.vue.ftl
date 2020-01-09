@@ -11,7 +11,10 @@
     <el-form ref="${dataFormName}" :rules="rules" :model="dataModel" label-position="left" label-width="100px" style="width: 400px; margin-left:50px;">
    <#list UIClassMeta.formFields as field>
       <el-form-item label="${(field.label)!''}" prop="${field.column.javaName}">
-      <#if field.column.mapping.isNumberType()==true>
+      <#if field.select??>
+        <dui-select v-model="dataModel.${field.column.javaName}" entity="${UIClassMeta.name}" field="${field.name}" label-field="${field.select.labelField}" value-field="${field.select.valueField}"/>
+        <#assign hasSelectType=true/>
+      <#elseif field.column.mapping.isNumberType()==true>
         <el-input-number
           v-model="dataModel.${field.column.javaName}"
           :min="1" :max="10"
@@ -41,9 +44,6 @@
           active-color="#13ce66"
           inactive-color="#ff4949">
         </el-switch>
-      <#elseif field.column.isDictType()==true>
-        <xselect v-model="dataModel.${field.column.javaName}" :data="${field.column.javaName}Options"/>
-        <#assign hasSelectType=true/>
       <#elseif field.column.isFileType()==true>
         <file-input v-model="dataModel.${field.column.javaName}File"/>
         <#assign hasFileType=true/>
@@ -67,9 +67,6 @@ import * as ${apiName} from '@/api/${vueModuleName}/${apiName}'
 <#if hasFileType>
 import fileInput from '@/components/xui/fileInput'
 </#if>
-<#if hasSelectType>
-import xselect from '@/components/xui/xselect'
-</#if>
 //  import { exchangeLinebreak } from '@/filters'
 
 export default {
@@ -77,9 +74,6 @@ export default {
   components: {
 <#if hasFileType>
     fileInput,
-</#if>
-<#if hasSelectType>
-    xselect
 </#if>
   },
   props: {

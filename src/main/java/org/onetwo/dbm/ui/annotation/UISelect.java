@@ -23,6 +23,8 @@ public @interface UISelect {
 	String labelField() default "label";
 	String valueField() default "value";
 	
+//	String remoteUrl() default "/web-admin/dbm/uiselect/dataProvider";
+	
 	public enum NoEnums {
 	}
 	public class NoProvider implements UISelectDataProvider {

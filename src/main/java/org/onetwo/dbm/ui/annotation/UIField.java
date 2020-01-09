@@ -23,4 +23,5 @@ public @interface UIField {
 	boolean listable() default true;
 	boolean insertable() default true;
 	boolean updatable() default true;
+	int order() default 0;
 }

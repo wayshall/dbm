@@ -29,6 +29,7 @@ public class UIFieldMeta {
 	boolean insertable;
 	boolean updatable;
 	boolean searchable;
+	int order;
 	
 	UISelectMeta select;
 	

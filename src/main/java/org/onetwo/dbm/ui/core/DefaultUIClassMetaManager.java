@@ -119,11 +119,15 @@ public class DefaultUIClassMetaManager implements InitializingBean, UIClassMetaM
 		}
 		
 		UIClass uiclassAnno = entry.getAnnotationInfo().getAnnotation(UIClass.class);
+		String entityName = uiclassAnno.name();
+		if (StringUtils.isBlank(entityName)) {
+			entityName = entry.getEntityName();
+		}
 		
 		TableMeta table = databaseMetaDialet.getTableMeta(entry.getTableInfo().getName());
 		UIClassMeta entityMeta = new UIClassMeta();
 		entityMeta.setLabel(uiclassAnno.label());
-		entityMeta.setName(entry.getEntityName());
+		entityMeta.setName(entityName);
 		entityMeta.setMappedEntry(entry);
 		entityMeta.setTable(table);
 		
@@ -150,6 +154,7 @@ public class DefaultUIClassMetaManager implements InitializingBean, UIClassMetaM
 										.listable(uifield.listable())
 										.updatable(uifield.updatable())
 										.dbmField(field)
+										.order(uifield.order())
 										.build();
 
 		UISelect uiselect = field.getPropertyInfo().getAnnotation(UISelect.class);

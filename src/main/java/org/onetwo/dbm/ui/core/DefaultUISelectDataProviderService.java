@@ -30,11 +30,11 @@ public class DefaultUISelectDataProviderService implements UISelectDataProviderS
 	private UIClassMetaManager uiclassMetaManager;
 	
 	public Object getDatas(UISelectDataRequest request) {
-		UIClassMeta meta = uiclassMetaManager.get(request.getUiname());
+		UIClassMeta meta = uiclassMetaManager.get(request.getEntity());
 		UIFieldMeta uifield = meta.getField(request.getField());
 		UISelectMeta uiselect = uifield.getSelect();
 		if (uiselect==null) {
-			throw new DbmUIException("ui select not found, uiname: " + request.getUiname() + ", field: " + request.getField());
+			throw new DbmUIException("ui select not found, entity name: " + request.getEntity() + ", field: " + request.getField());
 		}
 		return getDatas(uiselect, request.getQuery());
 	}
@@ -42,6 +42,7 @@ public class DefaultUISelectDataProviderService implements UISelectDataProviderS
 	public Object getDatas(UISelectMeta uiselect, String query) {
 		if (uiselect.useEnumData()) {
 			Enum<?>[] values = (Enum<?>[]) uiselect.getDataEnumClass().getEnumConstants();
+//			DataBase[] vals = DataBase.class.getEnumConstants();
 			List<EnumDataVO> list = Stream.of(values).map(ev -> {
 				EnumDataVO data = new EnumDataVO();
 				BeanWrapper bw = SpringUtils.newBeanWrapper(ev);

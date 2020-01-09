@@ -17,7 +17,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class UISelectDataRequest {
 	@NotNull
-	String uiname;
+	String entity;
 	@NotNull
 	String field; 
 	String query; 
