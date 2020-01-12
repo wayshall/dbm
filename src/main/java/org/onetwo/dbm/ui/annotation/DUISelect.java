@@ -14,11 +14,11 @@ import org.onetwo.dbm.ui.core.UISelectDataProvider;
 
 @Target({ElementType.FIELD, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface UISelect {
+public @interface DUISelect {
 	
 	Class<? extends Enum<?>> dataEnumClass() default NoEnums.class;
 	
-	Class<? extends UISelectDataProvider> dataProvider() default NoProvider.class;
+	Class<? extends UISelectDataProvider<?>> dataProvider() default NoProvider.class;
 	
 	String labelField() default "label";
 	String valueField() default "value";
@@ -27,7 +27,7 @@ public @interface UISelect {
 	
 	public enum NoEnums {
 	}
-	public class NoProvider implements UISelectDataProvider {
+	public class NoProvider implements UISelectDataProvider<Object> {
 		@Override
 		public Object findDatas(String query) {
 			throw new UnsupportedOperationException();

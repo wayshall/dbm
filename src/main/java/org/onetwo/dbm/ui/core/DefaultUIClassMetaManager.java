@@ -16,14 +16,14 @@ import org.onetwo.dbm.core.spi.DbmSessionFactory;
 import org.onetwo.dbm.mapping.DbmMappedEntry;
 import org.onetwo.dbm.mapping.DbmMappedField;
 import org.onetwo.dbm.mapping.MappedEntryManager;
-import org.onetwo.dbm.ui.annotation.UIClass;
-import org.onetwo.dbm.ui.annotation.UIField;
-import org.onetwo.dbm.ui.annotation.UISelect;
+import org.onetwo.dbm.ui.annotation.DUICrudPage;
+import org.onetwo.dbm.ui.annotation.DUIField;
+import org.onetwo.dbm.ui.annotation.DUISelect;
 import org.onetwo.dbm.ui.exception.DbmUIException;
-import org.onetwo.dbm.ui.meta.UIClassMeta;
-import org.onetwo.dbm.ui.meta.UIFieldMeta;
-import org.onetwo.dbm.ui.meta.UIFieldMeta.UISelectMeta;
-import org.onetwo.dbm.ui.spi.UIClassMetaManager;
+import org.onetwo.dbm.ui.meta.DUICrudPageMeta;
+import org.onetwo.dbm.ui.meta.DUIFieldMeta;
+import org.onetwo.dbm.ui.meta.DUIFieldMeta.UISelectMeta;
+import org.onetwo.dbm.ui.spi.DUIClassMetaManager;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
@@ -37,18 +37,18 @@ import com.google.common.collect.Maps;
  * <br/>
  */
 
-public class DefaultUIClassMetaManager implements InitializingBean, UIClassMetaManager {
+public class DefaultUIClassMetaManager implements InitializingBean, DUIClassMetaManager {
 	
 	@Autowired
 	private DbmSessionFactory dbmSessionFactory;
 	private DatabaseMetaDialet databaseMetaDialet;
 	private MappedEntryManager mappedEntryManager;
-	private Cache<Class<?>, UIClassMeta> entryCaches = CacheBuilder.newBuilder().build();
+	private Cache<Class<?>, DUICrudPageMeta> entryCaches = CacheBuilder.newBuilder().build();
 
 	private JFishResourcesScanner resourcesScanner = new JFishResourcesScanner();
 	private String[] packagesToScan;
 	private Map<String, String> uiclassMap = Maps.newConcurrentMap();
-	private Map<String, String> uiclassTableMap = Maps.newConcurrentMap();
+//	private Map<String, String> uiclassTableMap = Maps.newConcurrentMap();
 	
 	
 	@Override
@@ -58,8 +58,8 @@ public class DefaultUIClassMetaManager implements InitializingBean, UIClassMetaM
 		this.databaseMetaDialet = new DelegateDatabaseMetaDialet(dbmSessionFactory.getDataSource());
 		
 		resourcesScanner.scan((metadataReader, res, index)->{
-			if( metadataReader.getAnnotationMetadata().hasAnnotation(UIClass.class.getName()) ){
-				Map<String, Object> uiclassAttrs = metadataReader.getAnnotationMetadata().getAnnotationAttributes(UIClass.class.getName());
+			if( metadataReader.getAnnotationMetadata().hasAnnotation(DUICrudPage.class.getName()) ){
+				Map<String, Object> uiclassAttrs = metadataReader.getAnnotationMetadata().getAnnotationAttributes(DUICrudPage.class.getName());
 				String name = (String)uiclassAttrs.get("name");
 				if (StringUtils.isBlank(name)) {
 					name = metadataReader.getClassMetadata().getClassName();
@@ -71,18 +71,18 @@ public class DefaultUIClassMetaManager implements InitializingBean, UIClassMetaM
 				uiclassMap.put(name, metadataReader.getClassMetadata().getClassName());
 				
 
-				Map<String, Object> tableAttrs = metadataReader.getAnnotationMetadata().getAnnotationAttributes(Table.class.getName());
+				/*Map<String, Object> tableAttrs = metadataReader.getAnnotationMetadata().getAnnotationAttributes(Table.class.getName());
 				String tableName = (String)tableAttrs.get("name");
 				if (StringUtils.isNotBlank(tableName)) {
 					uiclassTableMap.put(tableName.toLowerCase(), metadataReader.getClassMetadata().getClassName());
-				}
+				}*/
 			}
 			return null;
 		}, packagesToScan);
 	}
 	
 
-	public UIClassMeta getByTable(String tableName) {
+	/*public UIClassMeta getByTable(String tableName) {
 		tableName = tableName.toLowerCase();
 		if (!uiclassTableMap.containsKey(tableName)) {
 			throw new DbmUIException("ui class not found for table: " + tableName);
@@ -90,9 +90,9 @@ public class DefaultUIClassMetaManager implements InitializingBean, UIClassMetaM
 		String className = uiclassTableMap.get(tableName);
 		Class<?> uiclass = ReflectUtils.loadClass(className);
 		return get(uiclass);
-	}
+	}*/
 
-	public UIClassMeta get(String uiname) {
+	public DUICrudPageMeta get(String uiname) {
 		if (!uiclassMap.containsKey(uiname)) {
 			throw new DbmUIException("ui class not found for name: " + uiname);
 		}
@@ -101,7 +101,7 @@ public class DefaultUIClassMetaManager implements InitializingBean, UIClassMetaM
 		return get(uiclass);
 	}
 	
-	public UIClassMeta get(Class<?> uiclass) {
+	public DUICrudPageMeta get(Class<?> uiclass) {
 		try {
 			return entryCaches.get(uiclass, () -> {
 				return buildUIClassMeta(uiclass);
@@ -111,21 +111,22 @@ public class DefaultUIClassMetaManager implements InitializingBean, UIClassMetaM
 		}
 	}
 	
-	protected UIClassMeta buildUIClassMeta(Class<?> uiclass) {
-		DbmMappedEntry entry = mappedEntryManager.getEntry(uiclass);
+	protected DUICrudPageMeta buildUIClassMeta(Class<?> uiclass) {
+		DUICrudPage uiclassAnno = uiclass.getAnnotation(DUICrudPage.class);
+		
+		DbmMappedEntry entry = mappedEntryManager.getEntry(uiclassAnno.entityClass());
 		if (entry==null) {
 //			return null;
 			throw new DbmUIException("ui class must be a dbm entity: " + uiclass);
 		}
 		
-		UIClass uiclassAnno = entry.getAnnotationInfo().getAnnotation(UIClass.class);
 		String entityName = uiclassAnno.name();
 		if (StringUtils.isBlank(entityName)) {
 			entityName = entry.getEntityName();
 		}
 		
 		TableMeta table = databaseMetaDialet.getTableMeta(entry.getTableInfo().getName());
-		UIClassMeta entityMeta = new UIClassMeta();
+		DUICrudPageMeta entityMeta = new DUICrudPageMeta();
 		entityMeta.setLabel(uiclassAnno.label());
 		entityMeta.setName(entityName);
 		entityMeta.setMappedEntry(entry);
@@ -142,12 +143,12 @@ public class DefaultUIClassMetaManager implements InitializingBean, UIClassMetaM
 		return entityMeta;
 	}
 	
-	protected Optional<UIFieldMeta> buildField(DbmMappedField field) {
-		UIField uifield = field.getPropertyInfo().getAnnotation(UIField.class);
+	protected Optional<DUIFieldMeta> buildField(DbmMappedField field) {
+		DUIField uifield = field.getPropertyInfo().getAnnotation(DUIField.class);
 		if (uifield==null) {
 			return Optional.empty();
 		}
-		UIFieldMeta uifieldMeta = UIFieldMeta.builder()
+		DUIFieldMeta uifieldMeta = DUIFieldMeta.builder()
 										.name(field.getName())
 										.label(uifield.label())
 										.insertable(uifield.insertable())
@@ -157,7 +158,7 @@ public class DefaultUIClassMetaManager implements InitializingBean, UIClassMetaM
 										.order(uifield.order())
 										.build();
 
-		UISelect uiselect = field.getPropertyInfo().getAnnotation(UISelect.class);
+		DUISelect uiselect = field.getPropertyInfo().getAnnotation(DUISelect.class);
 		if (uiselect!=null) {
 			UISelectMeta uiselectMeta = uifieldMeta.new UISelectMeta();
 			uiselectMeta.setDataEnumClass(uiselect.dataEnumClass());

@@ -368,9 +368,6 @@ public class DbGenerator {
 			GeneratedContext genContext = new GeneratedContext();
 			genContext.putAll(globalConfig.getRootContext());
 			genContext.putAll(tableContext);
-			if(outContext!=null) {
-				genContext.putAll(outContext);
-			}
 			
 			TableMeta tableMeta = dialet.getTableMeta(tableName);
 			tableMeta.setStripPrefix(globalConfig.getStripTablePrefix());
@@ -391,8 +388,11 @@ public class DbGenerator {
 				 * if(tableContext!=null){ genContext.setTableContext(tableContext); }
 				 */
 				String outfilePath = outFileNameFunc.getOutFileName(genContext);
-				
+				if(outContext!=null) {
+					genContext.putAll(outContext);
+				}
 				genContext.initBasicContext();
+				
 				File file = ftlGenerator.generateFile(genContext, config.templatePath, outfilePath);
 				files.add(file);
 			});
@@ -507,7 +507,11 @@ public class DbGenerator {
 				if(StringUtils.isBlank(stripChars))
 					return tableName;
 //				return org.apache.commons.lang3.StringUtils.stripStart(tableName.toLowerCase(), stripChars.toLowerCase());
-				return tableName.toLowerCase().substring(stripChars.length());
+				if (tableName.startsWith(stripChars)) {
+					return tableName.toLowerCase().substring(stripChars.length());
+				} else {
+					return tableName;
+				}
 			}
 			
 			public GlobalConfig globalGeneratedConfig(){

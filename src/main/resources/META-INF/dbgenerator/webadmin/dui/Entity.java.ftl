@@ -21,7 +21,6 @@ import org.hibernate.validator.constraints.SafeHtml;
 
 import org.onetwo.dbm.annotation.SnowflakeId;
 import org.onetwo.dbm.jpa.BaseEntity;
-import org.onetwo.dbm.ui.annotation.UIClass;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -34,8 +33,7 @@ import lombok.EqualsAndHashCode;
 @Table(name="${table.name}")
 @Data
 @EqualsAndHashCode(callSuper=true)
-@UIClass(name = "${entityClassName2}", label = "${(table.comments[0])!''}")
-public class ${entityClassName} extends BaseEntity {
+public class ${entityClassName} extends <#if baseEntityClass??>${baseEntityClass}<#else>BaseEntity</#if> {
 
     @SnowflakeId
     @NotNull

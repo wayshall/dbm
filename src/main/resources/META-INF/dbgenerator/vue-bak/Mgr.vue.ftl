@@ -31,27 +31,19 @@
       <el-table-column align="center" width="80" type="selection"/>
   <#list UIClassMeta.listableFields as field>
     <#if field.column.isDateType()>
-      <el-table-column align="center" label="${(field.label)!''}" <#if field?counter != UIClassMeta.listableFields.size()>width="100"</#if>>
+      <el-table-column align="center" label="${(field.label)!''}" width="100">
         <template slot-scope="scope">
           <span>{{ scope.row.${field.column.javaName} | formatDateInMillis }}</span>
         </template>
       </el-table-column>
     <#else>
-      <el-table-column align="center" label="${(field.label)!''}" prop="${field.column.javaName}" <#if field?counter != UIClassMeta.listableFields.size()>width="100"</#if>/>
+      <el-table-column align="center" label="${(field.label)!''}" prop="${field.column.javaName}" width="100"/>
     </#if>
   </#list>
     </layout-table>
 
-    <el-dialog title="${UIClassMeta.label}管理"
-      :visible.sync="dialog.visible"
-      :close-on-click-modal="false"
-      :before-close="handleClose">
-      <el-tabs type="border-card">
-        <el-tab-pane label="${UIClassMeta.label}编辑">
-          <${table.propertyName}-form :status-mode="dialog.status" :data-model="dataModel" @finishHandle="on${_tableContext.className}Finish"/>
-        </el-tab-pane>
-      </el-tabs>
-    </el-dialog>
+    <${table.propertyName}-form :status-mode="dialog.status" :visible.sync="dialog.visible" :data-model="dataModel" @finishHandle="refreshTable = true"/>
+
   </div>
 </template>
 
@@ -69,9 +61,9 @@ export default {
   data() {
     return {
       queryFormModel: {
-  <#list UIClassMeta.formFields as field>
-    <#if !field.column.primaryKey>
-        ${field.column.javaName}: '',
+  <#list table.columns as column>
+    <#if !column.primaryKey>
+        ${column.javaName}: '',
     </#if>
   </#list>
         ${table.primaryKey.javaName}: null
@@ -90,27 +82,17 @@ export default {
   mounted: function() {
   },
   methods: {
-    handleClose() {
-      // 清除验证信息
-      // this.$refs.dataForm.resetFields()
-      this.dialog.visible = false
-      return true
-    },
-    on${_tableContext.className}Finish() {
-      this.refreshTable = true
-      this.dialog.visible = false
-    },
     listApi: ${apiName}.getList,
     deleteApi: ${apiName}.remove,
     // 初始化dataModel
     initDataModel() {
       return {
-  <#list UIClassMeta.formFields as field>
-    <#if !field.column.primaryKey>
-      <#if field.column.isFileType()>
-        ${field.column.javaName}File: null,
+  <#list table.columns as column>
+    <#if !column.primaryKey>
+      <#if column.isFileType()>
+        ${column.javaName}File: null,
       <#else>
-        ${field.column.javaName}: '',
+        ${column.javaName}: '',
       </#if>
     </#if>
   </#list>

@@ -4,8 +4,8 @@ package org.onetwo.dbm.ui.core;
  * <br/>
  */
 
-public interface UISelectDataProvider {
+public interface UISelectDataProvider<T> {
 	
-	Object findDatas(String query);
+	T findDatas(String query);
 
 }

@@ -10,18 +10,12 @@ import java.lang.annotation.Target;
  * <br/>
  */
 
-@Target({ElementType.FIELD, ElementType.METHOD})
+@Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface UIField {
+public @interface DUICrudPage {
 	
-	/****
-	 * 显示的label
-	 * @author weishao zeng
-	 * @return
-	 */
+	String name() default "";
 	String label();
-	boolean listable() default true;
-	boolean insertable() default true;
-	boolean updatable() default true;
-	int order() default 0;
+	Class<?> entityClass() default void.class;
+	DUIFormTabPannel[] formTabs() default {};
 }

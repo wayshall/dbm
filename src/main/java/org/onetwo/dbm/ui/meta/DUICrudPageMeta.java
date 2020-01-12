@@ -24,47 +24,47 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Data
-public class UIClassMeta {
+public class DUICrudPageMeta {
 	
 	private String name;
 	private String label;
 	
 	@Getter(AccessLevel.NONE)
 	@Setter(AccessLevel.NONE)
-	final private Map<String, UIFieldMeta> fieldMap = Maps.newLinkedHashMap();
-	private List<UIFieldMeta> fields = Lists.newArrayList();
+	final private Map<String, DUIFieldMeta> fieldMap = Maps.newLinkedHashMap();
+	private List<DUIFieldMeta> fields = Lists.newArrayList();
 	 
 //	private Collection<UIFieldMeta> fields = Sets.newTreeSet(Comparator.comparingInt(f -> f.getOrder()));
 	private DbmMappedEntry mappedEntry;
 	private TableMeta table;
 	
-	public void addField(UIFieldMeta field) {
+	public void addField(DUIFieldMeta field) {
 		fieldMap.put(field.getName(), field);
 		fields.add(field);
 		Collections.sort(fields, Comparator.comparingInt(f -> f.getOrder()));
 	}
 	
-	public UIFieldMeta getField(String fieldName) {
-		UIFieldMeta field =  fieldMap.get(fieldName);
+	public DUIFieldMeta getField(String fieldName) {
+		DUIFieldMeta field =  fieldMap.get(fieldName);
 		if (field==null) {
 			throw new DbmUIException("ui field not found for name: " + fieldName);
 		}
 		return field;
 	}
 	
-	public Collection<UIFieldMeta> getFields() {
+	public Collection<DUIFieldMeta> getFields() {
 		return fields;
 	}
 	
-	public Collection<UIFieldMeta> getListableFields() {
+	public Collection<DUIFieldMeta> getListableFields() {
 		return getFields().stream().filter(f -> f.isListable()).collect(Collectors.toList());
 	}
 	
-	public Collection<UIFieldMeta> getSearchableFields() {
+	public Collection<DUIFieldMeta> getSearchableFields() {
 		return getFields().stream().filter(f -> f.isSearchable()).collect(Collectors.toList());
 	}
 	
-	public Collection<UIFieldMeta> getFormFields() {
+	public Collection<DUIFieldMeta> getFormFields() {
 		return getFields().stream().filter(f -> f.isInsertable() || f.isUpdatable()).collect(Collectors.toList());
 	}
 	

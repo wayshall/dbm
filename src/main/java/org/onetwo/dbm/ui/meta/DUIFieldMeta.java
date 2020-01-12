@@ -2,8 +2,8 @@ package org.onetwo.dbm.ui.meta;
 
 import org.onetwo.common.db.generator.meta.ColumnMeta;
 import org.onetwo.dbm.mapping.DbmMappedField;
-import org.onetwo.dbm.ui.annotation.UISelect.NoEnums;
-import org.onetwo.dbm.ui.annotation.UISelect.NoProvider;
+import org.onetwo.dbm.ui.annotation.DUISelect.NoEnums;
+import org.onetwo.dbm.ui.annotation.DUISelect.NoProvider;
 import org.onetwo.dbm.ui.core.UISelectDataProvider;
 
 import lombok.AllArgsConstructor;
@@ -17,9 +17,9 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 @Builder
-public class UIFieldMeta {
+public class DUIFieldMeta {
 	
-	UIClassMeta classMeta;
+	DUICrudPageMeta classMeta;
 	DbmMappedField dbmField;
 	ColumnMeta column;
 	
@@ -49,7 +49,7 @@ public class UIFieldMeta {
 	@Data
 	public class UISelectMeta {
 		Class<? extends Enum<?>> dataEnumClass;
-		Class<? extends UISelectDataProvider> dataProvider;
+		Class<? extends UISelectDataProvider<?>> dataProvider;
 		String labelField;
 		String valueField;
 		
@@ -61,8 +61,8 @@ public class UIFieldMeta {
 			return dataProvider!=null && dataProvider!=NoProvider.class;
 		}
 		
-		public UIFieldMeta getField() {
-			return UIFieldMeta.this;
+		public DUIFieldMeta getField() {
+			return DUIFieldMeta.this;
 		}
 	}
 

@@ -97,9 +97,9 @@ public class ${_tableContext.className}MgrController extends ${pluginBaseControl
     /****
      * ${(table.comments[0])!''} 权限类
      */
+    @PermissionMeta(name="${(table.comments[0])!''}管理")
     public static interface ${_tableContext.className}Mgr {
-        String name = "${(table.comments[0])!''}管理";
-        
+    
         @PermissionMeta(name = "新增", permissionType=PermissionType.FUNCTION)
         public interface Create {
         }

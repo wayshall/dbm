@@ -10,10 +10,18 @@ import java.lang.annotation.Target;
  * <br/>
  */
 
-@Target({ElementType.TYPE})
+@Target({ElementType.FIELD, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface UIClass {
+public @interface DUIField {
 	
-	String name() default "";
+	/****
+	 * 显示的label
+	 * @author weishao zeng
+	 * @return
+	 */
 	String label();
+	boolean listable() default true;
+	boolean insertable() default true;
+	boolean updatable() default true;
+	int order() default 0;
 }

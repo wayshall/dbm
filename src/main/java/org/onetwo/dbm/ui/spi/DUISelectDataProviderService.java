@@ -7,7 +7,7 @@ import org.onetwo.dbm.ui.vo.UISelectDataRequest;
  * <br/>
  */
 
-public interface UISelectDataProviderService {
+public interface DUISelectDataProviderService {
 
 	Object getDatas(UISelectDataRequest request);
 	

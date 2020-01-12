@@ -15,9 +15,8 @@ import org.onetwo.common.dbm.model.hib.entity.UserEntity.UserGenders;
 import org.onetwo.common.dbm.model.hib.entity.UserEntity.UserStatus;
 import org.onetwo.dbm.annotation.SnowflakeId;
 import org.onetwo.dbm.jpa.BaseEntity;
-import org.onetwo.dbm.ui.annotation.UIClass;
-import org.onetwo.dbm.ui.annotation.UIField;
-import org.onetwo.dbm.ui.annotation.UISelect;
+import org.onetwo.dbm.ui.annotation.DUIField;
+import org.onetwo.dbm.ui.annotation.DUISelect;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -30,7 +29,7 @@ import lombok.EqualsAndHashCode;
 @Table(name="TEST_USER")
 @Data
 @EqualsAndHashCode(callSuper=true)
-@UIClass(name = "TestUser", label = "用户")
+//@UIClass(name = "TestUser", label = "用户")
 public class UserUIEntity extends BaseEntity {
 
     @SnowflakeId
@@ -42,7 +41,7 @@ public class UserUIEntity extends BaseEntity {
 	/*****
 	 * 
 	 */
-    @UIField(label = "用户名称")
+    @DUIField(label = "用户名称")
 	@Length(min=1, max=50)
 	String userName;
   
@@ -75,13 +74,13 @@ public class UserUIEntity extends BaseEntity {
 	 * 
 	 */
 	@Enumerated(EnumType.ORDINAL)
-    @UIField(label = "性别")
-    @UISelect(dataEnumClass=UserGenders.class, valueField = "mappingValue")
+    @DUIField(label = "性别")
+    @DUISelect(dataEnumClass=UserGenders.class, valueField = "mappingValue")
 	UserGenders gender;
 	
 	@Enumerated(EnumType.STRING)
-    @UIField(label = "用户状态", updatable= true, insertable = false)
-    @UISelect(dataEnumClass=UserStatus.class)
+    @DUIField(label = "用户状态", updatable= true, insertable = false)
+    @DUISelect(dataEnumClass=UserStatus.class)
 	UserStatus status;
     
 }

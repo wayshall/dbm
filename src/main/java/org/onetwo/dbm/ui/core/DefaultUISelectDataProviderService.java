@@ -6,11 +6,11 @@ import java.util.stream.Stream;
 
 import org.onetwo.common.spring.SpringUtils;
 import org.onetwo.dbm.ui.exception.DbmUIException;
-import org.onetwo.dbm.ui.meta.UIClassMeta;
-import org.onetwo.dbm.ui.meta.UIFieldMeta;
-import org.onetwo.dbm.ui.meta.UIFieldMeta.UISelectMeta;
-import org.onetwo.dbm.ui.spi.UIClassMetaManager;
-import org.onetwo.dbm.ui.spi.UISelectDataProviderService;
+import org.onetwo.dbm.ui.meta.DUICrudPageMeta;
+import org.onetwo.dbm.ui.meta.DUIFieldMeta;
+import org.onetwo.dbm.ui.meta.DUIFieldMeta.UISelectMeta;
+import org.onetwo.dbm.ui.spi.DUIClassMetaManager;
+import org.onetwo.dbm.ui.spi.DUISelectDataProviderService;
 import org.onetwo.dbm.ui.vo.EnumDataVO;
 import org.onetwo.dbm.ui.vo.UISelectDataRequest;
 import org.springframework.beans.BeanWrapper;
@@ -22,16 +22,16 @@ import org.springframework.context.ApplicationContext;
  * <br/>
  */
 
-public class DefaultUISelectDataProviderService implements UISelectDataProviderService {
+public class DefaultUISelectDataProviderService implements DUISelectDataProviderService {
 	
 	@Autowired
 	private ApplicationContext applicationContext;
 	@Autowired
-	private UIClassMetaManager uiclassMetaManager;
+	private DUIClassMetaManager uiclassMetaManager;
 	
 	public Object getDatas(UISelectDataRequest request) {
-		UIClassMeta meta = uiclassMetaManager.get(request.getEntity());
-		UIFieldMeta uifield = meta.getField(request.getField());
+		DUICrudPageMeta meta = uiclassMetaManager.get(request.getEntity());
+		DUIFieldMeta uifield = meta.getField(request.getField());
 		UISelectMeta uiselect = uifield.getSelect();
 		if (uiselect==null) {
 			throw new DbmUIException("ui select not found, entity name: " + request.getEntity() + ", field: " + request.getField());
@@ -54,8 +54,8 @@ public class DefaultUISelectDataProviderService implements UISelectDataProviderS
 			}).collect(Collectors.toList());
 			return list;
 		} else if (uiselect.useDataProvider()) {
-			Class<? extends UISelectDataProvider> dataProviderClass = uiselect.getDataProvider();
-			UISelectDataProvider dataProvider = (UISelectDataProvider)SpringUtils.getBean(applicationContext, dataProviderClass);
+			Class<? extends UISelectDataProvider<?>> dataProviderClass = uiselect.getDataProvider();
+			UISelectDataProvider<?> dataProvider = (UISelectDataProvider<?>)SpringUtils.getBean(applicationContext, dataProviderClass);
 			return dataProvider.findDatas(query);
 		} else {
 			throw new DbmUIException("Neither enum nor dataProvider, field: " + uiselect.getField().getName());

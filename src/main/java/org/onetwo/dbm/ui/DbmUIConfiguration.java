@@ -6,8 +6,8 @@ import org.onetwo.common.reflect.ReflectUtils;
 import org.onetwo.common.utils.LangUtils;
 import org.onetwo.dbm.ui.core.DefaultUIClassMetaManager;
 import org.onetwo.dbm.ui.core.DefaultUISelectDataProviderService;
-import org.onetwo.dbm.ui.spi.UIClassMetaManager;
-import org.onetwo.dbm.ui.spi.UISelectDataProviderService;
+import org.onetwo.dbm.ui.spi.DUIClassMetaManager;
+import org.onetwo.dbm.ui.spi.DUISelectDataProviderService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportAware;
@@ -39,14 +39,14 @@ public class DbmUIConfiguration implements ImportAware {
 	}
 
 	@Bean
-	public UIClassMetaManager uiClassMetaManager() {
+	public DUIClassMetaManager uiClassMetaManager() {
 		DefaultUIClassMetaManager metaManager = new DefaultUIClassMetaManager();
 		metaManager.setPackagesToScan(packagesToScan);
 		return metaManager;
 	}
 	
 	@Bean
-	public UISelectDataProviderService uiSelectDataProviderService() {
+	public DUISelectDataProviderService uiSelectDataProviderService() {
 		return new DefaultUISelectDataProviderService();
 	}
 }

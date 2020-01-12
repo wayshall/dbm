@@ -8,11 +8,11 @@ import java.util.Optional;
 import org.junit.Test;
 import org.onetwo.common.base.DbmBaseTest;
 import org.onetwo.common.dbm.model.hib.entity.UserEntity.UserStatus;
-import org.onetwo.dbm.ui.entity.UserUIEntity;
-import org.onetwo.dbm.ui.meta.UIClassMeta;
-import org.onetwo.dbm.ui.meta.UIFieldMeta;
-import org.onetwo.dbm.ui.spi.UIClassMetaManager;
-import org.onetwo.dbm.ui.spi.UISelectDataProviderService;
+import org.onetwo.dbm.ui.entity.UserCrudPage;
+import org.onetwo.dbm.ui.meta.DUICrudPageMeta;
+import org.onetwo.dbm.ui.meta.DUIFieldMeta;
+import org.onetwo.dbm.ui.spi.DUIClassMetaManager;
+import org.onetwo.dbm.ui.spi.DUISelectDataProviderService;
 import org.onetwo.dbm.ui.vo.EnumDataVO;
 import org.onetwo.dbm.ui.vo.UISelectDataRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,26 +25,26 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class DbmUISimpleTest extends DbmBaseTest {
 	
 	@Autowired
-	private UIClassMetaManager uiClassMetaManager;
+	private DUIClassMetaManager uiClassMetaManager;
 	@Autowired
-	private UISelectDataProviderService selectDataProviderService;
+	private DUISelectDataProviderService selectDataProviderService;
 	
 	@Test
 	public void testUIClass() {
-		UIClassMeta classMeta = uiClassMetaManager.get(UserUIEntity.class);
+		DUICrudPageMeta classMeta = uiClassMetaManager.get(UserCrudPage.class);
 		assertThat(classMeta).isNotNull();
 		assertThat(classMeta.getFields().size()).isEqualTo(3);
-		UIFieldMeta status = classMeta.getField("status");
+		DUIFieldMeta status = classMeta.getField("status");
 		assertThat(status).isNotNull();
 		assertThat(status.getSelect()).isNotNull();
 	}
 
-	@Test
+	/*@Test
 	public void testUIClassWithTable() {
 		UIClassMeta classMeta = uiClassMetaManager.getByTable("TEST_USER");
 		assertThat(classMeta).isNotNull();
 		assertThat(classMeta.getFields().size()).isEqualTo(3);
-	}
+	}*/
 	
 	@SuppressWarnings("unchecked")
 	@Test
