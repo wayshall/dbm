@@ -4,6 +4,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.List;
 
 import org.onetwo.dbm.ui.core.UISelectDataProvider;
 
@@ -18,7 +19,10 @@ public @interface DUISelect {
 	
 	Class<? extends Enum<?>> dataEnumClass() default NoEnums.class;
 	
-	Class<? extends UISelectDataProvider<?>> dataProvider() default NoProvider.class;
+	Class<? extends UISelectDataProvider> dataProvider() default NoProvider.class;
+
+	Class<?> cascadeEntity() default Void.class;
+	String[] cascadeQueryFields() default {};
 	
 	String labelField() default "label";
 	String valueField() default "value";
@@ -27,9 +31,9 @@ public @interface DUISelect {
 	
 	public enum NoEnums {
 	}
-	public class NoProvider implements UISelectDataProvider<Object> {
+	public class NoProvider implements UISelectDataProvider {
 		@Override
-		public Object findDatas(String query) {
+		public List<?> findDatas(String query) {
 			throw new UnsupportedOperationException();
 		}
 	}

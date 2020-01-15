@@ -3,7 +3,6 @@ package org.onetwo.common.db.generator;
 import java.io.File;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -109,6 +108,16 @@ public class DbmGenerator {
 		this.dbGenerator.globalConfig().pageFileBaseDir(pageFileBaseDir);
 		return this;
 	}
+	
+	public DbmGenerator context(String key, Object value) {
+		this.context.put(key, value);
+		return this;
+	}
+	
+	public DbmGenerator pluginBaseController(Class<?> pluginBaseControllerClass) {
+		context.put("pluginBaseController", pluginBaseControllerClass.getName());
+		return this;
+	}
 
 	public DbmGenerator configGenerator(Consumer<DbGenerator> configurer) {
 		configurer.accept(dbGenerator);
@@ -181,6 +190,12 @@ public class DbmGenerator {
 
 	public WebadminGenerator webadminGenerator(String tableName){
 		DbTableGenerator tableGenerator = dbGenerator.table(tableName);
+		
+		DUIEntityMeta duiEntityMeta = getDUIEntityMeta(tableName);
+		if (duiEntityMeta!=null) {
+			tableGenerator.context().put("DUIEntityMeta", duiEntityMeta);
+		}
+		
 		WebadminGenerator webadmin = new WebadminGenerator();
 		webadmin.tableGenerator = tableGenerator;
 		this.webadmins.add(webadmin);
@@ -188,11 +203,7 @@ public class DbmGenerator {
 	}
 
 	public VuePageGenerator vueGenerator(Class<?> pageClass, String vueModuleName){
-		Optional<DUIEntityMeta> pageMetaOpt = getUIClassMeta(pageClass);
-		if (!pageMetaOpt.isPresent()) {
-			throw new DbmUIException("page not found: " + pageClass);
-		}
-		DUIEntityMeta duiEntityMeta = pageMetaOpt.get();
+		DUIEntityMeta duiEntityMeta = getDUIEntityMeta(pageClass);
 
 		DbTableGenerator tableGenerator = dbGenerator.table(duiEntityMeta.getTable().getName());
 		
@@ -211,13 +222,25 @@ public class DbmGenerator {
 		return vueGenerator;
 	}
 	
-	private Optional<DUIEntityMeta> getUIClassMeta(Class<?> pageClass) {
-		DUIEntityMeta meta = null;
-		DUIMetaManager uiClassMetaManager = Springs.getInstance().getBean(DUIMetaManager.class); 
-		if (uiClassMetaManager!=null) {
-			meta = uiClassMetaManager.get(pageClass);
+	private DUIEntityMeta getDUIEntityMeta(Class<?> pageClass) {
+		DUIEntityMeta meta = getDUIMetaManager().get(pageClass);
+		if (meta==null) {
+			throw new DbmUIException("DUIEntityMeta not found: " + pageClass);
 		}
-		return Optional.ofNullable(meta);
+		return meta;
+	}
+
+	private DUIEntityMeta getDUIEntityMeta(String tableName) {
+		DUIEntityMeta meta = getDUIMetaManager().getByTable(tableName);
+		return meta;
+	}
+	
+	private DUIMetaManager getDUIMetaManager() {
+		DUIMetaManager duiMetaManager = Springs.getInstance().getBean(DUIMetaManager.class);
+		if (duiMetaManager==null) {
+			throw new DbmUIException("DUIMetaManager not found");
+		}
+		return duiMetaManager;
 	}
 	
 	/****
@@ -292,8 +315,7 @@ public class DbmGenerator {
 			return this;
 		}
 		
-		public WebadminGenerator generateVueController(Class<?> pluginBaseController){
-			context.put("pluginBaseController", pluginBaseController.getName());
+		public WebadminGenerator generateVueController(){
 			tableGenerator.javaClassTemplate("controller", templateName+"/MgrController.java.ftl");
 			return this;
 		}
@@ -347,6 +369,9 @@ public class DbmGenerator {
 			
 			if (LangUtils.isNotEmpty(duiEntityMeta.getEditableEntities())) {
 				duiEntityMeta.getEditableEntities().forEach(editable -> {
+					DbmGenerator.this.webadminGenerator(editable.getTable().getName())
+										.generateVueController()
+										.generateServiceImpl();
 					VuePageGenerator vg = DbmGenerator.this.vueGenerator(editable.getEntityClass(), vueModuleName);
 					vg.generateVueMgrForm();
 					vg.generateVueJsApi();

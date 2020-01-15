@@ -7,12 +7,15 @@
 <#assign formComponentName="${table.propertyName}Form"/>
 <#assign moduleName="${_globalConfig.getModuleName()}"/>
 <template>
-  <div>
+  <div v-loading="dataLoading">
     <el-form ref="${dataFormName}" :rules="rules" :model="dataModel" label-position="left" label-width="100px" style="width: 400px; margin-left:50px;">
    <#list DUIEntityMeta.formFields as field>
       <el-form-item label="${(field.label)!''}" prop="${field.column.javaName}">
       <#if field.select??>
-        <dui-select v-model="dataModel.${field.column.javaName}" entity="${DUIEntityMeta.name}" field="${field.name}" label-field="${field.select.labelField}" value-field="${field.select.valueField}"/>
+        <dui-select
+          v-model="dataModel.${field.column.javaName}"
+          entity="${DUIEntityMeta.name}"
+          field="${field.name}"/>
         <#assign hasSelectType=true/>
       <#elseif field.column.mapping.isNumberType()==true>
         <el-input-number
@@ -84,8 +87,8 @@ export default {
       type: Boolean,
       default: false
     },
-    dataModel: {
-      type: Object,
+    dataId: {
+      type: String,
       required: true
     }
   },
@@ -102,14 +105,47 @@ export default {
         ${table.primaryKey.javaName}: [
         ]
       },
-      savingLoading: false
+      dataModel: this.initDataModel(),
+      savingLoading: false,
+      dataLoading: false
     }
   },
+  watch: {
+    dataId: function(newDataId) {
+      // console.log('newDataId:' + newDataId)
+      if (this.dataId) {
+        this.getData()
+      } else {
+        this.dataModel = this.initDataModel()
+      }
+    }
+  },
+  mounted: function() {
+  },
   methods: {
-<#list table.columns as column>
-    <#if column.isFileType()>
+    getData() {
+      this.dataLoading = true
+      ${apiName}.get(this.dataId).then(res => {
+        this.dataModel = res.data.data
+      }).finally(() => {
+        this.dataLoading = false
+      })
+    },
+    // 初始化dataModel
+    initDataModel() {
+      return {
+  <#list DUIEntityMeta.formFields as field>
+    <#if !field.column.primaryKey>
+      <#if field.column.isFileType()>
+        ${field.column.javaName}File: null,
+      <#else>
+        ${field.column.javaName}: '',
+      </#if>
     </#if>
-</#list>
+  </#list>
+        ${table.primaryKey.javaName}: null
+      }
+    },
     handleSave() {
       this.$refs.dataForm.validate(valid => {
         if (valid) {

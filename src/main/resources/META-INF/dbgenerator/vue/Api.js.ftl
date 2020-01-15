@@ -1,6 +1,16 @@
 <#assign requestPath="/${vueModuleName}/${_tableContext.propertyName}"/>
 <#assign idName="${table.primaryKey.javaName}"/>
 import request from '@/utils/request'
+<#if DUIEntityMeta?? && DUIEntityMeta.editableEntity>
+
+export function get(${idName}) {
+  return request.get(`${requestPath}/${'$'}{${idName}}.json`)
+}
+
+export function update(data) {
+  return request.put(`${requestPath}/${'$'}{data.${idName}}`, data)
+}
+<#else>
 import qs from 'qs'
 
 export function getList(page, queryFormModel) {
@@ -17,12 +27,12 @@ export function get(${idName}) {
   return request.get(`${requestPath}/${'$'}{${idName}}.json`)
 }
 
-export function add(data) {
-  return request.post('${requestPath}.json', data)
-}
-
 export function update(data) {
   return request.put(`${requestPath}/${'$'}{data.${idName}}`, data)
+}
+
+export function add(data) {
+  return request.post('${requestPath}.json', data)
 }
 
 export function remove(${idName}s) {
@@ -34,4 +44,4 @@ export function remove(${idName}s) {
     { arrayFormat: 'repeat' }
   ))
 }
-
+</#if>

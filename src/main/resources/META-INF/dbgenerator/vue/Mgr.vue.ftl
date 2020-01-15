@@ -45,16 +45,25 @@
 
     <el-dialog
       title="${DUIEntityMeta.label}管理"
-      :visible.sync="dialog.visible"
+      :visible.sync="dataForm.visible"
       :close-on-click-modal="false"
       :before-close="handleClose">
-      <el-tabs type="border-card">
-        <el-tab-pane label="${DUIEntityMeta.label}编辑">
-          <${table.propertyName}-form :status-mode="dialog.status" :data-model="dataModel" @finishHandle="on${_tableContext.className}Finish"/>
+      <el-tabs
+        type="border-card"
+        v-model="currentTabName">
+        <el-tab-pane
+          label="${DUIEntityMeta.label}编辑"
+          name="dataFormTab">
+          <${table.propertyName}-form
+            :status-mode="dataForm.status"
+            :data-id="dataForm.dataId"
+            @finishHandle="on${_tableContext.className}Finish"/>
         </el-tab-pane>
       <#list DUIEntityMeta.editableEntities as editableEntity>
-        <el-tab-pane label="${editableEntity.label}" :disabled="dataModel.id==null">
-          <${editableEntity.table.horizontalBarName}-form :status-mode="dialog.status" :data-model="dataModel"/>
+        <el-tab-pane label="${editableEntity.label}" v-if="dataForm.status === 'Edit'">
+          <${editableEntity.table.horizontalBarName}-form
+            :status-mode="dataForm.status"
+            :data-id="dataForm.row[${editableEntity.cascadeField}]"/>
         </el-tab-pane>
       </#list>
       </el-tabs>
@@ -85,12 +94,14 @@ export default {
   </#list>
         ${table.primaryKey.javaName}: null
       },
-      dialog: {
+      dataForm: {
         status: '',
+        dataId: '',
+        row: null,
         visible: false
       },
-      dataModel: this.initDataModel(),
       refreshTable: false,
+      currentTabName: 'dataFormTab',
       operations: [
         { action: 'edit', text: '编辑', handler: this.handleEdit }
       ]
@@ -102,30 +113,15 @@ export default {
     handleClose() {
       // 清除验证信息
       // this.$refs.dataForm.resetFields()
-      this.dialog.visible = false
+      this.dataForm.visible = false
       return true
     },
     on${_tableContext.className}Finish() {
       this.refreshTable = true
-      this.dialog.visible = false
+      this.dataForm.visible = false
     },
     listApi: ${apiName}.getList,
     deleteApi: ${apiName}.remove,
-    // 初始化dataModel
-    initDataModel() {
-      return {
-  <#list DUIEntityMeta.formFields as field>
-    <#if !field.column.primaryKey>
-      <#if field.column.isFileType()>
-        ${field.column.javaName}File: null,
-      <#else>
-        ${field.column.javaName}: '',
-      </#if>
-    </#if>
-  </#list>
-        ${table.primaryKey.javaName}: null
-      }
-    },
     // 操作菜单处理，根据command分派到不同方法
     handleAction(data) {
       const command = data.action
@@ -136,17 +132,18 @@ export default {
       }
     },
     handleAdd() {
-      this.dialog.status = 'Add'
-      this.dialog.visible = true
-      this.dataModel = this.initDataModel()
+      this.dataForm.status = 'Add'
+      this.dataForm.visible = true
+      this.dataForm.row = {}
+      this.dataForm.dataId = ''
+      this.currentTabName = 'dataFormTab'
     },
     handleEdit(row) {
-      this.dialog.status = 'Edit'
-      this.dialog.visible = true
-      this.dialog.dataId = row.${table.primaryKey.javaName}
-      ${apiName}.get(row.${table.primaryKey.javaName}).then(res => {
-        this.dataModel = res.data.data
-      })
+      this.dataForm.status = 'Edit'
+      this.dataForm.visible = true
+      this.dataForm.row = row
+      this.dataForm.dataId = row.${table.primaryKey.javaName}
+      this.currentTabName = 'dataFormTab'
     }
   }
 }

@@ -2,7 +2,8 @@ package org.onetwo.dbm.ui.core;
 
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ExecutionException;
+
+import javax.persistence.Table;
 
 import org.apache.commons.lang3.StringUtils;
 import org.onetwo.common.db.generator.dialet.DatabaseMetaDialet;
@@ -16,6 +17,7 @@ import org.onetwo.dbm.core.spi.DbmSessionFactory;
 import org.onetwo.dbm.mapping.DbmMappedEntry;
 import org.onetwo.dbm.mapping.DbmMappedField;
 import org.onetwo.dbm.mapping.MappedEntryManager;
+import org.onetwo.dbm.ui.annotation.DUICascadeEditable;
 import org.onetwo.dbm.ui.annotation.DUIEntity;
 import org.onetwo.dbm.ui.annotation.DUIField;
 import org.onetwo.dbm.ui.annotation.DUISelect;
@@ -49,7 +51,7 @@ public class DefaultDUIMetaManager implements InitializingBean, DUIMetaManager {
 	private JFishResourcesScanner resourcesScanner = new JFishResourcesScanner();
 	private String[] packagesToScan;
 	private Map<String, String> duiEntityClassMap = Maps.newConcurrentMap();
-//	private Map<String, String> uiclassTableMap = Maps.newConcurrentMap();
+	private Map<String, String> duiEntityTableMap = Maps.newConcurrentMap();
 	
 	
 	@Override
@@ -72,30 +74,30 @@ public class DefaultDUIMetaManager implements InitializingBean, DUIMetaManager {
 				duiEntityClassMap.put(name, metadataReader.getClassMetadata().getClassName());
 				
 
-				/*Map<String, Object> tableAttrs = metadataReader.getAnnotationMetadata().getAnnotationAttributes(Table.class.getName());
+				Map<String, Object> tableAttrs = metadataReader.getAnnotationMetadata().getAnnotationAttributes(Table.class.getName());
 				String tableName = (String)tableAttrs.get("name");
 				if (StringUtils.isNotBlank(tableName)) {
-					uiclassTableMap.put(tableName.toLowerCase(), metadataReader.getClassMetadata().getClassName());
-				}*/
+					duiEntityTableMap.put(tableName.toLowerCase(), metadataReader.getClassMetadata().getClassName());
+				}
 			}
 			return null;
 		}, packagesToScan);
 	}
 	
 
-	/*public UIClassMeta getByTable(String tableName) {
+	public DUIEntityMeta getByTable(String tableName) {
 		tableName = tableName.toLowerCase();
-		if (!uiclassTableMap.containsKey(tableName)) {
-			throw new DbmUIException("ui class not found for table: " + tableName);
+		if (!duiEntityTableMap.containsKey(tableName)) {
+			throw new DbmUIException("dui entity class not found for table: " + tableName);
 		}
-		String className = uiclassTableMap.get(tableName);
+		String className = duiEntityTableMap.get(tableName);
 		Class<?> uiclass = ReflectUtils.loadClass(className);
 		return get(uiclass);
-	}*/
+	}
 
 	public DUIEntityMeta get(String uiname) {
 		if (!duiEntityClassMap.containsKey(uiname)) {
-			throw new DbmUIException("ui class not found for name: " + uiname);
+			throw new DbmUIException("dui entity class not found for name: " + uiname);
 		}
 		String className = duiEntityClassMap.get(uiname);
 		Class<?> uiclass = ReflectUtils.loadClass(className);
@@ -104,14 +106,31 @@ public class DefaultDUIMetaManager implements InitializingBean, DUIMetaManager {
 	
 	public DUIEntityMeta get(Class<?> uiclass) {
 		try {
-			return entryCaches.get(uiclass, () -> {
+			DUIEntityMeta entityMeta = entryCaches.get(uiclass, () -> {
 				return buildUIClassMeta(uiclass);
 			});
+			DUICascadeEditable[] cascadeEditableList = entityMeta.getCascadeEditableList();
+			if (!LangUtils.isEmpty(cascadeEditableList)) {
+				buildEditableEntities(entityMeta);
+			}
+			return entityMeta;
 		} catch (Exception e) {
 			if (e.getCause() instanceof BaseException) {
 				throw (BaseException) e.getCause();
 			}
 			throw new DbmUIException("get EntityUIMeta error", e);
+		}
+	}
+
+	protected void buildEditableEntities(DUIEntityMeta entityMeta) {
+		for (DUICascadeEditable cascadeEditable : entityMeta.getCascadeEditableList()) {
+//				DUIEntityMeta editableMeta = get(editableEntityClass);
+			DUIEntityMeta editableMeta = get(cascadeEditable.entityClass());
+			if (editableMeta==null) {
+				continue;
+			}
+			editableMeta.setCascadeField(cascadeEditable.cascadeField());
+			entityMeta.addEditableEntity(editableMeta);
 		}
 	}
 	
@@ -148,17 +167,8 @@ public class DefaultDUIMetaManager implements InitializingBean, DUIMetaManager {
 			});
 		});
 		
-		Class<?>[] editableEntities = uiclassAnno.editableEntities();
-		if (!LangUtils.isEmpty(editableEntities)) {
-			for (Class<?> editableEntityClass : editableEntities) {
-//				DUIEntityMeta editableMeta = get(editableEntityClass);
-				DUIEntityMeta editableMeta = buildUIClassMeta(editableEntityClass);
-				if (editableMeta==null) {
-					continue;
-				}
-				entityMeta.addEditableEntity(editableMeta);
-			}
-		}
+		DUICascadeEditable[] editableEntities = uiclassAnno.cascadeEditableEntities();
+		entityMeta.setCascadeEditableList(editableEntities);
 		
 		return entityMeta;
 	}
@@ -210,6 +220,14 @@ public class DefaultDUIMetaManager implements InitializingBean, DUIMetaManager {
 			uiselectMeta.setDataProvider(uiselect.dataProvider());
 			uiselectMeta.setLabelField(uiselect.labelField());
 			uiselectMeta.setValueField(uiselect.valueField());
+			if (uiselect.cascadeEntity()!=Void.class) {
+				uiselectMeta.setCascadeEntity(uiselect.cascadeEntity());
+				if (uiselect.cascadeQueryFields().length==0) {
+					uiselectMeta.setCascadeQueryFields(new String[] {uifieldMeta.getListField()});
+				} else {
+					uiselectMeta.setCascadeQueryFields(uiselect.cascadeQueryFields());
+				}
+			}
 		}
 		return uiselectMeta;
 	}

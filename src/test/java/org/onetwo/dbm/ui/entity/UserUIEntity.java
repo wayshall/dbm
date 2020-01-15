@@ -15,6 +15,7 @@ import org.onetwo.common.dbm.model.hib.entity.UserEntity.UserGenders;
 import org.onetwo.common.dbm.model.hib.entity.UserEntity.UserStatus;
 import org.onetwo.dbm.annotation.SnowflakeId;
 import org.onetwo.dbm.jpa.BaseEntity;
+import org.onetwo.dbm.ui.annotation.DUIEntity;
 import org.onetwo.dbm.ui.annotation.DUIField;
 import org.onetwo.dbm.ui.annotation.DUISelect;
 
@@ -29,7 +30,7 @@ import lombok.EqualsAndHashCode;
 @Table(name="TEST_USER")
 @Data
 @EqualsAndHashCode(callSuper=true)
-//@UIClass(name = "TestUser", label = "用户")
+@DUIEntity(name = "TestUser", label = "用户")
 public class UserUIEntity extends BaseEntity {
 
     @SnowflakeId

@@ -54,7 +54,11 @@ public class DUIFieldMeta {
 	@Data
 	public class UISelectMeta {
 		Class<? extends Enum<?>> dataEnumClass;
-		Class<? extends UISelectDataProvider<?>> dataProvider;
+		Class<? extends UISelectDataProvider> dataProvider;
+		
+		Class<?> cascadeEntity;
+		String[] cascadeQueryFields;
+		
 		String labelField = "label";
 		String valueField = "value";
 		

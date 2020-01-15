@@ -44,6 +44,9 @@ import org.onetwo.common.spring.validator.ValidatorUtils.ValidGroup.ValidAnyTime
 import org.onetwo.common.spring.validator.ValidatorUtils.ValidGroup.ValidWhenEdit;
 import org.onetwo.common.spring.validator.ValidatorUtils.ValidGroup.ValidWhenNew;
 
+<#if DUIEntityMeta?? && DUIEntityMeta.editableEntity>
+import ${_globalConfig.getJavaLocalPackage(_tableContext.localPackage)}.${DUIEntityMeta.parent.table.className}MgrController.${DUIEntityMeta.parent.table.className}Mgr.Edit${DUIEntityMeta.table.className};
+</#if>
 import ${entityPackage}.${entityClassName};
 import ${serviceImplPackage}.${serviceImplClassName};
 
@@ -54,7 +57,23 @@ public class ${_tableContext.className}MgrController extends ${pluginBaseControl
     @Autowired
     private ${serviceImplClassName} ${serviceImplPropertyName};
     
+<#if DUIEntityMeta?? && DUIEntityMeta.editableEntity>
+    @ByPermissionClass(Edit${DUIEntityMeta.table.className}.class)
+    @GetMapping(value="{${idName}}")
+    public ${entityClassName} get(@PathVariable("${idName}") ${idType} ${idName}){
+        ${entityClassName} ${_tableContext.propertyName} = ${serviceImplPropertyName}.findById(${idName});
+        return ${_tableContext.propertyName};
+    }
     
+    @ByPermissionClass(Edit${DUIEntityMeta.table.className}.class)
+    @PutMapping(value="{${idName}}")
+    public ${entityClassName} update(@PathVariable("${idName}") ${idType} ${idName}, @Validated ${entityClassName} ${_tableContext.propertyName}, BindingResult br){
+        ValidatorUtils.throwIfHasErrors(br, true);
+        ${_tableContext.propertyName}.set${idName?cap_first}(${idName});
+        ${serviceImplPropertyName}.update(${_tableContext.propertyName});
+        return ${_tableContext.propertyName};
+    }
+<#else>
     @ByPermissionClass(${_tableContext.className}Mgr.class)//在菜单类新建 ${_tableContext.className}Mgr 类后用import
     @GetMapping
     public Page<${entityClassName}> list(PageRequest pageRequest, ${entityClassName} ${_tableContext.propertyName}){
@@ -64,7 +83,7 @@ public class ${_tableContext.className}MgrController extends ${pluginBaseControl
     
     @ByPermissionClass(${_tableContext.className}Mgr.Create.class)
     @PostMapping
-    public ${entityClassName} create(@Validated({ValidAnyTime.class, ValidWhenNew.class}) ${entityClassName} ${_tableContext.propertyName}, BindingResult br){
+    public ${entityClassName} create(@Validated ${entityClassName} ${_tableContext.propertyName}, BindingResult br){
         ValidatorUtils.throwIfHasErrors(br, true);
         ${serviceImplPropertyName}.save(${_tableContext.propertyName});
         return ${_tableContext.propertyName};
@@ -93,7 +112,7 @@ public class ${_tableContext.className}MgrController extends ${pluginBaseControl
         ${serviceImplPropertyName}.removeByIds(${idName}s);
         return DataResults.success("删除成功！").build();
     }
-    
+
     /****
      * ${(table.comments[0])!''} 权限类
      */
@@ -111,5 +130,14 @@ public class ${_tableContext.className}MgrController extends ${pluginBaseControl
         @PermissionMeta(name = "删除", permissionType=PermissionType.FUNCTION)
         public interface Delete {
         }
+        
+    <#if DUIEntityMeta?? && DUIEntityMeta.editableEntities??>
+      <#list DUIEntityMeta.editableEntities as editableEntity>
+        @PermissionMeta(name = "编辑${editableEntity.label}", permissionType=PermissionType.FUNCTION)
+        public interface Edit${editableEntity.table.className} {
+        }
+      </#list>
+    </#if>
     }
+</#if>
 }

@@ -12,18 +12,8 @@ import java.lang.annotation.Target;
 
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface DUIEntity {
+public @interface DUICascadeEditable {
 	
-	String name() default "";
-	String label();
-	
-	boolean listPage() default true;
-	boolean editPage() default true;
-	
-	/****
-	 * 级联编辑
-	 * @author weishao zeng
-	 * @return
-	 */
-	DUICascadeEditable[] cascadeEditableEntities() default {};
+	Class<?> entityClass();
+	String cascadeField() default "id";
 }

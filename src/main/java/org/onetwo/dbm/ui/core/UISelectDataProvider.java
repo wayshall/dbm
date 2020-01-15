@@ -1,11 +1,14 @@
 package org.onetwo.dbm.ui.core;
+
+import java.util.List;
+
 /**
  * @author weishao zeng
  * <br/>
  */
 
-public interface UISelectDataProvider<T> {
+public interface UISelectDataProvider {
 	
-	T findDatas(String query);
+	List<?> findDatas(String query);
 
 }

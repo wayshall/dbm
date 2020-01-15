@@ -8,7 +8,7 @@ import java.util.Optional;
 import org.junit.Test;
 import org.onetwo.common.base.DbmBaseTest;
 import org.onetwo.common.dbm.model.hib.entity.UserEntity.UserStatus;
-import org.onetwo.dbm.ui.entity.UserCrudPage;
+import org.onetwo.dbm.ui.entity.UserUIEntity;
 import org.onetwo.dbm.ui.meta.DUIEntityMeta;
 import org.onetwo.dbm.ui.meta.DUIFieldMeta;
 import org.onetwo.dbm.ui.spi.DUIMetaManager;
@@ -31,7 +31,7 @@ public class DbmUISimpleTest extends DbmBaseTest {
 	
 	@Test
 	public void testUIClass() {
-		DUIEntityMeta classMeta = uiClassMetaManager.get(UserCrudPage.class);
+		DUIEntityMeta classMeta = uiClassMetaManager.get(UserUIEntity.class);
 		assertThat(classMeta).isNotNull();
 		assertThat(classMeta.getFields().size()).isEqualTo(3);
 		DUIFieldMeta status = classMeta.getField("status");
