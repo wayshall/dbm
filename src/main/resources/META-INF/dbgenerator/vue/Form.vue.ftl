@@ -9,10 +9,10 @@
 <template>
   <div>
     <el-form ref="${dataFormName}" :rules="rules" :model="dataModel" label-position="left" label-width="100px" style="width: 400px; margin-left:50px;">
-   <#list UIClassMeta.formFields as field>
+   <#list DUIEntityMeta.formFields as field>
       <el-form-item label="${(field.label)!''}" prop="${field.column.javaName}">
       <#if field.select??>
-        <dui-select v-model="dataModel.${field.column.javaName}" entity="${UIClassMeta.name}" field="${field.name}" label-field="${field.select.labelField}" value-field="${field.select.valueField}"/>
+        <dui-select v-model="dataModel.${field.column.javaName}" entity="${DUIEntityMeta.name}" field="${field.name}" label-field="${field.select.labelField}" value-field="${field.select.valueField}"/>
         <#assign hasSelectType=true/>
       <#elseif field.column.mapping.isNumberType()==true>
         <el-input-number

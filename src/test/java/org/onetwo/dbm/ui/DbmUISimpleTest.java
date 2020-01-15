@@ -9,9 +9,9 @@ import org.junit.Test;
 import org.onetwo.common.base.DbmBaseTest;
 import org.onetwo.common.dbm.model.hib.entity.UserEntity.UserStatus;
 import org.onetwo.dbm.ui.entity.UserCrudPage;
-import org.onetwo.dbm.ui.meta.DUICrudPageMeta;
+import org.onetwo.dbm.ui.meta.DUIEntityMeta;
 import org.onetwo.dbm.ui.meta.DUIFieldMeta;
-import org.onetwo.dbm.ui.spi.DUIClassMetaManager;
+import org.onetwo.dbm.ui.spi.DUIMetaManager;
 import org.onetwo.dbm.ui.spi.DUISelectDataProviderService;
 import org.onetwo.dbm.ui.vo.EnumDataVO;
 import org.onetwo.dbm.ui.vo.UISelectDataRequest;
@@ -25,13 +25,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class DbmUISimpleTest extends DbmBaseTest {
 	
 	@Autowired
-	private DUIClassMetaManager uiClassMetaManager;
+	private DUIMetaManager uiClassMetaManager;
 	@Autowired
 	private DUISelectDataProviderService selectDataProviderService;
 	
 	@Test
 	public void testUIClass() {
-		DUICrudPageMeta classMeta = uiClassMetaManager.get(UserCrudPage.class);
+		DUIEntityMeta classMeta = uiClassMetaManager.get(UserCrudPage.class);
 		assertThat(classMeta).isNotNull();
 		assertThat(classMeta.getFields().size()).isEqualTo(3);
 		DUIFieldMeta status = classMeta.getField("status");

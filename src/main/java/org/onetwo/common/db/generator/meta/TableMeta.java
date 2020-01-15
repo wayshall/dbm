@@ -50,13 +50,27 @@ public class TableMeta {
 		return getName();
 	}
 	
+	@Deprecated
 	public String getTableClassName(){
+		return getClassName();
+	}
+	
+	public String getClassName(){
 		return StringUtils.toClassName(getShortName());
 	}
 	
 	public String getPropertyName(){
 		String shortName = getShortName();
 		return StringUtils.toPropertyName(shortName);
+	}
+	
+	/***
+	 * 横杠分割的名称
+	 * @author weishao zeng
+	 * @return
+	 */
+	public String getHorizontalBarName(){
+		return StringUtils.convertWithSeperator(getPropertyName(), "-");
 	}
 
 	

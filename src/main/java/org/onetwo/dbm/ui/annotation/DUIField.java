@@ -20,8 +20,10 @@ public @interface DUIField {
 	 * @return
 	 */
 	String label();
+	String listField() default "";
+	boolean searchable() default false;
 	boolean listable() default true;
 	boolean insertable() default true;
 	boolean updatable() default true;
-	int order() default 0;
+	int order() default 1;
 }

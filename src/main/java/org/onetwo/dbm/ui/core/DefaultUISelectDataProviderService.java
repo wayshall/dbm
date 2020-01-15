@@ -6,10 +6,10 @@ import java.util.stream.Stream;
 
 import org.onetwo.common.spring.SpringUtils;
 import org.onetwo.dbm.ui.exception.DbmUIException;
-import org.onetwo.dbm.ui.meta.DUICrudPageMeta;
+import org.onetwo.dbm.ui.meta.DUIEntityMeta;
 import org.onetwo.dbm.ui.meta.DUIFieldMeta;
 import org.onetwo.dbm.ui.meta.DUIFieldMeta.UISelectMeta;
-import org.onetwo.dbm.ui.spi.DUIClassMetaManager;
+import org.onetwo.dbm.ui.spi.DUIMetaManager;
 import org.onetwo.dbm.ui.spi.DUISelectDataProviderService;
 import org.onetwo.dbm.ui.vo.EnumDataVO;
 import org.onetwo.dbm.ui.vo.UISelectDataRequest;
@@ -27,10 +27,10 @@ public class DefaultUISelectDataProviderService implements DUISelectDataProvider
 	@Autowired
 	private ApplicationContext applicationContext;
 	@Autowired
-	private DUIClassMetaManager uiclassMetaManager;
+	private DUIMetaManager uiclassMetaManager;
 	
 	public Object getDatas(UISelectDataRequest request) {
-		DUICrudPageMeta meta = uiclassMetaManager.get(request.getEntity());
+		DUIEntityMeta meta = uiclassMetaManager.get(request.getEntity());
 		DUIFieldMeta uifield = meta.getField(request.getField());
 		UISelectMeta uiselect = uifield.getSelect();
 		if (uiselect==null) {
@@ -47,9 +47,13 @@ public class DefaultUISelectDataProviderService implements DUISelectDataProvider
 				EnumDataVO data = new EnumDataVO();
 				BeanWrapper bw = SpringUtils.newBeanWrapper(ev);
 				String label = (String)bw.getPropertyValue(uiselect.getLabelField());
-				Object value = bw.getPropertyValue(uiselect.getValueField());
+				if (bw.isReadableProperty(uiselect.getValueField())) {
+					Object value = bw.getPropertyValue(uiselect.getValueField());
+					data.setValue(value);
+				} else {
+					data.setValue(ev.name());
+				}
 				data.setLabel(label);
-				data.setValue(value);
 				return data;
 			}).collect(Collectors.toList());
 			return list;

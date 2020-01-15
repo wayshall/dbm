@@ -19,12 +19,17 @@ import lombok.Data;
 @Builder
 public class DUIFieldMeta {
 	
-	DUICrudPageMeta classMeta;
+	DUIEntityMeta classMeta;
 	DbmMappedField dbmField;
 	ColumnMeta column;
 	
 	String name;
 	String label;
+	/***
+	 * 列表时显示的字段
+	 * 如果枚举时应显示对应的label
+	 */
+	String listField;
 	boolean listable;
 	boolean insertable;
 	boolean updatable;
@@ -50,8 +55,8 @@ public class DUIFieldMeta {
 	public class UISelectMeta {
 		Class<? extends Enum<?>> dataEnumClass;
 		Class<? extends UISelectDataProvider<?>> dataProvider;
-		String labelField;
-		String valueField;
+		String labelField = "label";
+		String valueField = "value";
 		
 		public boolean useEnumData() {
 			return dataEnumClass!=null && dataEnumClass!=NoEnums.class;

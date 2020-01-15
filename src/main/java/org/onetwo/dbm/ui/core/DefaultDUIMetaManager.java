@@ -4,26 +4,27 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
-import javax.persistence.Table;
-
 import org.apache.commons.lang3.StringUtils;
 import org.onetwo.common.db.generator.dialet.DatabaseMetaDialet;
 import org.onetwo.common.db.generator.dialet.DelegateDatabaseMetaDialet;
 import org.onetwo.common.db.generator.meta.TableMeta;
+import org.onetwo.common.exception.BaseException;
 import org.onetwo.common.reflect.ReflectUtils;
 import org.onetwo.common.spring.utils.JFishResourcesScanner;
+import org.onetwo.common.utils.LangUtils;
 import org.onetwo.dbm.core.spi.DbmSessionFactory;
 import org.onetwo.dbm.mapping.DbmMappedEntry;
 import org.onetwo.dbm.mapping.DbmMappedField;
 import org.onetwo.dbm.mapping.MappedEntryManager;
-import org.onetwo.dbm.ui.annotation.DUICrudPage;
+import org.onetwo.dbm.ui.annotation.DUIEntity;
 import org.onetwo.dbm.ui.annotation.DUIField;
 import org.onetwo.dbm.ui.annotation.DUISelect;
 import org.onetwo.dbm.ui.exception.DbmUIException;
-import org.onetwo.dbm.ui.meta.DUICrudPageMeta;
+import org.onetwo.dbm.ui.meta.DUIEntityMeta;
 import org.onetwo.dbm.ui.meta.DUIFieldMeta;
 import org.onetwo.dbm.ui.meta.DUIFieldMeta.UISelectMeta;
-import org.onetwo.dbm.ui.spi.DUIClassMetaManager;
+import org.onetwo.dbm.ui.spi.DUILabelEnum;
+import org.onetwo.dbm.ui.spi.DUIMetaManager;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
@@ -37,17 +38,17 @@ import com.google.common.collect.Maps;
  * <br/>
  */
 
-public class DefaultUIClassMetaManager implements InitializingBean, DUIClassMetaManager {
+public class DefaultDUIMetaManager implements InitializingBean, DUIMetaManager {
 	
 	@Autowired
 	private DbmSessionFactory dbmSessionFactory;
 	private DatabaseMetaDialet databaseMetaDialet;
 	private MappedEntryManager mappedEntryManager;
-	private Cache<Class<?>, DUICrudPageMeta> entryCaches = CacheBuilder.newBuilder().build();
+	private Cache<Class<?>, DUIEntityMeta> entryCaches = CacheBuilder.newBuilder().build();
 
 	private JFishResourcesScanner resourcesScanner = new JFishResourcesScanner();
 	private String[] packagesToScan;
-	private Map<String, String> uiclassMap = Maps.newConcurrentMap();
+	private Map<String, String> duiEntityClassMap = Maps.newConcurrentMap();
 //	private Map<String, String> uiclassTableMap = Maps.newConcurrentMap();
 	
 	
@@ -58,17 +59,17 @@ public class DefaultUIClassMetaManager implements InitializingBean, DUIClassMeta
 		this.databaseMetaDialet = new DelegateDatabaseMetaDialet(dbmSessionFactory.getDataSource());
 		
 		resourcesScanner.scan((metadataReader, res, index)->{
-			if( metadataReader.getAnnotationMetadata().hasAnnotation(DUICrudPage.class.getName()) ){
-				Map<String, Object> uiclassAttrs = metadataReader.getAnnotationMetadata().getAnnotationAttributes(DUICrudPage.class.getName());
+			if( metadataReader.getAnnotationMetadata().hasAnnotation(DUIEntity.class.getName()) ){
+				Map<String, Object> uiclassAttrs = metadataReader.getAnnotationMetadata().getAnnotationAttributes(DUIEntity.class.getName());
 				String name = (String)uiclassAttrs.get("name");
 				if (StringUtils.isBlank(name)) {
 					name = metadataReader.getClassMetadata().getClassName();
 				}
 //				Class<?> cls = ReflectUtils.loadClass(metadataReader.getClassMetadata().getClassName(), false);
-				if (uiclassMap.containsKey(name)) {
+				if (duiEntityClassMap.containsKey(name)) {
 					throw new DbmUIException("duplicate ui name: " + name);
 				}
-				uiclassMap.put(name, metadataReader.getClassMetadata().getClassName());
+				duiEntityClassMap.put(name, metadataReader.getClassMetadata().getClassName());
 				
 
 				/*Map<String, Object> tableAttrs = metadataReader.getAnnotationMetadata().getAnnotationAttributes(Table.class.getName());
@@ -92,32 +93,39 @@ public class DefaultUIClassMetaManager implements InitializingBean, DUIClassMeta
 		return get(uiclass);
 	}*/
 
-	public DUICrudPageMeta get(String uiname) {
-		if (!uiclassMap.containsKey(uiname)) {
+	public DUIEntityMeta get(String uiname) {
+		if (!duiEntityClassMap.containsKey(uiname)) {
 			throw new DbmUIException("ui class not found for name: " + uiname);
 		}
-		String className = uiclassMap.get(uiname);
+		String className = duiEntityClassMap.get(uiname);
 		Class<?> uiclass = ReflectUtils.loadClass(className);
 		return get(uiclass);
 	}
 	
-	public DUICrudPageMeta get(Class<?> uiclass) {
+	public DUIEntityMeta get(Class<?> uiclass) {
 		try {
 			return entryCaches.get(uiclass, () -> {
 				return buildUIClassMeta(uiclass);
 			});
-		} catch (ExecutionException e) {
+		} catch (Exception e) {
+			if (e.getCause() instanceof BaseException) {
+				throw (BaseException) e.getCause();
+			}
 			throw new DbmUIException("get EntityUIMeta error", e);
 		}
 	}
 	
-	protected DUICrudPageMeta buildUIClassMeta(Class<?> uiclass) {
-		DUICrudPage uiclassAnno = uiclass.getAnnotation(DUICrudPage.class);
+	protected DUIEntityMeta buildUIClassMeta(Class<?> uiEntityClass) {
+		DUIEntity uiclassAnno = uiEntityClass.getAnnotation(DUIEntity.class);
 		
-		DbmMappedEntry entry = mappedEntryManager.getEntry(uiclassAnno.entityClass());
+		if (uiclassAnno==null) {
+			throw new DbmUIException("@DUIEntity not found on the ui class: " + uiEntityClass);
+		}
+		
+		DbmMappedEntry entry = mappedEntryManager.getEntry(uiEntityClass);
 		if (entry==null) {
 //			return null;
-			throw new DbmUIException("ui class must be a dbm entity: " + uiclass);
+			throw new DbmUIException("ui class must be a dbm entity: " + uiEntityClass);
 		}
 		
 		String entityName = uiclassAnno.name();
@@ -126,7 +134,7 @@ public class DefaultUIClassMetaManager implements InitializingBean, DUIClassMeta
 		}
 		
 		TableMeta table = databaseMetaDialet.getTableMeta(entry.getTableInfo().getName());
-		DUICrudPageMeta entityMeta = new DUICrudPageMeta();
+		DUIEntityMeta entityMeta = new DUIEntityMeta();
 		entityMeta.setLabel(uiclassAnno.label());
 		entityMeta.setName(entityName);
 		entityMeta.setMappedEntry(entry);
@@ -140,6 +148,18 @@ public class DefaultUIClassMetaManager implements InitializingBean, DUIClassMeta
 			});
 		});
 		
+		Class<?>[] editableEntities = uiclassAnno.editableEntities();
+		if (!LangUtils.isEmpty(editableEntities)) {
+			for (Class<?> editableEntityClass : editableEntities) {
+//				DUIEntityMeta editableMeta = get(editableEntityClass);
+				DUIEntityMeta editableMeta = buildUIClassMeta(editableEntityClass);
+				if (editableMeta==null) {
+					continue;
+				}
+				entityMeta.addEditableEntity(editableMeta);
+			}
+		}
+		
 		return entityMeta;
 	}
 	
@@ -150,25 +170,48 @@ public class DefaultUIClassMetaManager implements InitializingBean, DUIClassMeta
 		}
 		DUIFieldMeta uifieldMeta = DUIFieldMeta.builder()
 										.name(field.getName())
+										.listField(uifield.listField())
 										.label(uifield.label())
 										.insertable(uifield.insertable())
 										.listable(uifield.listable())
 										.updatable(uifield.updatable())
+										.searchable(uifield.searchable())
 										.dbmField(field)
 										.order(uifield.order())
 										.build();
-
+		if (StringUtils.isBlank(uifieldMeta.getListField())) {
+			uifieldMeta.setListField(uifieldMeta.getName());
+		}
+		if (field.isEnumerated()) {
+			Class<?> propType = field.getPropertyInfo().getType();
+			if (DUILabelEnum.class.isAssignableFrom(propType)) {
+				uifieldMeta.setListField(field.getName()+"Label");
+			}
+			if (Enum.class.isAssignableFrom(propType)) {
+				@SuppressWarnings("unchecked")
+				UISelectMeta uiselectMeta = buildSelectMeta(uifieldMeta, null, (Class<? extends Enum<?>>)propType);
+				uifieldMeta.setSelect(uiselectMeta);
+			}
+		}
 		DUISelect uiselect = field.getPropertyInfo().getAnnotation(DUISelect.class);
 		if (uiselect!=null) {
-			UISelectMeta uiselectMeta = uifieldMeta.new UISelectMeta();
-			uiselectMeta.setDataEnumClass(uiselect.dataEnumClass());
-			uiselectMeta.setDataProvider(uiselect.dataProvider());
-			uiselectMeta.setLabelField(uiselect.labelField());
-			uiselectMeta.setValueField(uiselect.valueField());
+			UISelectMeta uiselectMeta = buildSelectMeta(uifieldMeta, uiselect, null);
 			uifieldMeta.setSelect(uiselectMeta);
 		}
 		
 		return Optional.of(uifieldMeta);
+	}
+	
+	private UISelectMeta buildSelectMeta(DUIFieldMeta uifieldMeta, DUISelect uiselect, Class<? extends Enum<?>> enumClass) {
+		UISelectMeta uiselectMeta = uifieldMeta.new UISelectMeta();
+		uiselectMeta.setDataEnumClass(enumClass);
+		if (uiselect!=null) {
+			uiselectMeta.setDataEnumClass(uiselect.dataEnumClass());
+			uiselectMeta.setDataProvider(uiselect.dataProvider());
+			uiselectMeta.setLabelField(uiselect.labelField());
+			uiselectMeta.setValueField(uiselect.valueField());
+		}
+		return uiselectMeta;
 	}
 
 	public void setPackagesToScan(String... packagesToScan) {

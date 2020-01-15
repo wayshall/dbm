@@ -4,9 +4,9 @@ import java.util.Map;
 
 import org.onetwo.common.reflect.ReflectUtils;
 import org.onetwo.common.utils.LangUtils;
-import org.onetwo.dbm.ui.core.DefaultUIClassMetaManager;
+import org.onetwo.dbm.ui.core.DefaultDUIMetaManager;
 import org.onetwo.dbm.ui.core.DefaultUISelectDataProviderService;
-import org.onetwo.dbm.ui.spi.DUIClassMetaManager;
+import org.onetwo.dbm.ui.spi.DUIMetaManager;
 import org.onetwo.dbm.ui.spi.DUISelectDataProviderService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -39,8 +39,8 @@ public class DbmUIConfiguration implements ImportAware {
 	}
 
 	@Bean
-	public DUIClassMetaManager uiClassMetaManager() {
-		DefaultUIClassMetaManager metaManager = new DefaultUIClassMetaManager();
+	public DUIMetaManager uiClassMetaManager() {
+		DefaultDUIMetaManager metaManager = new DefaultDUIMetaManager();
 		metaManager.setPackagesToScan(packagesToScan);
 		return metaManager;
 	}

@@ -1,6 +1,7 @@
 <#assign apiName="${table.propertyName}Api"/>
 <#assign formComponentName="${table.propertyName}Form"/>
 <#assign moduleName="${_globalConfig.getModuleName()}"/>
+<#assign searchableFields=DUIEntityMeta.searchableFields/>
 <template>
   <div class="app-container">
 
@@ -12,67 +13,75 @@
       :refresh.sync="refreshTable"
       :delete-api="deleteApi"
       :operations="operations">
+  <#if searchableFields.isEmpty()==false>
       <template slot="queryForm">
-  <#list table.columns as column>
-    <#if !column.primaryKey>
-        <el-form-item label="${(column.comments[0])!''}">
-          <el-input v-model="queryFormModel.${column.javaName}" placeholder="${(column.comments[0])!''}"/>
+    <#list searchableFields as field>
+        <el-form-item label="${(field.label)!''}">
+          <el-input v-model="queryFormModel.${field.column.javaName}" placeholder="${(field.label)!''}"/>
         </el-form-item>
-    </#if>
-  </#list>
+    </#list>
       </template>
+  </#if>
 
       <template slot="toolbar">
         <el-button type="primary" icon="el-icon-edit" @click="handleAdd">
-          添加${(table.comments[0])!''}
+          添加${(DUIEntityMeta.label)!''}
         </el-button>
       </template>
 
       <el-table-column align="center" width="80" type="selection"/>
-  <#list UIClassMeta.listableFields as field>
+  <#list DUIEntityMeta.listableFields as field>
     <#if field.column.isDateType()>
-      <el-table-column align="center" label="${(field.label)!''}" <#if field?counter != UIClassMeta.listableFields.size()>width="100"</#if>>
+      <el-table-column align="center" label="${(field.label)!''}" <#if field?counter != DUIEntityMeta.listableFields.size()>width="100"</#if>>
         <template slot-scope="scope">
           <span>{{ scope.row.${field.column.javaName} | formatDateInMillis }}</span>
         </template>
       </el-table-column>
     <#else>
-      <el-table-column align="center" label="${(field.label)!''}" prop="${field.column.javaName}" <#if field?counter != UIClassMeta.listableFields.size()>width="100"</#if>/>
+      <el-table-column align="center" label="${(field.label)!''}" prop="${field.listField}" <#if field?counter != DUIEntityMeta.listableFields.size()>width="100"</#if>/>
     </#if>
   </#list>
     </layout-table>
 
-    <el-dialog title="${UIClassMeta.label}管理"
+    <el-dialog
+      title="${DUIEntityMeta.label}管理"
       :visible.sync="dialog.visible"
       :close-on-click-modal="false"
       :before-close="handleClose">
       <el-tabs type="border-card">
-        <el-tab-pane label="${UIClassMeta.label}编辑">
+        <el-tab-pane label="${DUIEntityMeta.label}编辑">
           <${table.propertyName}-form :status-mode="dialog.status" :data-model="dataModel" @finishHandle="on${_tableContext.className}Finish"/>
         </el-tab-pane>
+      <#list DUIEntityMeta.editableEntities as editableEntity>
+        <el-tab-pane label="${editableEntity.label}" :disabled="dataModel.id==null">
+          <${editableEntity.table.horizontalBarName}-form :status-mode="dialog.status" :data-model="dataModel"/>
+        </el-tab-pane>
+      </#list>
       </el-tabs>
     </el-dialog>
   </div>
 </template>
 
 <script>
-import layoutTable from '@/components/xui/layoutTable'
 import * as ${apiName} from '@/api/${vueModuleName}/${apiName}'
 import ${formComponentName} from './${formComponentName}'
+<#list DUIEntityMeta.editableEntities as editableEntity>
+import ${editableEntity.table.propertyName}Form from './${editableEntity.table.propertyName}Form'
+</#list>
 
 export default {
   name: '${_tableContext.className}',
   components: {
-    ${formComponentName},
-    layoutTable
+<#list DUIEntityMeta.editableEntities as editableEntity>
+    ${editableEntity.table.propertyName}Form,
+</#list>
+    ${formComponentName}
   },
   data() {
     return {
       queryFormModel: {
-  <#list UIClassMeta.formFields as field>
-    <#if !field.column.primaryKey>
+  <#list searchableFields as field>
         ${field.column.javaName}: '',
-    </#if>
   </#list>
         ${table.primaryKey.javaName}: null
       },
@@ -105,7 +114,7 @@ export default {
     // 初始化dataModel
     initDataModel() {
       return {
-  <#list UIClassMeta.formFields as field>
+  <#list DUIEntityMeta.formFields as field>
     <#if !field.column.primaryKey>
       <#if field.column.isFileType()>
         ${field.column.javaName}File: null,

@@ -12,10 +12,13 @@ import java.lang.annotation.Target;
 
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface DUICrudPage {
+public @interface DUIEntity {
 	
 	String name() default "";
 	String label();
-	Class<?> entityClass() default void.class;
-	DUIFormTabPannel[] formTabs() default {};
+	
+	boolean listPage() default true;
+	boolean editPage() default true;
+	
+	Class<?>[] editableEntities() default {};
 }

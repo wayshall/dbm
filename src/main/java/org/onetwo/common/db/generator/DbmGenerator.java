@@ -21,8 +21,8 @@ import org.onetwo.common.utils.StringUtils;
 import org.onetwo.dbm.exception.DbmException;
 import org.onetwo.dbm.jpa.BaseEntity;
 import org.onetwo.dbm.ui.exception.DbmUIException;
-import org.onetwo.dbm.ui.meta.DUICrudPageMeta;
-import org.onetwo.dbm.ui.spi.DUIClassMetaManager;
+import org.onetwo.dbm.ui.meta.DUIEntityMeta;
+import org.onetwo.dbm.ui.spi.DUIMetaManager;
 import org.springframework.util.Assert;
 
 import com.google.common.collect.Lists;
@@ -187,10 +187,33 @@ public class DbmGenerator {
 		return webadmin;
 	}
 
+	public VuePageGenerator vueGenerator(Class<?> pageClass, String vueModuleName){
+		Optional<DUIEntityMeta> pageMetaOpt = getUIClassMeta(pageClass);
+		if (!pageMetaOpt.isPresent()) {
+			throw new DbmUIException("page not found: " + pageClass);
+		}
+		DUIEntityMeta duiEntityMeta = pageMetaOpt.get();
+
+		DbTableGenerator tableGenerator = dbGenerator.table(duiEntityMeta.getTable().getName());
+		
+//		DbTableGenerator tableGenerator = dbGenerator.table(pageMeta.getTable().getName());
+		VuePageGenerator vueGenerator = new VuePageGenerator();
+		vueGenerator.tableGenerator = tableGenerator;
+		vueGenerator.vueModuleName = vueModuleName;
+		vueGenerator.duiEntityMeta = duiEntityMeta;
+		vueGenerator.initGenerator();
+//		vueGenerator.vueBaseDir = vueBaseDir;
+//		if (LangUtils.isNotEmpty(duiEntityMeta.getEditableEntities())) {
+//			duiEntityMeta.getEditableEntities().forEach(editable -> {
+//				vueGenerator(editable.getEntityClass(), vueModuleName);
+//			});
+//		}
+		return vueGenerator;
+	}
 	
-	private Optional<DUICrudPageMeta> getUIClassMeta(Class<?> pageClass) {
-		DUICrudPageMeta meta = null;
-		DUIClassMetaManager uiClassMetaManager = Springs.getInstance().getBean(DUIClassMetaManager.class); 
+	private Optional<DUIEntityMeta> getUIClassMeta(Class<?> pageClass) {
+		DUIEntityMeta meta = null;
+		DUIMetaManager uiClassMetaManager = Springs.getInstance().getBean(DUIMetaManager.class); 
 		if (uiClassMetaManager!=null) {
 			meta = uiClassMetaManager.get(pageClass);
 		}
@@ -256,7 +279,7 @@ public class DbmGenerator {
 	public class WebadminGenerator {
 		private String templateName = templateBasePath + "webadmin";
 		private DbTableGenerator tableGenerator;
-		private VuePageGenerator vueGenerator;
+//		private VuePageGenerator vueGenerator;
 		
 		public WebadminGenerator generateServiceImpl(){
 			tableGenerator.serviceImplTemplate(templateName+"/ServiceImpl.java.ftl");
@@ -304,23 +327,6 @@ public class DbmGenerator {
 			return this;
 		}
 		
-
-		public VuePageGenerator vueGenerator(Class<?> pageClass, String vueModuleName){
-			Optional<DUICrudPageMeta> pageMetaOpt = getUIClassMeta(pageClass);
-			if (!pageMetaOpt.isPresent()) {
-				throw new DbmUIException("page not found: " + pageClass);
-			}
-			DUICrudPageMeta pageMeta = pageMetaOpt.get();
-//			DbTableGenerator tableGenerator = dbGenerator.table(pageMeta.getTable().getName());
-			vueGenerator = new VuePageGenerator();
-			vueGenerator.tableGenerator = tableGenerator;
-			vueGenerator.vueModuleName = vueModuleName;
-			tableGenerator.context().put("vueModuleName", vueModuleName);
-			tableGenerator.context().put("UIClassMeta", pageMeta);
-//			vueGenerator.vueBaseDir = vueBaseDir;
-			return vueGenerator;
-		}
-		
 		public DbmGenerator end(){
 			return DbmGenerator.this;
 		}
@@ -331,7 +337,22 @@ public class DbmGenerator {
 		private String templateName = templateBasePath + "vue";
 //		String vueBaseDir;
 		String viewDir = "/src/views";
+		String apiDir = "/src/api";
 		String vueModuleName;
+		DUIEntityMeta duiEntityMeta;
+		
+		public void initGenerator() {
+			tableGenerator.context().put("vueModuleName", vueModuleName);
+			tableGenerator.context().put("DUIEntityMeta", duiEntityMeta);
+			
+			if (LangUtils.isNotEmpty(duiEntityMeta.getEditableEntities())) {
+				duiEntityMeta.getEditableEntities().forEach(editable -> {
+					VuePageGenerator vg = DbmGenerator.this.vueGenerator(editable.getEntityClass(), vueModuleName);
+					vg.generateVueMgrForm();
+					vg.generateVueJsApi();
+				});
+			}
+		}
 
 		Function<String, OutfilePathFunc> vueFileNameFuncCreator = path -> {
 			return ctx->{
@@ -360,9 +381,20 @@ public class DbmGenerator {
 		private String viewModuleName(TableGeneratedConfig c) {
 			return StringUtils.isNotBlank(vueModuleName)?vueModuleName:c.globalGeneratedConfig().getModuleName();
 		}
+
+		
+		public VuePageGenerator viewDir(String viewDir){
+			this.viewDir = viewDir;
+			return this;
+		}
+		
+		public VuePageGenerator apiDir(String apiDir){
+			this.apiDir = apiDir;
+			return this;
+		}
 		
 		public VuePageGenerator generateVueCrud(){
-			this.generateVueJsApi("/src/api");
+			this.generateVueJsApi();
 			this.generateVueMgr();
 			this.generateVueMgrForm();
 			return this;
@@ -375,15 +407,12 @@ public class DbmGenerator {
 		}
 		
 		public VuePageGenerator generateVueMgrForm(){
-			String mgrPath = templateName+"/Mgr.vue.ftl";
-			tableGenerator.pageTemplate(mgrPath, vueFileNameFuncCreator.apply(mgrPath));
-			
 			String formPath = templateName+"/Form.vue.ftl";
 			tableGenerator.pageTemplate(formPath, vueFileNameFuncCreator.apply(formPath));
 			return this;
 		}
 		
-		public VuePageGenerator generateVueJsApi(String apiDir){
+		public VuePageGenerator generateVueJsApi(){
 //			String apiDir = "/src/api";
 			Function<String, OutfilePathFunc> outFileNameFuncCreator = path -> {
 				return ctx->{

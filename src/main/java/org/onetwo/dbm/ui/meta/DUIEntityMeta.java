@@ -24,7 +24,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Data
-public class DUICrudPageMeta {
+public class DUIEntityMeta {
 	
 	private String name;
 	private String label;
@@ -37,6 +37,19 @@ public class DUICrudPageMeta {
 //	private Collection<UIFieldMeta> fields = Sets.newTreeSet(Comparator.comparingInt(f -> f.getOrder()));
 	private DbmMappedEntry mappedEntry;
 	private TableMeta table;
+	
+	private List<DUIEntityMeta> editableEntities;
+	
+	public Class<?> getEntityClass() {
+		return this.mappedEntry.getEntityClass();
+	}
+	
+	public void addEditableEntity(DUIEntityMeta entityMeta) {
+		if (this.editableEntities==null) {
+			this.editableEntities = Lists.newArrayList();
+		}
+		this.editableEntities.add(entityMeta);
+	}
 	
 	public void addField(DUIFieldMeta field) {
 		fieldMap.put(field.getName(), field);
