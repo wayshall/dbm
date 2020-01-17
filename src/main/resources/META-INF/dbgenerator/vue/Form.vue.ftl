@@ -8,7 +8,7 @@
 <#assign moduleName="${_globalConfig.getModuleName()}"/>
 <template>
   <div v-loading="dataLoading">
-    <el-form ref="${dataFormName}" :rules="rules" :model="dataModel" label-position="left" label-width="100px" style="width: 400px; margin-left:50px;">
+    <el-form ref="${dataFormName}" :rules="rules" :model="dataModel" label-position="right" label-width="40%" style="width: 60%; margin-left:50px;">
    <#list DUIEntityMeta.formFields as field>
       <el-form-item label="${(field.label)!''}" prop="${field.column.javaName}">
       <#if field.select??>
@@ -121,12 +121,13 @@ export default {
     }
   },
   mounted: function() {
+    this.getData()
   },
   methods: {
     getData() {
       this.dataLoading = true
       ${apiName}.get(this.dataId).then(res => {
-        this.dataModel = res.data.data
+        this.dataModel = res.data.data || this.initDataModel()
       }).finally(() => {
         this.dataLoading = false
       })

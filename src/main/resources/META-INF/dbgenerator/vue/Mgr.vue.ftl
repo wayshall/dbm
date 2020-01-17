@@ -63,7 +63,7 @@
         <el-tab-pane label="${editableEntity.label}" v-if="dataForm.status === 'Edit'">
           <${editableEntity.table.horizontalBarName}-form
             :status-mode="dataForm.status"
-            :data-id="dataForm.row[${editableEntity.cascadeField}]"/>
+            :data-id="dataForm.row['${editableEntity.cascadeField}'] || ''"/>
         </el-tab-pane>
       </#list>
       </el-tabs>

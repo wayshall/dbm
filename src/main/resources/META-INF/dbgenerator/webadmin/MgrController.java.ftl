@@ -66,8 +66,8 @@ public class ${_tableContext.className}MgrController extends ${pluginBaseControl
     }
     
     @ByPermissionClass(Edit${DUIEntityMeta.table.className}.class)
-    @PutMapping(value="{${idName}}")
-    public ${entityClassName} update(@PathVariable("${idName}") ${idType} ${idName}, @Validated ${entityClassName} ${_tableContext.propertyName}, BindingResult br){
+    @PostMapping
+    public ${entityClassName} save(@Validated ${entityClassName} ${_tableContext.propertyName}, BindingResult br){
         ValidatorUtils.throwIfHasErrors(br, true);
         ${_tableContext.propertyName}.set${idName?cap_first}(${idName});
         ${serviceImplPropertyName}.update(${_tableContext.propertyName});
