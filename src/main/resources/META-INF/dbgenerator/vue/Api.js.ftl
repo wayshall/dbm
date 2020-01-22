@@ -8,7 +8,7 @@ export function get(${idName}) {
 }
 
 export function update(data) {
-  return request.put(`${requestPath}/${'$'}{data.${idName}}`, data)
+  return request.post(`${requestPath}/${'$'}{data.${idName}}`, data)
 }
 <#else>
 import qs from 'qs'

@@ -39,14 +39,14 @@ public class DbmUIConfiguration implements ImportAware {
 	}
 
 	@Bean
-	public DUIMetaManager uiClassMetaManager() {
+	public DUIMetaManager duiClassMetaManager() {
 		DefaultDUIMetaManager metaManager = new DefaultDUIMetaManager();
 		metaManager.setPackagesToScan(packagesToScan);
 		return metaManager;
 	}
 	
 	@Bean
-	public DUISelectDataProviderService uiSelectDataProviderService() {
+	public DUISelectDataProviderService duiSelectDataProviderService() {
 		return new DefaultUISelectDataProviderService();
 	}
 }

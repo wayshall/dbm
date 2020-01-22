@@ -25,6 +25,7 @@ import org.onetwo.ext.permission.api.annotation.ByPermissionClass;
 import org.onetwo.ext.permission.api.PermissionType;
 import org.onetwo.ext.permission.api.annotation.PermissionMeta;
 
+import org.onetwo.common.data.DataResult;
 import org.onetwo.common.data.Result;
 import org.onetwo.common.spring.mvc.utils.DataResults;
 
@@ -66,12 +67,12 @@ public class ${_tableContext.className}MgrController extends ${pluginBaseControl
     }
     
     @ByPermissionClass(Edit${DUIEntityMeta.table.className}.class)
-    @PostMapping
-    public ${entityClassName} save(@Validated ${entityClassName} ${_tableContext.propertyName}, BindingResult br){
+    @PostMapping(value="{${idName}}")
+    public DataResult<${entityClassName}> save(@PathVariable("${idName}") ${idType} ${idName}, @Validated ${entityClassName} ${_tableContext.propertyName}, BindingResult br){
         ValidatorUtils.throwIfHasErrors(br, true);
         ${_tableContext.propertyName}.set${idName?cap_first}(${idName});
-        ${serviceImplPropertyName}.update(${_tableContext.propertyName});
-        return ${_tableContext.propertyName};
+        ${serviceImplPropertyName}.save(${_tableContext.propertyName});
+        return DataResults.<${entityClassName}>success("保存成功！").data(${_tableContext.propertyName}).build();
     }
 <#else>
     @ByPermissionClass(${_tableContext.className}Mgr.class)//在菜单类新建 ${_tableContext.className}Mgr 类后用import
@@ -83,10 +84,10 @@ public class ${_tableContext.className}MgrController extends ${pluginBaseControl
     
     @ByPermissionClass(${_tableContext.className}Mgr.Create.class)
     @PostMapping
-    public ${entityClassName} create(@Validated ${entityClassName} ${_tableContext.propertyName}, BindingResult br){
+    public DataResult<${entityClassName}> create(@Validated ${entityClassName} ${_tableContext.propertyName}, BindingResult br){
         ValidatorUtils.throwIfHasErrors(br, true);
         ${serviceImplPropertyName}.save(${_tableContext.propertyName});
-        return ${_tableContext.propertyName};
+        return DataResults.<${entityClassName}>success("保存成功！").data(${_tableContext.propertyName}).build();
     }
 
     @ByPermissionClass(${_tableContext.className}Mgr.class)
@@ -98,11 +99,11 @@ public class ${_tableContext.className}MgrController extends ${pluginBaseControl
     
     @ByPermissionClass(${_tableContext.className}Mgr.Update.class)
     @PutMapping(value="{${idName}}")
-    public ${entityClassName} update(@PathVariable("${idName}") ${idType} ${idName}, @Validated({ValidAnyTime.class, ValidWhenEdit.class}) ${entityClassName} ${_tableContext.propertyName}, BindingResult br){
+    public DataResult<${entityClassName}> update(@PathVariable("${idName}") ${idType} ${idName}, @Validated({ValidAnyTime.class, ValidWhenEdit.class}) ${entityClassName} ${_tableContext.propertyName}, BindingResult br){
         ValidatorUtils.throwIfHasErrors(br, true);
         ${_tableContext.propertyName}.set${idName?cap_first}(${idName});
         ${serviceImplPropertyName}.update(${_tableContext.propertyName});
-        return ${_tableContext.propertyName};
+        return DataResults.<${entityClassName}>success("保存成功！").data(${_tableContext.propertyName}).build();
     }
     
     

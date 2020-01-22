@@ -2,6 +2,7 @@ package org.onetwo.dbm.ui.meta;
 
 import org.onetwo.common.db.generator.meta.ColumnMeta;
 import org.onetwo.dbm.mapping.DbmMappedField;
+import org.onetwo.dbm.ui.annotation.DUIInput.InputTypes;
 import org.onetwo.dbm.ui.annotation.DUISelect.NoEnums;
 import org.onetwo.dbm.ui.annotation.DUISelect.NoProvider;
 import org.onetwo.dbm.ui.core.UISelectDataProvider;
@@ -36,7 +37,8 @@ public class DUIFieldMeta {
 	boolean searchable;
 	int order;
 	
-	UISelectMeta select;
+	DUISelectMeta select;
+	DUIInputMeta input;
 	
 	public String getFormDisabledValue() {
 		if (insertable && updatable) {
@@ -49,10 +51,18 @@ public class DUIFieldMeta {
 			return "true";
 		}
 	}
-	
 
 	@Data
-	public class UISelectMeta {
+	public class DUIInputMeta {
+		InputTypes type;
+		
+		public String getTypeName() {
+			return type.name().toLowerCase();
+		}
+	}
+
+	@Data
+	public class DUISelectMeta {
 		Class<? extends Enum<?>> dataEnumClass;
 		Class<? extends UISelectDataProvider> dataProvider;
 		

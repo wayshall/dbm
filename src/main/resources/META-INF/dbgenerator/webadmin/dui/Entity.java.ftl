@@ -50,7 +50,6 @@ public class ${entityClassName} extends <#if baseEntityClass??>${baseEntityClass
     <#if column.isJsonType()>
     @org.onetwo.dbm.annotation.DbmJsonField
     <#elseif column.mapping.isStringType()>
-    @NotBlank
     @Length(max=${column.columnSize})
     @SafeHtml
     <#elseif column.isEmailType()>

@@ -10,7 +10,7 @@ import org.onetwo.common.spring.SpringUtils;
 import org.onetwo.dbm.ui.exception.DbmUIException;
 import org.onetwo.dbm.ui.meta.DUIEntityMeta;
 import org.onetwo.dbm.ui.meta.DUIFieldMeta;
-import org.onetwo.dbm.ui.meta.DUIFieldMeta.UISelectMeta;
+import org.onetwo.dbm.ui.meta.DUIFieldMeta.DUISelectMeta;
 import org.onetwo.dbm.ui.spi.DUIMetaManager;
 import org.onetwo.dbm.ui.spi.DUISelectDataProviderService;
 import org.onetwo.dbm.ui.vo.EnumDataVO;
@@ -39,14 +39,14 @@ public class DefaultUISelectDataProviderService implements DUISelectDataProvider
 	public Object getDatas(UISelectDataRequest request) {
 		DUIEntityMeta meta = uiclassMetaManager.get(request.getEntity());
 		DUIFieldMeta uifield = meta.getField(request.getField());
-		UISelectMeta uiselect = uifield.getSelect();
+		DUISelectMeta uiselect = uifield.getSelect();
 		if (uiselect==null) {
 			throw new DbmUIException("ui select not found, entity name: " + request.getEntity() + ", field: " + request.getField());
 		}
 		return getDatas(uiselect, request.getQuery());
 	}
 	
-	public Object getDatas(UISelectMeta uiselect, String query) {
+	public Object getDatas(DUISelectMeta uiselect, String query) {
 		if (uiselect.useEnumData()) {
 			Enum<?>[] values = (Enum<?>[]) uiselect.getDataEnumClass().getEnumConstants();
 //			DataBase[] vals = DataBase.class.getEnumConstants();
@@ -72,7 +72,7 @@ public class DefaultUISelectDataProviderService implements DUISelectDataProvider
 	}
 	
 	@Transactional
-	public List<EnumDataVO> queryFromCascade(UISelectMeta uiselect, String query) {
+	public List<EnumDataVO> queryFromCascade(DUISelectMeta uiselect, String query) {
 		List<EnumDataVO> dataList = baseEntityManager.from(uiselect.getCascadeEntity())
 				.where()
 					.field(uiselect.getCascadeQueryFields())
@@ -87,7 +87,7 @@ public class DefaultUISelectDataProviderService implements DUISelectDataProvider
 		return dataList;
 	}
 
-	private EnumDataVO toEnumDataVO(UISelectMeta uiselect, Object beanData) {
+	private EnumDataVO toEnumDataVO(DUISelectMeta uiselect, Object beanData) {
 		EnumDataVO enumData = new EnumDataVO();
 		BeanWrapper bw = SpringUtils.newBeanWrapper(beanData);
 		String label = (String)bw.getPropertyValue(uiselect.getLabelField());

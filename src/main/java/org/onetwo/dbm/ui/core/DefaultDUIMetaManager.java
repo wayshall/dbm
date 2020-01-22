@@ -20,11 +20,14 @@ import org.onetwo.dbm.mapping.MappedEntryManager;
 import org.onetwo.dbm.ui.annotation.DUICascadeEditable;
 import org.onetwo.dbm.ui.annotation.DUIEntity;
 import org.onetwo.dbm.ui.annotation.DUIField;
+import org.onetwo.dbm.ui.annotation.DUIInput;
+import org.onetwo.dbm.ui.annotation.DUIInput.InputTypes;
 import org.onetwo.dbm.ui.annotation.DUISelect;
 import org.onetwo.dbm.ui.exception.DbmUIException;
 import org.onetwo.dbm.ui.meta.DUIEntityMeta;
 import org.onetwo.dbm.ui.meta.DUIFieldMeta;
-import org.onetwo.dbm.ui.meta.DUIFieldMeta.UISelectMeta;
+import org.onetwo.dbm.ui.meta.DUIFieldMeta.DUIInputMeta;
+import org.onetwo.dbm.ui.meta.DUIFieldMeta.DUISelectMeta;
 import org.onetwo.dbm.ui.spi.DUILabelEnum;
 import org.onetwo.dbm.ui.spi.DUIMetaManager;
 import org.springframework.beans.factory.InitializingBean;
@@ -192,6 +195,18 @@ public class DefaultDUIMetaManager implements InitializingBean, DUIMetaManager {
 		if (StringUtils.isBlank(uifieldMeta.getListField())) {
 			uifieldMeta.setListField(uifieldMeta.getName());
 		}
+		
+		// input
+		DUIInputMeta input = uifieldMeta.new DUIInputMeta();
+		input.setType(InputTypes.TEXT);
+		DUIInput inputAnno = field.getPropertyInfo().getAnnotation(DUIInput.class);
+		if (inputAnno!=null) {
+			input.setType(InputTypes.TEXTAREA);
+		}
+		uifieldMeta.setInput(input);
+		
+		
+		// select
 		if (field.isEnumerated()) {
 			Class<?> propType = field.getPropertyInfo().getType();
 			if (DUILabelEnum.class.isAssignableFrom(propType)) {
@@ -199,21 +214,21 @@ public class DefaultDUIMetaManager implements InitializingBean, DUIMetaManager {
 			}
 			if (Enum.class.isAssignableFrom(propType)) {
 				@SuppressWarnings("unchecked")
-				UISelectMeta uiselectMeta = buildSelectMeta(uifieldMeta, null, (Class<? extends Enum<?>>)propType);
+				DUISelectMeta uiselectMeta = buildSelectMeta(uifieldMeta, null, (Class<? extends Enum<?>>)propType);
 				uifieldMeta.setSelect(uiselectMeta);
 			}
 		}
 		DUISelect uiselect = field.getPropertyInfo().getAnnotation(DUISelect.class);
 		if (uiselect!=null) {
-			UISelectMeta uiselectMeta = buildSelectMeta(uifieldMeta, uiselect, null);
+			DUISelectMeta uiselectMeta = buildSelectMeta(uifieldMeta, uiselect, null);
 			uifieldMeta.setSelect(uiselectMeta);
 		}
 		
 		return Optional.of(uifieldMeta);
 	}
 	
-	private UISelectMeta buildSelectMeta(DUIFieldMeta uifieldMeta, DUISelect uiselect, Class<? extends Enum<?>> enumClass) {
-		UISelectMeta uiselectMeta = uifieldMeta.new UISelectMeta();
+	private DUISelectMeta buildSelectMeta(DUIFieldMeta uifieldMeta, DUISelect uiselect, Class<? extends Enum<?>> enumClass) {
+		DUISelectMeta uiselectMeta = uifieldMeta.new DUISelectMeta();
 		uiselectMeta.setDataEnumClass(enumClass);
 		if (uiselect!=null) {
 			uiselectMeta.setDataEnumClass(uiselect.dataEnumClass());

@@ -6,11 +6,19 @@
 <#assign apiName="${table.propertyName}Api"/>
 <#assign formComponentName="${table.propertyName}Form"/>
 <#assign moduleName="${_globalConfig.getModuleName()}"/>
+<#assign idName="${table.primaryKey.javaName}"/>
 <template>
   <div v-loading="dataLoading">
-    <el-form ref="${dataFormName}" :rules="rules" :model="dataModel" label-position="right" label-width="40%" style="width: 60%; margin-left:50px;">
+    <el-form ref="${dataFormName}"
+      :rules="rules"
+      :model="dataModel"
+      label-position="right"
+      label-width="40%"
+      style="width: 60%; margin-left:50px;">
    <#list DUIEntityMeta.formFields as field>
-      <el-form-item label="${(field.label)!''}" prop="${field.column.javaName}">
+      <el-form-item
+        label="${(field.label)!''}"
+        prop="${field.column.javaName}">
       <#if field.select??>
         <dui-select
           v-model="dataModel.${field.column.javaName}"
@@ -53,7 +61,10 @@
       <#elseif field.column.isAssociationType()==true>
         <el-input v-model="dataModel.${field.column.javaName}" placeholder="请输入${(field.label)!''}"/>
       <#else>
-        <el-input v-model="dataModel.${field.column.javaName}" placeholder="请输入${(field.label)!''}"/>
+        <el-input
+          v-model="dataModel.${field.column.javaName}"
+          type="${field.input.typeName}"
+          placeholder="请输入${(field.label)!''}"/>
       </#if>
       </el-form-item>
   </#list>
@@ -181,6 +192,7 @@ export default {
     },
     handleEditData() {
       console.log('edit data.....')
+      this.dataModel.${idName} = this.dataId
       return ${apiName}.update(this.dataModel)
     }
   }
