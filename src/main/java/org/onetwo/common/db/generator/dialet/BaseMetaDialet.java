@@ -4,6 +4,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import javax.sql.DataSource;
 
@@ -18,6 +19,7 @@ import org.onetwo.common.db.generator.utils.DBUtils;
 import org.onetwo.common.exception.BaseException;
 import org.onetwo.common.log.JFishLoggerFactory;
 import org.onetwo.common.utils.Assert;
+import org.onetwo.dbm.exception.DbmException;
 import org.slf4j.Logger;
 
 abstract public class BaseMetaDialet implements DatabaseMetaDialet {
@@ -39,6 +41,48 @@ abstract public class BaseMetaDialet implements DatabaseMetaDialet {
 		this.dataSource = dataSource;
 		this.catalog = catalog;
 		this.schema = schema;
+	}
+
+
+	public Optional<TableMeta> findTableMeta(String tableName){
+//		ResultSet rs = null;
+		Optional<TableMeta> tableOpt = Optional.empty();
+		DBConnecton dbcon = newDBConnecton();
+		try {
+			/*rs = dbcon.getMetaData().getTables(catalog, schema, tableName.trim(), null);
+			if(rs.next()){
+				rowMap = DBUtils.toMap(rs);
+			}else{
+				throw new DbmException("not table found: " + tableName);
+			}
+
+			String tname = (String)rowMap.get("TABLE_NAME");
+			String comment = (String)rowMap.get("REMARKS");
+			if(StringUtils.isBlank(comment)){
+				rs = dbcon.query("SHOW TABLE STATUS LIKE '"+tableName+"'");
+				rowMap = DBUtils.nextRowToMap(rs, "comment");
+				comment = (String)rowMap.get("comment");
+			}
+			table = new TableMeta(tname, comment);*/
+			tableOpt = findTableMeta(dbcon, tableName);
+			if (tableOpt.isPresent()) {
+				createFieldMeta(dbcon, tableOpt.get(), tableName);
+				createPrimaryKey(dbcon, tableOpt.get());
+			}
+		} catch (SQLException e) {
+			DBUtils.handleDBException(e);
+		} finally{
+			dbcon.close();
+		}
+		return tableOpt;
+	}
+	
+	abstract protected Optional<TableMeta> findTableMeta(DBConnecton dbcon, String tableName) throws SQLException;
+	
+	public TableMeta getTableMeta(String tableName){
+		return findTableMeta(tableName).orElseThrow(() -> {
+			return new DbmException("table not found: " + tableName);	
+		});
 	}
 
 	@Override
@@ -78,7 +122,16 @@ abstract public class BaseMetaDialet implements DatabaseMetaDialet {
 	public void setMetaMapping(MetaMapping sqlTypeMapping) {
 		this.metaMapping = sqlTypeMapping;
 	}
-	
+
+	protected void handleDBException(String dbmExceptionMsg, Exception e){
+		if (RuntimeException.class.isInstance(e)) {
+			throw (RuntimeException) e;
+		} else if( SQLException.class.isInstance(e)) {
+			throw new DbmException(dbmExceptionMsg, e);
+		} else {
+			throw new DbmException(dbmExceptionMsg, e);
+		}
+	}
 
 	protected void createPrimaryKey(DBConnecton dbcon, TableMeta table) throws SQLException {
 		ResultSet rs = null;
@@ -91,7 +144,7 @@ abstract public class BaseMetaDialet implements DatabaseMetaDialet {
 				table.setPrimaryKey(column);
 			}
 		} catch (Exception e) {
-			throw new BaseException("createTablePrimaryKey error ", e);
+			handleDBException("createTablePrimaryKey error ", e);
 		} finally{
 			DBUtils.closeResultSet(rs);
 		}
@@ -112,7 +165,7 @@ abstract public class BaseMetaDialet implements DatabaseMetaDialet {
 				}*/
 				String isNullable  = rs.getString("IS_NULLABLE");
 				int columnSize = rs.getInt("COLUMN_SIZE");
-				ColumnMapping mapping = getMetaMapping().getRequiredColumnMapping(sqlType);
+				ColumnMapping mapping = getMetaMapping().getRequiredColumnMapping(colName, sqlType);
 				logger.info("mapping -> colunm: {}, sqltype: {}", colName, mapping);
 				ColumnMeta meta = new ColumnMeta(table, colName, mapping);
 				meta.setComment(remark);

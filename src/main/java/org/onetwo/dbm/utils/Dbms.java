@@ -27,6 +27,7 @@ import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.context.ApplicationContext;
 import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.TransactionTimedOutException;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 
 import com.google.common.cache.CacheBuilder;
@@ -168,19 +169,40 @@ final public class Dbms {
 	
 
 	public static <R> R doInRequiresNewPropagation(BaseEntityManager baseEntityManager, Function<DbmTransaction, R> func) {
-		return doInPropagation((DbmSessionImplementor)baseEntityManager.getSessionFactory(), TransactionDefinition.PROPAGATION_REQUIRES_NEW, func);
+		return doInPropagation(baseEntityManager.getSessionFactory(), TransactionDefinition.PROPAGATION_REQUIRES_NEW, func);
 	}
 	
-	public static <R> R doInPropagation(DbmSessionImplementor contextSession, int propagationBehavior, Function<DbmTransaction, R> func) {
-		DbmSessionImplementor session = (DbmSessionImplementor)contextSession.getSessionFactory().openSession();
+	public static <R> R doInPropagation(DbmSessionFactory sf, int propagationBehavior, Function<DbmTransaction, R> func) {
+		return doInPropagation(sf, propagationBehavior, TransactionDefinition.TIMEOUT_DEFAULT, func);
+	}
+	
+	/****
+	 * 
+	 * @author weishao zeng
+	 * @param sf
+	 * @param propagationBehavior
+	 * @param timeoutInSeconds 事务超时时间，这个超时是非中断式触发的，只是每次执行的时候由 ResourceHolderSupport#checkTransactionTimeout 触发检查
+	 * @param func
+	 * @return
+	 */
+	public static <R> R doInPropagation(DbmSessionFactory sf, int propagationBehavior, int timeoutInSeconds, Function<DbmTransaction, R> func) {
 		DefaultTransactionDefinition definition = new DefaultTransactionDefinition();
 		definition.setPropagationBehavior(propagationBehavior);
+		definition.setTimeout(timeoutInSeconds);
+		return doInPropagation(sf, definition, func);
+	}
+	
+	public static <R> R doInPropagation(DbmSessionFactory sf, TransactionDefinition definition, Function<DbmTransaction, R> func) {
+		DbmSessionImplementor session = (DbmSessionImplementor)sf.openSession();
 		DbmTransaction transaction = session.beginTransaction(definition);
 		try {
 			R result = func.apply(transaction);
 			transaction.commit();
 			return result;
-		} catch (DbmException e) {
+		} catch (TransactionTimedOutException e) {
+			transaction.rollback();
+			throw e;
+		}  catch (DbmException e) {
 			transaction.rollback();
 			throw e;
 		} catch (Exception e) {

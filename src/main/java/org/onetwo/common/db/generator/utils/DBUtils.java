@@ -31,6 +31,7 @@ import org.onetwo.common.exception.ServiceException;
 import org.onetwo.common.utils.CUtils;
 import org.onetwo.common.utils.MyUtils;
 import org.onetwo.common.utils.map.CaseInsensitiveMap;
+import org.onetwo.dbm.exception.DbmException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -473,9 +474,9 @@ public class DBUtils {
 		if(RuntimeException.class.isInstance(e)){
 			throw (RuntimeException) e;
 		}else if(SQLException.class.isInstance(e)){
-			throw new BaseException("sql error.", e);
+			throw new DbmException("sql error.", e);
 		}else{
-			throw new BaseException("db process error.", e);
+			throw new DbmException("db process error.", e);
 		}
 	}
 	

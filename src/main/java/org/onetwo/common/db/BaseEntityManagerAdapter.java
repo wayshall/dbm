@@ -65,23 +65,6 @@ public abstract class BaseEntityManagerAdapter implements InnerBaseEntityManager
 	public Number countRecord(Class<?> entityClass, Object... params) {
 		return countRecordByProperties(entityClass, CUtils.asLinkedMap(params));
 	}
-	public void delete(ILogicDeleteEntity entity){
-		entity.deleted();
-		this.save(entity);
-	}
-
-	public <T extends ILogicDeleteEntity> T deleteById(Class<T> entityClass, Serializable id){
-		Object entity = this.findById(entityClass, id);
-		if(entity==null)
-			return null;
-		if(!ILogicDeleteEntity.class.isAssignableFrom(entity.getClass())){
-			throw new ServiceException("实体不支持逻辑删除，请实现相关接口！");
-		}
-		T logicDeleteEntity = (T) entity;
-		logicDeleteEntity.deleted();
-		this.save(logicDeleteEntity);
-		return logicDeleteEntity;
-	}
 	
 	public <T> List<T> findList(QueryBuilder<T> squery) {
 		return findListByProperties((Class<T>)squery.getEntityClass(), squery.getParams());

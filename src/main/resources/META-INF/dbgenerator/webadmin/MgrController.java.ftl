@@ -18,22 +18,24 @@
 
 package ${_globalConfig.getJavaLocalPackage(_tableContext.localPackage)};
 
-import org.onetwo.boot.core.web.controller.AbstractBaseController;
 import org.onetwo.boot.core.web.controller.DateInitBinder;
 import org.onetwo.common.utils.Page;
-import org.onetwo.easyui.EasyDataGrid;
-import org.onetwo.easyui.EasyViews.EasyGridView;
-import org.onetwo.boot.core.web.view.XResponseView;
-import org.onetwo.easyui.PageRequest;
+import org.onetwo.common.utils.PageRequest;
 import org.onetwo.ext.permission.api.annotation.ByPermissionClass;
-import org.onetwo.common.utils.map.MappableMap;
-import org.onetwo.easyui.EasyModel;
+import org.onetwo.ext.permission.api.PermissionType;
+import org.onetwo.ext.permission.api.annotation.PermissionMeta;
+
+import org.onetwo.common.data.Result;
+import org.onetwo.common.spring.mvc.utils.DataResults;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
@@ -47,52 +49,67 @@ import ${serviceImplPackage}.${serviceImplClassName};
 
 @RestController
 @RequestMapping("${requestPath}")
-public class ${_tableContext.className}Controller extends ${pluginBaseController} implements DateInitBinder {
+public class ${_tableContext.className}MgrController extends ${pluginBaseController} implements DateInitBinder {
 
     @Autowired
     private ${serviceImplClassName} ${serviceImplPropertyName};
     
     
     @ByPermissionClass(${_tableContext.className}Mgr.class)//在菜单类新建 ${_tableContext.className}Mgr 类后用import
-    @RequestMapping(method=RequestMethod.GET)
-    @XResponseView(value="easyui", wrapper=EasyGridView.class)
-    public ModelAndView index(PageRequest pageRequest, ${entityClassName} ${_tableContext.propertyName}){
-        //responsePageOrData不加json后缀访问时返回页面${pagePath}-index，加.json后缀时会返回page对象，并通过EasyGridView包装为适合easyui的数据格式
-        return responsePageOrData("${pagePath}-index", ()->{
-                    Page<${entityClassName}> page = ${serviceImplPropertyName}.findPage(pageRequest.toPageObject(), ${_tableContext.propertyName});
-                    return page;
-                });
+    @GetMapping
+    public Page<${entityClassName}> list(PageRequest pageRequest, ${entityClassName} ${_tableContext.propertyName}){
+        Page<${entityClassName}> page = ${serviceImplPropertyName}.findPage(pageRequest.toPageObject(), ${_tableContext.propertyName});
+        return page;
     }
     
     @ByPermissionClass(${_tableContext.className}Mgr.Create.class)
-    @RequestMapping(method=RequestMethod.POST)
-    public ModelAndView create(@Validated({ValidAnyTime.class, ValidWhenNew.class}) ${entityClassName} ${_tableContext.propertyName}, BindingResult br){
-    	ValidatorUtils.throwIfHasErrors(br, true);
+    @PostMapping
+    public ${entityClassName} create(@Validated({ValidAnyTime.class, ValidWhenNew.class}) ${entityClassName} ${_tableContext.propertyName}, BindingResult br){
+        ValidatorUtils.throwIfHasErrors(br, true);
         ${serviceImplPropertyName}.save(${_tableContext.propertyName});
-        return messageMv("保存成功！");
+        return ${_tableContext.propertyName};
     }
 
     @ByPermissionClass(${_tableContext.className}Mgr.class)
-    @RequestMapping(value="{${idName}}", method=RequestMethod.GET)
-    public ModelAndView show(@PathVariable("${idName}") ${idType} ${idName}){
+    @GetMapping(value="{${idName}}")
+    public ${entityClassName} get(@PathVariable("${idName}") ${idType} ${idName}){
         ${entityClassName} ${_tableContext.propertyName} = ${serviceImplPropertyName}.findById(${idName});
-        return responseData(${_tableContext.propertyName});
+        return ${_tableContext.propertyName};
     }
     
     @ByPermissionClass(${_tableContext.className}Mgr.Update.class)
-    @RequestMapping(value="{${idName}}", method=RequestMethod.PUT)
-    public ModelAndView update(@PathVariable("${idName}") ${idType} ${idName}, @Validated({ValidAnyTime.class, ValidWhenEdit.class}) ${entityClassName} ${_tableContext.propertyName}, BindingResult br){
-    	ValidatorUtils.throwIfHasErrors(br, true);
+    @PutMapping(value="{${idName}}")
+    public ${entityClassName} update(@PathVariable("${idName}") ${idType} ${idName}, @Validated({ValidAnyTime.class, ValidWhenEdit.class}) ${entityClassName} ${_tableContext.propertyName}, BindingResult br){
+        ValidatorUtils.throwIfHasErrors(br, true);
         ${_tableContext.propertyName}.set${idName?cap_first}(${idName});
         ${serviceImplPropertyName}.update(${_tableContext.propertyName});
-        return messageMv("更新成功！");
+        return ${_tableContext.propertyName};
     }
     
     
     @ByPermissionClass(${_tableContext.className}Mgr.Delete.class)
-    @RequestMapping(method=RequestMethod.DELETE)
-    public ModelAndView deleteBatch(${idType}[] ${idName}s){
+    @DeleteMapping
+    public Result deleteBatch(${idType}[] ${idName}s){
         ${serviceImplPropertyName}.removeByIds(${idName}s);
-        return messageMv("删除成功！");
+        return DataResults.success("删除成功！").build();
+    }
+    
+    /****
+     * ${(table.comments[0])!''} 权限类
+     */
+    public static interface ${_tableContext.className}Mgr {
+        String name = "${(table.comments[0])!''}管理";
+        
+        @PermissionMeta(name = "新增", permissionType=PermissionType.FUNCTION)
+        public interface Create {
+        }
+
+        @PermissionMeta(name = "更新", permissionType=PermissionType.FUNCTION)
+        public interface Update {
+        }
+
+        @PermissionMeta(name = "删除", permissionType=PermissionType.FUNCTION)
+        public interface Delete {
+        }
     }
 }

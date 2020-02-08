@@ -1,5 +1,5 @@
 <#assign apiName="${table.propertyName}Api"/>
-<#assign formComponentName="${table.propertyName}MgrForm"/>
+<#assign formComponentName="${table.propertyName}Form"/>
 <#assign moduleName="${_globalConfig.getModuleName()}"/>
 <template>
   <div class="app-container">
@@ -42,18 +42,18 @@
   </#list>
     </layout-table>
 
-    <${table.propertyName}-mgr-form :status-mode="dialog.status" :visible.sync="dialog.visible" :data-model="dataModel" @finishHandle="refreshTable = true"/>
+    <${table.propertyName}-form :status-mode="dialog.status" :visible.sync="dialog.visible" :data-model="dataModel" @finishHandle="refreshTable = true"/>
 
   </div>
 </template>
 
 <script>
 import layoutTable from '@/components/xui/layoutTable'
-import * as ${apiName} from '@/api/${moduleName}/${apiName}'
+import * as ${apiName} from '@/api/${vueModuleName}/${apiName}'
 import ${formComponentName} from './${formComponentName}'
 
 export default {
-  name: '${_tableContext.className}Mgr',
+  name: '${_tableContext.className}',
   components: {
     ${formComponentName},
     layoutTable

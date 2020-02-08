@@ -2,14 +2,18 @@ package org.onetwo.dbm.exception;
 
 import org.onetwo.common.exception.BaseException;
 import org.onetwo.common.exception.ErrorType;
+import org.onetwo.dbm.utils.DbmErrors;
 
 @SuppressWarnings("serial")
 public class DbmException extends BaseException{
 
 	public DbmException() {
-		super("dbm error!");
+		super(DbmErrors.ERR_DBM);
 	}
 
+	public DbmException(ErrorType exceptionType) {
+		super(exceptionType);
+	}
 
 	public DbmException(ErrorType exceptionType, Throwable cause) {
 		this(exceptionType.getErrorMessage(), cause, exceptionType.getErrorCode());

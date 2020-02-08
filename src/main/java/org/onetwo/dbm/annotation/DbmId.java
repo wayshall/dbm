@@ -5,16 +5,13 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.onetwo.dbm.utils.DBUtils;
-@Target({ElementType.FIELD, ElementType.METHOD})
+/**
+ * 对应 jpa @GeneratedValue 
+ * @author wayshall
+ * <br/>
+ */
 @Retention(RetentionPolicy.RUNTIME)
-public @interface DbmColumn {
-	
-	String name() default "";
-	
-	/***
-	 * @see java.sql.Types
-	 */
-	int sqlType() default DBUtils.TYPE_UNKNOW;
+@Target({ElementType.TYPE, ElementType.FIELD, ElementType.METHOD})
+public @interface DbmId {
 	
 }
