@@ -23,8 +23,8 @@ public class DbmMappedEntryImpl extends AbstractDbmMappedEntryImpl implements Db
 	private EntrySQLBuilderImpl staticSelectVersionSqlBuilder;
 //	private EntrySQLBuilderImpl staticSelectLockSqlBuilder;
 	
-	public DbmMappedEntryImpl(AnnotationInfo annotationInfo, TableInfo tableInfo, DbmInnerServiceRegistry serviceRegistry) {
-		super(annotationInfo, tableInfo, serviceRegistry);
+	public DbmMappedEntryImpl(String entityName, AnnotationInfo annotationInfo, TableInfo tableInfo, DbmInnerServiceRegistry serviceRegistry) {
+		super(entityName, annotationInfo, tableInfo, serviceRegistry);
 	}
 
 

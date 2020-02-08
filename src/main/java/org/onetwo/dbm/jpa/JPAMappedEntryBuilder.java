@@ -151,7 +151,7 @@ public class JPAMappedEntryBuilder extends DbmMappedEntryBuilder {
 			return super.createDbmMappedEntry(annotationInfo);
 		}
 		TableInfo tableInfo = newTableInfo(annotationInfo);
-		DbmMappedEntryImpl entry = new DbmMappedEntryImpl(annotationInfo, tableInfo, serviceRegistry);
+		DbmMappedEntryImpl entry = new DbmMappedEntryImpl(entity.name(), annotationInfo, tableInfo, serviceRegistry);
 		entry.setSqlBuilderFactory(this.getDialect().getSqlBuilderFactory());
 		return entry;
 	}

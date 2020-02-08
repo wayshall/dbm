@@ -5,11 +5,15 @@ package org.onetwo.dbm.exception;
 public class NoMappedEntryException extends DbmException{
 
 	public NoMappedEntryException() {
-		super("no mapped entry !");
+		super("entry not found!");
+	}
+
+	public NoMappedEntryException(Class<?> clazz) {
+		super("entry not found for class: " + clazz);
 	}
 
 	public NoMappedEntryException(String msg) {
-		super("[no mapped entry] "+msg);
+		super(msg);
 	}
 
 

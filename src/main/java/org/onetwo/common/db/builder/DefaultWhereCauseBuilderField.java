@@ -36,11 +36,9 @@ public class DefaultWhereCauseBuilderField<E> extends WhereCauseBuilderField<E> 
 							.toArray(new String[0]);
 	}
 
-	public WhereCauseBuilder<E> like(String... values) {
-		this.op = FieldOP.like;
-		this.values = values;
-		this.queryBuilder.addField(this);
-		return queryBuilder;
+	public DefaultWhereCauseBuilderField<E> when(Supplier<Boolean> predicate) {
+		this.whenPredicate = predicate;
+		return this;
 	}
 
 	/***
@@ -50,13 +48,20 @@ public class DefaultWhereCauseBuilderField<E> extends WhereCauseBuilderField<E> 
 	 * @return
 	 */
 	public WhereCauseBuilder<E> prelike(String... values) {
-		this.op = FieldOP.like;
-		this.values = Stream.of(values)
-							.map(val -> StringUtils.appendStartWith(val, "%"))
-							.collect(Collectors.toList())
-							.toArray(new String[0]);
-		this.queryBuilder.addField(this);
-		return queryBuilder;
+		return this.doWhenPredicate(()-> {
+			this.op = FieldOP.like;
+			this.values = Stream.of(values)
+								.map(val -> StringUtils.appendStartWith(val, "%"))
+								.collect(Collectors.toList())
+								.toArray(new String[0]);
+		});
+//		this.op = FieldOP.like;
+//		this.values = Stream.of(values)
+//							.map(val -> StringUtils.appendStartWith(val, "%"))
+//							.collect(Collectors.toList())
+//							.toArray(new String[0]);
+//		this.queryBuilder.addField(this);
+//		return queryBuilder;
 	}
 
 	/***
@@ -66,27 +71,44 @@ public class DefaultWhereCauseBuilderField<E> extends WhereCauseBuilderField<E> 
 	 * @return
 	 */
 	public WhereCauseBuilder<E> postlike(String... values) {
-		this.op = FieldOP.like;
-		this.values = Stream.of(values)
-							.map(val -> StringUtils.appendEndWith(val, "%"))
-							.collect(Collectors.toList())
-							.toArray(new String[0]);
-		this.queryBuilder.addField(this);
-		return queryBuilder;
+		return this.doWhenPredicate(()-> {
+			this.op = FieldOP.like;
+			this.values = Stream.of(values)
+								.map(val -> StringUtils.appendEndWith(val, "%"))
+								.collect(Collectors.toList())
+								.toArray(new String[0]);
+		});
+//		this.op = FieldOP.like;
+//		this.values = Stream.of(values)
+//							.map(val -> StringUtils.appendEndWith(val, "%"))
+//							.collect(Collectors.toList())
+//							.toArray(new String[0]);
+//		this.queryBuilder.addField(this);
+//		return queryBuilder;
 	}
 
 	public WhereCauseBuilder<E> notLike(String... values) {
-		this.op = FieldOP.not_like;
-		this.values = values;
-		this.queryBuilder.addField(this);
-		return queryBuilder;
+		return this.doWhenPredicate(()-> {
+			this.op = FieldOP.not_like;
+			this.values = values;
+		});
+//		this.op = FieldOP.not_like;
+//		this.values = values;
+//		this.queryBuilder.addField(this);
+//		return queryBuilder;
 	}
-
-	public DefaultWhereCauseBuilderField<E> when(Supplier<Boolean> predicate) {
-		this.whenPredicate = predicate;
-		return this;
+	
+	public WhereCauseBuilder<E> like(String... values) {
+		return this.doWhenPredicate(()-> {
+			this.op = FieldOP.like;
+			this.values = values;
+		});
+//		this.op = FieldOP.like;
+//		this.values = values;
+//		this.queryBuilder.addField(this);
+//		return queryBuilder;
 	}
-
+	
 	/***
 	 * 等于
 	 * @param values

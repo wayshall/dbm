@@ -13,6 +13,7 @@ import org.onetwo.dbm.event.spi.DbmEventListener;
 import org.onetwo.dbm.event.spi.DbmInsertOrUpdateEvent;
 import org.onetwo.dbm.event.spi.DbmSessionEvent;
 import org.onetwo.dbm.exception.DbmException;
+import org.onetwo.dbm.exception.EntityNotFoundException;
 import org.onetwo.dbm.exception.EntityVersionException;
 import org.onetwo.dbm.jdbc.internal.SimpleArgsPreparedStatementCreator;
 import org.onetwo.dbm.mapping.DbmConfig;
@@ -24,6 +25,7 @@ import org.onetwo.dbm.mapping.EntrySQLBuilder;
 import org.onetwo.dbm.mapping.JdbcStatementContext;
 import org.onetwo.dbm.utils.DbmUtils;
 import org.slf4j.Logger;
+import org.springframework.dao.EmptyResultDataAccessException;
 
 @SuppressWarnings("unchecked")
 abstract public class AbstractDbmEventListener implements DbmEventListener<DbmSessionEventSource, DbmSessionEvent> {
@@ -205,8 +207,14 @@ abstract public class AbstractDbmEventListener implements DbmEventListener<DbmSe
 	private Object getLastVersion(DbmSessionEventSource es, DbmMappedEntry entry, Object singleEntity) {
 		DbmMappedField versionField = entry.getVersionField();
 		JdbcStatementContext<Object[]> versionContext = entry.makeSelectVersion(singleEntity);
-		Object last = es.getDbmJdbcOperations().queryForObject(versionContext.getSql(), versionField.getColumnType(), entry.getId(singleEntity));
-		return last;
+		
+		Object id = entry.getId(singleEntity);
+		try {
+			Object last = es.getDbmJdbcOperations().queryForObject(versionContext.getSql(), versionField.getColumnType(), id);
+			return last;
+		} catch (EmptyResultDataAccessException e) {
+			throw new EntityNotFoundException("get entity version error: ", entry.getEntityClass(), id);
+		}
 	}
 	
 	/***

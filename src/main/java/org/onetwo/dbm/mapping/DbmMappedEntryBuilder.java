@@ -196,14 +196,14 @@ public class DbmMappedEntryBuilder implements MappedEntryBuilder, RegisterManage
 
 		TableInfo tableInfo = newTableInfo(annotationInfo);
 		if(jqueryable!=null){
-			entry = new DbmQueryableMappedEntryImpl(annotationInfo, tableInfo, serviceRegistry);
+			entry = new DbmQueryableMappedEntryImpl(jentity.name(), annotationInfo, tableInfo, serviceRegistry);
 		}else{
 			if(jentity.type()==MappedType.QUERYABLE_ONLY){
-				entry = new DbmQueryableMappedEntryImpl(annotationInfo, tableInfo, serviceRegistry);
+				entry = new DbmQueryableMappedEntryImpl(jentity.name(), annotationInfo, tableInfo, serviceRegistry);
 			}/*else if(jentity.type()==MappedType.JOINED){
 				entry = new JFishJoinedMappedEntryImpl(annotationInfo, tableInfo);
 			}*/else{
-				entry = new DbmMappedEntryImpl(annotationInfo, tableInfo, serviceRegistry);
+				entry = new DbmMappedEntryImpl(jentity.name(), annotationInfo, tableInfo, serviceRegistry);
 			}
 		}
 		entry.setSqlBuilderFactory(this.dialect.getSqlBuilderFactory());
