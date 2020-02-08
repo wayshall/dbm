@@ -149,12 +149,13 @@ public class BaseCrudEntityManager<T, PK extends Serializable> implements CrudEn
 	@Transactional
 	@Override
 	public T remove(T entity) {
-		if (entity instanceof ILogicDeleteEntity) {
-			((ILogicDeleteEntity)entity).deleted();
-			getBaseEntityManager().update(entity);
-		} else {
-			getBaseEntityManager().remove(entity);
-		}
+//		if (entity instanceof ILogicDeleteEntity) {
+//			((ILogicDeleteEntity)entity).deleted();
+//			getBaseEntityManager().update(entity);
+//		} else {
+//			getBaseEntityManager().remove(entity);
+//		}
+		getBaseEntityManager().remove(entity);
 		return entity;
 	}
 

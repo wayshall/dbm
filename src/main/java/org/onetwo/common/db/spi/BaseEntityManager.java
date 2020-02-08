@@ -64,6 +64,7 @@ public interface BaseEntityManager {
 	public void dymanicUpdate(Object entity);
 
 	/****
+	 * 执行此方法时，若实体实现了逻辑删除接口ILogicDeleteEntity，则只是更新状态
 	 * @param entity
 	 */
 	public int remove(Object entity);

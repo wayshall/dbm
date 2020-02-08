@@ -14,6 +14,7 @@ import org.onetwo.common.db.BaseEntityManagerAdapter;
 import org.onetwo.common.db.DataBase;
 import org.onetwo.common.db.DbmQueryValue;
 import org.onetwo.common.db.EntityManagerProvider;
+import org.onetwo.common.db.ILogicDeleteEntity;
 import org.onetwo.common.db.builder.QueryBuilder;
 import org.onetwo.common.db.builder.Querys;
 import org.onetwo.common.db.filequery.DbmNamedSqlFileManager;
@@ -161,9 +162,20 @@ public class DbmEntityManagerImpl extends BaseEntityManagerAdapter implements Qu
 		throwIfEffectiveCountError("persist", expectsize, rs);*/
 	}
 
+	/****
+	 * 执行此方法时，若实体实现了逻辑删除接口ILogicDeleteEntity，则只是更新状态
+	 */
 	@Override
 	public int remove(Object entity) {
-		return getCurrentSession().delete(entity);
+		int updateCount = 0;
+		if (entity instanceof ILogicDeleteEntity) {
+			((ILogicDeleteEntity)entity).deleted();
+			updateCount = getCurrentSession().update(entity);
+		} else {
+			updateCount = getCurrentSession().delete(entity);
+		}
+		return updateCount;
+//		return getCurrentSession().delete(entity);
 		/*int rs = getDbmDao().delete(entity);
 		int expectsize = LangUtils.size(entity);
 		throwIfEffectiveCountError("remove", expectsize, rs);*/
