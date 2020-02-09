@@ -25,6 +25,8 @@ import org.onetwo.dbm.annotation.DbmBindValueToField;
 import org.onetwo.dbm.annotation.DbmEntityListeners;
 import org.onetwo.dbm.annotation.DbmFieldListeners;
 import org.onetwo.dbm.annotation.DbmValidatorEnabled;
+import org.onetwo.dbm.annotation.DbmValidatorEnabled.OnInsert;
+import org.onetwo.dbm.annotation.DbmValidatorEnabled.OnUpdate;
 import org.onetwo.dbm.core.spi.DbmInnerServiceRegistry;
 import org.onetwo.dbm.dialet.DBDialect;
 import org.onetwo.dbm.event.spi.DbmEventAction;
@@ -74,7 +76,7 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 	private List<DbmEntityListener> entityListeners = Collections.EMPTY_LIST;
 	private List<DbmEntityFieldListener> fieldListeners = Collections.EMPTY_LIST;
 
-	private final boolean enabledEntithyValidator;
+	private final DbmValidatorEnabled dbmValidatorEnabled;
 //	private final SimpleDbmInnserServiceRegistry serviceRegistry;
 	private EntityValidator entityValidator;
 	
@@ -129,8 +131,8 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 		if(fieldListenersAnntation!=null){
 			this.fieldListeners = DbmUtils.initDbmEntityFieldListeners(fieldListenersAnntation);
 		}
-		this.enabledEntithyValidator = annotationInfo.hasAnnotation(DbmValidatorEnabled.class);
-		if(enabledEntithyValidator){
+		this.dbmValidatorEnabled = annotationInfo.getAnnotation(DbmValidatorEnabled.class);
+		if(dbmValidatorEnabled!=null){
 			this.entityValidator = serviceRegistry.getEntityValidator();
 			Assert.notNull(entityValidator, "no entity validator config!");
 		}
@@ -643,14 +645,14 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 				return null;
 			for(Object en : list){
 				this.processIBaseEntity(en, true);
-				this.vailidateEntity(en);
+				this.vailidateEntity(en, OnInsert.class);
 //				dsb.setColumnValuesFromEntity(en).addBatch();
 //				doEveryMappedFieldInStatementContext(dsb, en).addBatch();
 				dsb.processColumnValues(en).addBatch();
 			}
 		}else{
 			this.processIBaseEntity(entity, true);
-			this.vailidateEntity(entity);
+			this.vailidateEntity(entity, OnInsert.class);
 //			dsb.setColumnValuesFromEntity(entity);
 			dsb.processColumnValues(entity);
 		}
@@ -660,9 +662,10 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 		return dsb;
 	}
 	
-	private void vailidateEntity(Object entity){
+	private void vailidateEntity(Object entity, Class<?> validateGroup){
 		if(this.entityValidator!=null){
 			this.entityValidator.validate(entity);
+			this.entityValidator.validate(entity, validateGroup);
 		}
 	}
 	
@@ -749,7 +752,7 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 				dsb.processWhereCauseValuesFromEntity(en); // 先处理where字段值，因为如果使用了类似updateAt的字段做版本，processIBaseEntity方法会修改updateAt字段的值
 				this.processIBaseEntity(en, false);
 				
-				this.vailidateEntity(entity);
+				this.vailidateEntity(entity, OnUpdate.class);
 				
 //				dsb.setColumnValuesFromEntity(en)
 				dsb.processColumnValues(en)
@@ -761,7 +764,7 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 			dsb.processWhereCauseValuesFromEntity(entity); // 先处理where字段值，因为如果使用了类似updateAt的字段做版本，processIBaseEntity方法会修改updateAt字段的值
 			this.processIBaseEntity(entity, false);
 			
-			this.vailidateEntity(entity);
+			this.vailidateEntity(entity, OnUpdate.class);
 //			dsb.setColumnValuesFromEntity(entity);
 			dsb.processColumnValues(entity);
 //			dsb.processWhereCauseValuesFromEntity(entity); 上移到processIBaseEntity之前

@@ -144,6 +144,7 @@ final public class DbmUtils {
 		});
 		return packageNames;
 	}
+	
 	/*public static List<String> scanDbmPackages(ApplicationContext applicationContext){
 		ListableBeanFactory bf = (ListableBeanFactory)applicationContext.getAutowireCapableBeanFactory();
 		return scanDbmPackages(bf);
