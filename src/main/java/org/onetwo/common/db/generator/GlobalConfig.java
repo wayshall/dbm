@@ -43,6 +43,7 @@ public class GlobalConfig {
 	private final DbGenerator dbGenerator;
 	
 	private String stripTablePrefix;
+	private boolean overrideExistFile;
 
 	public GlobalConfig(DbGenerator dbGenerator) {
 		super();
@@ -193,6 +194,15 @@ public class GlobalConfig {
 
 	public GlobalConfig resourceDir(String resourceDir) {
 		this.resourceDir = resourceDir;
+		return this;
+	}
+
+	public boolean isOverrideExistFile() {
+		return overrideExistFile;
+	}
+
+	public GlobalConfig overrideExistFile(boolean overrideExistFile) {
+		this.overrideExistFile = overrideExistFile;
 		return this;
 	}
 }

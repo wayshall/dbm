@@ -21,6 +21,9 @@ import org.onetwo.common.utils.StringUtils;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public class DbGenerator {
 	//TableContextCreator
 //	private static final String TABLE_CONTEXT_KEY = "_tableContext";
@@ -393,8 +396,20 @@ public class DbGenerator {
 				}
 				genContext.initBasicContext();
 				
-				File file = ftlGenerator.generateFile(genContext, config.templatePath, outfilePath);
-				files.add(file);
+				File file = null;
+				if (globalConfig.isOverrideExistFile()) {
+					file = ftlGenerator.generateFile(genContext, config.templatePath, outfilePath);
+				} else {
+					if (!new File(outfilePath).exists()) {
+						file = ftlGenerator.generateFile(genContext, config.templatePath, outfilePath);
+					} else {
+						log.info("file[{}] is exist, ignore genenrated!", outfilePath);
+					}
+				}
+				
+				if (file!=null) {
+					files.add(file);
+				}
 			});
 			return new GeneratedResult<File>(tableName, files);
 		}
