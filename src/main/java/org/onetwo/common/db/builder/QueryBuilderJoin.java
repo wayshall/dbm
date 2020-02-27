@@ -34,12 +34,12 @@ public class QueryBuilderJoin {
 		}
 	}
 	
-	private QueryBuilder builder;
+	private QueryBuilder<?> builder;
 	private String joinTable;
 	private String alias;
 	private List<OnCause> onCauses = LangUtils.newArrayList();
 	
-	public QueryBuilderJoin(QueryBuilder builder, String joinTable, String alias) {
+	public QueryBuilderJoin(QueryBuilder<?> builder, String joinTable, String alias) {
 		super();
 		this.joinTable = joinTable;
 		this.builder = builder;
@@ -47,12 +47,12 @@ public class QueryBuilderJoin {
 	}
 	
 	
-	public QueryBuilder getBuilder() {
+	public QueryBuilder<?> getBuilder() {
 		return builder;
 	}
 
 
-	public QueryBuilder on(String...onCause){
+	public QueryBuilder<?> on(String...onCause){
 		for(int i=0; i<onCause.length; i=i+2){
 			onCauses.add(new OnCause(this, onCause[i], onCause[i+1]));
 		}
