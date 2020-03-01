@@ -27,6 +27,7 @@ import org.onetwo.common.proxy.BaseMethodParameter;
 import org.onetwo.common.reflect.ReflectUtils;
 import org.onetwo.common.utils.LangUtils;
 import org.onetwo.common.utils.Page;
+import org.onetwo.common.utils.PageRequest;
 import org.onetwo.common.utils.StringUtils;
 import org.onetwo.dbm.exception.FileNamedQueryException;
 import org.onetwo.dbm.mapping.DbmEnumValueMapping;
@@ -55,8 +56,9 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 	private int batchSize = -1;
 	private AsCountQuery asCountQuery;
 //	private List<String> parameterNames;
-	
+
 	private DynamicMethodParameter pageParamter;
+	private DynamicMethodParameter pageRequestParamter;
 	private DynamicMethodParameter dispatcherParamter;
 	
 	private QueryConfigData queryConfig;
@@ -73,13 +75,11 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 		Class<?> returnClass = getActualReturnType();
 //		Class<?> compClass = ReflectUtils.getGenricType(method.getGenericReturnType(), 0);
 		Class<?> compClass = getActualComponentType();
-		Optional<DynamicMethodParameter> pageParameterOpt = this.findPagePrarameter();
 		if(returnClass==void.class){
 //			DynamicMethodParameter firstParamter = parameters.get(0);
 //			pageParamter = dispatcherParamter!=null?parameters.get(1):parameters.get(0);
 //			this.pageParamter = this.findPagePrarameter();
-			if(pageParameterOpt.isPresent()){
-				this.pageParamter = pageParameterOpt.get();
+			if(findPagePrarameter()){
 				returnClass = pageParamter.getParameterType();
 				//获取page泛型类
 				Type ptype = pageParamter.getGenericParameterType();
@@ -88,9 +88,12 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 				}
 			}
 		}else if(Page.class==returnClass){
-			this.pageParamter = pageParameterOpt.orElseThrow(()->{
-				return new FileNamedQueryException("no Page type parameter found for paginaton method: " + method.toGenericString());
-			});
+			/*this.pageParamter = pageParameterOpt.orElseThrow(()->{
+				return new FileNamedQueryException("Page type parameter not found for paginaton method: " + method.toGenericString());
+			});*/
+			if (!findPagePrarameter() && !findPageRequestPrarameter()) {
+				throw new FileNamedQueryException("Page type parameter not found for paginaton method: " + method.toGenericString());
+			}
 			/*if(Page.class==rClass){
 //				throw new FileNamedQueryException("define Page Type at the first parameter and return void if you want to pagination: " + method.toGenericString());
 				this.pageParamter = pageParameterOpt.orElseThrow(()->{
@@ -137,19 +140,33 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 	}
 	
 	public boolean hasPageParamter() {
-		return pageParamter!=null;
+		return pageParamter!=null || pageRequestParamter!=null;
 	}
 
 	public final boolean isAnnotationPresent(Class<? extends Annotation> annoClass){
 		return this.method.getAnnotation(annoClass)!=null;
 	}
-	private Optional<DynamicMethodParameter> findPagePrarameter(){
-		return parameters.stream()
+	
+	private boolean findPagePrarameter(){
+		this.pageParamter = parameters.stream()
 				.filter(p->p.getParameterType()==Page.class)
 				.findAny()
+				.orElse(null);
+		return this.pageParamter!=null;
 				/*.orElseThrow(()->{
 					return new FileNamedQueryException("no Page type parameter found for paginaton method: " + method.toGenericString());
-				})*/;
+				})*/
+	}
+	
+	private boolean findPageRequestPrarameter(){
+		this.pageRequestParamter = parameters.stream()
+				.filter(p->PageRequest.class.isAssignableFrom(p.getParameterType()))
+				.findAny()
+				.orElse(null);
+		return this.pageRequestParamter!=null;
+				/*.orElseThrow(()->{
+					return new FileNamedQueryException("no Page type parameter found for paginaton method: " + method.toGenericString());
+				})*/
 	}
 	
 	/***
@@ -206,7 +223,12 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 	}
 	
 	public Page<?> getPageParamter(Object[] args) {
-		return (Page<?>)args[pageParamter.getParameterIndex()];
+		if (this.pageParamter!=null) {
+			return (Page<?>)args[pageParamter.getParameterIndex()];
+		} else {
+			PageRequest pageRequest = (PageRequest)args[pageRequestParamter.getParameterIndex()];
+			return pageRequest.toPageObject();
+		}
 	}
 
 	protected boolean judgeBatchUpdateFromParameterObjects(List<DynamicMethodParameter> mparameters){
