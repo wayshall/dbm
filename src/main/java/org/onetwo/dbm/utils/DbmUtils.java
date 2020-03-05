@@ -123,6 +123,25 @@ final public class DbmUtils {
 		ListableBeanFactory bf = (ListableBeanFactory)applicationContext.getAutowireCapableBeanFactory();
 		return scanEnableDbmPackages(bf);
 	}
+	
+	/***
+	 * 首先找到标注了 annotationCLass 注解（比如 @EnableDbm ）的bean
+	 * 然后读取注解的packagesToScan属性值，有则返回此值
+	 * 没有则返回标注了注解的bean所在包，作为返回值
+	 * 
+	 * sample:
+	 *  
+	 * @EnableDbm
+	 * class EnableDbmBean {
+	 * }
+	 * 
+	 * Set<String> packageNames = SpringAnnotationUtils.scanAnnotationPackages(applicationContext, EnableDbmBean.class)
+	 * packageNames = EnableDbmUIBean.class.getPackage().getName();
+	 * 
+	 * @author weishao zeng
+	 * @param beanFactory
+	 * @return
+	 */
 	public static List<String> scanEnableDbmPackages(ListableBeanFactory beanFactory){
 		List<String> packageNames = new ArrayList<String>();
 		SpringUtils.scanAnnotation(beanFactory, EnableDbm.class, (beanDef, beanClass)->{
