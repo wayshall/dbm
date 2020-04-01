@@ -792,6 +792,80 @@ public interface UserDao {
 }
 ```
 
+## sql片段支持
+有时候，两个查询方法的sql里，大部分是相同的（比如查询条件），只有小部分不同，如果写两份，就需要维护两份sql。这时候，你可以使用sql片段@fragment
+
+比如有两个sql查询
+
+sql1是findUserListLikeName:
+
+```sql
+/***
+ * @name: findUserListLikeName
+ */
+select 
+    usr.*
+from 
+    test_user usr
+where 
+    user_name like :userName?likeString
+```
+
+sql2是countUserLikeName:
+
+```sql
+/***
+ * @name: countUserLikeName
+ */
+select 
+    count(1)
+from 
+    test_user usr
+where 
+    user_name like :userName?likeString
+```
+
+两个方法的查询条件是一样的，只是select的数据不同，此时可以把相同的部分抽取出来：
+
+```sql
+/***
+ * @name: queryUser
+ * @fragment: subWhere
+ */
+from 
+    test_user usr
+where 
+    user_name like :userName?likeString
+
+```
+
+findUserListLikeName的sql可以改写为：
+
+```sql
+/***
+ * @name: findUserListLikeName
+ */
+select 
+    usr.*
+${fragment['queryUser.fragment.subWhere']}
+```
+
+countUserLikeName改写为：
+
+```sql
+/***
+ * @name: countUserLikeName
+ */
+select 
+    count(1)
+${fragment['queryUser.fragment.subWhere']}
+```
+
+
+
+
+
+
 ## 动态sql查询的语法和指令
 
 ### 常用指令
