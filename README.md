@@ -23,6 +23,7 @@
 - [BaseEntityManager接口和QueryDSL](#BaseEntityManager接口和QueryDSL)
 - [CrudEntityManager接口](#crudentitymanager接口)
 - [DbmRepository动态sql查询接口](#DbmRepository动态sql查询接口)
+- [sql片段支持](#sql片段支持)
 - [动态sql查询的语法和指令](#动态sql查询的语法和指令)
 - [DbmRepository接口的多数据源支持](#dbmrepository接口的多数据源支持)
 - [DbmRepository接口对其它orm框架的兼容](#dbmrepository接口对其它orm框架的兼容)
