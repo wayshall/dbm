@@ -55,8 +55,16 @@ public class IdGeneratorFactory {
 																tg.valueColumnName(), 
 																tg.pkColumnValue(),
 																tg.initialValue());
-		TableIdGenerator generator = new TableIdGenerator(tgAttrs);
+		IdentifierGenerator<Long> generator = createTableGenerator(tgAttrs);
 		return Optional.of(generator);
+	}
+	
+	public static IdentifierGenerator<Long> createTableGenerator(TableGeneratorAttrs tgAttrs){
+		if (tgAttrs==null) {
+			throw new IllegalArgumentException("TableGeneratorAttrs can not be null!");
+		}
+		TableIdGenerator generator = new TableIdGenerator(tgAttrs);
+		return generator;
 	}
 	
 	@SuppressWarnings("unchecked")
