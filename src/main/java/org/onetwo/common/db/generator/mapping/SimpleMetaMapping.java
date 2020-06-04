@@ -29,6 +29,7 @@ public final class SimpleMetaMapping extends BaseSqlTypeMapping {
 		types.put(Types.VARCHAR, String.class);
 		types.put(Types.LONGVARCHAR, String.class);
 		types.put(Types.LONGVARBINARY, byte[].class);
+		types.put(Types.BINARY, byte[].class);
 		types.put(Types.CLOB, String.class);
 		types.put(Types.FLOAT, Float.class);
 		types.put(Types.REAL, Float.class);
