@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 import org.onetwo.common.annotation.AnnotationInfo;
@@ -69,12 +70,17 @@ public class MutilMappedEntryManager implements MappedEntryBuilder, MappedEntryM
 	 */
 	@Override
 	public void scanPackages(String... packagesToScan) {
+		CompletableFuture.runAsync(() -> {
+			scanPackages0(packagesToScan);
+		});
+	}
+	
+	private void scanPackages0(String... packagesToScan) {
 		Assert.notEmpty(mappedEntryBuilders, "no mapped entry builders ...");
 		
+		StringBuilder log = new StringBuilder();
 		if (!LangUtils.isEmpty(packagesToScan)) {
-			if(logger.isInfoEnabled()){
-				logger.info("scan model package: {}", Arrays.asList(packagesToScan));
-			}
+			log.append("scan model package: ").append(Arrays.asList(packagesToScan)).append("\n");
 			
 			Collection<ScanedClassContext> entryClassNameList = scanner.scan(new ScanResourcesCallback<ScanedClassContext>() {
 
@@ -102,7 +108,7 @@ public class MutilMappedEntryManager implements MappedEntryBuilder, MappedEntryM
 //				if(entry==null)
 //					throw new DbmException("can not build the entity : " + clazz);
 //				buildEntry(entry);
-				logger.info("build entity entry[" + (count++) + "]: " + entry.getEntityName());
+				log.append("build entity entry[").append(count++).append("]: ").append(entry.getEntityName()).append("\n");
 				entryList.add(entry);
 				
 				String key = getCacheKey(entry.getEntityClass());
@@ -114,6 +120,10 @@ public class MutilMappedEntryManager implements MappedEntryBuilder, MappedEntryM
 			//锁定
 			for(DbmMappedEntry entry : entryList){
 				entry.freezing();
+			}
+			
+			if(logger.isInfoEnabled()){
+				logger.info(log.toString());
 			}
 		}
 
