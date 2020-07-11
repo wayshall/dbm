@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 import org.onetwo.common.annotation.AnnotationInfo;
@@ -18,7 +19,6 @@ import org.onetwo.common.utils.list.JFishList;
 import org.onetwo.dbm.core.spi.DbmInnerServiceRegistry;
 import org.onetwo.dbm.exception.DbmException;
 import org.onetwo.dbm.exception.NoMappedEntryException;
-import org.onetwo.dbm.utils.DbmErrors;
 import org.slf4j.Logger;
 import org.springframework.core.io.Resource;
 import org.springframework.core.type.classreading.MetadataReader;
@@ -70,12 +70,17 @@ public class MutilMappedEntryManager implements MappedEntryBuilder, MappedEntryM
 	 */
 	@Override
 	public void scanPackages(String... packagesToScan) {
+		CompletableFuture.runAsync(() -> {
+			scanPackages0(packagesToScan);
+		});
+	}
+	
+	private void scanPackages0(String... packagesToScan) {
 		Assert.notEmpty(mappedEntryBuilders, "no mapped entry builders ...");
 		
+		StringBuilder log = new StringBuilder();
 		if (!LangUtils.isEmpty(packagesToScan)) {
-			if(logger.isInfoEnabled()){
-				logger.info("scan model package: {}", Arrays.asList(packagesToScan));
-			}
+			log.append("scan model package: ").append(Arrays.asList(packagesToScan)).append("\n");
 			
 			Collection<ScanedClassContext> entryClassNameList = scanner.scan(new ScanResourcesCallback<ScanedClassContext>() {
 
@@ -103,7 +108,7 @@ public class MutilMappedEntryManager implements MappedEntryBuilder, MappedEntryM
 //				if(entry==null)
 //					throw new DbmException("can not build the entity : " + clazz);
 //				buildEntry(entry);
-				logger.info("build entity entry[" + (count++) + "]: " + entry.getEntityName());
+				log.append("build entity entry[").append(count++).append("]: ").append(entry.getEntityName()).append("\n");
 				entryList.add(entry);
 				
 				String key = getCacheKey(entry.getEntityClass());
@@ -116,12 +121,25 @@ public class MutilMappedEntryManager implements MappedEntryBuilder, MappedEntryM
 			for(DbmMappedEntry entry : entryList){
 				entry.freezing();
 			}
+			
+			if(logger.isInfoEnabled()){
+				logger.info(log.toString());
+			}
 		}
 
 	}
 	
+	/***
+	 * 检查缓存
+	 * @author weishao zeng
+	 * @param entry
+	 */
 	private void buildEntry(DbmMappedEntry entry){
-		if (nameEntryMapping.containsKey(entry.getEntityName())) {
+		buildEntry(entry, true);
+	}
+	
+	private void buildEntry(DbmMappedEntry entry, boolean putToNameCache){
+		if (putToNameCache && nameEntryMapping.containsKey(entry.getEntityName())) {
 			throw new DbmException("duplicate entity name: " + entry.getEntityName())
 						.put("exist entity", nameEntryMapping.get(entry.getEntityName()).getEntityClass())
 						.put("conflicted entity", entry.getEntityClass());
@@ -131,7 +149,9 @@ public class MutilMappedEntryManager implements MappedEntryBuilder, MappedEntryM
 		} catch (Exception e) {
 			throw new DbmException("build entry["+entry.getEntityName()+"] error: "+e.getMessage(), e);
 		}
-		nameEntryMapping.put(entry.getEntityName(), entry);
+		if (putToNameCache) {
+			nameEntryMapping.put(entry.getEntityName(), entry);
+		}
 	}
 
 	private void putInCache(String key, DbmMappedEntry entry) {
@@ -239,7 +259,7 @@ public class MutilMappedEntryManager implements MappedEntryBuilder, MappedEntryM
 				if (value == null)
 					throw new NoMappedEntryException("can find build entry for class : " + clazz);
 
-				buildEntry(value);
+				buildEntry(value, false);
 				value.freezing();
 				return value;
 			});

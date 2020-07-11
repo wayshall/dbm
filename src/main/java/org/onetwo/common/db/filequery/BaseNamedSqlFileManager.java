@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.stream.Stream;
 
 import org.onetwo.common.db.spi.NamedQueryFile;
 import org.onetwo.common.db.spi.NamedQueryFileListener;
@@ -164,10 +165,10 @@ abstract public class BaseNamedSqlFileManager implements NamedSqlFileManager {
 		}
 		
 //		Map<String, PropertiesNamespaceInfo<T>> nsproperties = LangUtils.newHashMap(sqlfileArray.length);
-		for(ResourceAdapter<?> f : sqlfileArray){
+		Stream.of(sqlfileArray).parallel().forEach( f-> {
 //			logger.info("parse named sql file: {}", f);
 			this.parseSqlFile(f, true);
-		}
+		});
 		return namespaceProperties;
 	}
 

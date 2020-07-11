@@ -140,6 +140,9 @@ public interface DbmSession {
 	 */
 	@DbmJdbcOperationMark(type=DbmJdbcOperationType.BATCH_UPDATE)
 	public <T> int batchUpdate(Collection<T> entities);
+	
+	@DbmJdbcOperationMark(type=DbmJdbcOperationType.BATCH_UPDATE)
+	public <T> int batchUpdate(Collection<T> entities, int batchSize);
 
 	/*******
 	 * 动态更新（忽略null值），用对象的id作为条件，根据对象的属性更新数据库记录

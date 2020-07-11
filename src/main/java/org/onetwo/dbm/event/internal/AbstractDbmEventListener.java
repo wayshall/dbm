@@ -104,10 +104,23 @@ abstract public class AbstractDbmEventListener implements DbmEventListener<DbmSe
 	 * @return
 	 */
 	protected int executeJdbcUpdate(boolean userBatch, String sql, List<Object[]> args, DbmSessionEventSource es){
+		return executeJdbcUpdate(userBatch, sql, args, es, es.getDataBaseConfig().getProcessSizePerBatch());
+	}
+	/***
+	 * 
+	 * @author weishao zeng
+	 * @param userBatch
+	 * @param sql
+	 * @param args
+	 * @param es
+	 * @param configBatchSize 批量处理时，每次提交的数据量
+	 * @return
+	 */
+	protected int executeJdbcUpdate(boolean userBatch, String sql, List<Object[]> args, DbmSessionEventSource es, Integer configBatchSize){
 		int count = 0;
 		if(userBatch){
 //			int[] ups = es.getJFishJdbcTemplate().batchUpdate(sql, args);
-			int batchSize = es.getDataBaseConfig().getProcessSizePerBatch();
+			int batchSize = configBatchSize!=null?configBatchSize:es.getDataBaseConfig().getProcessSizePerBatch();
 			int[][] ups = es.getDbmJdbcOperations().batchUpdateWith(sql, args, batchSize/*, new ParameterizedPreparedStatementSetter<Object[]>(){
 
 				@Override

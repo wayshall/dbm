@@ -256,6 +256,16 @@ public class DbmSessionImpl extends AbstractDbmSession implements DbmSessionEven
 		return event.getUpdateCount();
 	}
 	
+	@Override
+	public <T> int batchUpdate(Collection<T> entities, int batSize) {
+		DbmUpdateEvent event = new DbmUpdateEvent(entities, this);
+		event.setDynamicUpdate(false);
+		event.setAction(DbmEventAction.batchUpdate);
+		event.setBatchSize(batSize);
+		this.fireEvents(event);
+		return event.getUpdateCount();
+	}
+	
 	/*protected void fireEvents(JFishEventListener[] listeners, JFishEvent event){
 		for(JFishEventListener listern : listeners){
 			listern.doEvent(event);
@@ -615,7 +625,6 @@ public class DbmSessionImpl extends AbstractDbmSession implements DbmSessionEven
 	public DbmInnerServiceRegistry getServiceRegistry() {
 		return sessionFactory.getServiceRegistry();
 	}
-
 
 	@Override
 	public String toString() {
