@@ -16,6 +16,7 @@ public class DefaultDatabaseDialetManager implements RegisterManager<String, DBD
 		register(DataBase.MySQL.getName(), new MySQLDialect());
 		register(DataBase.Oracle.getName(), new OracleDialect());
 		register(DataBase.PostgreSQL.getName(), new PostgreSQLDialet());
+		register(DataBase.H2.getName(), new H2Dialet());
 	}
 	
 	final public DefaultDatabaseDialetManager register(DBDialect dialet){

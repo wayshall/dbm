@@ -178,8 +178,7 @@ public class DbmSessionImpl extends AbstractDbmSession implements DbmSessionEven
 	
 
 	public <T> int insertOrUpdate(T entity, boolean dymanicIfUpdate){
-		if(LangUtils.isNullOrEmptyObject(entity))
-			throw new DbmException("entity can not be null or empty: " + entity);
+		checkEntity(entity);
 		DbmInsertOrUpdateEvent event = new DbmInsertOrUpdateEvent(entity, dymanicIfUpdate, this);
 //		event.setRelatedFields(relatedFields);
 		this.fireEvents(event);
@@ -191,7 +190,7 @@ public class DbmSessionImpl extends AbstractDbmSession implements DbmSessionEven
 	}
 	
 	protected <T> int insert(T entity, boolean fetchId){
-		Assert.notNull(entity);
+		checkEntity(entity);
 		DbmInsertEvent event = new DbmInsertEvent(entity, this);
 		event.setFetchId(fetchId);
 //		event.setRelatedFields(relatedFields);
@@ -199,6 +198,14 @@ public class DbmSessionImpl extends AbstractDbmSession implements DbmSessionEven
 		return event.getUpdateCount();
 	}
 
+	private void checkEntity(Object entity) {
+		if (entity==null) {
+			throw new DbmException("entity can not be null");
+		}
+		if (entity instanceof Class) {
+			throw new DbmException("entity can not be a instance of class: " + entity);
+		}
+	}
 	/*public <T> int saveRef(T entity){
 		return saveRef(entity, false);
 	}*/
@@ -232,6 +239,7 @@ public class DbmSessionImpl extends AbstractDbmSession implements DbmSessionEven
 	
 	@Override
 	public <T> int justInsert(T entity){
+		checkEntity(entity);
 		return insert(entity, false);
 	}
 	
@@ -283,6 +291,7 @@ public class DbmSessionImpl extends AbstractDbmSession implements DbmSessionEven
 	
 	@Override
 	public int update(Object entity){
+		checkEntity(entity);
 		return update(entity, false);
 	}
 	
@@ -293,7 +302,7 @@ public class DbmSessionImpl extends AbstractDbmSession implements DbmSessionEven
 	
 	@Override
 	public int update(Object entity, boolean dymanicUpdate){
-		Assert.notNull(entity);
+		checkEntity(entity);
 		DbmUpdateEvent event = new DbmUpdateEvent(entity, this);
 		event.setDynamicUpdate(dymanicUpdate);
 //		event.setRelatedFields(relatedFields);
@@ -302,7 +311,7 @@ public class DbmSessionImpl extends AbstractDbmSession implements DbmSessionEven
 	}
 	
 	public int delete(Object entity){
-		Assert.notNull(entity);
+		checkEntity(entity);
 		DbmDeleteEvent deleteEvent = new DbmDeleteEvent(entity, this);
 //		deleteEvent.setRelatedFields(relatedFields);
 		this.fireEvents(deleteEvent);
