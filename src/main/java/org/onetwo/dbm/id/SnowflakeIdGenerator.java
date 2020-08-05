@@ -21,7 +21,7 @@ public class SnowflakeIdGenerator {
     * 每一部分占用的位数
     */
     private final static long SEQUENCE_BIT = 12; //序列号占用的位数,支持同一毫秒内同一个节点可以生成4096个ID
-    private final static long MACHINE_BIT = 5;  //机器标识占用的位数
+    private final static long MACHINE_BIT = 5;  //机器标识占用的位数,2^5=32
     private final static long DATACENTER_BIT = 5;//数据中心占用的位数
  
     /**
