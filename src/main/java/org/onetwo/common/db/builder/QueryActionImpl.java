@@ -1,6 +1,5 @@
 package org.onetwo.common.db.builder;
 
-import java.sql.ResultSet;
 import java.util.List;
 import java.util.Map;
 
@@ -55,6 +54,12 @@ public class QueryActionImpl<E> implements QueryAction<E> {
 		checkOperation();
 //		this.getQueryBuilder().limit(0, 1);
 		return (E)baseEntityManager.selectOne(getExtQuery());
+	}
+	
+
+	@Override
+	public boolean exist() {
+		return baseEntityManager.exist(getExtQuery());
 	}
 	
 	/***

@@ -3,28 +3,43 @@ package org.onetwo.common.db.sqlext;
 import java.util.Map;
 
 import org.onetwo.dbm.dialet.DBDialect.LockInfo;
+import org.onetwo.dbm.exception.DbmException;
 
 public interface SelectExtQuery extends ExtQueryInner {
 
 	public boolean needSetRange();
 
-	public Integer getFirstResult();
+	Integer getFirstResult();
 
-	public Integer getMaxResults();
+	Integer getMaxResults();
 	
-	public void setMaxResults(Integer maxResults);
+	void setMaxResults(Integer maxResults);
 	
-//	public boolean isIgnoreQuery();
-	public Map<Object, Object> getQueryConfig();
-	public String getCountSql();
+//	boolean isIgnoreQuery();
+	Map<Object, Object> getQueryConfig();
+	String getCountSql();
 	
 
-	public boolean isSubQuery();
+	boolean isSubQuery();
 
-	public void setSubQuery(boolean subQuery);
+	void setSubQuery(boolean subQuery);
 	
-	public boolean isCacheable();
+	boolean isCacheable();
 
-	public LockInfo getLockInfo();
+	LockInfo getLockInfo();
+	
+	/*****
+	 * 限制返回的结果数量
+	 * @author weishao zeng
+	 * @param first base from 0
+	 * @param size
+	 */
+	void limit(int first, int size);
+	
+	void select(String... fields);
+	
+	default void selectId() {
+		throw new DbmException("unsupported operation!");
+	}
 	
 }

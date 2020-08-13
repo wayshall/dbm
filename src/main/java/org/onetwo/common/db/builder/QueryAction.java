@@ -24,6 +24,15 @@ public interface QueryAction<E> {
 	
 	E one();
 	
+	/****
+	 * 查询数据是否存在
+	 * @author weishao zeng
+	 * @return
+	 */
+	default public boolean exist() {
+		return optionalOne().isPresent();
+	}
+	
 	default public Optional<E> optionalOne() {
 		return Optional.ofNullable(one());
 	}

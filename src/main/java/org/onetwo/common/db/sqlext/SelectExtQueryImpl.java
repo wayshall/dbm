@@ -557,4 +557,15 @@ public class SelectExtQueryImpl extends AbstractExtQuery implements SelectExtQue
 		return lockInfo;
 	}
 
+	@Override
+	public void limit(int first, int size) {
+		this.params.put(K.FIRST_RESULT, first);
+		this.params.put(K.MAX_RESULTS, size);
+	}
+
+	@Override
+	public void select(String... fields) {
+		this.params.put(K.SELECT, fields);
+	}
+
 }
