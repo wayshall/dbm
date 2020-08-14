@@ -230,7 +230,8 @@ public class QueryBuilderImpl<E> implements QueryBuilder<E> {
 		extQuery = createExtQuery(entityClass, alias, params);
 		extQuery.build();*/
 		
-		QueryActionImpl<E> queryAction = new QueryActionImpl<E>(this, entityClass, alias, params);
+//		QueryActionImpl<E> queryAction = new QueryActionImpl<E>(this, entityClass, alias, params);
+		QueryActionImpl<E> queryAction = new QueryActionImpl<E>(this);
 		
 		/*JFishQueryValue qv = JFishQueryValue.create(getSQLSymbolManager().getPlaceHolder(), extQuery.getSql());
 		qv.setResultClass(extQuery.getEntityClass());

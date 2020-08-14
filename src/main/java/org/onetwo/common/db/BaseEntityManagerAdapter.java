@@ -98,29 +98,29 @@ public abstract class BaseEntityManagerAdapter implements InnerBaseEntityManager
 		return createQuery(extQuery).getResultList();
 	}
 
-	@Override
-	public <T> T selectOne(SelectExtQuery extQuery) {
-		// 限制返回一条
-		extQuery.limit(0, 1);
-		List<T> list = select(extQuery);
-		T entity = null;
-		if(LangUtils.hasElement(list))
-			entity = list.get(0);
-		return entity;
-	}
-	
-	/****
-	 * 检测数据是否存在，只select id即可
-	 * @author weishao zeng
-	 * @param extQuery
-	 * @return
-	 */
-	@Override
-	public boolean exist(SelectExtQuery extQuery) {
-		extQuery.selectId();
-		Object dataWithId = selectOne(extQuery);
-		return dataWithId!=null;
-	}
+//	@Override
+//	public <T> T selectOne(SelectExtQuery extQuery) {
+//		// 限制返回一条
+//		extQuery.limit(0, 1);
+//		List<T> list = select(extQuery);
+//		T entity = null;
+//		if(LangUtils.hasElement(list))
+//			entity = list.get(0);
+//		return entity;
+//	}
+//	
+//	/****
+//	 * 检测数据是否存在，只select id即可
+//	 * @author weishao zeng
+//	 * @param extQuery
+//	 * @return
+//	 */
+//	@Override
+//	public boolean exist(SelectExtQuery extQuery) {
+//		extQuery.selectId();
+//		Object dataWithId = selectOne(extQuery);
+//		return dataWithId!=null;
+//	}
 
 	/****
 	 * 查找唯一结果，如果找不到则返回null，找到多个则抛异常 IncorrectResultSizeDataAccessException，详见：DataAccessUtils.requiredSingleResult

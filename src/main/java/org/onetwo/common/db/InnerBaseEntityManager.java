@@ -10,7 +10,6 @@ public interface InnerBaseEntityManager extends BaseEntityManager {
 	
 	<T> List<T> select(SelectExtQuery extQuery);
 	<T> T selectUnique(SelectExtQuery extQuery);
-	<T> T selectOne(SelectExtQuery extQuery);
 	<T> void selectPage(Page<T> page, SelectExtQuery extQuery);
 	
 
@@ -25,5 +24,6 @@ public interface InnerBaseEntityManager extends BaseEntityManager {
 	 * @param extQuery
 	 * @return
 	 */
-	boolean exist(SelectExtQuery extQuery);
+//	boolean exist(SelectExtQuery extQuery);
+//	<T> T selectOne(SelectExtQuery extQuery);
 }

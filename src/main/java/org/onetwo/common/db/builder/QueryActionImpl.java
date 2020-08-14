@@ -9,6 +9,7 @@ import org.onetwo.common.db.sqlext.ExtQueryInner;
 import org.onetwo.common.db.sqlext.SQLSymbolManager;
 import org.onetwo.common.db.sqlext.SelectExtQuery;
 import org.onetwo.common.spring.copier.CopyUtils;
+import org.onetwo.common.utils.LangUtils;
 import org.onetwo.common.utils.Page;
 import org.onetwo.dbm.core.spi.DbmEntityManager;
 import org.onetwo.dbm.exception.DbmException;
@@ -22,19 +23,35 @@ public class QueryActionImpl<E> implements QueryAction<E> {
 	protected InnerBaseEntityManager baseEntityManager;
 	private SelectExtQuery extQuery;
 	final private QueryBuilder<E> queryBuilder;
+	
+//	private final Class<?> entityClass;
+//	private final String alias;
+//	private final Map<Object, Object> properties;
 
-	public QueryActionImpl(QueryBuilderImpl<E> queryBuilder, Class<?> entityClass, String alias, Map<Object, Object> properties){
+	public QueryActionImpl(QueryBuilderImpl<E> queryBuilder){
 		if(queryBuilder.getBaseEntityManager()==null){
 			throw new DbmException("to create QueryAction, the baseEntityManager can not be null!");
 		}
 		this.queryBuilder = queryBuilder;
 		this.baseEntityManager = queryBuilder.getBaseEntityManager();
-		extQuery = getSQLSymbolManager().createSelectQuery(entityClass, alias, properties);
+		
+//		this.entityClass = entityClass;
+//		this.alias = alias;
+//		this.properties = properties;
+//		extQuery = getSQLSymbolManager().createSelectQuery(entityClass, alias, properties);
 //		extQuery.build();
+	}
+	
+	final protected SelectExtQuery createExtQuery() {
+		extQuery = getSQLSymbolManager().createSelectQuery(this.queryBuilder.getEntityClass(), this.queryBuilder.getAlias(), this.queryBuilder.getParams());
+		return extQuery;
 	}
 	
 	public SelectExtQuery getExtQuery() {
 //		throwIfHasNotBuild();
+		if (extQuery==null) {
+			this.createExtQuery();
+		}
 		return extQuery;
 	}
 
@@ -53,13 +70,25 @@ public class QueryActionImpl<E> implements QueryAction<E> {
 	public E one(){
 		checkOperation();
 //		this.getQueryBuilder().limit(0, 1);
-		return (E)baseEntityManager.selectOne(getExtQuery());
+		// 这句必须在创建extQuery前调用
+		this.queryBuilder.limit(0, 1);
+		
+		List<E> list = baseEntityManager.select(getExtQuery());
+		if (LangUtils.isEmpty(list)) {
+			return null;
+		}
+		return list.get(0);
 	}
 	
 
 	@Override
 	public boolean exist() {
-		return baseEntityManager.exist(getExtQuery());
+		// 这句必须在创建extQuery前调用
+		this.queryBuilder.limit(0, 1);
+		// 创建后，设置选择id
+		this.getExtQuery().selectId();
+		E one = one();
+		return one!=null;
 	}
 	
 	/***
