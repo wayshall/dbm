@@ -9,6 +9,7 @@ import java.util.stream.Stream;
 import javax.persistence.metamodel.SingularAttribute;
 
 import org.onetwo.common.db.sqlext.ExtQueryUtils;
+import org.onetwo.common.db.sqlext.SQLOps;
 import org.onetwo.common.db.sqlext.SQLSymbolManager.FieldOP;
 import org.onetwo.common.utils.StringUtils;
 import org.onetwo.common.utils.func.Closure;
@@ -120,8 +121,27 @@ public class DefaultWhereCauseBuilderField<E> extends WhereCauseBuilderField<E> 
 			this.values = values;
 		});
 	}
+
+	public <T> WhereCauseBuilder<E> value(SQLOps sqlOp, Supplier<T> valueSupplier) {
+		return this.doWhenPredicate(()->{
+			this.op = sqlOp.getSymbol();
+			this.values = new Object[] {valueSupplier.get()};
+		});
+	}
+
+	public <T> WhereCauseBuilder<E> values(SQLOps sqlOp, Supplier<T[]> valueSupplier) {
+		return this.doWhenPredicate(()->{
+			this.op = sqlOp.getSymbol();
+			this.values = valueSupplier.get();
+		});
+	}
+	
 	public <T> WhereCauseBuilder<E> is(T... values) {
 		return equalTo(values);
+	}
+	
+	public <T> WhereCauseBuilder<E> is(Supplier<T> valueSupplier) {
+		return value(SQLOps.EQUAL, valueSupplier);
 	}
 	
 	public WhereCauseBuilder<E> isNull(boolean isNull) {
