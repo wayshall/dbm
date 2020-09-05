@@ -43,7 +43,7 @@ public class DbmInsertEventListener extends InsertEventListener{
 	}
 	
 	/***
-	 * 另外提供了batchInsert，简直insert的参数为集合类型
+	 * 另外提供了batchInsert，batchInsert的参数为集合类型
 	 * 
 	 * @author weishao zeng
 	 * @param entity
