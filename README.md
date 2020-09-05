@@ -99,7 +99,7 @@ spring 4.0+
 <dependency>
     <groupId>org.onetwo4j</groupId>
     <artifactId>onetwo-dbm</artifactId>
-    <version>4.7.4-SNAPSHOT</version>
+    <version>4.8.0-SNAPSHOT</version>
 </dependency>
 
 ```
