@@ -253,11 +253,12 @@ public class EntrySQLBuilderImpl implements EntrySQLBuilder {
 		for(DbmMappedField field : columns){
 			fstr = alias?field.getColumn().getNameWithAlias():field.getColumn().getName();
 			fstr = dialet.wrapKeywordColumnName(fstr);
+			String op = " = ";
 			if(namedPlaceHoder){
 				namedStr = alias?field.getColumn().getNamedPlaceHolderWithAlias():field.getColumn().getNamedPlaceHolder();
-				strs.add(fstr+" = " + namedStr);
+				strs.add(fstr + op + namedStr);
 			}else{
-				strs.add(fstr+" = "+namedStr);
+				strs.add(fstr + op +namedStr);
 			}
 		}
 		return strs;
