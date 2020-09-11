@@ -192,6 +192,24 @@ abstract public class AbstractDbmEventListener implements DbmEventListener<DbmSe
 		DbmUtils.throwIfEffectiveCountError(operation + " error.", expectCount, effectiveCount);
 	}
 	
+	/****
+	 * t1 {
+	 * 		select(a) //a.version=1
+	 * 		update(a) //a.version=2
+	 * 		isolation: REQUIRES_NEW
+	 * 		t2 {
+	 * 			select(a.version) //t1未提交，a.version==1
+	 * 			update(a) // check(a.version==1) 出错
+	 * 			commit-t2()
+	 * 		}
+	 * 		commit-t1() //
+	 * }
+	 * @author weishao zeng
+	 * @param es
+	 * @param entry
+	 * @param singleEntity
+	 * @return
+	 */
 	protected final Object checkEntityLastVersion(DbmSessionEventSource es, DbmMappedEntry entry, Object singleEntity) {
 		Object currentTransactionVersion = null;
 		if(entry.isVersionControll()){
