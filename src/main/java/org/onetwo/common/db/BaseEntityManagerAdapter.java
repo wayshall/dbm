@@ -89,6 +89,9 @@ public abstract class BaseEntityManagerAdapter implements InnerBaseEntityManager
 	public Number count(SelectExtQuery extQuery) {
 		extQuery.build();
 		Number countNumber = (Number)this.findUnique(extQuery.getCountSql(), extQuery.getParamsValue().asMap());
+		if (countNumber==null) {
+			countNumber = 0;
+		}
 		return countNumber;
 	}
 
