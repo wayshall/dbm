@@ -2,7 +2,7 @@ package org.onetwo.dbm.id;
 
 
 /**
- * @author copy from http://www.wolfbe.com/detail/201611/381.html
+ * id = 1位标识符 + 41位时间戳(的差值) + 5位数据中心+5位机器标识 + 12位序列号
  * 1位标识符
  * 41位时间戳，这个是毫秒级的时间，一般实现上不会存储当前的时间戳，而是时间戳的差值（当前时间-固定的开始时间），这样可以使产生的ID从更小值开始；41位的时间戳可以使用69年，(1L << 41) / (1000L * 60 * 60 * 24 * 365) = 69年；
  * 5位数据中心，5位机器标识，Twitter实现中使用前5位作为数据中心标识，后5位作为机器标识，可以部署1024个节点；
@@ -38,8 +38,17 @@ public class SnowflakeIdGenerator {
     /**
     * 每一部分向左的位移
     */
+    /***
+     * 序列号占12位，所以机器要左移12位
+     */
     private final static long MACHINE_LEFT = SEQUENCE_BIT;
+    /***
+     * 机器表示占5位，序列号占12位，所以数据中心左移5+12=17位
+     */
     private final static long DATACENTER_LEFT = SEQUENCE_BIT + MACHINE_BIT;
+    /***
+     * 数据中心占5位，机器表示占5位，序列号占12位，所以时间差值左移5+5+12=22位
+     */
     private final static long TIMESTMP_LEFT = DATACENTER_LEFT + DATACENTER_BIT;
  
     private long datacenterId;  //数据中心
@@ -86,11 +95,35 @@ public class SnowflakeIdGenerator {
         }
  
         lastStmp = currStmp;
+        
+        long timeDiff = generatedTimeDifference(currStmp);
  
-        return (currStmp - START_STMP) << TIMESTMP_LEFT //时间戳部分
+        return timeDiff << TIMESTMP_LEFT //时间戳部分
                 | datacenterId << DATACENTER_LEFT      //数据中心部分
                 | machineId << MACHINE_LEFT            //机器标识部分
                 | sequence;                            //序列号部分
+    }
+    
+    /****
+     * 生成时间差值
+     * @author weishao zeng
+     * @param currStmp
+     * @return
+     */
+    protected long generatedTimeDifference(long currStmp) {
+    	long timeDiff = currStmp - START_STMP;
+    	return timeDiff;
+    }
+    
+    /****
+     * 提取snowfalke算法生成的id的时间差值部分
+     * @author weishao zeng
+     * @param snowflakeId
+     * @return
+     */
+    static public long getTimeDifference(long snowflakeId) {
+    	long timeDiff = snowflakeId >> TIMESTMP_LEFT;
+    	return timeDiff;
     }
  
     private long getNextMill() {
