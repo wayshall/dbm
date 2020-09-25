@@ -146,6 +146,18 @@ public class QueryBuilderImpl<E> implements QueryBuilder<E> {
 	}
 	
 	@Override
+	public QueryBuilderImpl<E> ascRand(Object seed){
+		this.params.put(K.ASC, K.RAND.withkey(seed));
+		return self();
+	}
+	
+	@Override
+	public QueryBuilderImpl<E> descRand(Object seed){
+		this.params.put(K.DESC, K.RAND.withkey(seed));
+		return self();
+	}
+	
+	@Override
 	public QueryBuilderImpl<E> desc(String...fields){
 		this.params.put(K.DESC, fields);
 		return self();
