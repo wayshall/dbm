@@ -35,6 +35,9 @@ CREATE TABLE `company`  (
   PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 1562 CHARACTER SET = utf8 COLLATE = utf8_bin ROW_FORMAT = Dynamic;
 
+ALTER TABLE `company` 
+ADD COLUMN `ext_info_list` json NULL AFTER `link_phones`;
+
 -- ----------------------------
 -- Table structure for data_mq_receive
 -- ----------------------------
