@@ -282,7 +282,7 @@ public class BaseCrudEntityManager<T, PK extends Serializable> implements CrudEn
 						.page(page);
 	}
 
-	protected WhereCauseBuilder<T> where(){
+	public WhereCauseBuilder<T> where(){
 		DbmEntityManager dem = (DbmEntityManager)this.getBaseEntityManager();
 		return dem.from(entityClass).where();
 	}
