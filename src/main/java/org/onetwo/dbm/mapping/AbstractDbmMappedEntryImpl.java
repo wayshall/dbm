@@ -528,6 +528,9 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 		}
 	}
 
+	protected EntrySQLBuilderImpl getStaticInsertOrUpdateSqlBuilder() {
+		throw new UnsupportedOperationException();
+	}
 	abstract protected EntrySQLBuilderImpl getStaticInsertSqlBuilder();
 	abstract protected EntrySQLBuilderImpl getStaticUpdateSqlBuilder();
 	abstract protected EntrySQLBuilderImpl getStaticDeleteSqlBuilder();
@@ -661,8 +664,42 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 //		JdbcStatementContext<List<Object[]>> context = SqlBuilderJdbcStatementContext.create(dsb.getSql(), dsb); 
 		return dsb;
 	}
+
+	/****
+	 * 利用mysql特有语法插入或更新：ON DUPLICATE KEY UPDATE
+	 * @author weishao zeng
+	 * @param entity
+	 * @return
+	 */
+	@Override
+	public JdbcStatementContext<List<Object[]>> makeMysqlInsertOrUpdate(Object entity) {
+		this.throwIfQueryableOnly();
+		EntrySQLBuilderImpl insertOrUpdateSqlBuilder = getStaticInsertOrUpdateSqlBuilder();
+		JdbcStatementContextBuilder dsb = JdbcStatementContextBuilder.create(DbmEventAction.insert, this, insertOrUpdateSqlBuilder);
+		if(LangUtils.isMultiple(entity)){
+			List<Object> list = LangUtils.asList(entity);
+			if(LangUtils.isEmpty(list))
+				return null;
+			for(Object en : list){
+				this.processIBaseEntity(en, true);
+				this.vailidateEntity(en, OnInsert.class, OnUpdate.class);
+//				dsb.setColumnValuesFromEntity(en).addBatch();
+//				doEveryMappedFieldInStatementContext(dsb, en).addBatch();
+				dsb.processColumnValues(en).addBatch();
+			}
+		}else{
+			this.processIBaseEntity(entity, true);
+			this.vailidateEntity(entity, OnInsert.class);
+//			dsb.setColumnValuesFromEntity(entity);
+			dsb.processColumnValues(entity);
+		}
+		dsb.build();
+//		KVEntry<String, List<Object[]>> kv = new KVEntry<String, List<Object[]>>(dsb.getSql(), dsb.getValues());
+//		JdbcStatementContext<List<Object[]>> context = SqlBuilderJdbcStatementContext.create(dsb.getSql(), dsb); 
+		return dsb;
+	}
 	
-	private void vailidateEntity(Object entity, Class<?> validateGroup){
+	private void vailidateEntity(Object entity, Class<?>... validateGroup){
 		if(this.entityValidator!=null){
 			this.entityValidator.validate(entity);
 			this.entityValidator.validate(entity, validateGroup);

@@ -59,7 +59,7 @@ public class DbmBatchInsertEventListener extends DbmInsertEventListener{
 			List<Object> list = LangUtils.asList(entity);
 			for(Object en : list){
 //				id = generatedIdentifyBeforeInsert(event, entry);
-				setIdIfNecessary(event, entry, en);
+				setIdIfNecessary(event.getEventSource(), entry, en);
 //				entry.setId(en, id);
 			}
 		}

@@ -71,6 +71,8 @@ public interface DbmMappedEntry extends DbmMappedEntryMeta {
 //	JdbcStatementContext<Object[]> makeLockSelect(Object object, LockInfo lock);
 	
 	JdbcStatementContext<List<Object[]>> makeInsert(Object entity);
+	
+	JdbcStatementContext<List<Object[]>> makeMysqlInsertOrUpdate(Object entity);
 
 	/***
 	 * make delete by id
