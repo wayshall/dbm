@@ -14,7 +14,6 @@ import org.onetwo.common.db.sql.SequenceNameManager;
 import org.onetwo.common.db.sqlext.SQLSymbolManager;
 import org.onetwo.common.db.sqlext.SelectExtQuery;
 import org.onetwo.common.utils.Assert;
-import org.onetwo.common.utils.LangUtils;
 import org.onetwo.common.utils.Page;
 import org.onetwo.dbm.core.spi.DbmInnerServiceRegistry;
 import org.onetwo.dbm.core.spi.DbmSession;
@@ -22,6 +21,7 @@ import org.onetwo.dbm.core.spi.DbmSessionFactory;
 import org.onetwo.dbm.core.spi.DbmTransaction;
 import org.onetwo.dbm.dialet.DBDialect;
 import org.onetwo.dbm.event.internal.DbmSessionEventSource;
+import org.onetwo.dbm.event.spi.DbmBatchInsertEvent;
 import org.onetwo.dbm.event.spi.DbmDeleteEvent;
 import org.onetwo.dbm.event.spi.DbmDeleteEvent.DeleteType;
 import org.onetwo.dbm.event.spi.DbmEventAction;
@@ -249,9 +249,7 @@ public class DbmSessionImpl extends AbstractDbmSession implements DbmSessionEven
 	@Override
 	public <T> int batchInsert(Collection<T> entities){
 //		Assert.notNull(entities);
-		DbmInsertEvent event = new DbmInsertEvent(entities, this);
-		event.setAction(DbmEventAction.batchInsert);
-//		this.fireBatchInsertEvent(event);
+		DbmBatchInsertEvent event = new DbmBatchInsertEvent(entities, this);
 		this.fireEvents(event);
 		return event.getUpdateCount();
 	}
@@ -270,6 +268,14 @@ public class DbmSessionImpl extends AbstractDbmSession implements DbmSessionEven
 		event.setDynamicUpdate(false);
 		event.setAction(DbmEventAction.batchUpdate);
 		event.setBatchSize(batSize);
+		this.fireEvents(event);
+		return event.getUpdateCount();
+	}
+	
+	public <T> int batchInsertOrUpdate(Collection<T> entities, Integer batchSize) {
+		DbmBatchInsertEvent event = new DbmBatchInsertEvent(entities, this);
+		event.setAction(DbmEventAction.batchInsertOrUpdate);
+		event.setBatchSize(batchSize);
 		this.fireEvents(event);
 		return event.getUpdateCount();
 	}

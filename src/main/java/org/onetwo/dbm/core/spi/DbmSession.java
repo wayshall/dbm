@@ -132,6 +132,18 @@ public interface DbmSession {
 	@DbmJdbcOperationMark(type=DbmJdbcOperationType.BATCH_INSERT)
 	public <T> int batchInsert(Collection<T> entities);
 	
+	/***
+	 * 目前只支持mysql
+	 * 批量插入或更新，触发的是batchInsert事件
+	 * @author weishao zeng
+	 * @param <T>
+	 * @param entities
+	 * @param batchSize 每次批量提交的数量
+	 * @return
+	 */
+	@DbmJdbcOperationMark(type=DbmJdbcOperationType.BATCH_INSERT)
+	<T> int batchInsertOrUpdate(Collection<T> entities, Integer batchSize);
+	
 	/*****
 	 * 批量更新<br/>
 	 * 更新实体的所有字段，非动态更新。
@@ -141,6 +153,14 @@ public interface DbmSession {
 	@DbmJdbcOperationMark(type=DbmJdbcOperationType.BATCH_UPDATE)
 	public <T> int batchUpdate(Collection<T> entities);
 	
+	/***
+	 * 
+	 * @author weishao zeng
+	 * @param <T>
+	 * @param entities
+	 * @param batchSize 批量处理时，每次提交的数据量
+	 * @return
+	 */
 	@DbmJdbcOperationMark(type=DbmJdbcOperationType.BATCH_UPDATE)
 	public <T> int batchUpdate(Collection<T> entities, int batchSize);
 

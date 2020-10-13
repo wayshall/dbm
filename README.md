@@ -1333,9 +1333,23 @@ public class CustomDaoTest {
 
 ## 批量插入
 
-### 使用DbmRepository查询批量插入
 在mybatis里，批量插入非常麻烦，我见过有些人甚至使用for循环生成value语句来批量插入的，这种方法插入的数据量如果很大，生成的sql语句以吨计，如果用jdbc接口执行这条语句，系统必挂无疑。   
-在dbm里，使用批量接口很简单。   
+在dbm里，批量插入有几种方式。
+
+- 注意，批量操作不会触发 DbmEntityListener 接口的回调
+
+### 使用session接口的批量插入接口
+```java   
+List<UserEntity> userList = new ArrayList<>();
+userList.add(user);
+...
+baseEntityManager.getSessionFactory().getSession().batchInsert(userList)
+
+```
+
+### 使用DbmRepository查询批量插入
+在dbm里，使用编写sql的方式批量接口很简单。   
+
 定义接口：   
 ```java   
 
@@ -1345,12 +1359,34 @@ public interface UserAutoidDao {
 }
 
 ```
-定义sql：     
-![batcchInsert](doc/sql.batcchInsert.jpg)
+
+然后定义sql：     
+
+```sql
+
+/*****
+ * @name: batchInsert
+ * 批量插入     */
+    insert 
+    into
+        test_user_autoid
+        (birthday, email, gender, mobile, nick_name, password, status, user_name) 
+    values
+        (:birthday, :email, :gender, :mobile, :nickName, :password?encrypt, :status.value, :userName)
 
 
+```
 
-搞掂！   
+### 批量插入或更新
+dbm也利用了mysql的on duplicate key update语法，支持批量插入或更新：
+```java   
+List<UserEntity> userList = new ArrayList<>();
+userList.add(user);
+...
+baseEntityManager.getSessionFactory().getSession().batchInsertOrUpdate(userList, 10000)
+
+```
+
 
 ## 其它映射特性
 

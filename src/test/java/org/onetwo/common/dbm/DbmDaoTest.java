@@ -76,11 +76,11 @@ public class DbmDaoTest extends DbmBaseTest {
 	}
 	
 	@Test
-	public void testInsertList(){
+	public void testBatchInsertList(){
 		int insertCount = 1000;
 		TimeCounter t = new TimeCounter("testInsertList");
 		t.start();
-		this.noAutoIdUserService.insertList(startId, insertCount);	
+		this.noAutoIdUserService.batchInsertUser(startId, insertCount);	
 		t.stop();
 		
 		noAutoIdUserService.deleteAll();
