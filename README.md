@@ -1017,6 +1017,14 @@ set  指令与where指令类似，只是@str指令的包装，用于sql更新语
         id = :query.id
 ```
 
+### dateRange
+
+```sql
+        // 以天（date）为间隔，遍历输出从10月1日到11日（不包含）的日期，日期按照format格式化为字符串，format参数不写，则dateVar为Date类型对象
+   [@dateRange from='2014-10-01' to='2014-10-11' type='date' format='yyyyMMdd' joiner=' or '; dateVar, index]
+        t.date = '${dateVar}'
+   [/@dateRange]
+```
 
 ### 其他特性
 
