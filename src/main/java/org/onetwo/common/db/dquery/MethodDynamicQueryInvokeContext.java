@@ -7,6 +7,7 @@ import java.util.Map;
 import org.onetwo.common.db.dquery.annotation.BatchObject;
 import org.onetwo.common.db.spi.NamedQueryInfo;
 import org.onetwo.common.db.spi.QueryProvideManager;
+import org.onetwo.common.db.spi.SqlTemplateParser;
 import org.onetwo.common.exception.BaseException;
 import org.onetwo.common.utils.LangUtils;
 import org.springframework.util.Assert;
@@ -34,6 +35,14 @@ public class MethodDynamicQueryInvokeContext implements NamedQueryInvokeContext 
 	public NamedQueryInfo getNamedQueryInfo() {
 		return namedQueryInfo;
 	}
+	
+	public SqlTemplateParser getDynamicSqlTemplateParser() {
+		SqlTemplateParser parser = dynamicMethod.getDynamicSqlTemplateParser();
+		if (parser==null) {
+			parser = queryProvideManager.getFileNamedQueryManager().getNamedSqlFileManager().getSqlStatmentParser();
+		}
+		return parser;
+	}
 
 	void setNamedQueryInfo(NamedQueryInfo namedQueryInfo) {
 		this.namedQueryInfo = namedQueryInfo;
@@ -46,7 +55,7 @@ public class MethodDynamicQueryInvokeContext implements NamedQueryInvokeContext 
 
 	public String getQueryName() {
 		Object dispatcher = getQueryMatcherValue();
-		String queryName = dynamicMethod.getQueryName();
+		String queryName = dynamicMethod.getQueryName(parameterValues);
 		if(dispatcher!=null){
 			Assert.notNull(dispatcher, "dispatcher can not be null!");
 			return queryName + "(" + dispatcher+")";

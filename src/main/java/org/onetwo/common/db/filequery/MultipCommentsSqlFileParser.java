@@ -6,7 +6,7 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.onetwo.common.db.filequery.SimpleSqlFileLineLexer.LineToken;
 import org.onetwo.common.db.spi.NamedQueryFile;
-import org.onetwo.common.db.spi.NamedQueryInfo;
+import org.onetwo.common.db.spi.FileBaseNamedQueryInfo;
 import org.onetwo.common.db.spi.NamedQueryInfoParser;
 import org.onetwo.common.db.spi.QueryConfigData;
 import org.onetwo.common.db.spi.QueryContextVariable.QueryGlobalVariable;
@@ -154,18 +154,18 @@ public class MultipCommentsSqlFileParser implements NamedQueryInfoParser {
 		//name
 		//没有发现 @name 属性的注释，抛错……
 //		String name = config.getAndThrowIfEmpty(DbmNamedFileQueryInfo.NAME_KEY);
-		String name = config.getProperty(NamedQueryInfo.NAME_KEY);
+		String name = config.getProperty(FileBaseNamedQueryInfo.NAME_KEY);
 		//没有发现 @name 属性的注释，忽略
 		if(StringUtils.isBlank(name)){
 			scanSqlContent(lineLexer);
 			return ;
 		}
-		config.remove(NamedQueryInfo.NAME_KEY);
+		config.remove(FileBaseNamedQueryInfo.NAME_KEY);
 		
-		NamedQueryInfo bean = namespaceInfo.getNamedProperty(name);
+		FileBaseNamedQueryInfo bean = namespaceInfo.getNamedProperty(name);
 		String sqlPropertyName = "value";
 		if(bean==null){
-			bean = new NamedQueryInfo();
+			bean = new FileBaseNamedQueryInfo();
 			bean.setDbmNamedQueryFile(namespaceInfo);
 			bean.setSrcfile(f);
 			bean.setQueryConfig(createQueryConfigData());
@@ -176,9 +176,9 @@ public class MultipCommentsSqlFileParser implements NamedQueryInfoParser {
 			namespaceInfo.put(bean.getName(), bean, true);
 
 			//别名
-			if(config.containsKey(NamedQueryInfo.ALIAS_KEY)){
-				bean.setAliasList(config.getStringList(NamedQueryInfo.ALIAS_KEY, ","));
-				config.remove(NamedQueryInfo.ALIAS_KEY);
+			if(config.containsKey(FileBaseNamedQueryInfo.ALIAS_KEY)){
+				bean.setAliasList(config.getStringList(FileBaseNamedQueryInfo.ALIAS_KEY, ","));
+				config.remove(FileBaseNamedQueryInfo.ALIAS_KEY);
 			}
 			
 			/*if(config.containsKey(JFishNamedFileQueryInfo.MATCHER_KEY)){
@@ -188,23 +188,23 @@ public class MultipCommentsSqlFileParser implements NamedQueryInfoParser {
 				config.remove(JFishNamedFileQueryInfo.MATCHER_KEY);
 				
 			}*/
-			if(config.containsKey(NamedQueryInfo.PROPERTY_KEY)
-					|| config.containsKey(NamedQueryInfo.FRAGMENT_KEY)){
+			if(config.containsKey(FileBaseNamedQueryInfo.PROPERTY_KEY)
+					|| config.containsKey(FileBaseNamedQueryInfo.FRAGMENT_KEY)){
 				throw new FileNamedQueryException("no parent query["+bean.getName()+"] found, the @property or @fragment tag must defined in a subquery, near at "
 						+ "line : " + lineLexer.getLineReader().getLineNumber());
 			}
 		}else{
-			if(config.containsKey(NamedQueryInfo.PROPERTY_KEY)){
+			if(config.containsKey(FileBaseNamedQueryInfo.PROPERTY_KEY)){
 				//property:propertyName
-				sqlPropertyName = config.getProperty(NamedQueryInfo.PROPERTY_KEY);
-				config.remove(NamedQueryInfo.PROPERTY_KEY);
+				sqlPropertyName = config.getProperty(FileBaseNamedQueryInfo.PROPERTY_KEY);
+				config.remove(FileBaseNamedQueryInfo.PROPERTY_KEY);
 				
-			}else if(config.containsKey(NamedQueryInfo.FRAGMENT_KEY)){
+			}else if(config.containsKey(FileBaseNamedQueryInfo.FRAGMENT_KEY)){
 				//fragment[fragmentValue]=sql
-				sqlPropertyName = NamedQueryInfo.FRAGMENT_KEY + "[" + 
-															config.getProperty(NamedQueryInfo.FRAGMENT_KEY)
+				sqlPropertyName = FileBaseNamedQueryInfo.FRAGMENT_KEY + "[" + 
+															config.getProperty(FileBaseNamedQueryInfo.FRAGMENT_KEY)
 																	+ "]";
-				config.remove(NamedQueryInfo.FRAGMENT_KEY);
+				config.remove(FileBaseNamedQueryInfo.FRAGMENT_KEY);
 				
 			}else{
 				throw new FileNamedQueryException("named query["+name+"]'s  must be specify a @property or @fragment."
@@ -284,8 +284,8 @@ public class MultipCommentsSqlFileParser implements NamedQueryInfoParser {
 	}
 	
 	protected void setNamedInfoProperty(BeanWrapper beanBw, String prop, Object val){
-		if(prop.indexOf(NamedQueryInfo.DOT_KEY)!=-1){
-			prop = org.onetwo.common.utils.StringUtils.toCamel(prop, NamedQueryInfo.DOT_KEY, false);
+		if(prop.indexOf(FileBaseNamedQueryInfo.DOT_KEY)!=-1){
+			prop = org.onetwo.common.utils.StringUtils.toCamel(prop, FileBaseNamedQueryInfo.DOT_KEY, false);
 		}
 		beanBw.setPropertyValue(prop, val);
 		/*try {

@@ -17,10 +17,10 @@ import org.onetwo.common.db.spi.NamedQueryInfo;
 import org.onetwo.common.db.spi.QueryProvideManager;
 import org.onetwo.common.db.spi.QueryWrapper;
 import org.onetwo.common.db.spi.SqlParamterPostfixFunctionRegistry;
+import org.onetwo.common.db.spi.SqlTemplateParser;
 import org.onetwo.common.db.sql.QueryOrderByable;
 import org.onetwo.common.db.sqlext.ExtQueryUtils;
 import org.onetwo.common.spring.SpringUtils;
-import org.onetwo.common.spring.ftl.TemplateParser;
 import org.onetwo.common.utils.ArrayUtils;
 import org.onetwo.common.utils.Assert;
 import org.onetwo.common.utils.CUtils;
@@ -51,7 +51,7 @@ public class DefaultFileQueryWrapper extends AbstractQueryWrapper implements Que
 	protected Class<?> resultClass;
 	
 	protected NamedQueryInfo info;
-	private TemplateParser parser;
+	private SqlTemplateParser parser;
 	private ParserContext parserContext;
 	
 	private String[] ascFields;
@@ -63,7 +63,7 @@ public class DefaultFileQueryWrapper extends AbstractQueryWrapper implements Que
 		this.invokeContext = invokeContext;
 		this.queryProvideManager = invokeContext.getQueryProvideManager();
 		this.countQuery = count;
-		this.parser = queryProvideManager.getFileNamedQueryManager().getNamedSqlFileManager().getSqlStatmentParser();
+		this.parser = invokeContext.getDynamicSqlTemplateParser();
 		
 		this.info = invokeContext.getNamedQueryInfo();
 		this.resultClass = invokeContext.getDynamicMethod().getComponentClass();

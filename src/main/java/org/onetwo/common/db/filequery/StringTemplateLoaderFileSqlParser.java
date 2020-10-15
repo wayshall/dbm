@@ -1,31 +1,34 @@
 package org.onetwo.common.db.filequery;
 
+import java.io.StringWriter;
 import java.util.Map.Entry;
 
 import org.onetwo.common.db.filequery.directive.SetDirective;
 import org.onetwo.common.db.filequery.directive.WhereDirective;
+import org.onetwo.common.db.spi.FileBaseNamedQueryInfo;
 import org.onetwo.common.db.spi.NamedQueryFile;
 import org.onetwo.common.db.spi.NamedQueryFileListener;
-import org.onetwo.common.db.spi.NamedQueryInfo;
+import org.onetwo.common.db.spi.SqlTemplateParser;
 import org.onetwo.common.propconf.ResourceAdapter;
 import org.onetwo.common.spring.ftl.AbstractFreemarkerTemplateConfigurer;
 import org.onetwo.common.spring.ftl.DateRangeDirective;
-import org.onetwo.common.spring.ftl.DefaultTemplateParser;
 import org.onetwo.common.spring.ftl.ForeachDirective;
 import org.onetwo.common.spring.ftl.StrDirective;
-import org.onetwo.common.spring.ftl.TemplateParser;
+import org.onetwo.dbm.exception.DbmException;
 
 import freemarker.cache.StringTemplateLoader;
 import freemarker.cache.TemplateLoader;
 import freemarker.template.Configuration;
+import freemarker.template.Template;
+import freemarker.template.TemplateException;
 
-public class StringTemplateLoaderFileSqlParser extends AbstractFreemarkerTemplateConfigurer implements TemplateParser, NamedQueryFileListener {
+public class StringTemplateLoaderFileSqlParser extends AbstractFreemarkerTemplateConfigurer implements SqlTemplateParser, NamedQueryFileListener {
 
 //	public static final String QUERY_POSTFIX = ".query";//for ftl
 	
 //	private JFishNamedSqlFileManager<T> sqlManager;
 	private StringTemplateLoader templateLoader;
-	final private TemplateParser parser;
+//	final private TemplateParser parser;
 	
 	
 	public StringTemplateLoaderFileSqlParser() {
@@ -39,15 +42,32 @@ public class StringTemplateLoaderFileSqlParser extends AbstractFreemarkerTemplat
 		addDirective(new SetDirective());
 		this.templateLoader = new StringTemplateLoader();
 		
-		DefaultTemplateParser p = new DefaultTemplateParser(this);
+//		DefaultTemplateParser p = new DefaultTemplateParser(this);
 		
-		parser = p;
+//		parser = p;
 	}
 	
 
 	@Override
-	public String parse(String name, Object context) {
-		return parser.parse(name, context);
+	public String parseSql(String name, Object context) {
+//		return parser.parse(name, context);
+
+		Template template = getTemplate(name);
+		StringWriter sw = new StringWriter();
+		try {
+			template.process(context, sw);
+		} catch (TemplateException e) {
+			e.printStackTrace();
+			Throwable cause = e.getCause();
+			if(cause!=null){
+				throw new DbmException("parse sql tempalte error : " + cause.getMessage(), cause);
+			}else{
+				throw new DbmException("parse sql tempalte error : " + e.getMessage(), e);
+			}
+		} catch (Exception e) {
+			throw new DbmException("parse sql tempalte error : " + e.getMessage(), e);
+		}
+		return sw.toString();
 	}
 
 
@@ -80,7 +100,7 @@ public class StringTemplateLoaderFileSqlParser extends AbstractFreemarkerTemplat
 
 
 	private void putTemplateByNamespaceInfo(NamedQueryFile namespace){
-		for(NamedQueryInfo info : namespace.getNamedProperties()){
+		for(FileBaseNamedQueryInfo info : namespace.getNamedProperties()){
 			if(logger.isInfoEnabled()){
 				logger.info("put query template: {}", info.getFullName());
 			}

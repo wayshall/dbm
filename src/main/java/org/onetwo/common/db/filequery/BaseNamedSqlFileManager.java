@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Stream;
 
+import org.onetwo.common.db.spi.FileBaseNamedQueryInfo;
 import org.onetwo.common.db.spi.NamedQueryFile;
 import org.onetwo.common.db.spi.NamedQueryFileListener;
 import org.onetwo.common.db.spi.NamedQueryInfo;
@@ -48,7 +49,7 @@ abstract public class BaseNamedSqlFileManager implements NamedSqlFileManager {
 	private Map<String, NamedQueryFile> namespaceProperties = Maps.newHashMap();
 //	private List<Properties> sqlfiles;
 //	private PropertiesWraper wrapper;
-	private Map<String, NamedQueryInfo> namedQueryCache = Maps.newConcurrentMap();
+	private Map<String, FileBaseNamedQueryInfo> namedQueryCache = Maps.newConcurrentMap();
 //	private DbmNamedQueryInfoParser sqlFileParser = new DefaultSqlFileParser();
 	private List<NamedQueryInfoParser> queryInfoParsers = Lists.newArrayList(new DefaultSqlFileParser());
 	final private NamedQueryFileListener listener;
@@ -205,7 +206,7 @@ abstract public class BaseNamedSqlFileManager implements NamedSqlFileManager {
 			return null;*/
 
 //		namespacesMap.put(namespace, np);
-		for(NamedQueryInfo nsp : namespaceInfo.getNamedProperties()){
+		for(FileBaseNamedQueryInfo nsp : namespaceInfo.getNamedProperties()){
 			if(namedQueryCache.containsKey(nsp.getFullName()) && throwIfExist){
 				throw new FileNamedQueryException("cache file named query error, key is exists : " + nsp.getFullName());
 			}
@@ -215,7 +216,7 @@ abstract public class BaseNamedSqlFileManager implements NamedSqlFileManager {
 		return namespaceInfo;
 	}
 	
-	protected void putIntoCaches(String key, NamedQueryInfo nsp){
+	protected void putIntoCaches(String key, FileBaseNamedQueryInfo nsp){
 		logger.info("cache query : {}", key);
 		this.namedQueryCache.put(key, nsp);
 	}
@@ -257,7 +258,7 @@ abstract public class BaseNamedSqlFileManager implements NamedSqlFileManager {
 	}*/
 	@Override
 	public NamedQueryInfo getNamedQueryInfo(String fullname) {
-		NamedQueryInfo info = namedQueryCache.get(fullname);
+		FileBaseNamedQueryInfo info = namedQueryCache.get(fullname);
 		return info;
 	}
 
@@ -297,7 +298,7 @@ abstract public class BaseNamedSqlFileManager implements NamedSqlFileManager {
 	public static class CommonNamespaceProperties implements NamedQueryFile {
 		private final String namespace;
 		private ResourceAdapter<?> source;
-		private Map<String, NamedQueryInfo> dbmNamedQueryInfoMap;
+		private Map<String, FileBaseNamedQueryInfo> dbmNamedQueryInfoMap;
 		
 		public CommonNamespaceProperties(String namespace){
 			this.namespace = namespace;
@@ -325,7 +326,7 @@ abstract public class BaseNamedSqlFileManager implements NamedSqlFileManager {
 		}
 
 		@Override
-		public Collection<NamedQueryInfo> getNamedProperties() {
+		public Collection<FileBaseNamedQueryInfo> getNamedProperties() {
 			return ImmutableList.copyOf(dbmNamedQueryInfoMap.values());
 		}
 
@@ -333,21 +334,21 @@ abstract public class BaseNamedSqlFileManager implements NamedSqlFileManager {
 			return source;
 		}
 		@Override
-		public NamedQueryInfo getNamedProperty(String name) {
+		public FileBaseNamedQueryInfo getNamedProperty(String name) {
 			return dbmNamedQueryInfoMap.get(name);
 		}
 		@Override
-		public void addAll(Map<String, NamedQueryInfo> namedInfos, boolean throwIfExist) {
-			for(Entry<String, NamedQueryInfo> entry : namedInfos.entrySet()){
+		public void addAll(Map<String, FileBaseNamedQueryInfo> namedInfos, boolean throwIfExist) {
+			for(Entry<String, FileBaseNamedQueryInfo> entry : namedInfos.entrySet()){
 				put(entry.getKey(), entry.getValue(), throwIfExist);
 			}
 		}
 		@Override
-		public void put(String name, NamedQueryInfo info, boolean throwIfExist) {
+		public void put(String name, FileBaseNamedQueryInfo info, boolean throwIfExist) {
 			Assert.hasText(name);
 			Assert.notNull(info);
 			if(throwIfExist && this.dbmNamedQueryInfoMap.containsKey(name)){
-				NamedQueryInfo exitProp = this.dbmNamedQueryInfoMap.get(name);
+				FileBaseNamedQueryInfo exitProp = this.dbmNamedQueryInfoMap.get(name);
 				throw new BaseException("int file["+info.getSrcfile()+"], sql key["+name+"] has already exist in namespace: " + namespace+", in file: "+ exitProp.getSrcfile());
 			}
 			this.dbmNamedQueryInfoMap.put(name, info);

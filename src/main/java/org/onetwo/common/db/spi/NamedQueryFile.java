@@ -8,10 +8,10 @@ import org.onetwo.common.propconf.ResourceAdapter;
 public interface NamedQueryFile {
 	public String getKey();
 	public String getNamespace();
-	public Collection<NamedQueryInfo> getNamedProperties();
-	public NamedQueryInfo getNamedProperty(String name);
-	public void addAll(Map<String, NamedQueryInfo> namedInfos, boolean throwIfExist);
-	public void put(String name, NamedQueryInfo info, boolean throwIfExist);
+	public Collection<FileBaseNamedQueryInfo> getNamedProperties();
+	public FileBaseNamedQueryInfo getNamedProperty(String name);
+	public void addAll(Map<String, FileBaseNamedQueryInfo> namedInfos, boolean throwIfExist);
+	public void put(String name, FileBaseNamedQueryInfo info, boolean throwIfExist);
 	boolean isGlobal();
 	
 	public ResourceAdapter<?> getSource();

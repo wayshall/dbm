@@ -4,17 +4,25 @@ import java.util.Map;
 
 import org.onetwo.common.db.spi.NamedQueryInfo;
 import org.onetwo.common.db.spi.QueryProvideManager;
+import org.onetwo.common.db.spi.SqlTemplateParser;
 
 public interface NamedQueryInvokeContext {
 
-	public String getQueryName();
+	String getQueryName();
 	
-	public Map<Object, Object> getParsedParams();
+	Map<Object, Object> getParsedParams();
 	
-	public DynamicMethod getDynamicMethod();
+	DynamicMethod getDynamicMethod();
 	
-	public QueryProvideManager getQueryProvideManager();
+	QueryProvideManager getQueryProvideManager();
 	
-	public NamedQueryInfo getNamedQueryInfo();
+	NamedQueryInfo getNamedQueryInfo();
+	
+	/***
+	 * 获取自定义动态sql模板解释器
+	 * @author weishao zeng
+	 * @return
+	 */
+	SqlTemplateParser getDynamicSqlTemplateParser();
 	
 }

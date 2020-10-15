@@ -18,20 +18,22 @@ import org.onetwo.common.db.dquery.annotation.BatchObject;
 import org.onetwo.common.db.dquery.annotation.ExecuteUpdate;
 import org.onetwo.common.db.dquery.annotation.Param;
 import org.onetwo.common.db.dquery.annotation.QueryDispatcher;
+import org.onetwo.common.db.dquery.annotation.QueryName;
 import org.onetwo.common.db.filequery.JNamedQueryKey;
 import org.onetwo.common.db.spi.QueryConfigData;
 import org.onetwo.common.db.spi.QueryWrapper;
+import org.onetwo.common.db.spi.SqlTemplateParser;
 import org.onetwo.common.db.sqlext.ExtQueryUtils;
 import org.onetwo.common.proxy.AbstractMethodResolver;
 import org.onetwo.common.proxy.BaseMethodParameter;
 import org.onetwo.common.reflect.ReflectUtils;
-import org.onetwo.common.spring.ftl.TemplateParser;
 import org.onetwo.common.utils.LangUtils;
 import org.onetwo.common.utils.Page;
 import org.onetwo.common.utils.PageRequest;
 import org.onetwo.common.utils.StringUtils;
 import org.onetwo.dbm.exception.FileNamedQueryException;
 import org.onetwo.dbm.mapping.DbmEnumValueMapping;
+import org.onetwo.dbm.utils.DbmUtils;
 import org.springframework.core.MethodParameter;
 
 
@@ -69,9 +71,10 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 	 * TODO
 	 * 新增支持自定义解释器？
 	 * 用于自定义从其它地方（非sql文件，比如数据之类）加载sql模板？
-	 * 在注解QueryTemplateParser指定自定义的TemplateParser？
+	 * 在注解QueryName指定自定义的TemplateParser？
 	 */
-	private TemplateParser parser;
+	private SqlTemplateParser dynamicSqlTemplateParser;
+	private DynamicMethodParameter queryNameParameter;
 	
 	public DynamicMethod(Method method){
 		super(method);
@@ -80,6 +83,8 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 
 		//check query swither
 		checkAndFindQuerySwitch(parameters);
+		// check queryName paramter
+		checkAndFindQueryNameParameter(parameters);
 		
 //		Class<?> returnClass = method.getReturnType();
 		Class<?> returnClass = getActualReturnType();
@@ -223,10 +228,35 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 						.orElse(null);
 	}
 	
+	private void checkAndFindQueryNameParameter(List<DynamicMethodParameter> parameters){
+		this.queryNameParameter = parameters.stream().filter(p->{
+								if(p.hasParameterAnnotation(QueryName.class)){
+									if(p.getParameterType()!=String.class){
+										throw new FileNamedQueryException("@" + QueryName.class.getSimpleName() + " parameter type must be String.");
+									}
+									return true;
+								}
+								return false;
+							})
+						.findFirst()
+						.orElse(null);
+		if (this.queryNameParameter!=null) {
+			QueryName queryNameAnno = this.queryNameParameter.getParameterAnnotation(QueryName.class);
+			if (queryNameAnno.templateParser()!=SqlTemplateParser.class) {
+				this.dynamicSqlTemplateParser = DbmUtils.createDbmBean(queryNameAnno.templateParser());
+			}
+		}
+	}
+	
 	public boolean isAsCountQuery(){
 		return asCountQuery!=null;
 	}
 	
+	
+	public SqlTemplateParser getDynamicSqlTemplateParser() {
+		return dynamicSqlTemplateParser;
+	}
+
 	@Override
 	protected DynamicMethodParameter createMethodParameter(Method method, int parameterIndex, Parameter parameter) {
 		return new DynamicMethodParameter(method, parameterIndex, parameter);
@@ -241,6 +271,14 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 		}
 	}
 
+	public String getQueryName(Object[] args) {
+		if (this.queryNameParameter!=null) {
+			String qname = (String)args[queryNameParameter.getParameterIndex()];
+			return qname;
+		}
+		return queryName;
+	}
+	
 	protected boolean judgeBatchUpdateFromParameterObjects(List<DynamicMethodParameter> mparameters){
 		for(DynamicMethodParameter mp : mparameters){
 			if(mp.hasParameterAnnotation(BatchObject.class)){
@@ -420,10 +458,6 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 
 	public Class<?> getComponentClass() {
 		return componentClass;
-	}
-
-	public String getQueryName() {
-		return queryName;
 	}
 	
 	public boolean isExecuteUpdate(){

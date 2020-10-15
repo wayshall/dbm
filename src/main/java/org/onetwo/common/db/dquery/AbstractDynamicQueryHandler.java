@@ -110,8 +110,14 @@ abstract public class AbstractDynamicQueryHandler implements DynamicQueryHandler
 	
 	private Object invokeWithInterceptor(Object proxy, DynamicMethod dmethod, Object[] args){
 		MethodDynamicQueryInvokeContext invokeContext = new MethodDynamicQueryInvokeContext(em, dmethod, args);
-		NamedQueryInfo namedQueryInfo = getNamedQueryInfo(invokeContext);
-		invokeContext.setNamedQueryInfo(namedQueryInfo);
+		
+		if (dmethod.getDynamicSqlTemplateParser()==null) {
+			NamedQueryInfo namedQueryInfo = getNamedQueryInfo(invokeContext);
+			if(namedQueryInfo==null) {
+				throw new FileNamedQueryException("namedQuery not found : " + invokeContext.getQueryName());
+			}
+			invokeContext.setNamedQueryInfo(namedQueryInfo);
+		}
 		
 		Collection<DbmInterceptor> interceptors = this.em.getRepositoryInterceptors();
 		if(interceptors.isEmpty()){
@@ -156,7 +162,7 @@ abstract public class AbstractDynamicQueryHandler implements DynamicQueryHandler
 //		JFishNamedFileQueryInfo parsedQueryName = (JFishNamedFileQueryInfo) em.getFileNamedQueryManager().getNamedQueryInfo(invokeContext);
 
 		if(logger.isDebugEnabled()){
-			logger.debug("{}: {}", dmethod.getQueryName(), LangUtils.toString(args));
+			logger.debug("{}: {}", dmethod.getQueryName(args), LangUtils.toString(args));
 		}
 		
 		Object result = null;
