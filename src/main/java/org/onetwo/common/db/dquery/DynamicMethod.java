@@ -25,6 +25,7 @@ import org.onetwo.common.db.sqlext.ExtQueryUtils;
 import org.onetwo.common.proxy.AbstractMethodResolver;
 import org.onetwo.common.proxy.BaseMethodParameter;
 import org.onetwo.common.reflect.ReflectUtils;
+import org.onetwo.common.spring.ftl.TemplateParser;
 import org.onetwo.common.utils.LangUtils;
 import org.onetwo.common.utils.Page;
 import org.onetwo.common.utils.PageRequest;
@@ -62,6 +63,15 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 	private DynamicMethodParameter dispatcherParamter;
 	
 	private QueryConfigData queryConfig;
+	
+	
+	/****
+	 * TODO
+	 * 新增支持自定义解释器？
+	 * 用于自定义从其它地方（非sql文件，比如数据之类）加载sql模板？
+	 * 在注解QueryTemplateParser指定自定义的TemplateParser？
+	 */
+	private TemplateParser parser;
 	
 	public DynamicMethod(Method method){
 		super(method);

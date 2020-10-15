@@ -1,6 +1,5 @@
 package org.onetwo.common.db.filequery;
 
-import java.util.Map;
 import java.util.Map.Entry;
 
 import org.onetwo.common.db.filequery.directive.SetDirective;
@@ -52,15 +51,18 @@ public class StringTemplateLoaderFileSqlParser extends AbstractFreemarkerTemplat
 	}
 
 
+//	@Override
+//	public void afterBuild(Map<String, NamedQueryFile> namespaceInfos, ResourceAdapter<?>... sqlfileArray) {
+//		this.initialize();
+//		for(NamedQueryFile namespace : namespaceInfos.values()){
+//			this.putTemplateByNamespaceInfo(namespace);
+//		}
+//	}
+
 	@Override
-	public void afterBuild(Map<String, NamedQueryFile> namespaceInfos, ResourceAdapter<?>... sqlfileArray) {
-		this.initialize();
-		for(NamedQueryFile namespace : namespaceInfos.values()){
-			this.putTemplateByNamespaceInfo(namespace);
-		}
+	public void afterBuild(ResourceAdapter<?> file, NamedQueryFile namepsaceInfo) {
+		this.putTemplateByNamespaceInfo(namepsaceInfo);
 	}
-
-
 
 
 	@Override
@@ -75,6 +77,8 @@ public class StringTemplateLoaderFileSqlParser extends AbstractFreemarkerTemplat
 		this.initialize();
 	}*/
 	
+
+
 	private void putTemplateByNamespaceInfo(NamedQueryFile namespace){
 		for(NamedQueryInfo info : namespace.getNamedProperties()){
 			if(logger.isInfoEnabled()){

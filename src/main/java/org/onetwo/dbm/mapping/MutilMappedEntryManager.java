@@ -176,7 +176,8 @@ public class MutilMappedEntryManager implements MappedEntryBuilder, MappedEntryM
 		} catch (DbmException e) {
 			throw e;
 		} catch (Exception e) {
-			throw new DbmException("find entry error: " + e.getMessage(), e);
+//			throw new DbmException("find entry error: " + e.getMessage(), e);
+			logger.error("find entry error: " + e.getMessage());
 		}
 		return null;
 	}

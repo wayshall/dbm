@@ -78,7 +78,7 @@ abstract public class BaseNamedSqlFileManager implements NamedSqlFileManager {
 		this.buildSqlFileMonitor(sqlFile);
 
 		if(this.listener!=null){
-			this.listener.afterReload(sqlFile, info);
+			this.listener.afterBuild(sqlFile, info);
 		}
 		/*logger.info("all named query : ");
 		for(T prop : this.namedQueryCache.values()){
