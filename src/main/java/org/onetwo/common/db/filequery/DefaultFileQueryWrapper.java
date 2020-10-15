@@ -66,7 +66,7 @@ public class DefaultFileQueryWrapper extends AbstractQueryWrapper implements Que
 		this.parser = invokeContext.getDynamicSqlTemplateParser();
 		
 		this.info = invokeContext.getNamedQueryInfo();
-		this.resultClass = invokeContext.getDynamicMethod().getComponentClass();
+		this.resultClass = invokeContext.getResultComponentClass();
 		if(countQuery){
 			this.resultClass = LangUtils.isIntegralType(resultClass)?resultClass:Long.class;
 		}

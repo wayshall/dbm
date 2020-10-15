@@ -1,9 +1,12 @@
-package org.onetwo.common.db.spi;
+package org.onetwo.common.db.filequery;
 
 import java.util.List;
 import java.util.Map;
 
-import org.onetwo.common.db.filequery.ParsedSqlUtils;
+import org.onetwo.common.db.spi.FileSqlParserType;
+import org.onetwo.common.db.spi.NamedQueryFile;
+import org.onetwo.common.db.spi.NamedQueryInfo;
+import org.onetwo.common.db.spi.QueryConfigData;
 import org.onetwo.common.db.sqlext.ExtQueryUtils;
 import org.onetwo.common.propconf.JFishProperties;
 import org.onetwo.common.propconf.ResourceAdapter;

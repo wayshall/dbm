@@ -99,4 +99,14 @@ public class MethodDynamicQueryInvokeContext implements NamedQueryInvokeContext 
 		return parsedParams;
 	}
 
+	/***
+	 * 获取方法返回类型的组件类型
+	 * 如：List<User> -> User.class
+	 * @author weishao zeng
+	 * @return
+	 */
+	public Class<?> getResultComponentClass() {
+		return dynamicMethod.getComponentClass(this.parameterValues);
+	}
+
 }

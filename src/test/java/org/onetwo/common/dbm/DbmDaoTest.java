@@ -41,6 +41,19 @@ public class DbmDaoTest extends DbmBaseTest {
 	
 	private int startId = 1;
 	
+	@Test
+	public void testQueryName() {
+		noAutoIdUserService.deleteAll();
+		int insertCount = 10;
+		this.noAutoIdUserService.insertWithStatus(startId, insertCount, UserStatus.STOP);
+		
+		int stopUserCount = userDao.countByStatus("countStop", UserStatus.STOP, int.class);
+		assertThat(stopUserCount).isEqualTo(insertCount);
+		
+		stopUserCount = userDao.countBySql("select count(1) from test_user t where  t.status = :status", UserStatus.STOP, int.class);
+		assertThat(stopUserCount).isEqualTo(insertCount);
+	}
+	
 
 
 	@Test

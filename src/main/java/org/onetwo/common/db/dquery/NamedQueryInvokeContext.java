@@ -25,4 +25,6 @@ public interface NamedQueryInvokeContext {
 	 */
 	SqlTemplateParser getDynamicSqlTemplateParser();
 	
+	Class<?> getResultComponentClass();
+	
 }

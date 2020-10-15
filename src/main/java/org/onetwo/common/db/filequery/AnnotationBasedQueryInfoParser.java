@@ -10,7 +10,6 @@ import java.util.stream.Stream;
 import org.onetwo.common.db.dquery.DbmSqlFileResource;
 import org.onetwo.common.db.dquery.annotation.Query;
 import org.onetwo.common.db.spi.NamedQueryFile;
-import org.onetwo.common.db.spi.FileBaseNamedQueryInfo;
 import org.onetwo.common.db.spi.NamedQueryInfoParser;
 import org.onetwo.common.db.spi.QueryConfigData;
 import org.onetwo.common.db.spi.QueryContextVariable;

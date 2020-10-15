@@ -3,6 +3,7 @@ package org.onetwo.common.db.spi;
 import java.util.Collection;
 import java.util.Map;
 
+import org.onetwo.common.db.filequery.FileBaseNamedQueryInfo;
 import org.onetwo.common.propconf.ResourceAdapter;
 
 public interface NamedQueryFile {

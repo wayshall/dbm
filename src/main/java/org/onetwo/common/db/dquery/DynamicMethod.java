@@ -1,6 +1,7 @@
 package org.onetwo.common.db.dquery;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.ParameterizedType;
@@ -19,7 +20,10 @@ import org.onetwo.common.db.dquery.annotation.ExecuteUpdate;
 import org.onetwo.common.db.dquery.annotation.Param;
 import org.onetwo.common.db.dquery.annotation.QueryDispatcher;
 import org.onetwo.common.db.dquery.annotation.QueryName;
+import org.onetwo.common.db.dquery.annotation.QueryResultType;
+import org.onetwo.common.db.dquery.annotation.Sql;
 import org.onetwo.common.db.filequery.JNamedQueryKey;
+import org.onetwo.common.db.filequery.TemplateNameIsSqlTemplateParser;
 import org.onetwo.common.db.spi.QueryConfigData;
 import org.onetwo.common.db.spi.QueryWrapper;
 import org.onetwo.common.db.spi.SqlTemplateParser;
@@ -68,13 +72,19 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 	
 	
 	/****
-	 * TODO
-	 * 新增支持自定义解释器？
+	 * 新增支持自定义解释器
 	 * 用于自定义从其它地方（非sql文件，比如数据之类）加载sql模板？
 	 * 在注解QueryName指定自定义的TemplateParser？
 	 */
 	private SqlTemplateParser dynamicSqlTemplateParser;
 	private DynamicMethodParameter queryNameParameter;
+	private DynamicMethodParameter sqlParameter;
+//	private DynamicMethodParameter dynamicQueryMetaProviderParameter;
+	
+	/***
+	 * 动态传入返回类型
+	 */
+	private DynamicMethodParameter resultTypeParameter;
 	
 	public DynamicMethod(Method method){
 		super(method);
@@ -82,14 +92,17 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 		this.checkAndSetExecuteType();
 
 		//check query swither
-		checkAndFindQuerySwitch(parameters);
+//		checkAndFindQuerySwitch(parameters);
 		// check queryName paramter
-		checkAndFindQueryNameParameter(parameters);
+//		checkAndFindQueryNameParameter(parameters);
+		checkAndFindSpecialParameters(parameters);
 		
 //		Class<?> returnClass = method.getReturnType();
+		// example: List
 		Class<?> returnClass = getActualReturnType();
-//		Class<?> compClass = ReflectUtils.getGenricType(method.getGenericReturnType(), 0);
+		// example: List<User> => User.class
 		Class<?> compClass = getActualComponentType();
+		
 		if(returnClass==void.class){
 //			DynamicMethodParameter firstParamter = parameters.get(0);
 //			pageParamter = dispatcherParamter!=null?parameters.get(1):parameters.get(0);
@@ -133,6 +146,11 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 		LangUtils.println("resultClass: ${0}, componentClass:${1}", resultClass, compClass);
 	}
 	
+	/***
+	 * 获取方法的返回类型，如果optional类型，则获取optional的泛型类型
+	 * @author weishao zeng
+	 * @return
+	 */
 	final public Class<?> getActualReturnType(){
 		Class<?> returnClass = method.getReturnType();
 		if(isReturnOptional()){
@@ -143,9 +161,12 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	final public Class<?> getActualComponentType(){
+		// 获取第一个泛型参数
 		Class compClass = ReflectUtils.getGenricType(method.getGenericReturnType(), 0);
 		if(isReturnOptional()){
+			// 如果是Optional类型，则获取Optional的实际类型
 			Optional<ParameterizedType> parameterizedType = ReflectUtils.getParameterizedType(method.getGenericReturnType(), 0);
+			// 获取该实际类型的第一个泛型参数
 			compClass = parameterizedType.map(ptype->{
 				return ReflectUtils.getGenricType(ptype, 0);
 			})
@@ -163,10 +184,10 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 	}
 	
 	private boolean findPagePrarameter(){
-		this.pageParamter = parameters.stream()
-				.filter(p->p.getParameterType()==Page.class)
-				.findAny()
-				.orElse(null);
+//		this.pageParamter = parameters.stream()
+//				.filter(p->p.getParameterType()==Page.class)
+//				.findAny()
+//				.orElse(null);
 		return this.pageParamter!=null;
 				/*.orElseThrow(()->{
 					return new FileNamedQueryException("no Page type parameter found for paginaton method: " + method.toGenericString());
@@ -174,10 +195,6 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 	}
 	
 	private boolean findPageRequestPrarameter(){
-		this.pageRequestParamter = parameters.stream()
-				.filter(p->PageRequest.class.isAssignableFrom(p.getParameterType()))
-				.findAny()
-				.orElse(null);
 		return this.pageRequestParamter!=null;
 				/*.orElseThrow(()->{
 					return new FileNamedQueryException("no Page type parameter found for paginaton method: " + method.toGenericString());
@@ -212,41 +229,87 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 		}
 	}
 	
-	private void checkAndFindQuerySwitch(List<DynamicMethodParameter> parameters){
-		this.dispatcherParamter = parameters.stream().filter(p->{
-								if(p.hasParameterAnnotation(QueryDispatcher.class)){
-									if(p.getParameterIndex()!=0){
-										throw new FileNamedQueryException("Dispatcher must be first parameter but actual index is " + (p.getParameterIndex()+1));
-									}/*else if(p.getParameterType()!=String.class){
-										throw new FileNamedQueryException("Dispatcher must be must be a String!");
-									}*/
-									return true;
-								}
-								return false;
-							})
-						.findFirst()
-						.orElse(null);
-	}
-	
-	private void checkAndFindQueryNameParameter(List<DynamicMethodParameter> parameters){
-		this.queryNameParameter = parameters.stream().filter(p->{
-								if(p.hasParameterAnnotation(QueryName.class)){
-									if(p.getParameterType()!=String.class){
-										throw new FileNamedQueryException("@" + QueryName.class.getSimpleName() + " parameter type must be String.");
-									}
-									return true;
-								}
-								return false;
-							})
-						.findFirst()
-						.orElse(null);
-		if (this.queryNameParameter!=null) {
-			QueryName queryNameAnno = this.queryNameParameter.getParameterAnnotation(QueryName.class);
-			if (queryNameAnno.templateParser()!=SqlTemplateParser.class) {
-				this.dynamicSqlTemplateParser = DbmUtils.createDbmBean(queryNameAnno.templateParser());
-			}
+
+	private void checkAndFindSpecialParameters(List<DynamicMethodParameter> parameters){
+		for (DynamicMethodParameter parameter : parameters) {
+			if (dispatcherParamter==null && parameter.hasParameterAnnotation(QueryDispatcher.class)){
+				if(parameter.getParameterIndex()!=0){
+					throw new FileNamedQueryException("Dispatcher must be first parameter but actual index is " + (parameter.getParameterIndex()+1));
+				}
+				dispatcherParamter = parameter;
+			} else if (queryNameParameter==null && parameter.hasParameterAnnotation(QueryName.class)) {
+				if(parameter.getParameterType()!=String.class){
+					throw new FileNamedQueryException("@" + QueryName.class.getSimpleName() + " parameter type must be String.");
+				}
+				QueryName queryNameAnno = parameter.getParameterAnnotation(QueryName.class);
+				if (queryNameAnno.templateParser()!=SqlTemplateParser.class) {
+					this.dynamicSqlTemplateParser = DbmUtils.createDbmBean(queryNameAnno.templateParser());
+				}
+				queryNameParameter = parameter;
+			} else if (sqlParameter==null && parameter.hasParameterAnnotation(Sql.class)) {
+				if(parameter.getParameterType()!=String.class){
+					throw new FileNamedQueryException("@" + Sql.class.getSimpleName() + " parameter type must be String.");
+				}
+//				Sql queryNameAnno = parameter.getParameterAnnotation(Sql.class);
+//				this.dynamicSqlTemplateParser = DbmUtils.createDbmBean(TemplateNameIsSqlTemplateParser.class);
+				this.dynamicSqlTemplateParser = TemplateNameIsSqlTemplateParser.INSTANCE;
+				this.sqlParameter = parameter;
+				this.queryNameParameter = parameter;
+			} else if (resultTypeParameter==null && parameter.hasParameterAnnotation(QueryResultType.class)) {
+				if(!(parameter.getParameterType() instanceof Class) && !parameter.getParameterType().isArray()){
+					throw new FileNamedQueryException("@" + QueryResultType.class.getSimpleName() + " parameter type must be Class or Array.");
+				}
+				resultTypeParameter = parameter;
+			} else if (PageRequest.class.isAssignableFrom(parameter.getParameterType())) {
+				this.pageRequestParamter = parameter;
+			} else if (PageRequest.class.isAssignableFrom(parameter.getParameterType())) {
+				this.pageRequestParamter = parameter;
+			} else if (Page.class.isAssignableFrom(parameter.getParameterType())) {
+				this.pageParamter = parameter;
+			} 
+//			else if (DynamicQueryMetaProvider.class.isAssignableFrom(parameter.getParameterType())) {
+//				this.dynamicQueryMetaProviderParameter = parameter;
+//			}
+			
 		}
 	}
+	
+//	private void checkAndFindQuerySwitch(List<DynamicMethodParameter> parameters){
+//		this.dispatcherParamter = parameters.stream().filter(p->{
+//								if(p.hasParameterAnnotation(QueryDispatcher.class)){
+//									if(p.getParameterIndex()!=0){
+//										throw new FileNamedQueryException("Dispatcher must be first parameter but actual index is " + (p.getParameterIndex()+1));
+//									}/*else if(p.getParameterType()!=String.class){
+//										throw new FileNamedQueryException("Dispatcher must be must be a String!");
+//									}*/
+//									return true;
+//								}
+//								return false;
+//							})
+//						.findFirst()
+//						.orElse(null);
+//	}
+//	
+//	private void checkAndFindQueryNameParameter(List<DynamicMethodParameter> parameters){
+//		this.queryNameParameter = parameters.stream().filter(p->{
+//								if(p.hasParameterAnnotation(QueryName.class)){
+//									if(p.getParameterType()!=String.class){
+//										throw new FileNamedQueryException("@" + QueryName.class.getSimpleName() + " parameter type must be String.");
+//									}
+//									return true;
+//								}
+//								return false;
+//							})
+//						.findFirst()
+//						.orElse(null);
+//		if (this.queryNameParameter!=null) {
+//			QueryName queryNameAnno = this.queryNameParameter.getParameterAnnotation(QueryName.class);
+//			if (queryNameAnno.templateParser()!=SqlTemplateParser.class) {
+//				this.dynamicSqlTemplateParser = DbmUtils.createDbmBean(queryNameAnno.templateParser());
+//			}
+//		}
+//	}
+	
 	
 	public boolean isAsCountQuery(){
 		return asCountQuery!=null;
@@ -277,6 +340,31 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 			return qname;
 		}
 		return queryName;
+	}
+
+
+	public Class<?> getResultClass(Object[] args) {
+		if (this.resultTypeParameter!=null) {
+			Object types = args[resultTypeParameter.getParameterIndex()];
+			if (types.getClass().isArray()) {
+				return (Class<?>)Array.get(types, 0);
+			} else {
+				return (Class<?>)types;
+			}
+		}
+		return resultClass;
+	}
+
+	public Class<?> getComponentClass(Object[] args) {
+		if (this.resultTypeParameter!=null) {
+			Object types = args[resultTypeParameter.getParameterIndex()];
+			if (types.getClass().isArray()) {
+				return (Class<?>)Array.get(types, 1);
+			} else {
+				return (Class<?>)types;
+			}
+		}
+		return componentClass;
 	}
 	
 	protected boolean judgeBatchUpdateFromParameterObjects(List<DynamicMethodParameter> mparameters){
@@ -450,14 +538,6 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 
 	public List<DynamicMethodParameter> getParameters() {
 		return parameters;
-	}
-
-	public Class<?> getResultClass() {
-		return resultClass;
-	}
-
-	public Class<?> getComponentClass() {
-		return componentClass;
 	}
 	
 	public boolean isExecuteUpdate(){

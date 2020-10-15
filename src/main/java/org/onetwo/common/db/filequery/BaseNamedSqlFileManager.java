@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Stream;
 
-import org.onetwo.common.db.spi.FileBaseNamedQueryInfo;
 import org.onetwo.common.db.spi.NamedQueryFile;
 import org.onetwo.common.db.spi.NamedQueryFileListener;
 import org.onetwo.common.db.spi.NamedQueryInfo;

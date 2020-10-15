@@ -16,6 +16,7 @@ import org.onetwo.common.db.ParsedSqlContext;
 import org.onetwo.common.db.filequery.ParsedSqlUtils;
 import org.onetwo.common.db.filequery.ParsedSqlUtils.ParsedSqlWrapper;
 import org.onetwo.common.db.filequery.ParsedSqlUtils.ParsedSqlWrapper.SqlParamterMeta;
+import org.onetwo.common.db.filequery.SimpleNamedQueryInfo;
 import org.onetwo.common.db.spi.DynamicQueryHandler;
 import org.onetwo.common.db.spi.NamedQueryInfo;
 import org.onetwo.common.db.spi.QueryProvideManager;
@@ -117,6 +118,11 @@ abstract public class AbstractDynamicQueryHandler implements DynamicQueryHandler
 				throw new FileNamedQueryException("namedQuery not found : " + invokeContext.getQueryName());
 			}
 			invokeContext.setNamedQueryInfo(namedQueryInfo);
+		} else {
+			SimpleNamedQueryInfo namedQueryInfo = new SimpleNamedQueryInfo();
+			String queryName = dmethod.getQueryName(args);
+			namedQueryInfo.setName(queryName);
+			invokeContext.setNamedQueryInfo(namedQueryInfo);
 		}
 		
 		Collection<DbmInterceptor> interceptors = this.em.getRepositoryInterceptors();
@@ -158,7 +164,7 @@ abstract public class AbstractDynamicQueryHandler implements DynamicQueryHandler
 	public Object dispatchInvoke(Object proxy, MethodDynamicQueryInvokeContext invokeContext) throws Throwable {
 		DynamicMethod dmethod = invokeContext.getDynamicMethod();
 		Object[] args = invokeContext.getParameterValues();
-		Class<?> resultClass = dmethod.getResultClass();
+		Class<?> resultClass = dmethod.getResultClass(args);
 //		JFishNamedFileQueryInfo parsedQueryName = (JFishNamedFileQueryInfo) em.getFileNamedQueryManager().getNamedQueryInfo(invokeContext);
 
 		if(logger.isDebugEnabled()){
@@ -292,13 +298,14 @@ abstract public class AbstractDynamicQueryHandler implements DynamicQueryHandler
 			logger.debug("===>>> batch insert stop: {}", t.getMessage());
 		}
 		
+		Class<?> resultClass = dmethod.getResultClass(invokeContext.getParameterValues());
 		if(dmethod.isReturnVoid()){
 			return null;
-		}else if(dmethod.getResultClass()==int[].class || dmethod.getResultClass()==Integer[].class){
+		}else if(resultClass==int[].class || resultClass==Integer[].class){
 			return counts;
 		}else{
 			int count = MathUtils.sum(counts);
-			return Types.convertValue(count, dmethod.getResultClass());
+			return Types.convertValue(count, resultClass);
 		}
 	}
 

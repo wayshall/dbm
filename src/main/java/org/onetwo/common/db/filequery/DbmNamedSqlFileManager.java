@@ -1,6 +1,5 @@
 package org.onetwo.common.db.filequery;
 
-import org.onetwo.common.db.spi.FileBaseNamedQueryInfo;
 import org.onetwo.common.db.spi.NamedQueryFileListener;
 import org.onetwo.common.db.spi.NamedQueryInfo;
 import org.onetwo.common.db.spi.SqlTemplateParser;

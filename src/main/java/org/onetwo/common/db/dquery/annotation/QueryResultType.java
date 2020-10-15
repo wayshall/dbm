@@ -5,14 +5,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.onetwo.common.db.spi.SqlTemplateParser;
-
 @Target(ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface QueryName {
-
-//	String value();
-	
-	Class<? extends SqlTemplateParser> templateParser() default SqlTemplateParser.class;
-	
+public @interface QueryResultType {
 }

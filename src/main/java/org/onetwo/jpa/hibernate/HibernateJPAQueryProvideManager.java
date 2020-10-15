@@ -226,7 +226,7 @@ public class HibernateJPAQueryProvideManager implements QueryProvideManager, Ini
 			DynamicMethod dmethod = invokeContext.getDynamicMethod();
 			if(dmethod.isAnnotationPresent(DbmResultMapping.class)){
 				DbmResultMapping dbmResultMapping = dmethod.getMethod().getAnnotation(DbmResultMapping.class);
-				HibernateNestedBeanTransformer<?> transformer = new HibernateNestedBeanTransformer<>(dmethod.getComponentClass(), dbmResultMapping);
+				HibernateNestedBeanTransformer<?> transformer = new HibernateNestedBeanTransformer<>(invokeContext.getResultComponentClass(), dbmResultMapping);
 				sqlQuery.setResultTransformer(transformer);
 			}else{
 				sqlQuery.setResultTransformer(new HibernateRowToBeanTransformer(createQueryCmd.getMappedClass()));
