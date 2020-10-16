@@ -16,12 +16,14 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.onetwo.common.db.dquery.DynamicMethod.DynamicMethodParameter;
 import org.onetwo.common.db.dquery.annotation.AsCountQuery;
 import org.onetwo.common.db.dquery.annotation.BatchObject;
+import org.onetwo.common.db.dquery.annotation.DbmRepository;
 import org.onetwo.common.db.dquery.annotation.ExecuteUpdate;
 import org.onetwo.common.db.dquery.annotation.Param;
 import org.onetwo.common.db.dquery.annotation.QueryDispatcher;
 import org.onetwo.common.db.dquery.annotation.QueryName;
 import org.onetwo.common.db.dquery.annotation.QueryParseContext;
 import org.onetwo.common.db.dquery.annotation.QueryResultType;
+import org.onetwo.common.db.dquery.annotation.QuerySqlTemplateParser;
 import org.onetwo.common.db.dquery.annotation.Sql;
 import org.onetwo.common.db.filequery.JNamedQueryKey;
 import org.onetwo.common.db.filequery.TemplateNameIsSqlTemplateParser;
@@ -96,6 +98,7 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 		super(method);
 		
 		this.checkAndSetExecuteType();
+		this.findAndConfigSqlTemplateParser();
 
 		//check query swither
 //		checkAndFindQuerySwitch(parameters);
@@ -150,6 +153,17 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 		findAndSetQueryName(this.asCountQuery);
 		
 		LangUtils.println("resultClass: ${0}, componentClass:${1}", resultClass, compClass);
+	}
+	
+	private void findAndConfigSqlTemplateParser() {
+		DbmRepository dbmRepository = method.getDeclaringClass().getAnnotation(DbmRepository.class);
+		if (dbmRepository.sqlTemplateParser()!=SqlTemplateParser.class) {
+			this.dynamicSqlTemplateParser = DbmUtils.createDbmBean(dbmRepository.sqlTemplateParser());
+		}
+		QuerySqlTemplateParser parserAnno = method.getAnnotation(QuerySqlTemplateParser.class);
+		if (parserAnno!=null && parserAnno.value()!=SqlTemplateParser.class) {
+			this.dynamicSqlTemplateParser = DbmUtils.createDbmBean(parserAnno.value());
+		}
 	}
 	
 	/***
@@ -247,10 +261,10 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 				if(parameter.getParameterType()!=String.class){
 					throw new FileNamedQueryException("@" + QueryName.class.getSimpleName() + " parameter type must be String.");
 				}
-				QueryName queryNameAnno = parameter.getParameterAnnotation(QueryName.class);
-				if (queryNameAnno.templateParser()!=SqlTemplateParser.class) {
-					this.dynamicSqlTemplateParser = DbmUtils.createDbmBean(queryNameAnno.templateParser());
-				}
+//				QueryName queryNameAnno = parameter.getParameterAnnotation(QueryName.class);
+//				if (queryNameAnno.templateParser()!=SqlTemplateParser.class) {
+//					this.dynamicSqlTemplateParser = DbmUtils.createDbmBean(queryNameAnno.templateParser());
+//				}
 				queryNameParameter = parameter;
 			} else if (sqlParameter==null && parameter.hasParameterAnnotation(Sql.class)) {
 				if(parameter.getParameterType()!=String.class){

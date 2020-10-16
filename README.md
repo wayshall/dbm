@@ -1399,13 +1399,14 @@ baseEntityManager.getSessionFactory().getSession().batchInsertOrUpdate(userList,
 
 ### 从其它地方加载DbmRepository接口的sql
 4.8.0 版本后DbmRepository接口的sql可以自定义加载方式。
-DbmRepository接口默认是自动绑定接口名称对应的 ".jfish.sql"后缀的sql文件的，但有些场景，我们需要从其它地方加载sql。
-这时，你可以通过@QueryName注解，标注命名查询的参数和配置加载和解释sql的具体过程：
+DbmRepository接口默认是自动绑定接口名称对应的 ".jfish.sql"后缀的sql文件的，但有些场景，我们需要从其它地方加载sql。   
+这时，你可以通过@QueryName注解，标注命名查询的参数，动态设置查询名称（正常情况下，名称是类名+方法名），   
+使用@QuerySqlTemplateParser注解配置加载和解释sql的具体过程：
 ```java
 @DbmRepository
 public interface SqlExecutor {
-    
-    <T> T executeSql(@QueryName(templateParser = SimpleSqlTemplateParser.class) String name, // 标记此参数是命名查询的名字参数，并且使用SimpleSqlTemplateParser解释命名查询
+    @QuerySqlTemplateParser(SimpleSqlTemplateParser.class) // 使用SimpleSqlTemplateParser解释命名查询
+    <T> T executeSql(@QueryName(templateParser = SimpleSqlTemplateParser.class) String name, // 标记此参数是命名查询的名字参数
                     UserStatus status, 
                     @QueryResultType Class<T> resultType);//对应查询的结果返回的类型
 

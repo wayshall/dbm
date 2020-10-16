@@ -12,6 +12,7 @@ import org.onetwo.common.db.dquery.annotation.Query;
 import org.onetwo.common.db.dquery.annotation.QueryName;
 import org.onetwo.common.db.dquery.annotation.QueryParseContext;
 import org.onetwo.common.db.dquery.annotation.QueryResultType;
+import org.onetwo.common.db.dquery.annotation.QuerySqlTemplateParser;
 import org.onetwo.common.db.dquery.annotation.Sql;
 import org.onetwo.common.db.spi.SqlTemplateParser;
 import org.onetwo.common.dbm.model.entity.UserTableIdEntity;
@@ -33,7 +34,8 @@ public interface UserDao extends CustomUserDao {
 	@Query(value="select * from test_user t where t.id in ( :userIds )")
 	ArrayList<UserEntity> findUserWithIds(Long[] userIds);
 	
-	<T> T countByStatus(@QueryName(templateParser = SimpleSqlTemplateParser.class) String name, UserStatus status, @QueryResultType Class<T> resultType);
+	@QuerySqlTemplateParser(SimpleSqlTemplateParser.class)
+	<T> T countByStatus(@QueryName String name, UserStatus status, @QueryResultType Class<T> resultType);
 	<T> T countBySql(@Sql String sql, UserStatus status, @QueryResultType Class<T> resultType, @QueryParseContext Map<String, Object> ctx);
 	
 	/***
