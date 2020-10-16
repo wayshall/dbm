@@ -34,6 +34,8 @@
 - [json映射](#json映射)
 - [敏感字段映射](#敏感字段映射)
 - [字段绑定](#字段绑定)
+- [从其它地方加载DbmRepository接口的sql](#从其它地方加载DbmRepository接口的sql)
+- [直接传入要执行的sql作为参数](#直接传入要执行的sql作为参数)
 - [其它映射特性](#其它映射特性)
 - [批量插入](#批量插入)
 - [充血模型支持](#充血模型支持)
@@ -1395,6 +1397,59 @@ baseEntityManager.getSessionFactory().getSession().batchInsertOrUpdate(userList,
 
 ```
 
+### 从其它地方加载DbmRepository接口的sql
+4.8.0 版本后DbmRepository接口的sql可以自定义加载方式。
+DbmRepository接口默认是自动绑定接口名称对应的 ".jfish.sql"后缀的sql文件的，但有些场景，我们需要从其它地方加载sql。
+这时，你可以通过@QueryName注解，标注命名查询的参数和配置加载和解释sql的具体过程：
+```java
+@DbmRepository
+public interface SqlExecutor {
+    
+    <T> T executeSql(@QueryName(templateParser = SimpleSqlTemplateParser.class) String name, // 标记此参数是命名查询的名字参数，并且使用SimpleSqlTemplateParser解释命名查询
+                    UserStatus status, 
+                    @QueryResultType Class<T> resultType);//对应查询的结果返回的类型
+
+}
+
+public class SimpleSqlTemplateParser implements SqlTemplateParser {
+
+    @Override
+    public String parseSql(String name, Object context) {
+        if ("countDisabledUser".equals(name)) {
+            return "select count(1) from test_user t where  t.status = :status";
+        }
+        return name;
+    }
+    
+}
+
+
+SqlExecutor.executeSql("countDisabledUser", // 执行名称为"countDisabledUser"的查询，而这个命名查询的sql就是SimpleSqlTemplateParser返回的sql
+                    UserStatus.DISABLED, 
+                    Long.class); // countDisabledUser实际执行的是一条统计sql，所以这里返回Long类型
+```
+
+### 直接传入要执行的sql作为参数
+4.8.0 版本支持。
+在一些更加复杂和需要动态化的场景，sql可能不是从某个地方加载的，而是需要从参数传入，然后直接执行，类似于原始的jdbc的execteSql功能，但同时又需要使用dbm的sql解释和参数化功能，也是没问题的。
+
+```java
+@DbmRepository
+public interface SqlExecutor {
+    
+    <T> T executeSql(@Sql String sql,
+                    UserStatus status, 
+                    @QueryResultType Class<T> resultType, //对应查询的结果返回的类型
+                    @QueryParseContext Map<String, Object> ctx);
+
+}
+
+Map<String, Object> ctx = Maps.newHashMap();
+ctx.put("now", new NiceData());
+SqlExecutor.executeSql("select count(1) from test_user t where  t.status = :status and t.birthDay=${now.format('yyyy-MM-dd')}", 
+                    UserStatus.DISABLED, 
+                    Long.class); // countDisabledUser实际执行的是一条统计sql，所以这里返回Long类型
+```
 
 ## 其它映射特性
 
