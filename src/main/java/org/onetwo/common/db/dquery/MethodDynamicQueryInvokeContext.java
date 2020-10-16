@@ -108,5 +108,9 @@ public class MethodDynamicQueryInvokeContext implements NamedQueryInvokeContext 
 	public Class<?> getResultComponentClass() {
 		return dynamicMethod.getComponentClass(this.parameterValues);
 	}
+	
+	public Map<?, ?> getQueryParseContext() {
+		return dynamicMethod.getQueryParseContext(this.parameterValues);
+	}
 
 }

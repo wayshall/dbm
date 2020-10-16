@@ -28,45 +28,45 @@ public class DefaultFileNamedSqlGenerator implements FileNamedSqlGenerator {
 	protected boolean countQuery;
 	private SqlTemplateParser parser;
 	private ParserContext parserContext;
-	private Class<?> resultClass;
+//	private Class<?> resultClass;
 	
-	private String[] ascFields;
-	private String[] desFields;
+//	private String[] ascFields;
+//	private String[] desFields;
 
 	private Map<Object, Object> params;
 	private final Optional<SqlFunctionDialet> sqlFunctionDialet;
 	
 	
 	
-	public DefaultFileNamedSqlGenerator(boolean countQuery,
-										SqlTemplateParser parser, 
-										ParserContext parserContext, 
-										Map<Object, Object> params, 
-										Optional<SqlFunctionDialet> sqlFunctionDialet) {
-		super();
-		this.info = parserContext.getQueryInfo();
-		this.countQuery = countQuery;
-		this.parser = parser;
-		this.params = LangUtils.emptyIfNull(params);
-		/*if(params!=null){
-			this.parserContext = (ParserContext)this.params.get(JNamedQueryKey.ParserContext);
-		}*/
-		this.parserContext = parserContext;
-		this.sqlFunctionDialet = sqlFunctionDialet;
-	}
+//	public DefaultFileNamedSqlGenerator(boolean countQuery,
+//										SqlTemplateParser parser, 
+//										ParserContext parserContext, 
+//										Map<Object, Object> params, 
+//										Optional<SqlFunctionDialet> sqlFunctionDialet) {
+//		super();
+//		this.info = parserContext.getQueryInfo();
+//		this.countQuery = countQuery;
+//		this.parser = parser;
+//		this.params = LangUtils.emptyIfNull(params);
+//		/*if(params!=null){
+//			this.parserContext = (ParserContext)this.params.get(JNamedQueryKey.ParserContext);
+//		}*/
+//		this.parserContext = parserContext;
+//		this.sqlFunctionDialet = sqlFunctionDialet;
+//	}
 
 	public DefaultFileNamedSqlGenerator(boolean countQuery,
 			SqlTemplateParser parser, ParserContext parserContext,
-			Class<?> resultClass, String[] ascFields, String[] desFields,
+//			Class<?> resultClass, String[] ascFields, String[] desFields,
 			Map<Object, Object> params, Optional<SqlFunctionDialet> sqlFunctionDialet) {
 		super();
 		this.info = parserContext.getQueryInfo();
 		this.countQuery = countQuery;
 		this.parser = parser;
 		this.parserContext = parserContext;
-		this.resultClass = resultClass;
-		this.ascFields = ascFields;
-		this.desFields = desFields;
+//		this.resultClass = resultClass;
+//		this.ascFields = ascFields;
+//		this.desFields = desFields;
 		this.params = new HashMap<>();
 		this.sqlFunctionDialet = sqlFunctionDialet;
 		

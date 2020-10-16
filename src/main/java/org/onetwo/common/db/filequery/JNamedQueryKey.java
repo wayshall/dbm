@@ -4,7 +4,9 @@ public enum JNamedQueryKey {
 
 //	ParserContext,
 	ResultClass,
+	@Deprecated
 	ASC,
+	@Deprecated
 	DESC;
 //	countClass;
 	

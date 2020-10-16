@@ -20,6 +20,7 @@ import org.onetwo.common.db.dquery.annotation.ExecuteUpdate;
 import org.onetwo.common.db.dquery.annotation.Param;
 import org.onetwo.common.db.dquery.annotation.QueryDispatcher;
 import org.onetwo.common.db.dquery.annotation.QueryName;
+import org.onetwo.common.db.dquery.annotation.QueryParseContext;
 import org.onetwo.common.db.dquery.annotation.QueryResultType;
 import org.onetwo.common.db.dquery.annotation.Sql;
 import org.onetwo.common.db.filequery.JNamedQueryKey;
@@ -85,6 +86,11 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 	 * 动态传入返回类型
 	 */
 	private DynamicMethodParameter resultTypeParameter;
+	/****
+	 * 标识解释上下文的参数
+	 * QueryParseContext
+	 */
+	private DynamicMethodParameter parseContextParameter;
 	
 	public DynamicMethod(Method method){
 		super(method);
@@ -260,6 +266,11 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 					throw new FileNamedQueryException("@" + QueryResultType.class.getSimpleName() + " parameter type must be Class or Array.");
 				}
 				resultTypeParameter = parameter;
+			} else if (parseContextParameter==null && parameter.hasParameterAnnotation(QueryParseContext.class)) {
+				if(!Map.class.isAssignableFrom(parameter.getParameterType())){
+					throw new FileNamedQueryException("@" + QueryParseContext.class.getSimpleName() + " parameter type must be Map.");
+				}
+				parseContextParameter = parameter;
 			} else if (PageRequest.class.isAssignableFrom(parameter.getParameterType())) {
 				this.pageRequestParamter = parameter;
 			} else if (PageRequest.class.isAssignableFrom(parameter.getParameterType())) {
@@ -342,6 +353,13 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 		return queryName;
 	}
 
+	public Map<?, ?> getQueryParseContext(Object[] args) {
+		if (this.parseContextParameter!=null) {
+			Map<?, ?> ctx = (Map<?, ?>)args[parseContextParameter.getParameterIndex()];
+			return ctx;
+		}
+		return null;
+	}
 
 	public Class<?> getResultClass(Object[] args) {
 		if (this.resultTypeParameter!=null) {

@@ -3,6 +3,7 @@ package org.onetwo.common.dbm;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -19,6 +20,7 @@ import org.onetwo.common.dbm.model.hib.entity.UserEntity.UserStatus;
 import org.onetwo.common.dbm.model.service.NoAutoIdUserService;
 import org.onetwo.common.dbm.model.service.UserAutoidServiceImpl;
 import org.onetwo.common.profiling.TimeCounter;
+import org.onetwo.common.utils.CUtils;
 import org.onetwo.common.utils.LangUtils;
 import org.onetwo.dbm.core.spi.DbmEntityManager;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,7 +52,10 @@ public class DbmDaoTest extends DbmBaseTest {
 		int stopUserCount = userDao.countByStatus("countStop", UserStatus.STOP, int.class);
 		assertThat(stopUserCount).isEqualTo(insertCount);
 		
-		stopUserCount = userDao.countBySql("select count(1) from test_user t where  t.status = :status", UserStatus.STOP, int.class);
+		Map<String, Object> ctx = CUtils.asMap("testValue", 1);
+		stopUserCount = userDao.countBySql("select count(1) from test_user t where  t.status = :status and 1=${testValue}", 
+											UserStatus.STOP, 
+											int.class, ctx);
 		assertThat(stopUserCount).isEqualTo(insertCount);
 	}
 	
@@ -78,6 +83,7 @@ public class DbmDaoTest extends DbmBaseTest {
 
 	@Test
 	public void testInsert(){
+		noAutoIdUserService.deleteAll();
 		int insertCount = 1000;
 		TimeCounter t = new TimeCounter("insertByStep");
 		t.start();
@@ -90,13 +96,12 @@ public class DbmDaoTest extends DbmBaseTest {
 	
 	@Test
 	public void testBatchInsertList(){
+		noAutoIdUserService.deleteAll();
 		int insertCount = 1000;
 		TimeCounter t = new TimeCounter("testInsertList");
 		t.start();
 		this.noAutoIdUserService.batchInsertUser(startId, insertCount);	
 		t.stop();
-		
-		noAutoIdUserService.deleteAll();
 	}
 	
 //	@Test

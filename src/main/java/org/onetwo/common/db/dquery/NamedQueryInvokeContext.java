@@ -27,4 +27,6 @@ public interface NamedQueryInvokeContext {
 	
 	Class<?> getResultComponentClass();
 	
+	Map<?, ?> getQueryParseContext();
+	
 }

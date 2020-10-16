@@ -1,6 +1,8 @@
 package org.onetwo.common.dbm.model.dao;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.EnumType;
 
@@ -8,6 +10,7 @@ import org.onetwo.common.db.dquery.annotation.DbmRepository;
 import org.onetwo.common.db.dquery.annotation.Param;
 import org.onetwo.common.db.dquery.annotation.Query;
 import org.onetwo.common.db.dquery.annotation.QueryName;
+import org.onetwo.common.db.dquery.annotation.QueryParseContext;
 import org.onetwo.common.db.dquery.annotation.QueryResultType;
 import org.onetwo.common.db.dquery.annotation.Sql;
 import org.onetwo.common.db.spi.SqlTemplateParser;
@@ -27,11 +30,11 @@ public interface UserDao extends CustomUserDao {
 	)
 	int batchInsertUsers(List<UserEntity> users);
 	
-//	@Query(value="select * from test_user t where t.id in ( :userIds )")
-//	ArrayList<UserEntity> findUserWithIds(Long[] userIds);
+	@Query(value="select * from test_user t where t.id in ( :userIds )")
+	ArrayList<UserEntity> findUserWithIds(Long[] userIds);
 	
 	<T> T countByStatus(@QueryName(templateParser = SimpleSqlTemplateParser.class) String name, UserStatus status, @QueryResultType Class<T> resultType);
-	<T> T countBySql(@Sql String sql, UserStatus status, @QueryResultType Class<T> resultType);
+	<T> T countBySql(@Sql String sql, UserStatus status, @QueryResultType Class<T> resultType, @QueryParseContext Map<String, Object> ctx);
 	
 	/***
 	 * Param注解可指定枚举取值方式，详见：DynamicMethod#convertQueryValue
