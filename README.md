@@ -1406,7 +1406,7 @@ DbmRepository接口默认是自动绑定接口名称对应的 ".jfish.sql"后缀
 @DbmRepository
 public interface SqlExecutor {
     @QuerySqlTemplateParser(SimpleSqlTemplateParser.class) // 使用SimpleSqlTemplateParser解释命名查询
-    <T> T executeSql(@QueryName(templateParser = SimpleSqlTemplateParser.class) String name, // 标记此参数是命名查询的名字参数
+    <T> T executeSql(@QueryName String name, // 标记此参数是命名查询的名字参数
                     UserStatus status, 
                     @QueryResultType Class<T> resultType);//对应查询的结果返回的类型
 
