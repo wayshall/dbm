@@ -2,13 +2,14 @@ package org.onetwo.common.db.dquery;
 
 import java.util.Map;
 
+import org.onetwo.common.db.filequery.ParserContext;
 import org.onetwo.common.db.spi.NamedQueryInfo;
 import org.onetwo.common.db.spi.QueryProvideManager;
 import org.onetwo.common.db.spi.SqlTemplateParser;
 
 public interface NamedQueryInvokeContext {
 
-	String getQueryName();
+//	String getQueryName();
 	
 	Map<Object, Object> getParsedParams();
 	
@@ -27,6 +28,6 @@ public interface NamedQueryInvokeContext {
 	
 	Class<?> getResultComponentClass();
 	
-	Map<?, ?> getQueryParseContext();
+	ParserContext getQueryParseContext();
 	
 }

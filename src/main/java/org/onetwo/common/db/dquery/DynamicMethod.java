@@ -9,6 +9,7 @@ import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import javax.persistence.EnumType;
 
@@ -25,7 +26,6 @@ import org.onetwo.common.db.dquery.annotation.QueryParseContext;
 import org.onetwo.common.db.dquery.annotation.QueryResultType;
 import org.onetwo.common.db.dquery.annotation.QuerySqlTemplateParser;
 import org.onetwo.common.db.dquery.annotation.Sql;
-import org.onetwo.common.db.filequery.JNamedQueryKey;
 import org.onetwo.common.db.filequery.TemplateNameIsSqlTemplateParser;
 import org.onetwo.common.db.spi.QueryConfigData;
 import org.onetwo.common.db.spi.QueryWrapper;
@@ -42,6 +42,8 @@ import org.onetwo.dbm.exception.FileNamedQueryException;
 import org.onetwo.dbm.mapping.DbmEnumValueMapping;
 import org.onetwo.dbm.utils.DbmUtils;
 import org.springframework.core.MethodParameter;
+
+import com.google.common.collect.Sets;
 
 
 public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter>{
@@ -93,6 +95,8 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 	 * QueryParseContext
 	 */
 	private DynamicMethodParameter parseContextParameter;
+	
+	private Set<DynamicMethodParameter> specialParameters = Sets.newHashSet();
 	
 	public DynamicMethod(Method method){
 		super(method);
@@ -257,6 +261,8 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 					throw new FileNamedQueryException("Dispatcher must be first parameter but actual index is " + (parameter.getParameterIndex()+1));
 				}
 				dispatcherParamter = parameter;
+				specialParameters.add(parameter);
+				
 			} else if (queryNameParameter==null && parameter.hasParameterAnnotation(QueryName.class)) {
 				if(parameter.getParameterType()!=String.class){
 					throw new FileNamedQueryException("@" + QueryName.class.getSimpleName() + " parameter type must be String.");
@@ -266,6 +272,8 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 //					this.dynamicSqlTemplateParser = DbmUtils.createDbmBean(queryNameAnno.templateParser());
 //				}
 				queryNameParameter = parameter;
+				specialParameters.add(parameter);
+				
 			} else if (sqlParameter==null && parameter.hasParameterAnnotation(Sql.class)) {
 				if(parameter.getParameterType()!=String.class){
 					throw new FileNamedQueryException("@" + Sql.class.getSimpleName() + " parameter type must be String.");
@@ -275,22 +283,28 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 				this.dynamicSqlTemplateParser = TemplateNameIsSqlTemplateParser.INSTANCE;
 				this.sqlParameter = parameter;
 				this.queryNameParameter = parameter;
+				specialParameters.add(parameter);
+				
 			} else if (resultTypeParameter==null && parameter.hasParameterAnnotation(QueryResultType.class)) {
 				if(!(parameter.getParameterType() instanceof Class) && !parameter.getParameterType().isArray()){
 					throw new FileNamedQueryException("@" + QueryResultType.class.getSimpleName() + " parameter type must be Class or Array.");
 				}
 				resultTypeParameter = parameter;
+				specialParameters.add(parameter);
+				
 			} else if (parseContextParameter==null && parameter.hasParameterAnnotation(QueryParseContext.class)) {
 				if(!Map.class.isAssignableFrom(parameter.getParameterType())){
 					throw new FileNamedQueryException("@" + QueryParseContext.class.getSimpleName() + " parameter type must be Map.");
 				}
 				parseContextParameter = parameter;
+				
 			} else if (PageRequest.class.isAssignableFrom(parameter.getParameterType())) {
 				this.pageRequestParamter = parameter;
-			} else if (PageRequest.class.isAssignableFrom(parameter.getParameterType())) {
-				this.pageRequestParamter = parameter;
+//				specialParameters.add(parameter);
+				
 			} else if (Page.class.isAssignableFrom(parameter.getParameterType())) {
 				this.pageParamter = parameter;
+//				specialParameters.add(parameter);
 			} 
 //			else if (DynamicQueryMetaProvider.class.isAssignableFrom(parameter.getParameterType())) {
 //				this.dynamicQueryMetaProviderParameter = parameter;
@@ -550,6 +564,9 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 		Object pvalue = null;
 //		ParserContext parserContext = ParserContext.create();
 		for(DynamicMethodParameter mp : parameters){
+			if (this.specialParameters.contains(mp)) { // 过滤特殊参数
+				continue;
+			}
 			pvalue = args[mp.getParameterIndex()];
 //			handleArg(values, parserContext, mp, pvalue);
 			handleArg(values, mp, pvalue);
@@ -558,9 +575,9 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 //		buildQueryConfig(parserContext);
 
 //		values.put(JNamedQueryKey.ParserContext, parserContext);
-		if(componentClass!=null){
-			values.put(JNamedQueryKey.ResultClass, componentClass);
-		}
+//		if(componentClass!=null){
+//			values.put(JNamedQueryKey.ResultClass, componentClass);
+//		}
 		return values;
 	}
 	

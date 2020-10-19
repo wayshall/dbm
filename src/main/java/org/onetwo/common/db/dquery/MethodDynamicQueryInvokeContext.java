@@ -3,33 +3,59 @@ package org.onetwo.common.db.dquery;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.onetwo.common.db.dquery.annotation.BatchObject;
+import org.onetwo.common.db.filequery.ParserContext;
 import org.onetwo.common.db.spi.NamedQueryInfo;
 import org.onetwo.common.db.spi.QueryProvideManager;
 import org.onetwo.common.db.spi.SqlTemplateParser;
 import org.onetwo.common.exception.BaseException;
 import org.onetwo.common.utils.LangUtils;
-import org.springframework.util.Assert;
 
 public class MethodDynamicQueryInvokeContext implements NamedQueryInvokeContext {
 
+	/***
+	 * 特殊的context变量前缀，若有此前缀，还会作为执行sql的参数对象params
+	 */
+	public static final String SPECIAL_CONTEXT_PREFIX = ":";
+	
 	final private DynamicMethod dynamicMethod;
 	final private Object[] parameterValues;
 	final private Map<Object, Object> parsedParams;
 //	private TemplateParser parser;
 	final private QueryProvideManager queryProvideManager;
 	private NamedQueryInfo namedQueryInfo;
+	private ParserContext parserContext;
 	
-	public MethodDynamicQueryInvokeContext(QueryProvideManager manager, DynamicMethod dynamicMethod, Object[] parameterValues) {
+	public MethodDynamicQueryInvokeContext(QueryProvideManager manager, DynamicMethod dynamicMethod, Object[] parameterValues, NamedQueryInfo namedQueryInfo) {
 		super();
 		this.dynamicMethod = dynamicMethod;
 		this.parameterValues = parameterValues;
+		this.namedQueryInfo = namedQueryInfo;
 		//ImmutableMap.copyOf key和value不能为null
 //		this.parsedParams = ImmutableMap.copyOf(dynamicMethod.toMapByArgs(parameterValues));
 		Map<Object, Object> methodParams = dynamicMethod.toMapByArgs(parameterValues);
-		this.parsedParams = Collections.unmodifiableMap(methodParams);
 		this.queryProvideManager = manager;
+		this.parserContext = ParserContext.create(namedQueryInfo);
+		
+		// 处理特殊前缀的变量
+		Map<?, ?> ctx = dynamicMethod.getQueryParseContext(this.parameterValues);
+		if (ctx!=null) {
+			for (Entry<?, ?> entry : ctx.entrySet()) {
+				if (entry.getKey() instanceof String) {
+					String key = entry.getKey().toString();
+					if (key.startsWith(SPECIAL_CONTEXT_PREFIX)) {
+						key = key.substring(SPECIAL_CONTEXT_PREFIX.length());
+						methodParams.put(key, entry.getValue());
+					}
+					this.parserContext.put(key, entry.getValue());
+				} else {
+					this.parserContext.put(entry.getKey(), entry.getValue());
+				}
+			}
+		}
+		this.parsedParams = Collections.unmodifiableMap(methodParams);
 	}
 
 	public NamedQueryInfo getNamedQueryInfo() {
@@ -53,15 +79,6 @@ public class MethodDynamicQueryInvokeContext implements NamedQueryInvokeContext 
 		return queryProvideManager;
 	}
 
-	public String getQueryName() {
-		Object dispatcher = getQueryMatcherValue();
-		String queryName = dynamicMethod.getQueryName(parameterValues);
-		if(dispatcher!=null){
-			Assert.notNull(dispatcher, "dispatcher can not be null!");
-			return queryName + "(" + dispatcher+")";
-		}
-		return queryName;
-	}
 	
 	/*public boolean matcher(JFishNamedFileQueryInfo queryInfo){
 		if(queryInfo.getMatchers().isEmpty()){
@@ -70,9 +87,6 @@ public class MethodDynamicQueryInvokeContext implements NamedQueryInvokeContext 
 		return queryInfo.getMatchers().contains(getQueryMatcherValue());
 	}*/
 	
-	private Object getQueryMatcherValue(){
-		return dynamicMethod.getMatcherValue(parameterValues);
-	}
 	
 	public Collection<?> getBatchParameter(){
 		Collection<?> batchParameter = (Collection<?>)parsedParams.get(BatchObject.class);
@@ -109,8 +123,8 @@ public class MethodDynamicQueryInvokeContext implements NamedQueryInvokeContext 
 		return dynamicMethod.getComponentClass(this.parameterValues);
 	}
 	
-	public Map<?, ?> getQueryParseContext() {
-		return dynamicMethod.getQueryParseContext(this.parameterValues);
+	public ParserContext getQueryParseContext() {
+		return parserContext;
 	}
 
 }

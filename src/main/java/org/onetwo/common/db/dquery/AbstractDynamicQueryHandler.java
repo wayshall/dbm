@@ -71,10 +71,24 @@ abstract public class AbstractDynamicQueryHandler implements DynamicQueryHandler
 		return Optional.empty();
 	}*/
 
-	final protected NamedQueryInfo getNamedQueryInfo(NamedQueryInvokeContext invokeContex) {
-		String qname = invokeContex.getQueryName();
+	final protected NamedQueryInfo getNamedQueryInfo(DynamicMethod dynamicMethod, Object[] parameterValues) {
+		String qname = getQueryName(dynamicMethod, parameterValues);
 		NamedQueryInfo queryInfo = this.em.getFileNamedQueryManager().getNamedSqlFileManager().getNamedQueryInfo(qname);
 		return queryInfo;
+	}
+
+	protected String getQueryName(DynamicMethod dynamicMethod, Object[] parameterValues) {
+		Object dispatcher = getQueryMatcherValue(dynamicMethod, parameterValues);
+		String queryName = dynamicMethod.getQueryName(parameterValues);
+		if(dispatcher!=null){
+			Assert.notNull(dispatcher, "dispatcher can not be null!");
+			return queryName + "(" + dispatcher+")";
+		}
+		return queryName;
+	}
+	
+	private Object getQueryMatcherValue(DynamicMethod dynamicMethod, Object[] parameterValues){
+		return dynamicMethod.getMatcherValue(parameterValues);
 	}
 
 //	@Override
@@ -110,20 +124,8 @@ abstract public class AbstractDynamicQueryHandler implements DynamicQueryHandler
 	}
 	
 	private Object invokeWithInterceptor(Object proxy, DynamicMethod dmethod, Object[] args){
-		MethodDynamicQueryInvokeContext invokeContext = new MethodDynamicQueryInvokeContext(em, dmethod, args);
 		
-		if (dmethod.getDynamicSqlTemplateParser()==null) {
-			NamedQueryInfo namedQueryInfo = getNamedQueryInfo(invokeContext);
-			if(namedQueryInfo==null) {
-				throw new FileNamedQueryException("namedQuery not found : " + invokeContext.getQueryName());
-			}
-			invokeContext.setNamedQueryInfo(namedQueryInfo);
-		} else {
-			SimpleNamedQueryInfo namedQueryInfo = new SimpleNamedQueryInfo();
-			String queryName = dmethod.getQueryName(args);
-			namedQueryInfo.setName(queryName);
-			invokeContext.setNamedQueryInfo(namedQueryInfo);
-		}
+		MethodDynamicQueryInvokeContext invokeContext = createMethodInvokeContext(dmethod, args);
 		
 		Collection<DbmInterceptor> interceptors = this.em.getRepositoryInterceptors();
 		if(interceptors.isEmpty()){
@@ -131,6 +133,25 @@ abstract public class AbstractDynamicQueryHandler implements DynamicQueryHandler
 		}
 		DbmInterceptorChain chain = new RepositoryDbmInterceptorChain(proxy, invokeContext, interceptors, ()->invokeMethod(proxy, invokeContext));
 		return chain.invoke();
+	}
+	
+	protected MethodDynamicQueryInvokeContext createMethodInvokeContext(DynamicMethod dmethod, Object[] args) {
+		MethodDynamicQueryInvokeContext invokeContext = null;
+		if (dmethod.getDynamicSqlTemplateParser()==null) {
+			NamedQueryInfo namedQueryInfo = getNamedQueryInfo(dmethod, args);
+			if(namedQueryInfo==null) {
+				String qname = getQueryName(dmethod, args);
+				throw new FileNamedQueryException("namedQuery not found : " + qname);
+			}
+			invokeContext = new MethodDynamicQueryInvokeContext(em, dmethod, args, namedQueryInfo);
+			invokeContext.setNamedQueryInfo(namedQueryInfo);
+		} else {
+			SimpleNamedQueryInfo namedQueryInfo = new SimpleNamedQueryInfo();
+			String queryName = dmethod.getQueryName(args);
+			namedQueryInfo.setName(queryName);
+			invokeContext = new MethodDynamicQueryInvokeContext(em, dmethod, args, namedQueryInfo);
+		}
+		return invokeContext;
 	}
 	
 	private Object invokeMethod(Object proxy, MethodDynamicQueryInvokeContext invokeContext) {
@@ -145,8 +166,9 @@ abstract public class AbstractDynamicQueryHandler implements DynamicQueryHandler
 		catch (DbmException e) {
 			throw e;
 		}catch (Throwable e) {
+			String qname = invokeContext.getNamedQueryInfo().getFullName();
 //			throw new FileNamedQueryException("invoke query["+invokeContext.getQueryName()+"] error : " + e.getMessage(), e);
-			throw new FileNamedQueryException("invoke query["+invokeContext.getQueryName()+"] error : ", e).put("queryName", invokeContext.getQueryName());
+			throw new FileNamedQueryException("invoke query["+qname+"] error : ", e).put("queryName", qname);
 		}
 		
 	}

@@ -68,11 +68,8 @@ public class DefaultFileQueryWrapper extends AbstractQueryWrapper /* implements 
 		if(countQuery){
 			this.resultClass = LangUtils.isIntegralType(resultClass)?resultClass:Long.class;
 		}
-		this.parserContext = ParserContext.create(info);
-		Map<?, ?> ctx = invokeContext.getQueryParseContext();
-		if (ctx!=null) {
-			this.parserContext.putAll(ctx);
-		}
+//		this.parserContext = ParserContext.create(info);
+		this.parserContext = invokeContext.getQueryParseContext();
 	}
 	
 //	abstract protected DataQuery createDataQuery(DynamicQuery query);
