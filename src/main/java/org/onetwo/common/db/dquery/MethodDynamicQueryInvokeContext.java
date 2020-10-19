@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.onetwo.common.db.dquery.annotation.BatchObject;
 import org.onetwo.common.db.filequery.ParserContext;
@@ -12,6 +13,8 @@ import org.onetwo.common.db.spi.QueryProvideManager;
 import org.onetwo.common.db.spi.SqlTemplateParser;
 import org.onetwo.common.exception.BaseException;
 import org.onetwo.common.utils.LangUtils;
+
+import com.google.common.collect.Sets;
 
 public class MethodDynamicQueryInvokeContext implements NamedQueryInvokeContext {
 
@@ -39,6 +42,7 @@ public class MethodDynamicQueryInvokeContext implements NamedQueryInvokeContext 
 		this.queryProvideManager = manager;
 		this.parserContext = ParserContext.create(namedQueryInfo);
 		
+		Set<String> vars = Sets.newHashSet(dynamicMethod.getSqlParameterVars());
 		// 处理特殊前缀的变量
 		Map<?, ?> ctx = dynamicMethod.getQueryParseContext(this.parameterValues);
 		if (ctx!=null) {
@@ -47,6 +51,8 @@ public class MethodDynamicQueryInvokeContext implements NamedQueryInvokeContext 
 					String key = entry.getKey().toString();
 					if (key.startsWith(SPECIAL_CONTEXT_PREFIX)) {
 						key = key.substring(SPECIAL_CONTEXT_PREFIX.length());
+						methodParams.put(key, entry.getValue());
+					} else if (vars.contains(key)) {
 						methodParams.put(key, entry.getValue());
 					}
 					this.parserContext.put(key, entry.getValue());

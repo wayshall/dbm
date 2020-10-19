@@ -95,6 +95,8 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 	 * QueryParseContext
 	 */
 	private DynamicMethodParameter parseContextParameter;
+	private QueryParseContext queryParseContext;
+//	private Set<String> varAsJdbcParameter = Sets.newHashSet();
 	
 	private Set<DynamicMethodParameter> specialParameters = Sets.newHashSet();
 	
@@ -297,7 +299,7 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 					throw new FileNamedQueryException("@" + QueryParseContext.class.getSimpleName() + " parameter type must be Map.");
 				}
 				parseContextParameter = parameter;
-				
+				queryParseContext = this.parseContextParameter.getParameterAnnotation(QueryParseContext.class);
 			} else if (PageRequest.class.isAssignableFrom(parameter.getParameterType())) {
 				this.pageRequestParamter = parameter;
 //				specialParameters.add(parameter);
@@ -348,6 +350,13 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 //			}
 //		}
 //	}
+	
+	public String[] getSqlParameterVars() {
+		if (queryParseContext==null) {
+			return LangUtils.EMPTY_STRING_ARRAY;
+		}
+		return queryParseContext.sqlParameterVars();
+	}
 	
 	
 	public boolean isAsCountQuery(){

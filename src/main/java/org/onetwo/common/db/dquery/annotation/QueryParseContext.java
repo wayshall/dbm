@@ -9,4 +9,11 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface QueryParseContext {
 	
+	/****
+	 * 指定上下文中特定的变量可以作为sql的命名参数值
+	 * @author weishao zeng
+	 * @return
+	 */
+	String[] sqlParameterVars() default {};
+	
 }
