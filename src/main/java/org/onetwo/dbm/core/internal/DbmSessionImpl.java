@@ -254,6 +254,14 @@ public class DbmSessionImpl extends AbstractDbmSession implements DbmSessionEven
 		return event.getUpdateCount();
 	}
 	
+	@Override
+	public <T> int batchInsert(Collection<T> entities, Integer batchSize) {
+		DbmBatchInsertEvent event = new DbmBatchInsertEvent(entities, this);
+		event.setBatchSize(batchSize);
+		this.fireEvents(event);
+		return event.getUpdateCount();
+	}
+
 	public <T> int batchUpdate(Collection<T> entities){
 		DbmUpdateEvent event = new DbmUpdateEvent(entities, this);
 		event.setDynamicUpdate(false);
