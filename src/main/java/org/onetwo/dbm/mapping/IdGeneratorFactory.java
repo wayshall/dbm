@@ -59,6 +59,31 @@ public class IdGeneratorFactory {
 		return Optional.of(generator);
 	}
 	
+	/***
+	 * 此方法使用下面的默认表:
+	 * CREATE TABLE `gen_ids` (
+		`gen_name`  varchar(255) NOT NULL ,
+		`gen_value`  bigint NOT NULL ,
+		PRIMARY KEY (`gen_name`)
+		);
+	 * @author weishao zeng
+	 * @param genenratorName
+	 * @return
+	 */
+	public static IdentifierGenerator<Long> createTableGenerator(String genenratorName){
+		String tableName = "gen_ids";
+		int allocationSize = 1;
+		int initialValue = 1;
+		TableGeneratorAttrs tgAttrs = new TableGeneratorAttrs(genenratorName, 
+				allocationSize, 
+				tableName, 
+				"gen_name", 
+				"gen_value", 
+				genenratorName,
+				initialValue);
+		return createTableGenerator(tgAttrs);
+	}
+	
 	public static IdentifierGenerator<Long> createTableGenerator(TableGeneratorAttrs tgAttrs){
 		if (tgAttrs==null) {
 			throw new IllegalArgumentException("TableGeneratorAttrs can not be null!");
