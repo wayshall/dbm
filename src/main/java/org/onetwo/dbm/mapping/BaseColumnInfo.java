@@ -58,6 +58,15 @@ abstract public class BaseColumnInfo extends Propertable{
 		return ":" + getJavaNameWithAlias();
 	}
 	
+	/****
+	 * ON DUPLICATE KEY UPDATE  field =  VALUES(field);
+	 * @author weishao zeng
+	 * @return
+	 */
+	public String getDuplicateKeyUpdateSql(){
+		return getName() + " = values( " + getName() + " )";
+	}
+	
 	public String withAlias(String sep, String name){
 		return name;
 	}

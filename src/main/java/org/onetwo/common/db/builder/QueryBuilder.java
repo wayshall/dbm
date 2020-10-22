@@ -2,6 +2,7 @@ package org.onetwo.common.db.builder;
 
 import java.util.Map;
 
+import org.onetwo.common.db.sqlext.ExtQuery.K;
 import org.onetwo.dbm.dialet.DBDialect.LockInfo;
 
 /***
@@ -49,6 +50,9 @@ public interface QueryBuilder<E> {
 	public QueryBuilder<E> asc(String... fields);
 
 	public QueryBuilder<E> desc(String... fields);
+	
+	QueryBuilderImpl<E> ascRand(Object seed);
+	QueryBuilderImpl<E> descRand(Object seed);
 
 	public QueryBuilder<E> distinct(String... fields);
 	public QueryBuilder<E> lock(LockInfo lock);

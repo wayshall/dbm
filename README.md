@@ -34,6 +34,8 @@
 - [json映射](#json映射)
 - [敏感字段映射](#敏感字段映射)
 - [字段绑定](#字段绑定)
+- [从其它地方加载DbmRepository接口的sql](#从其它地方加载DbmRepository接口的sql)
+- [直接传入要执行的sql作为参数](#直接传入要执行的sql作为参数)
 - [其它映射特性](#其它映射特性)
 - [批量插入](#批量插入)
 - [充血模型支持](#充血模型支持)
@@ -1017,6 +1019,14 @@ set  指令与where指令类似，只是@str指令的包装，用于sql更新语
         id = :query.id
 ```
 
+### dateRange
+
+```sql
+        // 以天（date）为间隔，遍历输出从10月1日到11日（不包含）的日期，日期按照format格式化为字符串，format参数不写，则dateVar为Date类型对象
+   [@dateRange from='2014-10-01' to='2014-10-11' type='date' format='yyyyMMdd' joiner=' or '; dateVar, index]
+        t.date = '${dateVar}'
+   [/@dateRange]
+```
 
 ### 其他特性
 
@@ -1333,9 +1343,23 @@ public class CustomDaoTest {
 
 ## 批量插入
 
-### 使用DbmRepository查询批量插入
 在mybatis里，批量插入非常麻烦，我见过有些人甚至使用for循环生成value语句来批量插入的，这种方法插入的数据量如果很大，生成的sql语句以吨计，如果用jdbc接口执行这条语句，系统必挂无疑。   
-在dbm里，使用批量接口很简单。   
+在dbm里，批量插入有几种方式。
+
+- 注意，批量操作不会触发 DbmEntityListener 接口的回调
+
+### 使用session接口的批量插入接口
+```java   
+List<UserEntity> userList = new ArrayList<>();
+userList.add(user);
+...
+baseEntityManager.getSessionFactory().getSession().batchInsert(userList)
+
+```
+
+### 使用DbmRepository查询批量插入
+在dbm里，使用编写sql的方式批量接口很简单。   
+
 定义接口：   
 ```java   
 
@@ -1345,12 +1369,88 @@ public interface UserAutoidDao {
 }
 
 ```
-定义sql：     
-![batcchInsert](doc/sql.batcchInsert.jpg)
+
+然后定义sql：     
+
+```sql
+
+/*****
+ * @name: batchInsert
+ * 批量插入     */
+    insert 
+    into
+        test_user_autoid
+        (birthday, email, gender, mobile, nick_name, password, status, user_name) 
+    values
+        (:birthday, :email, :gender, :mobile, :nickName, :password?encrypt, :status.value, :userName)
 
 
+```
 
-搞掂！   
+### 批量插入或更新
+dbm也利用了mysql的on duplicate key update语法，支持批量插入或更新：
+```java   
+List<UserEntity> userList = new ArrayList<>();
+userList.add(user);
+...
+baseEntityManager.getSessionFactory().getSession().batchInsertOrUpdate(userList, 10000)
+
+```
+
+### 从其它地方加载DbmRepository接口的sql
+4.8.0 版本后DbmRepository接口的sql可以自定义加载方式。
+DbmRepository接口默认是自动绑定接口名称对应的 ".jfish.sql"后缀的sql文件的，但有些场景，我们需要从其它地方加载sql。   
+这时，你可以通过@QueryName注解，标注命名查询的参数，动态设置查询名称（正常情况下，名称是类名+方法名），   
+使用@QuerySqlTemplateParser注解配置加载和解释sql的具体过程：
+```java
+@DbmRepository
+public interface SqlExecutor {
+    @QuerySqlTemplateParser(SimpleSqlTemplateParser.class) // 使用SimpleSqlTemplateParser解释命名查询
+    <T> T executeSql(@QueryName String name, // 标记此参数是命名查询的名字参数
+                    UserStatus status, 
+                    @QueryResultType Class<T> resultType);//对应查询的结果返回的类型
+
+}
+
+public class SimpleSqlTemplateParser implements SqlTemplateParser {
+
+    @Override
+    public String parseSql(String name, Object context) {
+        if ("countDisabledUser".equals(name)) {
+            return "select count(1) from test_user t where  t.status = :status";
+        }
+        return name;
+    }
+    
+}
+
+
+SqlExecutor.executeSql("countDisabledUser", // 执行名称为"countDisabledUser"的查询，而这个命名查询的sql就是SimpleSqlTemplateParser返回的sql
+                    UserStatus.DISABLED, 
+                    Long.class); // countDisabledUser实际执行的是一条统计sql，所以这里返回Long类型
+```
+
+### 直接传入要执行的sql作为参数
+4.8.0 版本支持。
+在一些更加复杂和需要动态化的场景，sql可能不是从某个地方加载的，而是需要从参数传入，然后直接执行，类似于原始的jdbc的execteSql功能，但同时又需要使用dbm的sql解释和参数化功能，也是没问题的。
+
+```java
+@DbmRepository
+public interface SqlExecutor {
+    
+    <T> T executeSql(@Sql String sql,
+                    UserStatus status, 
+                    @QueryResultType Class<T> resultType, //对应查询的结果返回的类型
+                    @QueryParseContext Map<String, Object> ctx);
+
+}
+
+Map<String, Object> ctx = Maps.newHashMap();
+ctx.put("now", new NiceData());
+SqlExecutor.executeSql("select count(1) from test_user t where  t.status = :status and t.birthDay=${now.format('yyyy-MM-dd')}", 
+                    UserStatus.DISABLED, 
+                    Long.class); // countDisabledUser实际执行的是一条统计sql，所以这里返回Long类型
+```
 
 ## 其它映射特性
 

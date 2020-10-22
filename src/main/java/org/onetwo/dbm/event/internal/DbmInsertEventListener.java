@@ -25,7 +25,7 @@ public class DbmInsertEventListener extends InsertEventListener{
 		Object entity = event.getObject();
 		
 		throwIfEntityIsMultiple(entity);
-		setIdIfNecessary(event, entry, entity);
+		setIdIfNecessary(event.getEventSource(), entry, entity);
 
 		/*if(entry.isEntity() && entry.getIdentifyField().isGeneratedValue()){
 			Serializable id = null;

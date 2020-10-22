@@ -10,6 +10,11 @@ import org.onetwo.dbm.exception.EntityNotFoundException;
 import org.onetwo.dbm.mapping.DbmMappedEntry;
 import org.springframework.dao.DuplicateKeyException;
 
+/****
+ * insertOrUpdate支持对象为集合类型的参数
+ * @author way
+ *
+ */
 public class DbmInsertOrUpdateListener extends AbstractDbmEventListener {
 
 	@Override
@@ -20,7 +25,7 @@ public class DbmInsertOrUpdateListener extends AbstractDbmEventListener {
 		int updateCount = 0;
 		
 		if(entry.hasIdentifyValue(entity)){
-			// 如果id有值并且id是自增或者自动生成，则执行update
+			// 如果id有值并且id是自增或者自动生成，则首先尝试执行update操作
 //			if(entry.getIdentifyFields().isGeneratedValue() || entry.getIdentifyField().isIdentityStrategy()){
 			if(entry.hasGeneratedValueIdField() || entry.hasIdentityStrategyField()){
 				try {
@@ -30,7 +35,9 @@ public class DbmInsertOrUpdateListener extends AbstractDbmEventListener {
 						updateCount = es.update(entity);
 					}
 				} catch (EntityNotFoundException e) {
-					insert(insertOrUpdate, entry, entity);
+					// update失败，则尝试插入
+//					insert(insertOrUpdate, entry, entity);
+					updateCount = es.insert(entity);
 				}
 			}else{
 				updateCount = insert(insertOrUpdate, entry, entity);

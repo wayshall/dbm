@@ -93,6 +93,9 @@ public class JdbcStatementContextBuilder implements JdbcStatementContext<List<Ob
 		}else if(SqlBuilderType.insert==sqltype){
 			batchValues = columnValues.values().toArray();
 			
+		}else if(SqlBuilderType.insertOrUpdate==sqltype){
+			batchValues = columnValues.values().toArray();
+			
 		}else if(SqlBuilderType.delete==sqltype){
 //			this.getColumnValues().addAll(getCauseValues());
 			batchValues = ArrayUtils.addAll(columnValues.values().toArray(), causeValues.toArray());

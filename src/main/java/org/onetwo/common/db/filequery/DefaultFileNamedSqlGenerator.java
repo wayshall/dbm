@@ -2,7 +2,6 @@ package org.onetwo.common.db.filequery;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 
 import org.onetwo.common.db.ParsedSqlContext;
@@ -11,11 +10,10 @@ import org.onetwo.common.db.spi.FileNamedSqlGenerator;
 import org.onetwo.common.db.spi.FileSqlParserType;
 import org.onetwo.common.db.spi.NamedQueryInfo;
 import org.onetwo.common.db.spi.QueryContextVariable;
-import org.onetwo.common.db.sql.DynamicQuery;
-import org.onetwo.common.db.sql.DynamicQueryFactory;
+import org.onetwo.common.db.spi.SqlTemplateParser;
 import org.onetwo.common.db.sqlext.ExtQueryUtils;
-import org.onetwo.common.spring.ftl.TemplateParser;
 import org.onetwo.common.utils.LangUtils;
+import org.onetwo.dbm.exception.DbmException;
 import org.springframework.util.Assert;
 
 /****
@@ -28,47 +26,47 @@ public class DefaultFileNamedSqlGenerator implements FileNamedSqlGenerator {
 //	private static final Logger logger = JFishLoggerFactory.getLogger(DefaultFileNamedSqlGenerator.class);
 	protected NamedQueryInfo info;
 	protected boolean countQuery;
-	private TemplateParser parser;
+	private SqlTemplateParser parser;
 	private ParserContext parserContext;
-	private Class<?> resultClass;
+//	private Class<?> resultClass;
 	
-	private String[] ascFields;
-	private String[] desFields;
+//	private String[] ascFields;
+//	private String[] desFields;
 
 	private Map<Object, Object> params;
 	private final Optional<SqlFunctionDialet> sqlFunctionDialet;
 	
 	
 	
-	public DefaultFileNamedSqlGenerator(boolean countQuery,
-										TemplateParser parser, 
-										ParserContext parserContext, 
-										Map<Object, Object> params, 
-										Optional<SqlFunctionDialet> sqlFunctionDialet) {
-		super();
-		this.info = parserContext.getQueryInfo();
-		this.countQuery = countQuery;
-		this.parser = parser;
-		this.params = LangUtils.emptyIfNull(params);
-		/*if(params!=null){
-			this.parserContext = (ParserContext)this.params.get(JNamedQueryKey.ParserContext);
-		}*/
-		this.parserContext = parserContext;
-		this.sqlFunctionDialet = sqlFunctionDialet;
-	}
+//	public DefaultFileNamedSqlGenerator(boolean countQuery,
+//										SqlTemplateParser parser, 
+//										ParserContext parserContext, 
+//										Map<Object, Object> params, 
+//										Optional<SqlFunctionDialet> sqlFunctionDialet) {
+//		super();
+//		this.info = parserContext.getQueryInfo();
+//		this.countQuery = countQuery;
+//		this.parser = parser;
+//		this.params = LangUtils.emptyIfNull(params);
+//		/*if(params!=null){
+//			this.parserContext = (ParserContext)this.params.get(JNamedQueryKey.ParserContext);
+//		}*/
+//		this.parserContext = parserContext;
+//		this.sqlFunctionDialet = sqlFunctionDialet;
+//	}
 
 	public DefaultFileNamedSqlGenerator(boolean countQuery,
-			TemplateParser parser, ParserContext parserContext,
-			Class<?> resultClass, String[] ascFields, String[] desFields,
+			SqlTemplateParser parser, ParserContext parserContext,
+//			Class<?> resultClass, String[] ascFields, String[] desFields,
 			Map<Object, Object> params, Optional<SqlFunctionDialet> sqlFunctionDialet) {
 		super();
 		this.info = parserContext.getQueryInfo();
 		this.countQuery = countQuery;
 		this.parser = parser;
 		this.parserContext = parserContext;
-		this.resultClass = resultClass;
-		this.ascFields = ascFields;
-		this.desFields = desFields;
+//		this.resultClass = resultClass;
+//		this.ascFields = ascFields;
+//		this.desFields = desFields;
 		this.params = new HashMap<>();
 		this.sqlFunctionDialet = sqlFunctionDialet;
 		
@@ -85,21 +83,26 @@ public class DefaultFileNamedSqlGenerator implements FileNamedSqlGenerator {
 	public ParsedSqlContext generatSql(){
 		String parsedSql = null;
 		ParsedSqlContext sv = null;
-		if(info.getParserType()==FileSqlParserType.IGNORENULL){
-			String sql = countQuery?info.getCountSql():info.getSql();
-			DynamicQuery query = DynamicQueryFactory.createJFishDynamicQuery(sql, resultClass);
-			for(Entry<Object, Object> entry : this.params.entrySet()){
-				query.setParameter(entry.getKey().toString(), entry.getValue());
-			}
-			query.asc(ascFields);
-			query.desc(desFields);
-			query.compile();
-			parsedSql = query.getTransitionSql();
-			sv = new SqlAndValues(false, parsedSql, query.getValues());
-			
-		}else if(info.getParserType()==FileSqlParserType.TEMPLATE){
+		// 4.8版本后移除非TEMPLATE类型的判断
+//		if(info.getParserType()==FileSqlParserType.IGNORENULL){
+//			String sql = countQuery?info.getCountSql():info.getSql();
+//			DynamicQuery query = DynamicQueryFactory.createJFishDynamicQuery(sql, resultClass);
+//			for(Entry<Object, Object> entry : this.params.entrySet()){
+//				query.setParameter(entry.getKey().toString(), entry.getValue());
+//			}
+//			query.asc(ascFields);
+//			query.desc(desFields);
+//			query.compile();
+//			parsedSql = query.getTransitionSql();
+//			sv = new SqlAndValues(false, parsedSql, query.getValues());
+//			
+//		}else 
+		if(info.getParserType()==FileSqlParserType.TEMPLATE){
 			Assert.notNull(parserContext, "parserContext can not be null");
-			this.sqlFunctionDialet.ifPresent(func->parserContext.put(ParserContext.CONTEXT_KEY, sqlFunctionDialet));
+			// _func -> SqlFunctionDialet
+			this.sqlFunctionDialet.ifPresent(func-> {
+				parserContext.put(ParserContext.CONTEXT_KEY, func);
+			});
 			this.parserContext.putAll(params);
 			FragmentTemplateParser attrParser = new FragmentTemplateParser(parser, parserContext, info);
 			this.parserContext.put(attrParser.getVarName(), attrParser);
@@ -115,8 +118,10 @@ public class DefaultFileNamedSqlGenerator implements FileNamedSqlGenerator {
 			sv = new SqlAndValues(true, parsedSql, params);
 			
 		}else{
-			parsedSql = countQuery?info.getCountSql():info.getSql();
-			sv = new SqlAndValues(true, parsedSql, params);
+			throw new DbmException("unsupported parser type: " + info.getParserType());
+			// 4.8版本后移除非TEMPLATE类型的判断
+//			parsedSql = countQuery?info.getCountSql():info.getSql();
+//			sv = new SqlAndValues(true, parsedSql, params);
 		}
 
 		return sv;

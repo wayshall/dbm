@@ -1,5 +1,13 @@
 package org.onetwo.common.db.filequery;
 
+/***
+ * @deprecated 此枚举主要是用于通过param对象传入特定处理的参数，一般用于早起的IgnoreNull模板
+ * 4.8版本后去掉了IgnoreNull模板，后面版本会移除这个枚举
+ * @see DefaultFileQueryWrapper#processQueryKey(JNamedQueryKey, Object)
+ * @author way
+ *
+ */
+@Deprecated
 public enum JNamedQueryKey {
 
 //	ParserContext,

@@ -17,13 +17,11 @@ import org.onetwo.common.db.spi.NamedQueryInfo;
 import org.onetwo.common.db.spi.QueryProvideManager;
 import org.onetwo.common.db.spi.QueryWrapper;
 import org.onetwo.common.db.spi.SqlParamterPostfixFunctionRegistry;
-import org.onetwo.common.db.sql.QueryOrderByable;
+import org.onetwo.common.db.spi.SqlTemplateParser;
 import org.onetwo.common.db.sqlext.ExtQueryUtils;
 import org.onetwo.common.spring.SpringUtils;
-import org.onetwo.common.spring.ftl.TemplateParser;
 import org.onetwo.common.utils.ArrayUtils;
 import org.onetwo.common.utils.Assert;
-import org.onetwo.common.utils.CUtils;
 import org.onetwo.common.utils.LangUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.jdbc.core.RowMapper;
@@ -36,7 +34,7 @@ import com.google.common.collect.Maps;
  * @author wayshall
  *
  */
-public class DefaultFileQueryWrapper extends AbstractQueryWrapper implements QueryOrderByable {
+public class DefaultFileQueryWrapper extends AbstractQueryWrapper /* implements QueryOrderByable */ {
 
 	final protected NamedQueryInvokeContext invokeContext;
 	protected QueryProvideManager queryProvideManager;
@@ -51,11 +49,11 @@ public class DefaultFileQueryWrapper extends AbstractQueryWrapper implements Que
 	protected Class<?> resultClass;
 	
 	protected NamedQueryInfo info;
-	private TemplateParser parser;
+	private SqlTemplateParser parser;
 	private ParserContext parserContext;
 	
-	private String[] ascFields;
-	private String[] desFields;
+//	private String[] ascFields;
+//	private String[] desFields;
 
 	public DefaultFileQueryWrapper(NamedQueryInvokeContext invokeContext, boolean count) {
 		Assert.notNull(invokeContext);
@@ -63,14 +61,15 @@ public class DefaultFileQueryWrapper extends AbstractQueryWrapper implements Que
 		this.invokeContext = invokeContext;
 		this.queryProvideManager = invokeContext.getQueryProvideManager();
 		this.countQuery = count;
-		this.parser = queryProvideManager.getFileNamedQueryManager().getNamedSqlFileManager().getSqlStatmentParser();
+		this.parser = invokeContext.getDynamicSqlTemplateParser();
 		
 		this.info = invokeContext.getNamedQueryInfo();
-		this.resultClass = invokeContext.getDynamicMethod().getComponentClass();
+		this.resultClass = invokeContext.getResultComponentClass();
 		if(countQuery){
 			this.resultClass = LangUtils.isIntegralType(resultClass)?resultClass:Long.class;
 		}
-		this.parserContext = ParserContext.create(info);
+//		this.parserContext = ParserContext.create(info);
+		this.parserContext = invokeContext.getQueryParseContext();
 	}
 	
 //	abstract protected DataQuery createDataQuery(DynamicQuery query);
@@ -85,7 +84,8 @@ public class DefaultFileQueryWrapper extends AbstractQueryWrapper implements Que
 	protected ParsedSqlContext createParsedSqlContext(){
 		Optional<SqlFunctionDialet> sqlFunction = queryProvideManager.getSqlFunctionDialet();
 		FileNamedSqlGenerator sqlGen = new DefaultFileNamedSqlGenerator(countQuery, parser, parserContext, 
-																		resultClass, ascFields, desFields, params, sqlFunction);
+//																		resultClass, ascFields, desFields, 
+																		params, sqlFunction);
 		ParsedSqlContext sqlAndValues = sqlGen.generatSql();
 		return sqlAndValues;
 	}
@@ -232,14 +232,14 @@ public class DefaultFileQueryWrapper extends AbstractQueryWrapper implements Que
 				if(!countQuery)
 					setResultClass((Class<?>)value);
 				break;
-			case ASC:
-				String[] ascFields = CUtils.asStringArray(value);
-				asc(ascFields);
-				break;
-			case DESC:
-				String[] desFields = CUtils.asStringArray(value);
-				desc(desFields);
-				break;
+//			case ASC:
+//				String[] ascFields = CUtils.asStringArray(value);
+//				asc(ascFields);
+//				break;
+//			case DESC:
+//				String[] desFields = CUtils.asStringArray(value);
+//				desc(desFields);
+//				break;
 			/*case ParserContext:
 				this.setParserContext((ParserContext)value);*/
 			default:
@@ -256,21 +256,21 @@ public class DefaultFileQueryWrapper extends AbstractQueryWrapper implements Que
 		return this;
 	}
 
-	@Override
-	public void asc(String... fields) {
-		this.ascFields = fields;
-		/*if(isNeedParseSql() && QueryOrderByable.class.isAssignableFrom(query.getClass())){
-			((QueryOrderByable)query).asc(fields);
-		}else{
-			throw new UnsupportedOperationException("the query can't supported orderby, you need set ignore.null to true.");
-		}*/
-	}
-
-	@Override
-	public void desc(String... fields) {
-		this.desFields = fields;
-	}
-	
+//	@Override
+//	public void asc(String... fields) {
+//		this.ascFields = fields;
+//		/*if(isNeedParseSql() && QueryOrderByable.class.isAssignableFrom(query.getClass())){
+//			((QueryOrderByable)query).asc(fields);
+//		}else{
+//			throw new UnsupportedOperationException("the query can't supported orderby, you need set ignore.null to true.");
+//		}*/
+//	}
+//
+//	@Override
+//	public void desc(String... fields) {
+//		this.desFields = fields;
+//	}
+//	
 
 	@Override
 	public QueryWrapper setParameters(Object[] params) {

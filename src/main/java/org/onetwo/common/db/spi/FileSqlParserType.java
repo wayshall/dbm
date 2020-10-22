@@ -1,8 +1,14 @@
 package org.onetwo.common.db.spi;
 
 public enum FileSqlParserType {
-	NONE,
-	IGNORENULL,
+	/**
+	 * 4.8 后移除
+	 */
+//	NONE,
+	/**
+	 * 4.8 后移除
+	 */
+//	IGNORENULL,
 	TEMPLATE
 
 }

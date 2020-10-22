@@ -42,6 +42,7 @@ public class DbGenerator {
 	public DbGenerator(DataSource dataSource) {
 		super();
 		this.dataSource = dataSource;
+		this.dialet = new DelegateDatabaseMetaDialet(dataSource);
 	}
 
 	public DbGenerator(DatabaseMetaDialet dialet) {

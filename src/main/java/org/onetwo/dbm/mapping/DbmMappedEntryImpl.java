@@ -12,6 +12,7 @@ import org.onetwo.dbm.mapping.SQLBuilderFactory.SqlBuilderType;
 public class DbmMappedEntryImpl extends AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 	
 
+	private EntrySQLBuilderImpl staticInsertOrUpdateSqlBuilder;
 	private EntrySQLBuilderImpl staticInsertSqlBuilder;
 	private EntrySQLBuilderImpl staticUpdateSqlBuilder;
 	private EntrySQLBuilderImpl staticFetchAllSqlBuilder;
@@ -68,6 +69,10 @@ public class DbmMappedEntryImpl extends AbstractDbmMappedEntryImpl implements Db
 	protected void buildStaticSQL(TableInfo taboleInfo){
 //		List<ColumnInfo> idColumns = taboleInfo.getPrimaryKey().getColumns();
 
+		staticInsertOrUpdateSqlBuilder = createSQLBuilder(SqlBuilderType.insertOrUpdate);
+		staticInsertOrUpdateSqlBuilder.append(getInsertableFields());
+		staticInsertOrUpdateSqlBuilder.build();
+		
 		staticInsertSqlBuilder = createSQLBuilder(SqlBuilderType.insert);
 		staticInsertSqlBuilder.append(getInsertableFields());
 		staticInsertSqlBuilder.build();
@@ -125,6 +130,11 @@ public class DbmMappedEntryImpl extends AbstractDbmMappedEntryImpl implements Db
 		return staticSelectLockSqlBuilder;
 	}*/
 
+
+	@Override
+	protected EntrySQLBuilderImpl getStaticInsertOrUpdateSqlBuilder() {
+		return staticInsertOrUpdateSqlBuilder;
+	}
 
 	@Override
 	protected EntrySQLBuilderImpl getStaticInsertSqlBuilder() {
