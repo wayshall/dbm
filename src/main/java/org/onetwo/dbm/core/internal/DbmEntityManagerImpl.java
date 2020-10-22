@@ -37,6 +37,7 @@ import org.onetwo.dbm.core.spi.DbmEntityManager;
 import org.onetwo.dbm.core.spi.DbmInterceptor;
 import org.onetwo.dbm.core.spi.DbmSessionFactory;
 import org.onetwo.dbm.core.spi.DbmSessionImplementor;
+import org.onetwo.dbm.exception.DbmException;
 import org.onetwo.dbm.exception.EntityNotFoundException;
 import org.onetwo.dbm.jdbc.mapper.RowMapperFactory;
 import org.onetwo.dbm.jdbc.spi.DbmJdbcOperations;
@@ -191,15 +192,20 @@ public class DbmEntityManagerImpl extends BaseEntityManagerAdapter implements Qu
 		if (id==null) {
 			throw new IllegalArgumentException("id can not be null");
 		}
-		T entity = getCurrentSession().findById(entityClass, id);
-		if (entity==null)
-			return null;
-//		T entity = load(entityClass, id);
-		int updateCount = getCurrentSession().delete(entity);
-		/*int rs = getDbmDao().delete(entity);
-		throwIfEffectiveCountError("removeById", 1, rs);*/
+		
+//		T entity = getCurrentSession().findById(entityClass, id);
+//		if (entity==null)
+//			return null;
+//		int updateCount = getCurrentSession().delete(entity);
 		//如果成功删除，则返回实体，否则返回null
-		return updateCount==1?entity:null;
+//		return updateCount==1?entity:null;
+		
+		T entity = load(entityClass, id);
+		int updateCount = getCurrentSession().delete(entity);
+		if (updateCount!=1) {
+			throw new DbmException("remove entity error, id: " + id);
+		}
+		return entity;
 	}
 
 	@Override
