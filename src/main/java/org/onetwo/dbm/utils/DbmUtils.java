@@ -16,10 +16,16 @@ import javax.sql.DataSource;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.onetwo.common.db.filequery.directive.SetDirective;
+import org.onetwo.common.db.filequery.directive.WhereDirective;
 import org.onetwo.common.log.JFishLoggerFactory;
 import org.onetwo.common.reflect.ReflectUtils;
 import org.onetwo.common.spring.SpringUtils;
 import org.onetwo.common.spring.Springs;
+import org.onetwo.common.spring.ftl.AbstractFreemarkerTemplateConfigurer;
+import org.onetwo.common.spring.ftl.DateRangeDirective;
+import org.onetwo.common.spring.ftl.ForeachDirective;
+import org.onetwo.common.spring.ftl.StrDirective;
 import org.onetwo.common.utils.CUtils;
 import org.onetwo.common.utils.LangUtils;
 import org.onetwo.dbm.annotation.DbmFieldListeners;
@@ -123,6 +129,25 @@ final public class DbmUtils {
 		ListableBeanFactory bf = (ListableBeanFactory)applicationContext.getAutowireCapableBeanFactory();
 		return scanEnableDbmPackages(bf);
 	}
+	
+	/***
+	 * 首先找到标注了 annotationCLass 注解（比如 @EnableDbm ）的bean
+	 * 然后读取注解的packagesToScan属性值，有则返回此值
+	 * 没有则返回标注了注解的bean所在包，作为返回值
+	 * 
+	 * sample:
+	 *  
+	 * @EnableDbm
+	 * class EnableDbmBean {
+	 * }
+	 * 
+	 * Set<String> packageNames = SpringAnnotationUtils.scanAnnotationPackages(applicationContext, EnableDbmBean.class)
+	 * packageNames = EnableDbmUIBean.class.getPackage().getName();
+	 * 
+	 * @author weishao zeng
+	 * @param beanFactory
+	 * @return
+	 */
 	public static List<String> scanEnableDbmPackages(ListableBeanFactory beanFactory){
 		List<String> packageNames = new ArrayList<String>();
 		SpringUtils.scanAnnotation(beanFactory, EnableDbm.class, (beanDef, beanClass)->{
@@ -144,6 +169,7 @@ final public class DbmUtils {
 		});
 		return packageNames;
 	}
+	
 	/*public static List<String> scanDbmPackages(ApplicationContext applicationContext){
 		ListableBeanFactory bf = (ListableBeanFactory)applicationContext.getAutowireCapableBeanFactory();
 		return scanDbmPackages(bf);
@@ -345,6 +371,14 @@ final public class DbmUtils {
 		public String toString() {
 			return getValue()==null?"NULL":getValue().toString();
 		}
+	}
+	
+	public static void initSqlTemplateDirective(AbstractFreemarkerTemplateConfigurer configurer) {
+		configurer.addDirective(new ForeachDirective());
+		configurer.addDirective(new DateRangeDirective());
+		configurer.addDirective(new StrDirective());
+		configurer.addDirective(new WhereDirective());
+		configurer.addDirective(new SetDirective());
 	}
 	
 	private DbmUtils(){

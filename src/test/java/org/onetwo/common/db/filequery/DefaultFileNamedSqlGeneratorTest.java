@@ -102,7 +102,7 @@ public class DefaultFileNamedSqlGeneratorTest {
 		System.out.println("sql: " + sqlAndValues.getParsedSql());
 		System.out.println("values: " + sqlAndValues.asMap());
 		String sql = "select * from TEST_USER u\n"
-				+ "where u.age = :query.age ";
+				+ "where  u.age = :query.age ";
 		assertThat(sqlAndValues.getParsedSql()).isEqualTo(sql);
 		
 		
@@ -121,7 +121,7 @@ public class DefaultFileNamedSqlGeneratorTest {
 		System.out.println("sql: " + sqlAndValues.getParsedSql());
 		System.out.println("values: " + sqlAndValues.asMap());
 		sql = "select * from TEST_USER u\n"
-				+ "where u.user_name = :query.userName    and u.status = :query.status ";
+				+ "where u.user_name = :query.userName    and u.status = :query.status  ";
 		assertThat(sqlAndValues.getParsedSql()).isEqualTo(sql);
 	}
 

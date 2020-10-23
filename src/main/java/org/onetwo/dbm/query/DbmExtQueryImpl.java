@@ -64,6 +64,14 @@ public class DbmExtQueryImpl extends SelectExtQueryImpl {
 		return super.getSelectFieldName(fname);
 	}
 
+	@Override
+	public void selectId() {
+		List<String> idFields = this.entry.getIdentifyFields().stream().map(f -> {
+			return f.getName();
+		}).collect(Collectors.toList());
+		select(idFields.toArray(new String[0]));
+	}
+	
 	/*@SuppressWarnings("unchecked")
 	protected SelectExtQueryImpl buildJoin(StringBuilder joinBuf, String joinKey, boolean hasParentheses) {
 		if (!hasParams(joinKey))

@@ -1,6 +1,7 @@
 package org.onetwo.dbm.mapping.converter;
 
 import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
+import org.onetwo.common.utils.StringUtils;
 import org.onetwo.dbm.exception.DbmException;
 import org.onetwo.dbm.mapping.DbmFieldValueConverter;
 import org.onetwo.dbm.mapping.DbmMappedField;
@@ -19,7 +20,7 @@ public class EncryptFieldValueConverter implements DbmFieldValueConverter {
 
 	@Override
 	public Object forJava(DbmMappedField field, Object fieldValue) {
-		if (fieldValue==null) {
+		if (fieldValue==null || StringUtils.isBlank(fieldValue.toString())) {
 			return fieldValue;
 		}
 		String decrypted = encryptor.decrypt(fieldValue.toString());

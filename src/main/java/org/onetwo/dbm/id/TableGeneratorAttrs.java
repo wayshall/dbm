@@ -1,4 +1,9 @@
 package org.onetwo.dbm.id;
+
+import org.onetwo.common.utils.StringUtils;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.util.Assert;
+
 /**
  * @author wayshall
  * <br/>
@@ -6,16 +11,28 @@ package org.onetwo.dbm.id;
 public class TableGeneratorAttrs {
 
 	final private String name;
+	/***
+	 * 批量分配时， 每次分配id的数量
+	 */
 	final private int allocationSize;
-	final private String table;
+	private String table = "gen_ids";
 	//列1，varchar 类型，存储生成ID的键
-	final private String pkColumnName;  
+	private String pkColumnName = "gen_name";  
 	// 列2，int 类型，存储ID值
-	final private String valueColumnName;
+	private String valueColumnName = "gen_value";
 	//列1的键值
 	final private String pkColumnValue;
 	
 	final private int initialValue;
+	/***
+	 * 默认使用 PROPAGATION_REQUIRES_NEW 
+	 */
+	private int transactionPropagation = TransactionDefinition.PROPAGATION_REQUIRES_NEW;
+	
+	
+	public TableGeneratorAttrs(String name, String pkColumnValue, int allocationSize) {
+		this(name, allocationSize, "gen_ids", "gen_name", "gen_value", pkColumnValue, 1);
+	}
 	
 	public TableGeneratorAttrs(String name, int allocationSize, String table,
 			String pkColumnName, String valueColumnName, String pkColumnValue,
@@ -23,9 +40,21 @@ public class TableGeneratorAttrs {
 		super();
 		this.name = name;
 		this.allocationSize = allocationSize;
-		this.table = table;
-		this.pkColumnName = pkColumnName;
-		this.valueColumnName = valueColumnName;
+		if (StringUtils.isNotBlank(table)) {
+			this.table = table;
+		} else {
+			Assert.hasText(table, "table can not be blank!");
+		}
+		if (StringUtils.isNotBlank(pkColumnName)) {
+			this.pkColumnName = pkColumnName;
+		} else {
+			Assert.hasText(pkColumnName, "pkColumnName can not be blank!");
+		}
+		if (StringUtils.isNotBlank(valueColumnName)) {
+			this.valueColumnName = valueColumnName;
+		} else {
+			Assert.hasText(valueColumnName, "valueColumnName can not be blank!");
+		}
 		this.pkColumnValue = pkColumnValue;
 		this.initialValue = initialValue;
 	}
@@ -56,6 +85,14 @@ public class TableGeneratorAttrs {
 
 	public int getInitialValue() {
 		return initialValue;
+	}
+
+	public int getTransactionPropagation() {
+		return transactionPropagation;
+	}
+
+	public void setTransactionPropagation(int transactionPropagation) {
+		this.transactionPropagation = transactionPropagation;
 	}  
 
 }

@@ -15,10 +15,8 @@ public class Jsr303EntityValidator implements EntityValidator {
 	}
 
 	@Override
-	public void validate(Object entity) {
-		this.validatorWrapper.throwIfValidateFailed(entity);
+	public void validate(Object entity, Class<?>... validateGrpups) {
+		this.validatorWrapper.throwIfValidateFailed(entity, validateGrpups);
 	}
 	
-	
-
 }

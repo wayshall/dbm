@@ -13,6 +13,7 @@ import org.onetwo.common.db.sqlext.SQLSymbolManager;
 import org.onetwo.common.utils.LangUtils;
 import org.onetwo.common.utils.StringUtils;
 import org.onetwo.dbm.dialet.DBDialect.LockInfo;
+import org.onetwo.dbm.exception.DbmException;
 
 /*********
  * 提供简易有明确api的查询构造器
@@ -59,6 +60,9 @@ public class QueryBuilderImpl<E> implements QueryBuilder<E> {
 	}
 
 	protected QueryBuilderImpl(InnerBaseEntityManager baseEntityManager, Class<?> entityClass){
+		if (entityClass==null) {
+			throw new DbmException("entity class can not be null");
+		}
 		this.entityClass = entityClass;
 		this.alias = StringUtils.uncapitalize(entityClass.getSimpleName());
 		this.baseEntityManager = baseEntityManager;
@@ -138,6 +142,18 @@ public class QueryBuilderImpl<E> implements QueryBuilder<E> {
 	@Override
 	public QueryBuilderImpl<E> asc(String...fields){
 		this.params.put(K.ASC, fields);
+		return self();
+	}
+	
+	@Override
+	public QueryBuilderImpl<E> ascRand(Object seed){
+		this.params.put(K.ASC, K.RAND.withkey(seed));
+		return self();
+	}
+	
+	@Override
+	public QueryBuilderImpl<E> descRand(Object seed){
+		this.params.put(K.DESC, K.RAND.withkey(seed));
 		return self();
 	}
 	
@@ -226,7 +242,8 @@ public class QueryBuilderImpl<E> implements QueryBuilder<E> {
 		extQuery = createExtQuery(entityClass, alias, params);
 		extQuery.build();*/
 		
-		QueryActionImpl<E> queryAction = new QueryActionImpl<E>(this, entityClass, alias, params);
+//		QueryActionImpl<E> queryAction = new QueryActionImpl<E>(this, entityClass, alias, params);
+		QueryActionImpl<E> queryAction = new QueryActionImpl<E>(this);
 		
 		/*JFishQueryValue qv = JFishQueryValue.create(getSQLSymbolManager().getPlaceHolder(), extQuery.getSql());
 		qv.setResultClass(extQuery.getEntityClass());

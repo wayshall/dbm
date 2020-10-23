@@ -81,7 +81,7 @@ abstract public class BaseMetaDialet implements DatabaseMetaDialet {
 	
 	public TableMeta getTableMeta(String tableName){
 		return findTableMeta(tableName).orElseThrow(() -> {
-			return new DbmException("not table found: " + tableName);	
+			return new DbmException("table not found: " + tableName);	
 		});
 	}
 
@@ -165,8 +165,8 @@ abstract public class BaseMetaDialet implements DatabaseMetaDialet {
 				}*/
 				String isNullable  = rs.getString("IS_NULLABLE");
 				int columnSize = rs.getInt("COLUMN_SIZE");
-				ColumnMapping mapping = getMetaMapping().getRequiredColumnMapping(sqlType);
-				logger.info("mapping -> colunm: {}, sqltype: {}", colName, mapping);
+				ColumnMapping mapping = getMetaMapping().getRequiredColumnMapping(colName, sqlType);
+//				logger.info("mapping -> colunm: {}, sqltype: {}", colName, mapping);
 				ColumnMeta meta = new ColumnMeta(table, colName, mapping);
 				meta.setComment(remark);
 				meta.setNullable("yes".equalsIgnoreCase(isNullable));

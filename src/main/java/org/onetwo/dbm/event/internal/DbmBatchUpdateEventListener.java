@@ -29,7 +29,7 @@ public class DbmBatchUpdateEventListener extends UpdateEventListener {
 		}
 //		int count = this.executeJdbcUpdate(event.getEventSource(), entry.makeUpdate(entity));
 		JdbcStatementContext<List<Object[]>> updates = entry.makeUpdate(entity);
-		int count = this.executeJdbcUpdate(true, updates.getSql(), updates.getValue(), event.getEventSource());
+		int count = this.executeJdbcUpdate(true, updates.getSql(), updates.getValue(), event.getEventSource(), event.getBatchSize());
 		event.setUpdateCount(count);
 	}
 

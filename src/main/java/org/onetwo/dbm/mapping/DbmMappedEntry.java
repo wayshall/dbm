@@ -71,6 +71,8 @@ public interface DbmMappedEntry extends DbmMappedEntryMeta {
 //	JdbcStatementContext<Object[]> makeLockSelect(Object object, LockInfo lock);
 	
 	JdbcStatementContext<List<Object[]>> makeInsert(Object entity);
+	
+	JdbcStatementContext<List<Object[]>> makeMysqlInsertOrUpdate(Object entity);
 
 	/***
 	 * make delete by id
@@ -85,8 +87,8 @@ public interface DbmMappedEntry extends DbmMappedEntryMeta {
 
 	JdbcStatementContext<List<Object[]>> makeDymanicUpdate(Object entity);
 
-	Map<String, AbstractMappedField> getMappedFields();
-	Map<String, AbstractMappedField> getMappedColumns();
+	Map<String, DbmMappedField> getMappedFields();
+	Map<String, DbmMappedField> getMappedColumns();
 
 	/*boolean isQueryableOnly();
 

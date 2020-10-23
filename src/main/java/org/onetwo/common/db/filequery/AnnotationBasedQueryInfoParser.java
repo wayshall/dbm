@@ -10,7 +10,6 @@ import java.util.stream.Stream;
 import org.onetwo.common.db.dquery.DbmSqlFileResource;
 import org.onetwo.common.db.dquery.annotation.Query;
 import org.onetwo.common.db.spi.NamedQueryFile;
-import org.onetwo.common.db.spi.NamedQueryInfo;
 import org.onetwo.common.db.spi.NamedQueryInfoParser;
 import org.onetwo.common.db.spi.QueryConfigData;
 import org.onetwo.common.db.spi.QueryContextVariable;
@@ -50,15 +49,15 @@ public class AnnotationBasedQueryInfoParser implements NamedQueryInfoParser {
 			return ;
 		}
 		for(Method method : methods){
-			NamedQueryInfo info = getOrCreateNamedQueryInfo(namedQueryFile, method);
+			FileBaseNamedQueryInfo info = getOrCreateNamedQueryInfo(namedQueryFile, method);
 			processQueryConfig(info, method);
 		}
 	}
 	
-	protected NamedQueryInfo getOrCreateNamedQueryInfo(NamedQueryFile namedQueryFile, Method method){
-		NamedQueryInfo info = namedQueryFile.getNamedProperty(method.getName());
+	protected FileBaseNamedQueryInfo getOrCreateNamedQueryInfo(NamedQueryFile namedQueryFile, Method method){
+		FileBaseNamedQueryInfo info = namedQueryFile.getNamedProperty(method.getName());
 		if(info==null){
-			info = new NamedQueryInfo();
+			info = new FileBaseNamedQueryInfo();
 			info.setName(method.getName());
 			info.setDbmNamedQueryFile(namedQueryFile);
 			namedQueryFile.put(info.getName(), info, true);
@@ -66,7 +65,7 @@ public class AnnotationBasedQueryInfoParser implements NamedQueryInfoParser {
 		return info;
 	}
 	
-	protected void processQueryConfig(NamedQueryInfo info, Method method){
+	protected void processQueryConfig(FileBaseNamedQueryInfo info, Method method){
 		Query query = AnnotationUtils.findAnnotation(method, Query.class);
 		if(StringUtils.isNotBlank(query.value())){
 			info.setSql(query.value());

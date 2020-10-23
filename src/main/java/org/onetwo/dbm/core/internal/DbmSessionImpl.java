@@ -14,7 +14,6 @@ import org.onetwo.common.db.sql.SequenceNameManager;
 import org.onetwo.common.db.sqlext.SQLSymbolManager;
 import org.onetwo.common.db.sqlext.SelectExtQuery;
 import org.onetwo.common.utils.Assert;
-import org.onetwo.common.utils.LangUtils;
 import org.onetwo.common.utils.Page;
 import org.onetwo.dbm.core.spi.DbmInnerServiceRegistry;
 import org.onetwo.dbm.core.spi.DbmSession;
@@ -22,6 +21,7 @@ import org.onetwo.dbm.core.spi.DbmSessionFactory;
 import org.onetwo.dbm.core.spi.DbmTransaction;
 import org.onetwo.dbm.dialet.DBDialect;
 import org.onetwo.dbm.event.internal.DbmSessionEventSource;
+import org.onetwo.dbm.event.spi.DbmBatchInsertEvent;
 import org.onetwo.dbm.event.spi.DbmDeleteEvent;
 import org.onetwo.dbm.event.spi.DbmDeleteEvent.DeleteType;
 import org.onetwo.dbm.event.spi.DbmEventAction;
@@ -41,6 +41,7 @@ import org.onetwo.dbm.mapping.MappedEntryManager;
 import org.onetwo.dbm.query.DbmQuery;
 import org.onetwo.dbm.query.DbmQueryImpl;
 import org.onetwo.dbm.query.DbmQueryWrapperImpl;
+import org.onetwo.dbm.utils.DbmErrors;
 import org.onetwo.dbm.utils.DbmLock;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.ColumnMapRowMapper;
@@ -63,6 +64,7 @@ public class DbmSessionImpl extends AbstractDbmSession implements DbmSessionEven
 	final private long id;
 	final private Date timestamp = new Date();
 	private SessionTransactionType transactionType;
+	private boolean closed = false;
 
 	public DbmSessionImpl(DbmSessionFactory sessionFactory, long id, DbmTransaction transaction){
 		Assert.notNull(sessionFactory);
@@ -76,9 +78,20 @@ public class DbmSessionImpl extends AbstractDbmSession implements DbmSessionEven
 		return id;
 	}
 
+	protected void errorIfClosed() {
+		if (isClosed()) {
+			throw new DbmException(DbmErrors.ERR_SESSION_IS_CLOSED);
+		}
+	}
+	
+	public boolean isClosed() {
+		return closed;
+	}
+
 	@Override
 	public void close() {
-		
+		this.transaction = null;
+		this.closed = true;
 	}
 
 	public boolean useContextTransactional() {
@@ -102,6 +115,7 @@ public class DbmSessionImpl extends AbstractDbmSession implements DbmSessionEven
 	}
 
 	public DbmTransaction getTransaction() {
+		this.errorIfClosed();
 		return transaction;
 	}
 
@@ -111,6 +125,8 @@ public class DbmSessionImpl extends AbstractDbmSession implements DbmSessionEven
 	}
 	
 	public synchronized DbmTransaction beginTransaction(TransactionDefinition definition) {
+		this.errorIfClosed();
+		
 		if(this.transactionType==SessionTransactionType.CONTEXT_MANAGED 
 //				|| this.transactionType==SessionTransactionType.PROXY
 			){
@@ -162,8 +178,7 @@ public class DbmSessionImpl extends AbstractDbmSession implements DbmSessionEven
 	
 
 	public <T> int insertOrUpdate(T entity, boolean dymanicIfUpdate){
-		if(LangUtils.isNullOrEmptyObject(entity))
-			throw new DbmException("entity can not be null or empty: " + entity);
+		checkEntity(entity);
 		DbmInsertOrUpdateEvent event = new DbmInsertOrUpdateEvent(entity, dymanicIfUpdate, this);
 //		event.setRelatedFields(relatedFields);
 		this.fireEvents(event);
@@ -175,7 +190,7 @@ public class DbmSessionImpl extends AbstractDbmSession implements DbmSessionEven
 	}
 	
 	protected <T> int insert(T entity, boolean fetchId){
-		Assert.notNull(entity);
+		checkEntity(entity);
 		DbmInsertEvent event = new DbmInsertEvent(entity, this);
 		event.setFetchId(fetchId);
 //		event.setRelatedFields(relatedFields);
@@ -183,6 +198,14 @@ public class DbmSessionImpl extends AbstractDbmSession implements DbmSessionEven
 		return event.getUpdateCount();
 	}
 
+	private void checkEntity(Object entity) {
+		if (entity==null) {
+			throw new DbmException("entity can not be null");
+		}
+		if (entity instanceof Class) {
+			throw new DbmException("entity can not be a instance of class: " + entity);
+		}
+	}
 	/*public <T> int saveRef(T entity){
 		return saveRef(entity, false);
 	}*/
@@ -216,6 +239,7 @@ public class DbmSessionImpl extends AbstractDbmSession implements DbmSessionEven
 	
 	@Override
 	public <T> int justInsert(T entity){
+		checkEntity(entity);
 		return insert(entity, false);
 	}
 	
@@ -225,17 +249,41 @@ public class DbmSessionImpl extends AbstractDbmSession implements DbmSessionEven
 	@Override
 	public <T> int batchInsert(Collection<T> entities){
 //		Assert.notNull(entities);
-		DbmInsertEvent event = new DbmInsertEvent(entities, this);
-		event.setAction(DbmEventAction.batchInsert);
-//		this.fireBatchInsertEvent(event);
+		DbmBatchInsertEvent event = new DbmBatchInsertEvent(entities, this);
 		this.fireEvents(event);
 		return event.getUpdateCount();
 	}
 	
+	@Override
+	public <T> int batchInsert(Collection<T> entities, Integer batchSize) {
+		DbmBatchInsertEvent event = new DbmBatchInsertEvent(entities, this);
+		event.setBatchSize(batchSize);
+		this.fireEvents(event);
+		return event.getUpdateCount();
+	}
+
 	public <T> int batchUpdate(Collection<T> entities){
 		DbmUpdateEvent event = new DbmUpdateEvent(entities, this);
 		event.setDynamicUpdate(false);
 		event.setAction(DbmEventAction.batchUpdate);
+		this.fireEvents(event);
+		return event.getUpdateCount();
+	}
+	
+	@Override
+	public <T> int batchUpdate(Collection<T> entities, int batSize) {
+		DbmUpdateEvent event = new DbmUpdateEvent(entities, this);
+		event.setDynamicUpdate(false);
+		event.setAction(DbmEventAction.batchUpdate);
+		event.setBatchSize(batSize);
+		this.fireEvents(event);
+		return event.getUpdateCount();
+	}
+	
+	public <T> int batchInsertOrUpdate(Collection<T> entities, Integer batchSize) {
+		DbmBatchInsertEvent event = new DbmBatchInsertEvent(entities, this);
+		event.setAction(DbmEventAction.batchInsertOrUpdate);
+		event.setBatchSize(batchSize);
 		this.fireEvents(event);
 		return event.getUpdateCount();
 	}
@@ -247,6 +295,7 @@ public class DbmSessionImpl extends AbstractDbmSession implements DbmSessionEven
 	}*/
 	
 	protected void fireEvents(DbmSessionEvent event){
+		this.errorIfClosed();
 		getDialect().getDbmEventListenerManager().fireEvents(event);
 		/*DbmEventListener[] listeners = getDialect().getDbmEventListenerManager().getListeners(event.getAction());
 		for(DbmEventListener listern : listeners){
@@ -256,6 +305,7 @@ public class DbmSessionImpl extends AbstractDbmSession implements DbmSessionEven
 	
 	@Override
 	public int update(Object entity){
+		checkEntity(entity);
 		return update(entity, false);
 	}
 	
@@ -266,7 +316,7 @@ public class DbmSessionImpl extends AbstractDbmSession implements DbmSessionEven
 	
 	@Override
 	public int update(Object entity, boolean dymanicUpdate){
-		Assert.notNull(entity);
+		checkEntity(entity);
 		DbmUpdateEvent event = new DbmUpdateEvent(entity, this);
 		event.setDynamicUpdate(dymanicUpdate);
 //		event.setRelatedFields(relatedFields);
@@ -275,7 +325,7 @@ public class DbmSessionImpl extends AbstractDbmSession implements DbmSessionEven
 	}
 	
 	public int delete(Object entity){
-		Assert.notNull(entity);
+		checkEntity(entity);
 		DbmDeleteEvent deleteEvent = new DbmDeleteEvent(entity, this);
 //		deleteEvent.setRelatedFields(relatedFields);
 		this.fireEvents(deleteEvent);
@@ -408,6 +458,7 @@ public class DbmSessionImpl extends AbstractDbmSession implements DbmSessionEven
 	}
 	
 	public <T> T findUnique(String sql, Object[] args, RowMapper<T> row){
+		this.errorIfClosed();
 		T result = null;
 		try{
 			result = this.getDbmJdbcOperations().queryForObject(sql, args, row);
@@ -507,6 +558,7 @@ public class DbmSessionImpl extends AbstractDbmSession implements DbmSessionEven
 	}
 	
 	public DbmQuery createDbmQuery(String sql, Class<?> entityClass){
+		this.errorIfClosed();
 		return new DbmQueryImpl(this, sql, entityClass);
 	}
 	
@@ -596,7 +648,6 @@ public class DbmSessionImpl extends AbstractDbmSession implements DbmSessionEven
 	public DbmInnerServiceRegistry getServiceRegistry() {
 		return sessionFactory.getServiceRegistry();
 	}
-
 
 	@Override
 	public String toString() {

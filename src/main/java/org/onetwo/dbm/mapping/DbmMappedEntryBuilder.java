@@ -22,6 +22,7 @@ import org.onetwo.common.utils.RegisterManager;
 import org.onetwo.common.utils.StringUtils;
 import org.onetwo.dbm.annotation.DbmColumn;
 import org.onetwo.dbm.annotation.DbmEntity;
+import org.onetwo.dbm.annotation.DbmGeneratedValue;
 import org.onetwo.dbm.annotation.DbmQueryable;
 import org.onetwo.dbm.core.spi.DbmInnerServiceRegistry;
 import org.onetwo.dbm.dialet.DBDialect;
@@ -30,6 +31,7 @@ import org.onetwo.dbm.id.StrategyType;
 import org.onetwo.dbm.jpa.GeneratedValueIAttrs;
 import org.onetwo.dbm.query.DbmQueryableMappedEntryImpl;
 import org.onetwo.dbm.utils.DBUtils;
+import org.onetwo.dbm.utils.SpringAnnotationFinder;
 import org.slf4j.Logger;
 import org.springframework.core.Ordered;
 import org.springframework.core.type.AnnotationMetadata;
@@ -194,14 +196,14 @@ public class DbmMappedEntryBuilder implements MappedEntryBuilder, RegisterManage
 
 		TableInfo tableInfo = newTableInfo(annotationInfo);
 		if(jqueryable!=null){
-			entry = new DbmQueryableMappedEntryImpl(annotationInfo, tableInfo, serviceRegistry);
+			entry = new DbmQueryableMappedEntryImpl(jentity.name(), annotationInfo, tableInfo, serviceRegistry);
 		}else{
 			if(jentity.type()==MappedType.QUERYABLE_ONLY){
-				entry = new DbmQueryableMappedEntryImpl(annotationInfo, tableInfo, serviceRegistry);
+				entry = new DbmQueryableMappedEntryImpl(jentity.name(), annotationInfo, tableInfo, serviceRegistry);
 			}/*else if(jentity.type()==MappedType.JOINED){
 				entry = new JFishJoinedMappedEntryImpl(annotationInfo, tableInfo);
 			}*/else{
-				entry = new DbmMappedEntryImpl(annotationInfo, tableInfo, serviceRegistry);
+				entry = new DbmMappedEntryImpl(jentity.name(), annotationInfo, tableInfo, serviceRegistry);
 			}
 		}
 		entry.setSqlBuilderFactory(this.dialect.getSqlBuilderFactory());
@@ -382,6 +384,8 @@ public class DbmMappedEntryBuilder implements MappedEntryBuilder, RegisterManage
 		/*if(ignoreMappedField(prop)) {
 			return null;
 		}*/
+		// 替换注解查找策略
+		prop.getAnnotationInfo().setAnnotationFinder(SpringAnnotationFinder.INSTANCE);
 		
 		AbstractMappedField mfield = newMappedField(entry, prop);
 		this.buildMappedField(mfield);
@@ -420,15 +424,21 @@ public class DbmMappedEntryBuilder implements MappedEntryBuilder, RegisterManage
 	
 
 	protected void buildIdGeneratorsOnField(DbmMappedField mfield){
-		GeneratedValue g = mfield.getPropertyInfo().getAnnotation(GeneratedValue.class);
-		if(g==null){
-			return ;
-		}
-		GenerationType type = g.strategy();
-		GeneratedValueIAttrs generatedValueIAttrs = new GeneratedValueIAttrs(type, g.generator());
-		mfield.setGeneratedValueIAttrs(generatedValueIAttrs);
-		
+		GeneratedValueIAttrs generatedValueIAttrs = null;
+
 		AnnotationInfo annotationInfo = mfield.getPropertyInfo().getAnnotationInfo();
+		
+		GeneratedValue g = annotationInfo.getAnnotation(GeneratedValue.class);
+		DbmGeneratedValue dg = annotationInfo.getAnnotation(DbmGeneratedValue.class);
+		if (dg!=null) {
+			GenerationType type = dg.strategy();
+			generatedValueIAttrs = new GeneratedValueIAttrs(type, dg.generator());
+		} else if (g!=null) {
+			GenerationType type = g.strategy();
+			generatedValueIAttrs = new GeneratedValueIAttrs(type, g.generator());
+		}
+		
+		mfield.setGeneratedValueIAttrs(generatedValueIAttrs);
 		IdGeneratorFactory.createDbmIdGenerator(annotationInfo)
 							.ifPresent(idGenerator->mfield.addIdGenerator(idGenerator));
 	}

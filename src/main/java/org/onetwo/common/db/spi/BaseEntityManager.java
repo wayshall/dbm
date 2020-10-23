@@ -64,6 +64,7 @@ public interface BaseEntityManager {
 	public void dymanicUpdate(Object entity);
 
 	/****
+	 * 执行此方法时，若实体实现了逻辑删除接口ILogicDeleteEntity，则只是更新状态
 	 * @param entity
 	 */
 	public int remove(Object entity);
@@ -107,7 +108,7 @@ public interface BaseEntityManager {
 	 * @author wayshall
 	 * @param entity
 	 */
-	public void delete(ILogicDeleteEntity entity);
+//	public void delete(ILogicDeleteEntity entity);
 
 	/***
 	 * 逻辑删除
@@ -116,7 +117,7 @@ public interface BaseEntityManager {
 	 * @param id
 	 * @return
 	 */
-	public <T extends ILogicDeleteEntity> T deleteById(Class<T> entityClass, Serializable id);
+//	public <T extends ILogicDeleteEntity> T deleteById(Class<T> entityClass, Serializable id);
 
 	public <T> List<T> findAll(Class<T> entityClass);
 

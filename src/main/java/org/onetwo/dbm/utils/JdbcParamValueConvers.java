@@ -14,6 +14,7 @@ import javax.persistence.Enumerated;
 
 import org.onetwo.common.date.DateUtils;
 import org.onetwo.common.date.Dates;
+import org.onetwo.common.date.NiceDate;
 import org.onetwo.common.utils.JFishProperty;
 import org.onetwo.common.utils.JFishPropertyInfoImpl;
 import org.onetwo.dbm.jdbc.spi.JdbcParameterValue;
@@ -93,8 +94,10 @@ final public class JdbcParamValueConvers {
 				
 			};*/
 			
-		}else if(value instanceof JdbcParameterValue){
+		} else if (value instanceof JdbcParameterValue){
 			return ((JdbcParameterValue)value).toParameterValue();
+		 }else if (value instanceof NiceDate){
+			return ((NiceDate)value).getTime();
 		}
 		return value;
 	}

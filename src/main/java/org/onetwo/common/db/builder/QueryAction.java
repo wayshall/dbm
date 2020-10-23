@@ -3,9 +3,11 @@ package org.onetwo.common.db.builder;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.onetwo.common.utils.Page;
+import org.onetwo.dbm.jdbc.DbmMapRowMapperResultSetExtractor;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowMapper;
 
@@ -21,6 +23,15 @@ public interface QueryAction<E> {
 	E unique();
 	
 	E one();
+	
+	/****
+	 * 查询数据是否存在
+	 * @author weishao zeng
+	 * @return
+	 */
+	default public boolean exist() {
+		return optionalOne().isPresent();
+	}
 	
 	default public Optional<E> optionalOne() {
 		return Optional.ofNullable(one());
@@ -41,6 +52,8 @@ public interface QueryAction<E> {
 	default <T> List<T> listWith(SingleArgRowMapper<T> rowMapper) {
 		return listWith((RowMapper<T>)rowMapper);
 	}
+	
+	<K, V> Map<K, V> asMap(DbmMapRowMapperResultSetExtractor<K, V> rse);
 	
 	@FunctionalInterface
 	public interface SingleArgRowMapper<T> extends RowMapper<T> {

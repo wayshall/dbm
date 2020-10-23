@@ -6,9 +6,15 @@ import org.onetwo.common.db.TimeRecordableEntity;
 import org.onetwo.dbm.event.spi.DbmInsertOrUpdateEvent;
 import org.onetwo.dbm.event.spi.DbmSessionEvent;
 import org.onetwo.dbm.exception.EntityInsertException;
+import org.onetwo.dbm.exception.EntityNotFoundException;
 import org.onetwo.dbm.mapping.DbmMappedEntry;
 import org.springframework.dao.DuplicateKeyException;
 
+/****
+ * insertOrUpdate支持对象为集合类型的参数
+ * @author way
+ *
+ */
 public class DbmInsertOrUpdateListener extends AbstractDbmEventListener {
 
 	@Override
@@ -19,46 +25,22 @@ public class DbmInsertOrUpdateListener extends AbstractDbmEventListener {
 		int updateCount = 0;
 		
 		if(entry.hasIdentifyValue(entity)){
-			// 如果id有值并且id是自增或者自动生成，则执行update
+			// 如果id有值并且id是自增或者自动生成，则首先尝试执行update操作
 //			if(entry.getIdentifyFields().isGeneratedValue() || entry.getIdentifyField().isIdentityStrategy()){
 			if(entry.hasGeneratedValueIdField() || entry.hasIdentityStrategyField()){
-				if(insertOrUpdate.isDynamicUpdate()){
-					updateCount = es.dymanicUpdate(entity);
-				}else{
-					updateCount = es.update(entity);
-				}
-			}else{
-				// 插入前需要保存version字段的当前值，因为insert的时候可能会更改了
-				Object versionValue = null;
-				if(entry.isVersionControll()) {
-					versionValue = entry.getVersionField().getValue(entity);
-				}
-				
-				Date createAt = null;
-				TimeRecordableEntity timeEntity = null;
-				if (TimeRecordableEntity.class.isInstance(entity)) {
-					timeEntity = (TimeRecordableEntity) entity;
-					createAt = timeEntity.getCreateAt();
-				}
-				
 				try {
-					es.insert(entity);
-				} catch (EntityInsertException | DuplicateKeyException e) {
-					logger.warn("insert error, try to update...");
-					// 失败后把当前version值设置回去
-					if(entry.isVersionControll()) {
-						entry.getVersionField().setValue(entity, versionValue);
-					}
-					// 失败后设置回createAt
-					if (timeEntity!=null) {
-						timeEntity.setCreateAt(createAt);
-					}
 					if(insertOrUpdate.isDynamicUpdate()){
 						updateCount = es.dymanicUpdate(entity);
 					}else{
 						updateCount = es.update(entity);
 					}
+				} catch (EntityNotFoundException e) {
+					// update失败，则尝试插入
+//					insert(insertOrUpdate, entry, entity);
+					updateCount = es.insert(entity);
 				}
+			}else{
+				updateCount = insert(insertOrUpdate, entry, entity);
 			}
 		}else{
 			updateCount = es.insert(entity);
@@ -66,5 +48,40 @@ public class DbmInsertOrUpdateListener extends AbstractDbmEventListener {
 		return updateCount;
 	}
 	
+	private int insert(DbmInsertOrUpdateEvent insertOrUpdate, DbmMappedEntry entry, Object entity) {
+		// 插入前需要保存version字段的当前值，因为insert的时候可能会更改了
+		Object versionValue = null;
+		if(entry.isVersionControll()) {
+			versionValue = entry.getVersionField().getValue(entity);
+		}
+		
+		Date createAt = null;
+		TimeRecordableEntity timeEntity = null;
+		if (TimeRecordableEntity.class.isInstance(entity)) {
+			timeEntity = (TimeRecordableEntity) entity;
+			createAt = timeEntity.getCreateAt();
+		}
+		
+		int updateCount = 0;
+		try {
+			insertOrUpdate.getEventSource().insert(entity);
+		} catch (EntityInsertException | DuplicateKeyException e) {
+			logger.warn("insert error, try to update...");
+			// 失败后把当前version值设置回去
+			if(entry.isVersionControll()) {
+				entry.getVersionField().setValue(entity, versionValue);
+			}
+			// 失败后设置回createAt
+			if (timeEntity!=null) {
+				timeEntity.setCreateAt(createAt);
+			}
+			if(insertOrUpdate.isDynamicUpdate()){
+				updateCount = insertOrUpdate.getEventSource().dymanicUpdate(entity);
+			}else{
+				updateCount = insertOrUpdate.getEventSource().update(entity);
+			}
+		}
+		return updateCount;
+	}
 
 }

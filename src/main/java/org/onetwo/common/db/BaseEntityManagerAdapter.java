@@ -65,23 +65,6 @@ public abstract class BaseEntityManagerAdapter implements InnerBaseEntityManager
 	public Number countRecord(Class<?> entityClass, Object... params) {
 		return countRecordByProperties(entityClass, CUtils.asLinkedMap(params));
 	}
-	public void delete(ILogicDeleteEntity entity){
-		entity.deleted();
-		this.save(entity);
-	}
-
-	public <T extends ILogicDeleteEntity> T deleteById(Class<T> entityClass, Serializable id){
-		Object entity = this.findById(entityClass, id);
-		if(entity==null)
-			return null;
-		if(!ILogicDeleteEntity.class.isAssignableFrom(entity.getClass())){
-			throw new ServiceException("实体不支持逻辑删除，请实现相关接口！");
-		}
-		T logicDeleteEntity = (T) entity;
-		logicDeleteEntity.deleted();
-		this.save(logicDeleteEntity);
-		return logicDeleteEntity;
-	}
 	
 	public <T> List<T> findList(QueryBuilder<T> squery) {
 		return findListByProperties((Class<T>)squery.getEntityClass(), squery.getParams());
@@ -106,6 +89,9 @@ public abstract class BaseEntityManagerAdapter implements InnerBaseEntityManager
 	public Number count(SelectExtQuery extQuery) {
 		extQuery.build();
 		Number countNumber = (Number)this.findUnique(extQuery.getCountSql(), extQuery.getParamsValue().asMap());
+		if (countNumber==null) {
+			countNumber = 0;
+		}
 		return countNumber;
 	}
 
@@ -115,14 +101,29 @@ public abstract class BaseEntityManagerAdapter implements InnerBaseEntityManager
 		return createQuery(extQuery).getResultList();
 	}
 
-	@Override
-	public <T> T selectOne(SelectExtQuery extQuery) {
-		List<T> list = select(extQuery);
-		T entity = null;
-		if(LangUtils.hasElement(list))
-			entity = list.get(0);
-		return entity;
-	}
+//	@Override
+//	public <T> T selectOne(SelectExtQuery extQuery) {
+//		// 限制返回一条
+//		extQuery.limit(0, 1);
+//		List<T> list = select(extQuery);
+//		T entity = null;
+//		if(LangUtils.hasElement(list))
+//			entity = list.get(0);
+//		return entity;
+//	}
+//	
+//	/****
+//	 * 检测数据是否存在，只select id即可
+//	 * @author weishao zeng
+//	 * @param extQuery
+//	 * @return
+//	 */
+//	@Override
+//	public boolean exist(SelectExtQuery extQuery) {
+//		extQuery.selectId();
+//		Object dataWithId = selectOne(extQuery);
+//		return dataWithId!=null;
+//	}
 
 	/****
 	 * 查找唯一结果，如果找不到则返回null，找到多个则抛异常 IncorrectResultSizeDataAccessException，详见：DataAccessUtils.requiredSingleResult

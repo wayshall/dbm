@@ -1,8 +1,8 @@
 package org.onetwo.common.db.filequery;
 
 import org.onetwo.common.db.spi.NamedQueryInfo;
+import org.onetwo.common.db.spi.SqlTemplateParser;
 import org.onetwo.common.spring.ftl.FtlUtils;
-import org.onetwo.common.spring.ftl.TemplateParser;
 import org.onetwo.dbm.exception.FileNamedQueryException;
 
 import freemarker.template.TemplateHashModel;
@@ -12,11 +12,11 @@ import freemarker.template.TemplateModelException;
 public class FragmentTemplateParser implements TemplateHashModel {
 	public static final String DOT = ".";
 	
-	private final TemplateParser parser;
+	private final SqlTemplateParser parser;
 	private final ParserContext parserContext;
 	private final NamedQueryInfo query;
 	
-	public FragmentTemplateParser(TemplateParser parser, ParserContext parserContext, NamedQueryInfo query) {
+	public FragmentTemplateParser(SqlTemplateParser parser, ParserContext parserContext, NamedQueryInfo query) {
 		super();
 		this.parser = parser;
 		this.parserContext = parserContext;
@@ -29,7 +29,7 @@ public class FragmentTemplateParser implements TemplateHashModel {
 	 * @return
 	 */
 	public String getVarName() {
-		return NamedQueryInfo.FRAGMENT_KEY;
+		return FileBaseNamedQueryInfo.FRAGMENT_KEY;
 	}
 	
 	/***
@@ -40,7 +40,7 @@ public class FragmentTemplateParser implements TemplateHashModel {
 	 */
 	private boolean isNamespaceScope(String key){
 //		return key.startsWith(AbstractPropertiesManager.NAME_PREFIX);
-		return key.indexOf(NamedQueryInfo.DOT_KEY)!=-1;
+		return key.indexOf(FileBaseNamedQueryInfo.DOT_KEY)!=-1;
 	}
 	
 	private String getQueryName(String key){
@@ -59,12 +59,12 @@ public class FragmentTemplateParser implements TemplateHashModel {
 		String qname = getQueryName(key);
 		String subkey = key.substring(qname.length()+DOT.length());
 		// 跨命名空间访问片段时，必须以fragment开头，如：fragment.subWhere
-		if(!subkey.startsWith(NamedQueryInfo.FRAGMENT_KEY)){
-			throw new FileNamedQueryException("only can access "+NamedQueryInfo.FRAGMENT_KEY+" of query, error key: " + key);
+		if(!subkey.startsWith(FileBaseNamedQueryInfo.FRAGMENT_KEY)){
+			throw new FileNamedQueryException("only can access "+FileBaseNamedQueryInfo.FRAGMENT_KEY+" of query, error key: " + key);
 		}
 	}
 	/****
-	 * {@link NamedQueryInfo#getFragment()}
+	 * {@link FileBaseNamedQueryInfo#getFragment()}
 	 */
 	@Override
 	public TemplateModel get(String key) throws TemplateModelException {
@@ -77,7 +77,8 @@ public class FragmentTemplateParser implements TemplateHashModel {
 //			checkKeyIfNamespaceScope(subkey);
 //			value = (String)SpringUtils.newBeanWrapper(queryInfo).getPropertyValue(subkey);
 			checkKeyIfNamespaceScope(key);
-			value = query.getDbmNamedQueryFile().isGlobal()?key:query.getNamespace()+"."+key;
+//			value = query.getDbmNamedQueryFile().isGlobal()?key:query.getNamespace()+"."+key;
+			value = query.getNamespace()+"."+key;
 		}else{
 //			checkKey(key);
 //			value = query.getAttrs().get(key);

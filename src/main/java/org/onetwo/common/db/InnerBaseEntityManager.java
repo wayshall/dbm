@@ -8,14 +8,22 @@ import org.onetwo.common.utils.Page;
 
 public interface InnerBaseEntityManager extends BaseEntityManager {
 	
-	public <T> List<T> select(SelectExtQuery extQuery);
-	public <T> T selectUnique(SelectExtQuery extQuery);
-	public <T> T selectOne(SelectExtQuery extQuery);
-	public <T> void selectPage(Page<T> page, SelectExtQuery extQuery);
+	<T> List<T> select(SelectExtQuery extQuery);
+	<T> T selectUnique(SelectExtQuery extQuery);
+	<T> void selectPage(Page<T> page, SelectExtQuery extQuery);
 	
 
-	public <T> List<T> findList(DbmQueryValue queryValue);
-	public <T> T findUnique(DbmQueryValue queryValue);
+	<T> List<T> findList(DbmQueryValue queryValue);
+	<T> T findUnique(DbmQueryValue queryValue);
 
-	public Number count(SelectExtQuery extQuery);
+	Number count(SelectExtQuery extQuery);
+	
+	/****
+	 * 检测数据是否存在
+	 * @author weishao zeng
+	 * @param extQuery
+	 * @return
+	 */
+//	boolean exist(SelectExtQuery extQuery);
+//	<T> T selectOne(SelectExtQuery extQuery);
 }

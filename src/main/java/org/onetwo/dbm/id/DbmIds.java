@@ -44,7 +44,8 @@ public class DbmIds {
 	 */
 	public static SnowflakeIdGenerator createIdGeneratorByAddress() {
 		//根据ip地址来创建生成器
-		String[] strs = StringUtils.split(NetUtils.getHostAddress(), ".");
+//		String[] strs = StringUtils.split(NetUtils.getHostAddress(), ".");
+		String[] strs = StringUtils.split(NetUtils.getLocalHostLANIp(), ".");
 		int datacenterId = Types.asValue(strs[strs.length-2], int.class, 1)%32;
 		int machineId = Types.asValue(strs[strs.length-1], int.class, 1)%32;
 		SnowflakeIdGenerator idGenerator = createIdGenerator(new SnowflakeIdKey(datacenterId, machineId));
@@ -71,6 +72,31 @@ public class DbmIds {
 	public static class SnowflakeIdKey {
 		final private long datacenterId;
 		final private long machineId;
+		
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			SnowflakeIdKey other = (SnowflakeIdKey) obj;
+			if (datacenterId != other.datacenterId)
+				return false;
+			if (machineId != other.machineId)
+				return false;
+			return true;
+		}
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + (int) (datacenterId ^ (datacenterId >>> 32));
+			result = prime * result + (int) (machineId ^ (machineId >>> 32));
+			return result;
+		}
+		
 	}
 	
 	private DbmIds() {

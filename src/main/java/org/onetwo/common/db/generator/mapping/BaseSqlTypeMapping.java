@@ -56,10 +56,10 @@ public class BaseSqlTypeMapping implements MetaMapping {
 	public Collection<ColumnMapping> getColumnMappings(){
 		return sqlToJavaTypeMappings.values();
 	}
-	public ColumnMapping getRequiredColumnMapping(int sqlType){
+	public ColumnMapping getRequiredColumnMapping(String colName, int sqlType){
 		ColumnMapping mapping = sqlToJavaTypeMappings.get(sqlType);
 		if(mapping==null){
-			throw new BaseException("no mapping for sql type: " + sqlType);
+			throw new BaseException("no mapping for sql type: " + sqlType + ", column name: " + colName);
 		}
 		return mapping;
 	}

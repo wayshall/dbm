@@ -4,7 +4,6 @@ import java.io.File;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 import javax.sql.DataSource;
 
@@ -14,10 +13,10 @@ import org.onetwo.common.db.generator.ftl.FtlEngine;
 import org.onetwo.common.db.generator.ftl.TomcatDataSourceBuilder;
 import org.onetwo.common.file.FileUtils;
 import org.onetwo.common.utils.LangUtils;
-import org.onetwo.common.utils.StringUtils;
 import org.onetwo.dbm.exception.DbmException;
 import org.springframework.util.Assert;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 /**
@@ -65,7 +64,8 @@ public class DbmGenerator {
 	
 	private String templateBasePath = "META-INF/dbgenerator/";
 	
-	private WebadminGenerator webadmin;
+//	private WebadminGenerator webadmin;
+	private List<WebadminGenerator> webadmins = Lists.newArrayList();
 	
 	private Map<String, Object> context = Maps.newHashMap();
 	
@@ -97,6 +97,17 @@ public class DbmGenerator {
 
 	public DbmGenerator pageFileBaseDir(String pageFileBaseDir) {
 		this.pageFileBaseDir = pageFileBaseDir;
+		this.dbGenerator.globalConfig().pageFileBaseDir(pageFileBaseDir);
+		return this;
+	}
+	
+	public DbmGenerator context(String key, Object value) {
+		this.context.put(key, value);
+		return this;
+	}
+	
+	public DbmGenerator pluginBaseController(Class<?> pluginBaseControllerClass) {
+		context.put("pluginBaseController", pluginBaseControllerClass.getName());
 		return this;
 	}
 
@@ -112,13 +123,13 @@ public class DbmGenerator {
 			dbGenerator.stripTablePrefix(stripTablePrefix)
 			.globalConfig()
 				.projectPath(projectPath)
-				.pageFileBaseDir(pageFileBaseDir)
+//				.pageFileBaseDir(pageFileBaseDir)
 				.resourceDir(resourceDir)
 				.javaSrcDir(javaSrcDir)
 				.javaBasePackage(javaBasePackage)
 				.moduleName(moduleName)
-				.defaultTableContexts()
-				.end()
+//				.defaultTableContexts()
+//				.end()
 			.end();
 		});
 	}
@@ -134,16 +145,20 @@ public class DbmGenerator {
 				.javaSrcDir(testJavaSrcDir)
 				.javaBasePackage(javaBasePackage)
 				.moduleName(moduleName)
-				.defaultTableContexts()
-				.end()
+//				.defaultTableContexts()
+//				.end()
 			.end();
 		});
 	}
 	
 	public DbmGenerator pluginProjectDir(String pluginName){
+		/*
+		 * if (StringUtils.isBlank(moduleName)) { moduleName(pluginName); }
+		 */
 		this.mavenProjectDir();
 		pageFileBaseDir = LangUtils.toString("${0}/src/main/resources/META-INF/resources/webftls/"+pluginName, this.projectPath);
 		this.dbGenerator.globalConfig().pageFileBaseDir(pageFileBaseDir);
+		
 		return this;
 	}
 	
@@ -167,10 +182,13 @@ public class DbmGenerator {
 
 	public WebadminGenerator webadminGenerator(String tableName){
 		DbTableGenerator tableGenerator = dbGenerator.table(tableName);
-		webadmin = new WebadminGenerator();
+		
+		WebadminGenerator webadmin = new WebadminGenerator();
 		webadmin.tableGenerator = tableGenerator;
+		this.webadmins.add(webadmin);
 		return webadmin;
 	}
+
 	
 	/****
 	 * @see build()
@@ -221,9 +239,9 @@ public class DbmGenerator {
 			if(context!=DbmGenerator.this.context){
 				DbmGenerator.this.context.putAll(context);
 			}
-			if(webadmin!=null){
+			if(!webadmins.isEmpty()){
 				List<GeneratedResult<File>> resullt = dbGenerator.generate(context);
-				System.out.println("webadmin result: " + resullt);
+				System.out.println("generate result: " + resullt);
 			}
 		}
 	}
@@ -231,20 +249,7 @@ public class DbmGenerator {
 	public class WebadminGenerator {
 		private String templateName = templateBasePath + "webadmin";
 		private DbTableGenerator tableGenerator;
-		Function<String, OutfilePathFunc> vueFileNameFuncCreator = path -> {
-			return c->{
-				String tableShortName = c.tableNameStripStart(c.globalGeneratedConfig().getStripTablePrefix());
-				String pageFileBaseDir = c.globalGeneratedConfig().getPageFileBaseDir();
-				Assert.notNull(pageFileBaseDir, "pageFileBaseDir can not be null");
-				String moduleName = c.globalGeneratedConfig().getModuleName();
-				Assert.notNull(moduleName, "moduleName can not be null");
-				
-				String fileName = StringUtils.toCamel(tableShortName, false);
-				String filePath = pageFileBaseDir + "/"+moduleName+"/"+
-								fileName + FileUtils.getFileNameWithoutExt(path);
-				return filePath;
-			};
-		};
+//		private VuePageGenerator vueGenerator;
 		
 		public WebadminGenerator generateServiceImpl(){
 			tableGenerator.serviceImplTemplate(templateName+"/ServiceImpl.java.ftl");
@@ -253,13 +258,12 @@ public class DbmGenerator {
 		
 		public WebadminGenerator generateController(Class<?> pluginBaseController){
 			context.put("pluginBaseController", pluginBaseController.getName());
-			tableGenerator.controllerTemplate("controller", templateName+"/Controller.java.ftl");
+			tableGenerator.javaClassTemplate("controller", templateName+"/Controller.java.ftl");
 			return this;
 		}
 		
-		public WebadminGenerator generateVueController(Class<?> pluginBaseController){
-			context.put("pluginBaseController", pluginBaseController.getName());
-			tableGenerator.controllerTemplate("controller", templateName+"/MgrController.java.ftl");
+		public WebadminGenerator generateVueController(){
+			tableGenerator.javaClassTemplate("controller", templateName+"/MgrController.java.ftl");
 			return this;
 		}
 		
@@ -267,6 +271,7 @@ public class DbmGenerator {
 			tableGenerator.entityTemplate(templateName+"/Entity.java.ftl");
 			return this;
 		}
+		
 		
 		public WebadminGenerator generatePage(){
 			tableGenerator.pageTemplate(templateName+"/index.html.ftl");
@@ -278,53 +283,11 @@ public class DbmGenerator {
 			return this;
 		}
 		
-		public WebadminGenerator generateVueCrud(){
-			this.generateVueJsApi();
-			this.generateVueMgr();
-			this.generateVueMgrForm();
-			return this;
-		}
-		
-		public WebadminGenerator generateVueMgr(){
-			String mgrPath = templateName+"/Mgr.vue.ftl";
-			tableGenerator.pageTemplate(mgrPath, vueFileNameFuncCreator.apply(mgrPath));
-			return this;
-		}
-		
-		public WebadminGenerator generateVueMgrForm(){
-			String mgrPath = templateName+"/Mgr.vue.ftl";
-			tableGenerator.pageTemplate(mgrPath, vueFileNameFuncCreator.apply(mgrPath));
-			
-			String formPath = templateName+"/MgrForm.vue.ftl";
-			tableGenerator.pageTemplate(formPath, vueFileNameFuncCreator.apply(formPath));
-			return this;
-		}
-		public WebadminGenerator generateVueJsApi(){
-			String apiDir = "/src/api";
-			Function<String, OutfilePathFunc> outFileNameFuncCreator = path -> {
-				return c->{
-					String tableShortName = c.tableNameStripStart(c.globalGeneratedConfig().getStripTablePrefix());
-					String projectDir = c.globalGeneratedConfig().getProjectPath();
-					Assert.notNull(projectDir, "projectDir can not be null");
-					String moduleName = c.globalGeneratedConfig().getModuleName();
-					Assert.notNull(moduleName, "moduleName can not be null");
-					
-					String filePath = projectDir + apiDir + "/"+moduleName+"/"+
-					tableShortName.replace('_', '-') + FileUtils.getFileNameWithoutExt(path);
-					return filePath;
-				};
-			};
-			
-			String mgrPath = templateName+"/Api.js.ftl";
-			tableGenerator.pageTemplate(mgrPath, outFileNameFuncCreator.apply(mgrPath));
-			
-			return this;
-		}
-		
 		public DbmGenerator end(){
 			return DbmGenerator.this;
 		}
 		
 	}
+	
 	
 }

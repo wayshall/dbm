@@ -23,6 +23,7 @@
 - [BaseEntityManager接口和QueryDSL](#BaseEntityManager接口和QueryDSL)
 - [CrudEntityManager接口](#crudentitymanager接口)
 - [DbmRepository动态sql查询接口](#DbmRepository动态sql查询接口)
+- [sql片段支持](#sql片段支持)
 - [动态sql查询的语法和指令](#动态sql查询的语法和指令)
 - [DbmRepository接口的多数据源支持](#dbmrepository接口的多数据源支持)
 - [DbmRepository接口对其它orm框架的兼容](#dbmrepository接口对其它orm框架的兼容)
@@ -33,6 +34,8 @@
 - [json映射](#json映射)
 - [敏感字段映射](#敏感字段映射)
 - [字段绑定](#字段绑定)
+- [从其它地方加载DbmRepository接口的sql](#从其它地方加载DbmRepository接口的sql)
+- [直接传入要执行的sql作为参数](#直接传入要执行的sql作为参数)
 - [其它映射特性](#其它映射特性)
 - [批量插入](#批量插入)
 - [充血模型支持](#充血模型支持)
@@ -98,7 +101,7 @@ spring 4.0+
 <dependency>
     <groupId>org.onetwo4j</groupId>
     <artifactId>onetwo-dbm</artifactId>
-    <version>4.7.4-SNAPSHOT</version>
+    <version>4.8.0-SNAPSHOT</version>
 </dependency>
 
 ```
@@ -224,6 +227,25 @@ public class UserEntity implements Serializable {
 	protected Long id;
 }
 ```
+
+
+### @SnowFlakeId 注解
+
+4.7.4 版本后，使用内置的snowFlakeId生成主键id时，可直接使用 @SnowflakeId 简化配置：
+
+```Java
+@Entity
+@Table(name="t_user")
+public class UserEntity {
+	@SnowflakeId 
+	protected Long id;
+}
+```
+
+
+
+
+
 
 ## 复合主键映射
 jpa支持三种复合主键映射策略，dbm目前只支持一种： @IdClass 映射。
@@ -773,6 +795,80 @@ public interface UserDao {
 }
 ```
 
+## sql片段支持
+有时候，两个查询方法的sql里，大部分是相同的（比如查询条件），只有小部分不同，如果写两份，就需要维护两份sql。这时候，你可以使用sql片段@fragment
+
+比如有两个sql查询
+
+sql1是findUserListLikeName:
+
+```sql
+/***
+ * @name: findUserListLikeName
+ */
+select 
+    usr.*
+from 
+    test_user usr
+where 
+    user_name like :userName?likeString
+```
+
+sql2是countUserLikeName:
+
+```sql
+/***
+ * @name: countUserLikeName
+ */
+select 
+    count(1)
+from 
+    test_user usr
+where 
+    user_name like :userName?likeString
+```
+
+两个方法的查询条件是一样的，只是select的数据不同，此时可以把相同的部分抽取出来：
+
+```sql
+/***
+ * @name: queryUser
+ * @fragment: subWhere
+ */
+from 
+    test_user usr
+where 
+    user_name like :userName?likeString
+
+```
+
+findUserListLikeName的sql可以改写为：
+
+```sql
+/***
+ * @name: findUserListLikeName
+ */
+select 
+    usr.*
+${fragment['queryUser.fragment.subWhere']}
+```
+
+countUserLikeName改写为：
+
+```sql
+/***
+ * @name: countUserLikeName
+ */
+select 
+    count(1)
+${fragment['queryUser.fragment.subWhere']}
+```
+
+
+
+
+
+
 ## 动态sql查询的语法和指令
 
 ### 常用指令
@@ -923,6 +1019,14 @@ set  指令与where指令类似，只是@str指令的包装，用于sql更新语
         id = :query.id
 ```
 
+### dateRange
+
+```sql
+        // 以天（date）为间隔，遍历输出从10月1日到11日（不包含）的日期，日期按照format格式化为字符串，format参数不写，则dateVar为Date类型对象
+   [@dateRange from='2014-10-01' to='2014-10-11' type='date' format='yyyyMMdd' joiner=' or '; dateVar, index]
+        t.date = '${dateVar}'
+   [/@dateRange]
+```
 
 ### 其他特性
 
@@ -1239,9 +1343,23 @@ public class CustomDaoTest {
 
 ## 批量插入
 
-### 使用DbmRepository查询批量插入
 在mybatis里，批量插入非常麻烦，我见过有些人甚至使用for循环生成value语句来批量插入的，这种方法插入的数据量如果很大，生成的sql语句以吨计，如果用jdbc接口执行这条语句，系统必挂无疑。   
-在dbm里，使用批量接口很简单。   
+在dbm里，批量插入有几种方式。
+
+- 注意，批量操作不会触发 DbmEntityListener 接口的回调
+
+### 使用session接口的批量插入接口
+```java   
+List<UserEntity> userList = new ArrayList<>();
+userList.add(user);
+...
+baseEntityManager.getSessionFactory().getSession().batchInsert(userList)
+
+```
+
+### 使用DbmRepository查询批量插入
+在dbm里，使用编写sql的方式批量接口很简单。   
+
 定义接口：   
 ```java   
 
@@ -1251,16 +1369,95 @@ public interface UserAutoidDao {
 }
 
 ```
-定义sql：     
-![batcchInsert](doc/sql.batcchInsert.jpg)
+
+然后定义sql：     
+
+```sql
+
+/*****
+ * @name: batchInsert
+ * 批量插入     */
+    insert 
+    into
+        test_user_autoid
+        (birthday, email, gender, mobile, nick_name, password, status, user_name) 
+    values
+        (:birthday, :email, :gender, :mobile, :nickName, :password?encrypt, :status.value, :userName)
 
 
+```
 
-搞掂！   
+### 批量插入或更新
+dbm也利用了mysql的on duplicate key update语法，支持批量插入或更新：
+```java   
+List<UserEntity> userList = new ArrayList<>();
+userList.add(user);
+...
+baseEntityManager.getSessionFactory().getSession().batchInsertOrUpdate(userList, 10000)
+
+```
+
+### 从其它地方加载DbmRepository接口的sql
+4.8.0 版本后DbmRepository接口的sql可以自定义加载方式。
+DbmRepository接口默认是自动绑定接口名称对应的 ".jfish.sql"后缀的sql文件的，但有些场景，我们需要从其它地方加载sql。   
+这时，你可以通过@QueryName注解，标注命名查询的参数，动态设置查询名称（正常情况下，名称是类名+方法名），   
+使用@QuerySqlTemplateParser注解配置加载和解释sql的具体过程：
+```java
+@DbmRepository
+public interface SqlExecutor {
+    @QuerySqlTemplateParser(SimpleSqlTemplateParser.class) // 使用SimpleSqlTemplateParser解释命名查询
+    <T> T executeSql(@QueryName String name, // 标记此参数是命名查询的名字参数
+                    UserStatus status, 
+                    @QueryResultType Class<T> resultType);//对应查询的结果返回的类型
+
+}
+
+public class SimpleSqlTemplateParser implements SqlTemplateParser {
+
+    @Override
+    public String parseSql(String name, Object context) {
+        if ("countDisabledUser".equals(name)) {
+            return "select count(1) from test_user t where  t.status = :status";
+        }
+        return name;
+    }
+    
+}
+
+
+SqlExecutor.executeSql("countDisabledUser", // 执行名称为"countDisabledUser"的查询，而这个命名查询的sql就是SimpleSqlTemplateParser返回的sql
+                    UserStatus.DISABLED, 
+                    Long.class); // countDisabledUser实际执行的是一条统计sql，所以这里返回Long类型
+```
+
+### 直接传入要执行的sql作为参数
+4.8.0 版本支持。
+在一些更加复杂和需要动态化的场景，sql可能不是从某个地方加载的，而是需要从参数传入，然后直接执行，类似于原始的jdbc的execteSql功能，但同时又需要使用dbm的sql解释和参数化功能，也是没问题的。
+
+```java
+@DbmRepository
+public interface SqlExecutor {
+    
+    <T> T executeSql(@Sql String sql,
+                    UserStatus status, 
+                    @QueryResultType Class<T> resultType, //对应查询的结果返回的类型
+                    @QueryParseContext Map<String, Object> ctx);
+
+}
+
+Map<String, Object> ctx = Maps.newHashMap();
+ctx.put("now", new NiceData());
+SqlExecutor.executeSql("select count(1) from test_user t where  t.status = :status and t.birthDay=${now.format('yyyy-MM-dd')}", 
+                    UserStatus.DISABLED, 
+                    Long.class); // countDisabledUser实际执行的是一条统计sql，所以这里返回Long类型
+```
 
 ## 其它映射特性
 
+
+
 ### 注解@DbmRowMapper
+
 用于配置DbmRepository类的数据映射器，配置指定的mapper，默认为ENTITY模式。
 由于标注为实体的映射规则和Pojo默认的映射规则不一致，导致有时候某些查询返回需要用到两种规则时无法兼容，使用此注解的MIXTURE 混合模式可以兼容两种规则。
 

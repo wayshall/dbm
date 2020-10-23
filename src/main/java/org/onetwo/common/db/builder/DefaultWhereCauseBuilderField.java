@@ -9,6 +9,7 @@ import java.util.stream.Stream;
 import javax.persistence.metamodel.SingularAttribute;
 
 import org.onetwo.common.db.sqlext.ExtQueryUtils;
+import org.onetwo.common.db.sqlext.SQLOps;
 import org.onetwo.common.db.sqlext.SQLSymbolManager.FieldOP;
 import org.onetwo.common.utils.StringUtils;
 import org.onetwo.common.utils.func.Closure;
@@ -36,11 +37,9 @@ public class DefaultWhereCauseBuilderField<E> extends WhereCauseBuilderField<E> 
 							.toArray(new String[0]);
 	}
 
-	public WhereCauseBuilder<E> like(String... values) {
-		this.op = FieldOP.like;
-		this.values = values;
-		this.queryBuilder.addField(this);
-		return queryBuilder;
+	public DefaultWhereCauseBuilderField<E> when(Supplier<Boolean> predicate) {
+		this.whenPredicate = predicate;
+		return this;
 	}
 
 	/***
@@ -50,13 +49,20 @@ public class DefaultWhereCauseBuilderField<E> extends WhereCauseBuilderField<E> 
 	 * @return
 	 */
 	public WhereCauseBuilder<E> prelike(String... values) {
-		this.op = FieldOP.like;
-		this.values = Stream.of(values)
-							.map(val -> StringUtils.appendStartWith(val, "%"))
-							.collect(Collectors.toList())
-							.toArray(new String[0]);
-		this.queryBuilder.addField(this);
-		return queryBuilder;
+		return this.doWhenPredicate(()-> {
+			this.op = FieldOP.like;
+			this.values = Stream.of(values)
+								.map(val -> StringUtils.appendStartWith(val, "%"))
+								.collect(Collectors.toList())
+								.toArray(new String[0]);
+		});
+//		this.op = FieldOP.like;
+//		this.values = Stream.of(values)
+//							.map(val -> StringUtils.appendStartWith(val, "%"))
+//							.collect(Collectors.toList())
+//							.toArray(new String[0]);
+//		this.queryBuilder.addField(this);
+//		return queryBuilder;
 	}
 
 	/***
@@ -66,27 +72,44 @@ public class DefaultWhereCauseBuilderField<E> extends WhereCauseBuilderField<E> 
 	 * @return
 	 */
 	public WhereCauseBuilder<E> postlike(String... values) {
-		this.op = FieldOP.like;
-		this.values = Stream.of(values)
-							.map(val -> StringUtils.appendEndWith(val, "%"))
-							.collect(Collectors.toList())
-							.toArray(new String[0]);
-		this.queryBuilder.addField(this);
-		return queryBuilder;
+		return this.doWhenPredicate(()-> {
+			this.op = FieldOP.like;
+			this.values = Stream.of(values)
+								.map(val -> StringUtils.appendEndWith(val, "%"))
+								.collect(Collectors.toList())
+								.toArray(new String[0]);
+		});
+//		this.op = FieldOP.like;
+//		this.values = Stream.of(values)
+//							.map(val -> StringUtils.appendEndWith(val, "%"))
+//							.collect(Collectors.toList())
+//							.toArray(new String[0]);
+//		this.queryBuilder.addField(this);
+//		return queryBuilder;
 	}
 
 	public WhereCauseBuilder<E> notLike(String... values) {
-		this.op = FieldOP.not_like;
-		this.values = values;
-		this.queryBuilder.addField(this);
-		return queryBuilder;
+		return this.doWhenPredicate(()-> {
+			this.op = FieldOP.not_like;
+			this.values = values;
+		});
+//		this.op = FieldOP.not_like;
+//		this.values = values;
+//		this.queryBuilder.addField(this);
+//		return queryBuilder;
 	}
-
-	public DefaultWhereCauseBuilderField<E> when(Supplier<Boolean> predicate) {
-		this.whenPredicate = predicate;
-		return this;
+	
+	public WhereCauseBuilder<E> like(String... values) {
+		return this.doWhenPredicate(()-> {
+			this.op = FieldOP.like;
+			this.values = values;
+		});
+//		this.op = FieldOP.like;
+//		this.values = values;
+//		this.queryBuilder.addField(this);
+//		return queryBuilder;
 	}
-
+	
 	/***
 	 * 等于
 	 * @param values
@@ -98,8 +121,27 @@ public class DefaultWhereCauseBuilderField<E> extends WhereCauseBuilderField<E> 
 			this.values = values;
 		});
 	}
+
+	public <T> WhereCauseBuilder<E> value(SQLOps sqlOp, Supplier<T> valueSupplier) {
+		return this.doWhenPredicate(()->{
+			this.op = sqlOp.getSymbol();
+			this.values = new Object[] {valueSupplier.get()};
+		});
+	}
+
+	public <T> WhereCauseBuilder<E> values(SQLOps sqlOp, Supplier<T[]> valueSupplier) {
+		return this.doWhenPredicate(()->{
+			this.op = sqlOp.getSymbol();
+			this.values = valueSupplier.get();
+		});
+	}
+	
 	public <T> WhereCauseBuilder<E> is(T... values) {
 		return equalTo(values);
+	}
+	
+	public <T> WhereCauseBuilder<E> is(Supplier<T> valueSupplier) {
+		return value(SQLOps.EQUAL, valueSupplier);
 	}
 	
 	public WhereCauseBuilder<E> isNull(boolean isNull) {

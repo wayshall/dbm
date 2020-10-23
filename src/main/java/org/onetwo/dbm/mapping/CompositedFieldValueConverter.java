@@ -2,11 +2,8 @@ package org.onetwo.dbm.mapping;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Stream;
 
-import org.onetwo.common.convert.Types;
 import org.onetwo.common.utils.LangUtils;
-import org.onetwo.dbm.exception.DbmException;
 
 import com.google.common.collect.Lists;
 
@@ -17,6 +14,14 @@ import com.google.common.collect.Lists;
 public class CompositedFieldValueConverter implements DbmFieldValueConverter {
 	
 	final public static DbmFieldValueConverter ENUM_CONVERTER = new DbmFieldValueConverter() {
+		public Object forJava(DbmMappedField field, Object value) {
+			return field.getEnumType().forJava(field, value);
+		}
+		public Object forStore(DbmMappedField field, Object value) {
+			return field.getEnumType().forStore(field, value);
+		}
+	};
+	/*final public static DbmFieldValueConverter ENUM_CONVERTER = new DbmFieldValueConverter() {
 		
 		@Override
 		public Object forJava(DbmMappedField field, Object value) {
@@ -66,7 +71,7 @@ public class CompositedFieldValueConverter implements DbmFieldValueConverter {
 			}
 			return actualValue;
 		}
-	};
+	};*/
 
 	public static CompositedFieldValueConverter composited(DbmFieldValueConverter... converters) {
 		List<DbmFieldValueConverter> list = Lists.newArrayList();

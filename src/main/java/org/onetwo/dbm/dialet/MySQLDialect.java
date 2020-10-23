@@ -2,6 +2,9 @@ package org.onetwo.dbm.dialet;
 
 import org.onetwo.common.db.DataBase;
 import org.onetwo.common.utils.StringUtils;
+import org.onetwo.dbm.event.internal.DefaultCoreEventListenerManager;
+import org.onetwo.dbm.event.internal.mysql.MySQLBatchInsertOrUpdateEventListener;
+import org.onetwo.dbm.event.spi.DbmEventAction;
 import org.onetwo.dbm.id.StrategyType;
 
 public class MySQLDialect extends AbstractDBDialect {
@@ -32,7 +35,12 @@ public class MySQLDialect extends AbstractDBDialect {
 	protected String getReadLockString(int timeoutInMillis) {
 		return "lock in share mode";
 	}
-	
+
+	@Override
+	protected void onDefaultDbEventListenerManager(DefaultCoreEventListenerManager listMg){
+		super.onDefaultDbEventListenerManager(listMg);
+		listMg.registerListeners(DbmEventAction.batchInsertOrUpdate, new MySQLBatchInsertOrUpdateEventListener());
+	}
 
 	/*protected DbEventListenerManager createDefaultDbEventListenerManager() {
 		JFishdbEventListenerManager listenerManager = new JFishdbEventListenerManager();

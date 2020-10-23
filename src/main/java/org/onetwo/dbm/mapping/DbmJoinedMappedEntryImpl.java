@@ -24,7 +24,7 @@ public class DbmJoinedMappedEntryImpl extends AbstractDbmMappedEntryImpl impleme
 	}
 	
 	protected void buildStaticSQL(TableInfo tableInfo){
-		Collection<AbstractMappedField> columns = getFields();
+		Collection<? extends DbmMappedField> columns = getFields();
 //		List<ColumnInfo> idColumns = tableInfo.getPrimaryKey().getColumns();
 
 		staticInsertSqlBuilder = createSQLBuilder(SqlBuilderType.insert);

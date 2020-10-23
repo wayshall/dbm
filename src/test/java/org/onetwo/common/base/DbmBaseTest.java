@@ -10,6 +10,7 @@ import org.onetwo.common.log.JFishLoggerFactory;
 import org.onetwo.common.spring.cache.JFishSimpleCacheManagerImpl;
 import org.onetwo.common.spring.config.JFishProfile;
 import org.onetwo.common.spring.test.SpringBaseJUnitTestCase;
+import org.onetwo.dbm.lock.DbmLockerConfiguration;
 import org.onetwo.dbm.mapping.DbmConfig;
 import org.onetwo.dbm.mapping.DefaultDbmConfig;
 import org.onetwo.dbm.spring.EnableDbm;
@@ -20,6 +21,7 @@ import org.springframework.cache.CacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.ImportResource;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
@@ -39,7 +41,9 @@ public class DbmBaseTest extends SpringBaseJUnitTestCase {
 	@JFishProfile
 	@ImportResource("classpath:conf/applicationContext-test.xml")
 	@EnableDbm(value="dataSource", packagesToScan="org.onetwo.common.dbm")
+//	@EnableDbmUI(packagesToScan = "org.onetwo.dbm.ui.entity")
 	@ComponentScan(basePackageClasses=PackageInfo.class)
+	@Import(DbmLockerConfiguration.class)
 	public static class DbmBaseTestInnerContextConfig {
 
 		@Resource
