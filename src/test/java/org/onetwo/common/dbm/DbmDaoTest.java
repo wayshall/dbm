@@ -53,7 +53,7 @@ public class DbmDaoTest extends DbmBaseTest {
 		assertThat(stopUserCount).isEqualTo(insertCount);
 		
 		Map<String, Object> ctx = CUtils.asMap("testValue", 1);
-		ctx = CUtils.asMap(":sqlParameter1", 1);
+//		ctx = CUtils.asMap(":sqlParameter1", 1);
 		stopUserCount = userDao.countBySql("select count(1) from test_user t where  t.status = :status and 1=${testValue}", 
 											UserStatus.STOP, 
 											int.class, ctx);

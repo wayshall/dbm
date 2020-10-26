@@ -149,10 +149,16 @@ abstract public class AbstractMappedField implements DbmMappedField{
 		return enumType!=null;
 	}
 	
+	/****
+	 * 和 {@link #getValue(Object)}对应
+	 * 把value（一般从数据库获取）设置为实体的实际值（经过转换器转换的值，如转为java枚举量）
+	 * @see 和 {@link #getValue(Object)}对应
+	 */
 	@Override
 	public void setValue(Object entity, Object value){
 		value = DbmUtils.convertFromSqlParameterValue(this, value);
-		Object actaulValue = this.fieldValueConverter.forJava(this, value);;
+//		Object actaulValue = this.fieldValueConverter.forJava(this, value);;
+		Object actaulValue = this.getActualJavaValue(value);;
 		propertyInfo.setValue(entity, actaulValue);
 		
 		// 同时设置此字段绑定的字段的值
@@ -176,7 +182,13 @@ abstract public class AbstractMappedField implements DbmMappedField{
 		}
 	}
 	
-	
+	/***
+	 * 
+	 * 和 {@link #setValue(Object)}对应
+	 * 根据字段的配置信息，获取实体字段的实际值，用于保存到数据库
+	 * 
+	 * @see {@link #setValue(Object)}
+	 */
 	@Override
 	public Object getValue(Object entity){
 		Assert.notNull(entity);
@@ -196,7 +208,23 @@ abstract public class AbstractMappedField implements DbmMappedField{
 		} else {
 			value = propertyInfo.getValue(entity);
 		}
-		value = this.fieldValueConverter.forStore(this, value);
+//		value = this.fieldValueConverter.forStore(this, value);
+		value = this.getActualStoreValue(value);
+		return value;
+	}
+	
+
+	@Override
+	public Object getActualStoreValue(Object fieldValue) {
+//		Assert.notNull(fieldValue);
+		Object value = this.fieldValueConverter.forStore(this, fieldValue);
+		return value;
+	}
+
+	@Override
+	public Object getActualJavaValue(Object fieldValue) {
+//		Assert.notNull(fieldValue);
+		Object value = this.fieldValueConverter.forJava(this, fieldValue);
 		return value;
 	}
 	
@@ -374,7 +402,7 @@ abstract public class AbstractMappedField implements DbmMappedField{
 	public DbmEnumType getEnumType() {
 		return enumType;
 	}
-
+	
 	public DbmJsonField getJsonFieldAnnotation() {
 		return jsonFieldAnnotation;
 	}

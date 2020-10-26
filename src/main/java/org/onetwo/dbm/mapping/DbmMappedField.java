@@ -21,6 +21,21 @@ public interface DbmMappedField {
 	void setValue(Object entity, Object value);
 
 	Object getValue(Object entity);
+	
+	/***
+	 * 此方法会使用字段配置过的转换器对fieldValue进行转换，得到真实的字段值，一般用于存储
+	 * @see DbmMappedField#getFieldValueConverter
+	 * @param fieldValue
+	 * @return
+	 */
+	Object getActualStoreValue(Object fieldValue);
+	
+	/***
+	 * 此方法会使用字段配置过的转换器对fieldValue进行转换，得到真实的字段值，一般用于设置java对象
+	 * @param fieldValue
+	 * @return
+	 */
+	Object getActualJavaValue(Object fieldValue);
 
 //	void setValueFromJdbc(Object entity, Object value);
 
