@@ -22,8 +22,8 @@ import com.alibaba.druid.util.JdbcUtils;
 
 abstract public class DruidUtils {
 
-	public static String toCountSql(String sql, Object value){
-		return changeAsCountStatement(sql, value).toString();
+	public static String toCountSql(String sql){
+		return changeAsCountStatement(sql).toString();
 	}
 
 	/*public static String toCountSql2(String sql, Object value){
@@ -46,7 +46,7 @@ abstract public class DruidUtils {
 		SQLSelectStatement selectStatement = (SQLSelectStatement)statements.get(index);
 		return selectStatement;
 	}
-	public static SQLSelectStatement changeAsCountStatement(String sql, Object value){
+	public static SQLSelectStatement changeAsCountStatement(String sql){
 		List<SQLStatement> statements = SQLUtils.parseStatements(sql, JdbcUtils.MYSQL);
 		SQLSelectStatement selectStatement = getSQLSelectStatement(statements, 0);
 		if(selectStatement==null){
