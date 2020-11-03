@@ -69,6 +69,10 @@
 
 - 支持json映射，直接把数据库的json或者varchar类型（存储内容为json数据）的列映射为Java对象
 
+- 支持非int和String类型的枚举映射
+
+- 内置支持SnowFlake id生成算法
+
 - 支持敏感字段映射
 
    
@@ -343,7 +347,7 @@ public class UserEntity {
 	@Enumerated(EnumType.ORDINAL)
 	UserGenders gender;
 
-	public static enum UserGenders implements DbmEnumValueMapping {
+	public static enum UserGenders implements DbmEnumValueMapping<Integer> {
 		FEMALE("女性", 10),
 		MALE("男性", 11);
 		
@@ -357,13 +361,49 @@ public class UserEntity {
 			return label;
 		}
 		@Override
-		public int getMappingValue() {
+		public Integer getEnumMappingValue() {
 			return value;
 		}
 		
 	}
 }
 ```
+
+### 非int和String类型的枚举映射支持
+在jpa里，@Enumerated 注解支持int和String两种枚举值类型。
+在dbm里，只要属性的类型是枚举类型，并且实现了DbmEnumValueMapping接口，dbm就会自动处理枚举类型，不需要@Enumerated注解标记。
+而DbmEnumValueMapping是个泛型接口，可以支持任意类型的枚举值，只要数据值从数据库取回时可以和getEnumMappingValue()返回的值匹配上（eqauls）即可。
+比如项目比较奇葩，需要把枚举类型映射到Double类型：
+```java
+@Entity
+@Table(name="TEST_USER")
+@Data
+public class UserEntity {
+    @SnowflakeId
+    Long id;
+    UserGenders gender;
+}
+static enum UserGenders implements DbmEnumValueMapping<Double> {
+        FEMALE("女性", 0),
+        LADYBOY("人妖", 0.5),
+        MALE("男性", 1);
+        
+        final private String label;
+        final private double value;
+        private UserGenders(String label, double value) {
+            this.label = label;
+            this.value = value;
+        }
+        public String getLabel() {
+            return label;
+        }
+        @Override
+        public Double getEnumMappingValue() {
+            return value;
+        }
+}
+```
+
 
 ### 枚举属性查询时的处理
 

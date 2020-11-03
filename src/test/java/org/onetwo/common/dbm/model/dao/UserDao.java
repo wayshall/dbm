@@ -27,7 +27,7 @@ public interface UserDao extends CustomUserDao {
 
 	@Query(value="insert  into test_user " +
         " (id, birthday, email, gender, user_name) " +
-        " values (:id, :birthday, :email, :gender.mappingValue, :userName)"
+        " values (:id, :birthday, :email, :gender.enumMappingValue, :userName)"
 	)
 	int batchInsertUsers(List<UserEntity> users);
 	

@@ -26,6 +26,7 @@ import org.onetwo.common.utils.LangOps;
 import org.onetwo.common.utils.LangUtils;
 import org.onetwo.common.utils.Page;
 import org.onetwo.dbm.utils.DbmLock;
+import org.springframework.test.annotation.Rollback;
 
 public class DbmEntityManagerTest extends DbmBaseTest {
 
@@ -108,9 +109,9 @@ public class DbmEntityManagerTest extends DbmBaseTest {
 		user.setHeight(3.3f);
 		user.setAge(28);
 		user.setId(10000000000L);
-		user.setGender(UserGenders.MALE);
+		user.setGender(UserGenders.LADYBOY);
 		entityManager.save(user);
-		Assert.assertEquals(10000000000L, user.getId(), 0);
+		assertThat(user.getId()).isEqualTo(10000000000L);
 		
 		UserEntity quser = entityManager.findById(UserEntity.class, user.getId());
 		Assert.assertNotNull(quser);

@@ -5,8 +5,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 
+import org.onetwo.common.reflect.ReflectUtils;
 import org.onetwo.common.spring.SpringUtils;
 import org.onetwo.common.utils.Assert;
 import org.onetwo.common.utils.JFishProperty;
@@ -19,6 +21,7 @@ import org.onetwo.dbm.annotation.DbmJsonField;
 import org.onetwo.dbm.event.spi.DbmEventAction;
 import org.onetwo.dbm.id.StrategyType;
 import org.onetwo.dbm.jpa.GeneratedValueIAttrs;
+import org.onetwo.dbm.mapping.enums.DbmMappingEnumType;
 import org.onetwo.dbm.mapping.version.VersionableType;
 import org.onetwo.dbm.utils.DbmUtils;
 import org.onetwo.dbm.utils.SpringAnnotationFinder;
@@ -81,13 +84,18 @@ abstract public class AbstractMappedField implements DbmMappedField{
 		
 		if(propertyInfo.hasAnnotation(Enumerated.class)){
 			Enumerated enumerated = propertyInfo.getAnnotation(Enumerated.class);
-			this.enumType = DbmEnumType.valueOf(enumerated.value().name());
-		}else if(Enum.class.isAssignableFrom(propertyInfo.getType())){
+			if (enumerated.value()==EnumType.STRING) {
+				this.enumType = DbmEnumType.STRING;
+			} else {
+				this.enumType = DbmEnumType.ORDINAL;
+			}
+		} else if (Enum.class.isAssignableFrom(propertyInfo.getType())){
 			this.enumType = DbmEnumType.STRING;
 		}
-		// 如果配置了ORDINAL，并且实现了DbmEnumValueMapping接口，则设置为MAPPING
-		if(enumType==DbmEnumType.ORDINAL && DbmEnumValueMapping.class.isAssignableFrom(this.propertyInfo.getType())) {
-			this.enumType = DbmEnumType.MAPPING;
+		// 如果配置了ORDINAL，并且实现了DbmEnumValueMapping接口，则修改为DbmMappingEnumType
+		if(DbmEnumValueMapping.class.isAssignableFrom(this.propertyInfo.getType())) {
+			Class<?> actualEnumValueType = ReflectUtils.resolveClassOfGenericType(DbmEnumValueMapping.class, this.propertyInfo.getType());
+			this.enumType = new DbmMappingEnumType(actualEnumValueType);
 		}
 		
 		DbmFieldListeners listenersAnntation = propertyInfo.getAnnotation(DbmFieldListeners.class);

@@ -439,8 +439,10 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 			this.batchUpdate = executeUpdate.isBatch();
 			this.batchSize = executeUpdate.batchSize();
 		}else{
-			this.update = EXECUTE_UPDATE_PREFIX.contains(StringUtils.getFirstWord(this.method.getName()));
-			this.batchUpdate = BATCH_PREFIX.contains(StringUtils.getFirstWord(this.method.getName()));
+//			this.update = EXECUTE_UPDATE_PREFIX.contains(StringUtils.getFirstWord(this.method.getName()));
+			this.update = StringUtils.isStringStartWithAnyOne(this.method.getName(), EXECUTE_UPDATE_PREFIX);
+//			this.batchUpdate = BATCH_PREFIX.contains(StringUtils.getFirstWord(this.method.getName()));
+			this.batchUpdate = StringUtils.isStringStartWithAnyOne(this.method.getName(), BATCH_PREFIX);
 		}
 		if(!batchUpdate){
 			this.batchUpdate = judgeBatchUpdateFromParameterObjects(parameters);
