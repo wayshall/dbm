@@ -11,7 +11,7 @@ import org.onetwo.dbm.mapping.DbmMappedField;
 public class OrdinalEnumType extends AbstractDbmEnumType {
 
 	public OrdinalEnumType() {
-		super(String.class);
+		super(Integer.class);
 	}
 
 	@Override
