@@ -1155,6 +1155,36 @@ where
 - 执行脚本必须返回void
 - 脚本无法设置 jdbc 参数
 
+如：
+```Java
+@DbmRepository
+public interface SqlScriptDao {
+    @SqlScript
+    void createTables();
+}
+```
+对应的sql文件：
+```sql
+/**
+ * @name: createTables
+ */
+SET NAMES utf8mb4;
+SET FOREIGN_KEY_CHECKS = 0;
+
+-- ----------------------------
+-- Table structure for wx_access_token
+-- ----------------------------
+DROP TABLE IF EXISTS `test_table`;
+CREATE TABLE `test_table`  (
+  `id` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `create_at` datetime(0) NOT NULL,
+  `update_at` datetime(0) NOT NULL,
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_bin ROW_FORMAT = Compact;
+
+SET FOREIGN_KEY_CHECKS = 1;
+```
+
 ## DbmRepository接口的多数据源支持
 DbmRepository 查询接口还可以通过注解支持绑定不同的数据源，dataSource的值为spring bean的名称：
 ```Java
