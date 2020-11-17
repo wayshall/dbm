@@ -25,6 +25,7 @@
 - [DbmRepository动态sql查询接口](#DbmRepository动态sql查询接口)
 - [sql片段支持](#sql片段支持)
 - [动态sql查询的语法和指令](#动态sql查询的语法和指令)
+- [用DbmRepository执行脚本](#用DbmRepository执行脚本)
 - [DbmRepository接口的多数据源支持](#dbmrepository接口的多数据源支持)
 - [DbmRepository接口对其它orm框架的兼容](#dbmrepository接口对其它orm框架的兼容)
 - [查询映射](#查询映射)
@@ -74,6 +75,7 @@
 - 内置支持SnowFlake id生成算法
 
 - 支持敏感字段映射
+- Repository接口支持执行sql脚本
 
    
 ## 示例项目   
@@ -1146,7 +1148,12 @@ where
 
 - 支持Optional类型的返回值
 
-
+## 用DbmRepository执行脚本
+4.8.0版本后，DbmRepository支持执行sql脚本。
+只需要在DbmRepository的方法上加上注解@SqlScript，方法对应的sql即会被当做sql脚本执行。
+但需要注意：
+- 执行脚本必须返回void
+- 脚本无法设置 jdbc 参数
 
 ## DbmRepository接口的多数据源支持
 DbmRepository 查询接口还可以通过注解支持绑定不同的数据源，dataSource的值为spring bean的名称：
