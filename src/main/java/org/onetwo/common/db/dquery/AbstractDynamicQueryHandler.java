@@ -13,6 +13,7 @@ import java.util.concurrent.ExecutionException;
 
 import org.onetwo.common.convert.Types;
 import org.onetwo.common.db.ParsedSqlContext;
+import org.onetwo.common.db.dquery.annotation.SqlScript;
 import org.onetwo.common.db.filequery.ParsedSqlUtils;
 import org.onetwo.common.db.filequery.ParsedSqlUtils.ParsedSqlWrapper;
 import org.onetwo.common.db.filequery.ParsedSqlUtils.ParsedSqlWrapper.SqlParamterMeta;
@@ -38,9 +39,14 @@ import org.onetwo.dbm.exception.FileNamedQueryException;
 import org.onetwo.dbm.jdbc.spi.DbmJdbcOperations;
 import org.slf4j.Logger;
 import org.springframework.beans.BeanWrapper;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
+import org.springframework.jdbc.datasource.init.DatabasePopulatorUtils;
+import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 import org.springframework.util.Assert;
 
 import com.google.common.cache.LoadingCache;
+import com.google.common.util.concurrent.UncheckedExecutionException;
 
 abstract public class AbstractDynamicQueryHandler implements DynamicQueryHandler  {
 	
@@ -179,6 +185,13 @@ abstract public class AbstractDynamicQueryHandler implements DynamicQueryHandler
 		} catch (ExecutionException e) {
 			throw new FileNamedQueryException("get dynamic method error: " + method.getName(), e);
 //			return newDynamicMethod(method);
+		} catch (UncheckedExecutionException e) {
+			Throwable cause = e.getCause();
+			if (cause instanceof DbmException) {
+				throw (DbmException) cause;
+			}
+			throw new FileNamedQueryException("get dynamic method error: " + method.getName(), cause);
+//			return newDynamicMethod(method);
 		}
 	}
 	
@@ -197,45 +210,48 @@ abstract public class AbstractDynamicQueryHandler implements DynamicQueryHandler
 //		Object[] methodArgs = null;
 		
 		if(dmethod.isBatch()){
-			//先特殊处理
-//			result = handleBatch(dmethod, args, parsedQueryName, parsedParams);
 			result = handleBatch(invokeContext);
-		}else{
-//			methodArgs = Langs.toArray(invokeContext.getParsedParams());
+		} else if (dmethod.isScript()) {
+			ParsedSqlContext sv = em.getFileNamedQueryManager().parseNamedQuery(invokeContext);
+			String sql = sv.getParsedSql();
 			
-			if(dmethod.isExecuteUpdate()){
-				QueryWrapper dq = em.getFileNamedQueryManager().createQuery(invokeContext);
-				result = dq.executeUpdate();
-				
-			}/*else if(Page.class.isAssignableFrom(resultClass)){
-				Page<?> page = dmethod.getPageParamter(args);
-				result = em.getFileNamedQueryManager().findPage(page, invokeContext);
-				
-			}*/else if(dmethod.hasPageParamter()){
-				Page<?> page = dmethod.getPageParamter(args);
-				result = em.getFileNamedQueryManager().findPage(page, invokeContext);
-			}else if(Collection.class.isAssignableFrom(resultClass)){
-				List<?> datalist = em.getFileNamedQueryManager().findList(invokeContext);
-				if(resultClass.isAssignableFrom(datalist.getClass())){
-					result = datalist;
-				}else{
-					Collection<Object> collections = CUtils.newCollections((Class<Collection<Object>>)resultClass, datalist.size());
-					collections.addAll(datalist);
-					result = collections;
-				}
-				
-			}else if(QueryWrapper.class.isAssignableFrom(resultClass)){
-				QueryWrapper dq = em.getFileNamedQueryManager().createQuery(invokeContext);
-				return dq;
-				
-			}else if(dmethod.isAsCountQuery()){
-//				parsedQueryName.setMappedEntity(dmethod.getResultClass());
-				QueryWrapper dq = em.getFileNamedQueryManager().createCountQuery(invokeContext);
-				result = dq.getSingleResult();
-				result = Types.convertValue(result, resultClass);
+			SqlScript sqlScript = dmethod.getSqlScript();
+			Resource sqlRes = new ByteArrayResource(sql.getBytes(sqlScript.sqlScriptEncoding()));
+			ResourceDatabasePopulator populator = new ResourceDatabasePopulator();
+			populator.setContinueOnError(sqlScript.isContinueOnError());
+			populator.setSeparator(sqlScript.separator());
+			populator.setSqlScriptEncoding(sqlScript.sqlScriptEncoding());
+			populator.addScript(sqlRes);
+			
+			DatabasePopulatorUtils.execute(populator, em.getDataSource());
+		} else if (dmethod.isExecuteUpdate()){
+			QueryWrapper dq = em.getFileNamedQueryManager().createQuery(invokeContext);
+			result = dq.executeUpdate();
+			
+		} else if (dmethod.hasPageParamter()){
+			Page<?> page = dmethod.getPageParamter(args);
+			result = em.getFileNamedQueryManager().findPage(page, invokeContext);
+		} else if (Collection.class.isAssignableFrom(resultClass)){
+			List<?> datalist = em.getFileNamedQueryManager().findList(invokeContext);
+			if(resultClass.isAssignableFrom(datalist.getClass())){
+				result = datalist;
 			}else{
-				result = em.getFileNamedQueryManager().findOne(invokeContext);
+				Collection<Object> collections = CUtils.newCollections((Class<Collection<Object>>)resultClass, datalist.size());
+				collections.addAll(datalist);
+				result = collections;
 			}
+			
+		} else if (QueryWrapper.class.isAssignableFrom(resultClass)){
+			QueryWrapper dq = em.getFileNamedQueryManager().createQuery(invokeContext);
+			return dq;
+			
+		} else if (dmethod.isAsCountQuery()){
+//				parsedQueryName.setMappedEntity(dmethod.getResultClass());
+			QueryWrapper dq = em.getFileNamedQueryManager().createCountQuery(invokeContext);
+			result = dq.getSingleResult();
+			result = Types.convertValue(result, resultClass);
+		} else {
+			result = em.getFileNamedQueryManager().findOne(invokeContext);
 		}
 		
 		if(dmethod.isReturnVoid()){
@@ -251,24 +267,7 @@ abstract public class AbstractDynamicQueryHandler implements DynamicQueryHandler
 	protected Object handleBatch(MethodDynamicQueryInvokeContext invokeContext){
 		DynamicMethod dmethod = invokeContext.getDynamicMethod();
 		Collection<?> batchParameter = invokeContext.getBatchParameter();
-		/*if(batchParameter==null){
-			if(LangUtils.size(invokeContext.getParameterValues())!=1 || !Collection.class.isInstance(invokeContext.getParameterValues()[0])){
-				throw new BaseException("BatchObject not found, the batch method parameter only supported one parameter and must a Collection : " + invokeContext.getDynamicMethod().getMethod().toGenericString());
-			}
-			
-			//default is first arg
-			batchParameter = (Collection<?>)args[0];
-		}*/
-		
-		/*FileNamedSqlGenerator sqlGen = em.getFileNamedQueryManager().createFileNamedSqlGenerator(invokeContext);
-		ParsedSqlContext sv = sqlGen.generatSql();*/
 		ParsedSqlContext sv = em.getFileNamedQueryManager().parseNamedQuery(invokeContext);
-//		JdbcDao jdao = this.jdao;
-		/*DbmJdbcOperations dbmJdbcTemplate = this.dbmJdbcOperations;
-		if(dbmJdbcTemplate==null){
-			DataSource ds = Springs.getInstance().getBean(DataSource.class, false);
-			dbmJdbcTemplate = new DbmJdbcTemplate(ds);
-		}*/
 		
 		if(logger.isDebugEnabled()){
 			logger.debug("===>>> batch insert start ...");

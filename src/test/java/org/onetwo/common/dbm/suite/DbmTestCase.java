@@ -21,6 +21,7 @@ import org.onetwo.common.dbm.DbmLongVersionTest;
 import org.onetwo.common.dbm.DbmNestedMappingTest;
 import org.onetwo.common.dbm.DbmSensitiveFieldTest;
 import org.onetwo.common.dbm.DbmSnowflakeTest;
+import org.onetwo.common.dbm.DbmSqlScriptTest;
 import org.onetwo.common.dbm.EncryptFieldTest;
 import org.onetwo.common.dbm.InQueryWithArrayTest;
 import org.onetwo.common.dbm.JsonFieldTest;
@@ -74,7 +75,8 @@ import org.onetwo.dbm.utils.SpringAnnotationFinderTest;
 	HibernateNestedMappingTest.class,
 	UserQueryHibernateDaoTest.class,
 	EncryptFieldTest.class,
-	SimpleDBLockerTest.class
+	SimpleDBLockerTest.class,
+	DbmSqlScriptTest.class
 //	RichModelTest.class
 })
 public class DbmTestCase {
