@@ -6,9 +6,9 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import org.junit.Test;
 import org.onetwo.common.base.DbmBaseTest;
 import org.onetwo.common.db.generator.dialet.DatabaseMetaDialet;
-import org.onetwo.common.db.generator.dialet.DelegateDatabaseMetaDialet;
 import org.onetwo.common.db.generator.meta.TableMeta;
 import org.onetwo.common.dbm.model.dao.SqlScriptDao;
+import org.onetwo.dbm.core.spi.DbmSessionFactory;
 import org.onetwo.dbm.exception.DbmException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.Rollback;
@@ -21,10 +21,12 @@ import org.springframework.test.annotation.Rollback;
 public class DbmSqlScriptTest extends DbmBaseTest {
 	@Autowired
 	private SqlScriptDao sqlScriptDao;
+	@Autowired
+	DbmSessionFactory sessionFactory;
 	
 	@Test
 	public void test() {
-		DatabaseMetaDialet dialet = new DelegateDatabaseMetaDialet(dataSource);
+		DatabaseMetaDialet dialet = sessionFactory.getDatabaseMetaDialet();
 		
 		assertThatExceptionOfType(DbmException.class).isThrownBy(()-> {
 			sqlScriptDao.executeSqlScriptError();
