@@ -10,7 +10,7 @@ import org.onetwo.common.db.filequery.MultipCommentsSqlFileParserTest;
 import org.onetwo.common.db.sqlext.ExtQueryImplTest;
 import org.onetwo.common.db.sqlext.JFishExtQueryImplTest;
 import org.onetwo.common.dbm.BaseCrudEntityManagerTest;
-import org.onetwo.common.dbm.BatchInsertTest;
+import org.onetwo.common.dbm.DbmBatchInsertOrUpdateTest;
 import org.onetwo.common.dbm.CompositeIDTest;
 import org.onetwo.common.dbm.CustomDaoTest;
 import org.onetwo.common.dbm.DbmDaoTest;
@@ -53,7 +53,7 @@ import org.onetwo.dbm.utils.SpringAnnotationFinderTest;
 	DbmDataFilterTest.class,
 //	DBCheckerTest.class,
 //	OneBatchInsertTest.class, // 耗时太长
-	BatchInsertTest.class,
+	DbmBatchInsertOrUpdateTest.class,
 	BaseCrudEntityManagerTest.class,
 	DbmNestedMappingTest.class,
 	TransactionalListenerTest.class,

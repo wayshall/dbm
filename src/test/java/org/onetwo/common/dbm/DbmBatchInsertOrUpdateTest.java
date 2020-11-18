@@ -21,7 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 
 //@Rollback(false)
-public class BatchInsertTest extends DbmBaseTest {
+public class DbmBatchInsertOrUpdateTest extends DbmBaseTest {
 
 	@Resource
 	private UserAutoidServiceImpl userAutoidServiceImpl;
