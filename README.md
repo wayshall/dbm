@@ -42,6 +42,7 @@
 - [充血模型支持](#充血模型支持)
 - [参数配置](#参数配置)
 - [代码生成器](#代码生成器)
+- [辅助工具：导出表结构为excel](#辅助工具：导出表结构为excel)
 - [捐赠](#捐赠)
 
 
@@ -1627,6 +1628,22 @@ DbmGenerator.createWithDburl("jdbc:mysql://localhost:3306/test?useUnicode=true&c
 					.end()
 					.build()
 					.generate();//生成文件
+```
+
+## 辅助工具：导出表结构为excel
+可以通过ExcelExporter类导出表结构为excel
+
+```Java
+    TableExportParam params = new TableExportParam();
+    params.setExportFilePath("f:/test/表字段说明.xls"); // 导出的excel文件保存路径
+    params.addTable("table1", // 导出的表名
+            "table2");
+    params.setConfigurer(it -> {
+        // 满足条件的字段才会被导出
+        it.setCondition("#column.name!='create_at' && #column.name!='update_at'");
+    });
+    ExcelExporter export = ExcelExporter.create(dataSource);
+    export.exportTableShema(params); // 导出
 ```
 
 
