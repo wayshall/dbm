@@ -1630,7 +1630,7 @@ DbmGenerator.createWithDburl("jdbc:mysql://localhost:3306/test?useUnicode=true&c
 					.generate();//生成文件
 ```
 
-## 辅助工具：导出表结构为excel
+## 辅助工具导出表结构为excel
 可以通过ExcelExporter类导出表结构为excel
 
 ```Java
