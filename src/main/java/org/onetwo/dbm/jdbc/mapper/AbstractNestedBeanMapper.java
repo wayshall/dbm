@@ -541,9 +541,9 @@ abstract public class AbstractNestedBeanMapper<T> {
 			for(PropertyResultClassMapper pm : this.complexFields.values()){
 				Object propertyValue = pm.mapResult(resutSetWrapper, names, columnValueGetter, rowNum);
 				boolean linkParent = false;
-				if (propertyValue instanceof DbmNestedLinkToParentMapping) {
-					DbmNestedLinkToParentMapping linkToPrent = (DbmNestedLinkToParentMapping) propertyValue;
-					linkParent = linkToPrent.linkParent(entity);
+				if (propertyValue instanceof DbmChildrenRowNestedMapping) {
+					DbmChildrenRowNestedMapping linkToPrent = (DbmChildrenRowNestedMapping) propertyValue;
+					linkParent = linkToPrent.linkParent(pm.getBelongToProperty().getName(), entity);
 				}
 				// 如果linkParent为false，则dbm自动设置到parent属性
 				if (!linkParent) {
