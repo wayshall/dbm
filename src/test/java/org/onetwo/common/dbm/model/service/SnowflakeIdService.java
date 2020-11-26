@@ -6,6 +6,7 @@ import java.util.concurrent.ConcurrentSkipListSet;
 import org.onetwo.common.db.spi.BaseEntityManager;
 import org.onetwo.common.dbm.model.entity.ArticleEntity;
 import org.onetwo.common.dbm.model.entity.SnowflakeIdUserEntity;
+import org.onetwo.common.utils.LangUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -36,7 +37,7 @@ public class SnowflakeIdService {
 	public void saveSnowflakeIdUsers(int count) {
 		for (int i = 0; i < count; i++) {
 			SnowflakeIdUserEntity user = new SnowflakeIdUserEntity();
-			user.setUserName("snowflake");
+			user.setUserName(LangUtils.randomUUID());
 			baseEntityManager.persist(user);
 			
 			long id = user.getId();

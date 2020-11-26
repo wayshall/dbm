@@ -23,7 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.test.annotation.Rollback;
 
-@Rollback(false)
+//@Rollback(false)
 public class DbmBatchInsertOrUpdateTest extends DbmBaseTest {
 
 	@Resource
@@ -113,9 +113,12 @@ public class DbmBatchInsertOrUpdateTest extends DbmBaseTest {
 	}
 
 	@Test
+	@Rollback(false)
 	public void testBatchInsertOrUpdateWithForeignKey(){
 		articleService.removeAll();
 		noAutoIdUserService.deleteAll();
+		
+//		articleService.addArtilceForeignKey();
 		
 		int insertCount = 100;
 		int startId = 1;
@@ -130,5 +133,8 @@ public class DbmBatchInsertOrUpdateTest extends DbmBaseTest {
 		this.articleService.saveForBatchUpdateForeignKey(art);
 		
 		this.noAutoIdUserService.batchInsertOrUpdateUser(userlist);
+		
+		articleService.removeAll();
+//		articleService.dropArtilceForeignKey();
 	}
 }

@@ -173,7 +173,7 @@ public class DbmEntityManagerTest extends DbmBaseTest {
 		List<UserEntity> users = LangOps.generateList(20, i->{
 			UserEntity user = new UserEntity();
 			user.setId(i+1L);
-			user.setUserName("JdbcTest");
+			user.setUserName("JdbcTest"+i);
 			user.setBirthday(DateUtils.now());
 			user.setEmail("username@qq.com");
 			user.setHeight(3.3f);
