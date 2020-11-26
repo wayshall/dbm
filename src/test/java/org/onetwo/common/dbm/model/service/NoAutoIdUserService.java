@@ -11,6 +11,7 @@ import org.onetwo.common.dbm.model.hib.entity.UserEntity.UserGenders;
 import org.onetwo.common.dbm.model.hib.entity.UserEntity.UserStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -31,6 +32,7 @@ public class NoAutoIdUserService {
 		return baseEntityManager.findById(UserEntity.class, id);
 	}
 
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public int deleteAll(){
 		return this.baseEntityManager.removeAll(UserEntity.class);
 	}
@@ -51,11 +53,18 @@ public class NoAutoIdUserService {
 		baseEntityManager.getSessionFactory().getSession().batchInsert(userlist);
 	}
 	
-	public void batchInsertOrUpdateUser(String prefix, int startId, int insertCount){
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
+	public List<UserEntity> batchInsertOrUpdateUser(String prefix, int startId, int insertCount){
 		List<UserEntity> userlist = Stream.iterate(startId, item->item+1).limit(insertCount)
 					.map(i->createUserEntity(prefix, i))
 					.collect(Collectors.toList());
 		
+		baseEntityManager.getSessionFactory().getSession().batchInsertOrUpdate(userlist, null);
+		return userlist;
+	}
+
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
+	public void batchInsertOrUpdateUser(List<UserEntity> userlist){
 		baseEntityManager.getSessionFactory().getSession().batchInsertOrUpdate(userlist, null);
 	}
 	

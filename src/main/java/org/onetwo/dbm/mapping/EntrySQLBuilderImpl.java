@@ -337,6 +337,10 @@ public class EntrySQLBuilderImpl implements EntrySQLBuilder {
 	protected List<String> duplicateKeyUpdateSqlString(Collection<DbmMappedField> columns){
 		List<String> strs = new ArrayList<String>();
 		for(DbmMappedField field : columns){
+			// 忽略主键
+			if (field.isIdentify()) {
+				continue ;
+			}
 			String columnName = dialet.wrapKeywordColumnName(field.getColumn().getName());
 			String duplicateKeyUpdateSql = columnName + " = values( " + columnName + " )";
 			strs.add(duplicateKeyUpdateSql);
