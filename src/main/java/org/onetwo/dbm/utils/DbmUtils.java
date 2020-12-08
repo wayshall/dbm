@@ -4,6 +4,7 @@ import java.lang.annotation.Annotation;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -16,6 +17,7 @@ import javax.sql.DataSource;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.onetwo.common.date.DateUtils;
 import org.onetwo.common.db.filequery.directive.SetDirective;
 import org.onetwo.common.db.filequery.directive.WhereDirective;
 import org.onetwo.common.log.JFishLoggerFactory;
@@ -291,6 +293,8 @@ final public class DbmUtils {
 			}
 			if(arg instanceof String){
 				sql = (String)arg;
+			}else if(arg instanceof Date){
+				params = DateUtils.formatDateTimeMillis((Date)arg);
 			}else if(arg instanceof Map){
 				params = arg;
 			}else if(arg.getClass().isArray()){
