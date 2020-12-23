@@ -79,6 +79,9 @@ public interface DbmSessionImplementor extends DbmSession {
 	@DbmJdbcOperationMark(type=DbmJdbcOperationType.QUERY)
 	public <T> List<T> findList(DbmQueryValue queryValue, RowMapper<T> rowMapper);
 	
+	@DbmJdbcOperationMark(type=DbmJdbcOperationType.QUERY)
+	public <T> List<T> findListWihtLimit(DbmQueryValue queryValue, RowMapper<T> rowMapper, int first, int maxResults);
+	
 	public DBDialect getDialect();
 
 	@DbmJdbcOperationMark(type=DbmJdbcOperationType.UPDATE)

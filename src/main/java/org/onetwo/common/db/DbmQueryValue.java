@@ -22,10 +22,17 @@ public class DbmQueryValue {
 	private String sql;
 	private String countSql;
 	
+//	private Integer firstResult = 0; 
+//	private Integer maxResults = -1;
+	
 	private DbmQueryValue(String sql){
 		this.values = new LinkedHashMap<>();
 		this.sql = sql;
 	}
+
+//	public boolean isLimitQuery(){
+//		return SelectExtQueryImpl.isLimitQuery(this.firstResult, maxResults);
+//	}
 
 	public DbmQueryValue setValue(int index, Object value){
 		Map<String, Object> map = this.values;
@@ -77,6 +84,20 @@ public class DbmQueryValue {
 	public void setResultClass(Class<?> resultClass) {
 		this.resultClass = resultClass;
 	}
+
+//	public Integer getFirstResult() {
+//		return firstResult;
+//	}
+//
+//	public void setLimit(Integer firstResult, Integer maxResult) {
+//		this.firstResult = firstResult;
+//		this.maxResults = maxResult;
+//	}
+//
+//	public Integer getMaxResults() {
+//		return maxResults;
+//	}
+
 
 	public String getSql() {
 		return sql;
