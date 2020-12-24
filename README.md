@@ -1464,6 +1464,10 @@ public interface UserAutoidDao {
 
 
 ```
+**说明**
+- 方法名称以batchInsert、batchUpdate、batchSave开头命名即被视为批量操作，否则需要使用@ExecuteUpdate(isBatch=true)来注明该方法是批量操作
+- 因为是批量操作，第一个必须是Collection集合类型，若有多个参数且第一个参数不是集合类型，则必须使用@BatchObject标记集合类型的参数
+- values语句里面的userName等字段对应集合里面元素（对象）的属性
 
 ### 批量插入或更新
 dbm也利用了mysql的on duplicate key update语法，支持批量插入或更新：
