@@ -120,8 +120,13 @@ public class MutilMappedEntryManager implements MappedEntryBuilder, MappedEntryM
 
 	}
 	
+
 	private void buildEntry(DbmMappedEntry entry){
-		if (nameEntryMapping.containsKey(entry.getEntityName())) {
+		buildEntry(entry, true);
+	}
+	
+	private void buildEntry(DbmMappedEntry entry, boolean putToNameCache){
+		if (putToNameCache && nameEntryMapping.containsKey(entry.getEntityName())) {
 			throw new DbmException("duplicate entity name: " + entry.getEntityName())
 						.put("exist entity", nameEntryMapping.get(entry.getEntityName()).getEntityClass())
 						.put("conflicted entity", entry.getEntityClass());
@@ -131,7 +136,9 @@ public class MutilMappedEntryManager implements MappedEntryBuilder, MappedEntryM
 		} catch (Exception e) {
 			throw new DbmException("build entry["+entry.getEntityName()+"] error: "+e.getMessage(), e);
 		}
-		nameEntryMapping.put(entry.getEntityName(), entry);
+		if (putToNameCache) {
+			nameEntryMapping.put(entry.getEntityName(), entry);
+		}
 	}
 
 	private void putInCache(String key, DbmMappedEntry entry) {
@@ -239,7 +246,7 @@ public class MutilMappedEntryManager implements MappedEntryBuilder, MappedEntryM
 				if (value == null)
 					throw new NoMappedEntryException("can find build entry for class : " + clazz);
 
-				buildEntry(value);
+				buildEntry(value, false);
 				value.freezing();
 				return value;
 			});
