@@ -16,6 +16,8 @@ import org.onetwo.common.utils.LangUtils;
 import org.onetwo.common.utils.StringUtils;
 import org.slf4j.Logger;
 
+import com.google.common.collect.Maps;
+
 abstract public class AbstractExtQuery implements ExtQueryInner{
 	protected final Logger logger = JFishLoggerFactory.getLogger(this.getClass());
 
@@ -47,6 +49,7 @@ abstract public class AbstractExtQuery implements ExtQueryInner{
 	private boolean fireListeners = true;
 
 	private final Map<?, ?> sourceParams;
+	private final Map<String, Object> sourceParamNameSymbolMapping = Maps.newHashMap();
 	
 	public AbstractExtQuery(Class<?> entityClass, String alias, Map<?, ?> params, SQLSymbolManager symbolManager) {
 		this(entityClass, alias, params, symbolManager, null);
@@ -77,6 +80,16 @@ abstract public class AbstractExtQuery implements ExtQueryInner{
 		}else{
 			this.params = new LinkedHashMap<Object, Object>(sourceParams);
 		}
+		
+		this.params.forEach((k, v) -> {
+			if (!(k instanceof String[])) {
+				return ;
+			}
+			for (String key : (String[])k) {
+				String name = StringUtils.split(key, ':')[0];
+				this.sourceParamNameSymbolMapping.put(name, k);
+			}
+		});
 	}
 
 
@@ -147,6 +160,11 @@ abstract public class AbstractExtQuery implements ExtQueryInner{
 		return params;
 	}
 
+	
+	public Object getParamByName(String name) {
+		Object realName = this.sourceParamNameSymbolMapping.get(name);
+		return this.params.get(realName);
+	}
 
 	protected boolean hasParams(Object key) {
 		return this.params != null && !this.params.isEmpty() && this.params.containsKey(key);
