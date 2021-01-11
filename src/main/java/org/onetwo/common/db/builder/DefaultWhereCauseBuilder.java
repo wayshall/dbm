@@ -58,6 +58,9 @@ public class DefaultWhereCauseBuilder<E> implements WhereCauseBuilder<E> {
 	}
 	
 	public DefaultWhereCauseBuilder<E> addFields(Object entity, boolean useLikeIfStringVlue){
+		if (entity==null) {
+			return self();
+		}
 		DbmSessionFactory sf = queryBuilder.getBaseEntityManager().getSessionFactory();
 		DbmMappedEntry entry = sf.getMappedEntryManager().getEntry(entity);
 		Map<String, Object> fieldMap = ReflectUtils.toMap(entity, (p, v)->{
