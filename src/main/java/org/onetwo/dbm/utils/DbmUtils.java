@@ -331,7 +331,7 @@ final public class DbmUtils {
 				newParams.put(k, formatValueIfNeed(v));
 			});
 			return newParams;
-		} else if (arg.getClass().isArray()){
+		} else if (arg!=null && arg.getClass().isArray()){
 			return CUtils.tolist(arg, false).stream().map(v -> formatValueIfNeed(v)).collect(Collectors.toList());
 		} else if (arg instanceof Collection){//batch operation...
 			Collection<?> c = (Collection<?>) arg;
