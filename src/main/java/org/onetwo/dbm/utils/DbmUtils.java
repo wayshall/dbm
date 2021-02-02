@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import javax.sql.DataSource;
 
@@ -59,6 +60,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 final public class DbmUtils {
 	
@@ -318,6 +320,32 @@ final public class DbmUtils {
 			return null;
 		}
 		return Pair.of(sql, params);
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static Object formatContainerValueIfNeed(Object arg) {
+		if (arg instanceof Map) {
+			Map<?, ?> temp = (Map<?, ?>) arg;
+			Map<Object, Object> newParams = Maps.newLinkedHashMap();
+			temp.forEach((k, v)->{
+				newParams.put(k, formatValueIfNeed(v));
+			});
+			return newParams;
+		} else if (arg.getClass().isArray()){
+			return CUtils.tolist(arg, false).stream().map(v -> formatValueIfNeed(v)).collect(Collectors.toList());
+		} else if (arg instanceof Collection){//batch operation...
+			Collection<?> c = (Collection<?>) arg;
+			return c.stream().map(v -> formatValueIfNeed(v)).collect(Collectors.toList());
+		} 
+		return arg;
+	}
+	
+	public static Object formatValueIfNeed(Object arg) {
+		Object val = arg;
+		if (arg instanceof Date) {
+			val = DateUtils.formatDateTime((Date)arg);
+		}
+		return val;
 	}
 	
 
