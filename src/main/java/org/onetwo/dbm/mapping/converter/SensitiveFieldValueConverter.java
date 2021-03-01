@@ -52,7 +52,14 @@ public class SensitiveFieldValueConverter implements DbmFieldValueConverter {
 		}
 	}
 	
-	private String unsensitiveField(DbmSensitiveField sensitiveField, String sensitive) {
+	/***
+	 * 脱敏指定字段
+	 * @author weishao zeng
+	 * @param sensitiveField
+	 * @param sensitive
+	 * @return
+	 */
+	protected String unsensitiveField(DbmSensitiveField sensitiveField, String sensitive) {
 		SensitiveFieldInfo info = new SensitiveFieldInfo();
 		info.setReplacementString(sensitiveField.replacementString());
 		info.setLeftPlainTextSize(sensitiveField.leftPlainTextSize());
@@ -62,15 +69,21 @@ public class SensitiveFieldValueConverter implements DbmFieldValueConverter {
 		return unsensitiveString(info, sensitive);
 	}
 	
-	protected String unsensitiveString(SensitiveFieldInfo sensitiveFieldInfo, String sensitive) {
+	public static String unsensitiveString(SensitiveFieldInfo sensitiveFieldInfo, String sensitive) {
 		String unsensitive = null;
 		if (StringUtils.isNotBlank(sensitiveFieldInfo.getSensitiveEndOf())) {
 			int endIndex = StringUtils.indexOf(sensitive, sensitiveFieldInfo.getSensitiveEndOf());
 			unsensitive = StringUtils.left(sensitive, endIndex);
-			unsensitive = unsensitiveSurround(sensitiveFieldInfo, unsensitive);
+			unsensitive = unsensitiveSurround(unsensitive, 
+										sensitiveFieldInfo.getLeftPlainTextSize(), 
+										sensitiveFieldInfo.getRightPlainTextSize(), 
+										sensitiveFieldInfo.getReplacementString());
 			unsensitive += StringUtils.mid(sensitive, endIndex, sensitive.length());
 		} else {
-			unsensitive = unsensitiveSurround(sensitiveFieldInfo, sensitive);
+			unsensitive = unsensitiveSurround(sensitive, 
+										sensitiveFieldInfo.getLeftPlainTextSize(), 
+										sensitiveFieldInfo.getRightPlainTextSize(), 
+										sensitiveFieldInfo.getReplacementString());
 		}
 		return unsensitive;
 	}
@@ -82,22 +95,22 @@ public class SensitiveFieldValueConverter implements DbmFieldValueConverter {
 	 * @param sensitive
 	 * @return
 	 */
-	protected String unsensitiveSurround(SensitiveFieldInfo sensitiveFieldInfo, String sensitive) {
-		if (sensitiveFieldInfo.getLeftPlainTextSize()<0 || sensitiveFieldInfo.getRightPlainTextSize()<0) {
+	public static String unsensitiveSurround(String sensitive, int leftPlainTextSize, int rightPlainTextSize, String replacementString) {
+		if (leftPlainTextSize<0 || rightPlainTextSize<0) {
 			throw new DbmException("leftPlainTextSize or rightPlainTextSize can not be negative");
 		}
-		if (sensitiveFieldInfo.getLeftPlainTextSize() + sensitiveFieldInfo.getRightPlainTextSize() >= sensitive.length()) {
+		if (leftPlainTextSize + rightPlainTextSize >= sensitive.length()) {
 			return sensitive;
 		}
-		int padSize = sensitive.length() - sensitiveFieldInfo.getLeftPlainTextSize() - sensitiveFieldInfo.getRightPlainTextSize();
-		String unsensitive = StringUtils.left(sensitive, sensitiveFieldInfo.getLeftPlainTextSize()) + 
-				LangUtils.repeatString(padSize, sensitiveFieldInfo.getReplacementString()) + 
-				StringUtils.right(sensitive, sensitiveFieldInfo.getRightPlainTextSize());
+		int padSize = sensitive.length() - leftPlainTextSize - rightPlainTextSize;
+		String unsensitive = StringUtils.left(sensitive, leftPlainTextSize) + 
+				LangUtils.repeatString(padSize, replacementString) + 
+				StringUtils.right(sensitive, rightPlainTextSize);
 		return unsensitive;
 	}
 	
 	@Data
-	protected static class SensitiveFieldInfo {
+	public static class SensitiveFieldInfo {
 		/***
 		 *  左边保留明文的长度
 		 */
