@@ -19,7 +19,7 @@ import lombok.Getter;
  */
 @Target({FIELD, METHOD})
 @Retention(RetentionPolicy.RUNTIME)
-@DbmField(converterClass=JsonFieldValueConverter.class)
+@DbmFieldConvert(converterClass=JsonFieldValueConverter.class)
 public @interface DbmJsonField {
 	
 	/***

@@ -13,7 +13,7 @@ import org.junit.Test;
 import org.onetwo.common.dbm.model.entity.SnowflakeIdUserEntity;
 import org.onetwo.common.dbm.model.hib.entity.UserEntity;
 import org.onetwo.common.reflect.ReflectUtils;
-import org.onetwo.dbm.annotation.DbmField;
+import org.onetwo.dbm.annotation.DbmFieldConvert;
 import org.onetwo.dbm.annotation.DbmGeneratedValue;
 import org.onetwo.dbm.annotation.DbmId;
 import org.onetwo.dbm.annotation.DbmIdGenerator;
@@ -25,7 +25,7 @@ public class SpringAnnotationFinderTest {
 	public void test() {
 		Method field = ReflectUtils.getReadMethod(UserEntity.class, "appCodeUnsensitive", String.class);
 		SpringAnnotationFinder finder = new SpringAnnotationFinder();
-		DbmField dbmfield = finder.getAnnotation(field, DbmField.class);
+		DbmFieldConvert dbmfield = finder.getAnnotation(field, DbmFieldConvert.class);
 		assertThat(dbmfield).isNotNull();
 	}
 	

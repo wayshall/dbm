@@ -23,7 +23,7 @@ public class DbmFieldTest {
 	static class DbmFeildEntity {
 		@DbmJsonField
 		Map testMapField;
-		@DbmField(converterClass=JustTestDbmFieldValueConverter.class)
+		@DbmFieldConvert(converterClass=JustTestDbmFieldValueConverter.class)
 		String testField;
 		
 		public Map getTestMapField() {

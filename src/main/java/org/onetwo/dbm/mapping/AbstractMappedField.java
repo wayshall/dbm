@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -14,7 +15,7 @@ import org.onetwo.common.utils.Assert;
 import org.onetwo.common.utils.JFishProperty;
 import org.onetwo.common.utils.LangUtils;
 import org.onetwo.common.utils.StringUtils;
-import org.onetwo.dbm.annotation.DbmField;
+import org.onetwo.dbm.annotation.DbmFieldConvert;
 import org.onetwo.dbm.annotation.DbmFieldListeners;
 import org.onetwo.dbm.annotation.DbmGenerated;
 import org.onetwo.dbm.annotation.DbmJsonField;
@@ -59,7 +60,7 @@ abstract public class AbstractMappedField implements DbmMappedField{
 	 */
 	private Class<?> actualMappingColumnType;
 	final private DbmJsonField jsonFieldAnnotation;
-	final private DbmField dbmFieldAnnotation;
+//	final private DbmFieldConvert dbmFieldAnnotation;
 	
 	private DbmEnumType enumType;
 	
@@ -106,32 +107,50 @@ abstract public class AbstractMappedField implements DbmMappedField{
 				this.fieldListeners = new ArrayList<DbmEntityFieldListener>(entry.getFieldListeners());
 			}
 		}
+		this.jsonFieldAnnotation = propertyInfo.getAnnotation(DbmJsonField.class);
+		
 
+//		CompositedFieldValueConverter compositedConverter = CompositedFieldValueConverter.composited();
+//		if(enumType!=null){
+//			compositedConverter.addFieldValueConverter(CompositedFieldValueConverter.ENUM_CONVERTER);
+//		}
+		/*if (getName().equals("appCode") && getEntry().getEntityName().equals("org.onetwo.common.dbm.model.hib.entity.UserEntity")) {
+			System.out.println("test");
+		}*/
+//		this.dbmFieldAnnotation = propertyInfo.getAnnotation(DbmField.class);
+		/*if(jsonFieldAnnotation != null){
+			compositedConverter.addFieldValueConverter(JsonFieldValueConverter.getInstance());
+		}*/
+//		if(this.dbmFieldAnnotation!=null){
+//			Class<? extends DbmFieldValueConverter> converterClass = this.dbmFieldAnnotation.converterClass();
+//			DbmFieldValueConverter converter = DbmUtils.createDbmBean(converterClass);
+//			compositedConverter.addFieldValueConverter(converter);
+//			/*this.dbmFieldAnnotation.forEach(f -> {
+//				Class<? extends DbmFieldValueConverter> converterClass = f.converterClass();
+//				DbmFieldValueConverter converter = DbmUtils.createDbmBean(converterClass);
+//				compositedConverter.addFieldValueConverter(converter);
+//			});*/
+//		}
+		this.fieldValueConverter = this.scanDbmFieldConverters(propertyInfo);
+		
+		
+		this.obtainActaulMappingType();
+	}
+	
+	private CompositedFieldValueConverter scanDbmFieldConverters(JFishProperty propertyInfo) {
 		CompositedFieldValueConverter compositedConverter = CompositedFieldValueConverter.composited();
 		if(enumType!=null){
 			compositedConverter.addFieldValueConverter(CompositedFieldValueConverter.ENUM_CONVERTER);
 		}
-		/*if (getName().equals("appCode") && getEntry().getEntityName().equals("org.onetwo.common.dbm.model.hib.entity.UserEntity")) {
-			System.out.println("test");
-		}*/
-		this.dbmFieldAnnotation = propertyInfo.getAnnotation(DbmField.class);
-		this.jsonFieldAnnotation = propertyInfo.getAnnotation(DbmJsonField.class);
-		/*if(jsonFieldAnnotation != null){
-			compositedConverter.addFieldValueConverter(JsonFieldValueConverter.getInstance());
-		}*/
-		if(this.dbmFieldAnnotation!=null){
-			Class<? extends DbmFieldValueConverter> converterClass = this.dbmFieldAnnotation.converterClass();
+		
+		Set<DbmFieldConvert> fieldAnnos = propertyInfo.getMergedRepeatableAnnotations(DbmFieldConvert.class);
+		fieldAnnos.forEach(f -> {
+			Class<? extends DbmFieldValueConverter> converterClass = f.converterClass();
 			DbmFieldValueConverter converter = DbmUtils.createDbmBean(converterClass);
 			compositedConverter.addFieldValueConverter(converter);
-			/*this.dbmFieldAnnotation.forEach(f -> {
-				Class<? extends DbmFieldValueConverter> converterClass = f.converterClass();
-				DbmFieldValueConverter converter = DbmUtils.createDbmBean(converterClass);
-				compositedConverter.addFieldValueConverter(converter);
-			});*/
-		}
-		this.fieldValueConverter = compositedConverter;
-		
-		this.obtainActaulMappingType();
+		});
+		compositedConverter.sort();
+		return compositedConverter;
 	}
 	
 	private void obtainActaulMappingType(){

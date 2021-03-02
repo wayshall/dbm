@@ -567,9 +567,10 @@ DbmSensitiveField 属性解释如下：
 
 
 
-### @DbmField注解
-@DbmField 注解可自定义一个值转换器，用于从数据库表获取的字段值转换为Java对象的属性值，和把Java对象的属性值转换为数据库表的字段值。   
+### @DbmFieldConvert注解
+@DbmFieldConvert 注解可自定义一个值转换器，用于从数据库表获取的字段值转换为Java对象的属性值，和把Java对象的属性值转换为数据库表的字段值。   
 @DbmJsonField 注解实际上是包装了@DbmField注解实现的。
+字段支持重复多个@DbmFieldConvert 注解
 
 
 

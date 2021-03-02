@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.onetwo.common.utils.LangUtils;
+import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 
 import com.google.common.collect.Lists;
 
@@ -120,6 +121,9 @@ public class CompositedFieldValueConverter implements DbmFieldValueConverter {
 		return newValue;
 	}
 	
+	public void sort() {
+		AnnotationAwareOrderComparator.sort(converters);
+	}
 	
 
 }

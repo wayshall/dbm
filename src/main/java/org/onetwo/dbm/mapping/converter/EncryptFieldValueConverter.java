@@ -5,11 +5,14 @@ import org.onetwo.common.utils.StringUtils;
 import org.onetwo.dbm.exception.DbmException;
 import org.onetwo.dbm.mapping.DbmFieldValueConverter;
 import org.onetwo.dbm.mapping.DbmMappedField;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 
 /**
  * @author wayshall
  * <br/>
  */
+@Order(Ordered.LOWEST_PRECEDENCE)
 public class EncryptFieldValueConverter implements DbmFieldValueConverter {
 	
 	private StandardPBEStringEncryptor encryptor;
