@@ -5,6 +5,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.lang3.StringUtils;
 import org.onetwo.common.convert.Types;
+import org.onetwo.common.log.JFishLoggerFactory;
 import org.onetwo.common.utils.NetUtils;
 import org.onetwo.dbm.exception.DbmException;
 
@@ -46,8 +47,15 @@ public class DbmIds {
 		//根据ip地址来创建生成器
 //		String[] strs = StringUtils.split(NetUtils.getHostAddress(), ".");
 		String[] strs = StringUtils.split(NetUtils.getLocalHostLANIp(), ".");
-		int datacenterId = Types.asValue(strs[strs.length-2], int.class, 1)%32;
-		int machineId = Types.asValue(strs[strs.length-1], int.class, 1)%32;
+		int datacenterId = 0;
+		int machineId = 0;
+		if (strs!=null && strs.length>=2) {
+			datacenterId = Types.asValue(strs[strs.length-2], int.class, 1)%32;
+			machineId = Types.asValue(strs[strs.length-1], int.class, 1)%32;
+			JFishLoggerFactory.getCommonLogger().info("[dbm] createIdGeneratorByAddress, datacenterId: {}, machineId: {}", datacenterId, machineId);
+		} else {
+			JFishLoggerFactory.getCommonLogger().info("[dbm] localhost lanip not found, createIdGeneratorByAddress user default value , datacenterId: {}, machineId: {}", datacenterId, machineId);
+		}
 		SnowflakeIdGenerator idGenerator = createIdGenerator(new SnowflakeIdKey(datacenterId, machineId));
 		return idGenerator;
 	}
