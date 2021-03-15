@@ -2,6 +2,7 @@ package org.onetwo.dbm.event.internal;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 import org.onetwo.common.log.JFishLoggerFactory;
 import org.onetwo.common.utils.ArrayUtils;
@@ -36,6 +37,9 @@ abstract public class AbstractDbmEventListener implements DbmEventListener<DbmSe
 	@Override
 	public void doEvent(DbmSessionEvent event) {
 		Object entity = event.getObject();
+		if (entity instanceof Optional) {
+			throw new DbmException("operation is not support Optional Type, entity: " + entity);
+		}
 		DbmInsertOrUpdateEvent insertOrUpdate = (DbmInsertOrUpdateEvent) event;
 
 		int updateCount = 0;
