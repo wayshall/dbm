@@ -109,6 +109,9 @@ public class QueryActionImpl<E> implements QueryAction<E> {
 	@Override
 	public <T> List<T> listAs(Class<T> toClass){
 		checkOperation();
+		if (LangUtils.isSimpleType(toClass)) {
+			throw new DbmException("target class can not be a simple type: " + toClass);
+		}
 		List<?> datas = baseEntityManager.select(getExtQuery());
 		return CopyUtils.copy(toClass, datas);
 	}
@@ -155,7 +158,9 @@ public class QueryActionImpl<E> implements QueryAction<E> {
 //	}
 	
 	public <T> List<T> listWith(RowMapper<T> rowMapper) {
-		List<T> res = this.getDbmEntityManager().getCurrentSession().findList(convertAsDbmQueryValue(getExtQuery()), rowMapper);
+		SelectExtQuery query = getExtQuery();
+		DbmQueryValue dqv = convertAsDbmQueryValue(query);
+		List<T> res = this.getDbmEntityManager().getCurrentSession().findListWihtLimit(dqv, rowMapper, query.getFirstResult(), query.getMaxResults());
 		return res;
 	}
 	

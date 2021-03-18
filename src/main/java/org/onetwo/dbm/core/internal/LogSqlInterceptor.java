@@ -54,7 +54,8 @@ public class LogSqlInterceptor implements DbmInterceptor, Ordered {
 		}
 		if(logger.isTraceEnabled()){
 			long txId = sessionFactory.getSession().getTransaction()!=null?sessionFactory.getSession().getTransaction().getId():DbmIds.UNKNOW_TX_ID;
-			logger.trace("tx[{}] dbm sql: {}, sql parameters: {}", txId, sqlParams.getKey(), sqlParams.getValue());
+			Object sqlParamValues = DbmUtils.formatContainerValueIfNeed(sqlParams.getValue());
+			logger.trace("tx[{}] dbm sql: {}, sql parameters: {}", txId, sqlParams.getKey(), sqlParamValues);
 		}
 		
 		TimeCounter counter = TimeCounter.start("dbm jdbc: ");

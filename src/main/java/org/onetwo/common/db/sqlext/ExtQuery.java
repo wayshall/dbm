@@ -167,7 +167,7 @@ public interface ExtQuery {
 
 //	public void setParams(Map params);
 	
-	
+	Object getParamByName(String name);
 
 	public ParamValues getParamsValue();
 	

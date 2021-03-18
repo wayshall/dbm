@@ -1,7 +1,5 @@
 package org.onetwo.common.db.sqlext;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import java.io.IOException;
 import java.util.List;
 
@@ -29,9 +27,19 @@ public class DruidUtilsTest {
 
 	@Test
 	public void testParseSql(){
-		printStatements("select * from user where user_name=?");
-		printStatements("select id, user_name, password from user where user_name=?");
-		printStatements("select count(id) from user where user_name=?");
+		String sql1 = "select * from user where user_name=?";
+		printStatements(sql1);
+		String sql2 = "select id, user_name, password from user where user_name=?";
+		printStatements(sql2);
+		String sql3 = "select count(id) from user where user_name=?";
+		printStatements(sql3);
+		
+		String sql = sql1 + ";" + sql2 + ";" + sql3;
+		List<SQLStatement> statements = SQLUtils.parseStatements(sql, JdbcUtils.MYSQL);
+		statements.forEach(s -> {
+			SQLSelectStatement select = (SQLSelectStatement) s;
+			System.out.println("statements: " + select.getSelect().toString());
+		});
 	}
 	
 	private void printStatements(String sql){
@@ -91,7 +99,7 @@ public class DruidUtilsTest {
 		//order by
 		sql = readSql("testChangeSql.sql");
 		printStatements(sql);
-		String countSql = DruidUtils.toCountSql(sql, null);
+		String countSql = DruidUtils.toCountSql(sql);
 		System.out.println("new sql: "+countSql);
 		
 	}
@@ -99,7 +107,7 @@ public class DruidUtilsTest {
 	@Test
 	public void testGroupByCountSql(){
 		String sql = "SELECT * FROM product_active pa GROUP BY pa.ACTIVE_DATE";
-		SQLSelectStatement selectStatement = DruidUtils.changeAsCountStatement(sql, "");
+		SQLSelectStatement selectStatement = DruidUtils.changeAsCountStatement(sql);
 		System.out.println("new sql: "+selectStatement);
 //		assertThat(selectStatement.toString()).isEqualTo("SELECT count(1) FROM (SELECT * FROM product_active pa GROUP BY pa.ACTIVE_DATE ) countView");
 	}
@@ -109,7 +117,7 @@ public class DruidUtilsTest {
 		//union group by
 		String sql = readSql("testChangeSql-groupby.sql");
 		printStatements(sql);
-		String countSql = DruidUtils.toCountSql(sql, null);
+		String countSql = DruidUtils.toCountSql(sql);
 		System.out.println("new sql: "+countSql);
 	}
 	

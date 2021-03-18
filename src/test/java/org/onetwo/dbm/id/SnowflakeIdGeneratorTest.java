@@ -14,6 +14,14 @@ import org.onetwo.common.concurrent.ConcurrentRunnable;
  * <br/>
  */
 public class SnowflakeIdGeneratorTest {
+
+	@Test
+	public void getGenerateId(){
+		SnowflakeIdGenerator idGenerator = new SnowflakeIdGenerator(1);
+		Long id = idGenerator.nextId();
+		System.out.println("id: " + id);
+	}
+	
 	@Test
 	public void testGetTimeDiff(){
 		AtomicLong generatedTimeDiff = new AtomicLong();

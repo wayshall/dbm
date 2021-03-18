@@ -200,6 +200,11 @@ abstract public class AbstractNestedBeanMapper<T> {
 		final private ResultClassMapper parentMapper;
 		/***
 		 * 映射对象所属的父对象的属性
+		 * 比如：
+		 * class Parent {
+		 * 		List<Children> children;
+		 * }
+		 * 则Children对应的PropertyResultClassMapper的belongToProperty为children属性
 		 */
 		final private JFishProperty belongToProperty;
 		public PropertyResultClassMapper(ResultClassMapper parentMapper, String idField, String columnPrefix, JFishProperty belongToProperty) {
@@ -535,7 +540,15 @@ abstract public class AbstractNestedBeanMapper<T> {
 			entity = bw.getWrappedInstance();
 			for(PropertyResultClassMapper pm : this.complexFields.values()){
 				Object propertyValue = pm.mapResult(resutSetWrapper, names, columnValueGetter, rowNum);
-				pm.linkToParent(bw, propertyValue);
+				boolean linkParent = false;
+				if (propertyValue instanceof DbmChildrenRowNestedMapping) {
+					DbmChildrenRowNestedMapping linkToPrent = (DbmChildrenRowNestedMapping) propertyValue;
+					linkParent = linkToPrent.linkParent(pm.getBelongToProperty().getName(), entity);
+				}
+				// 如果linkParent为false，则dbm自动设置到parent属性
+				if (!linkParent) {
+					pm.linkToParent(bw, propertyValue);
+				}
 			}
 			return afterMapResult(entity, hash, isNew);
 		}

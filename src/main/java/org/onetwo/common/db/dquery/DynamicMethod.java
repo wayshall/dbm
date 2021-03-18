@@ -26,6 +26,7 @@ import org.onetwo.common.db.dquery.annotation.QueryParseContext;
 import org.onetwo.common.db.dquery.annotation.QueryResultType;
 import org.onetwo.common.db.dquery.annotation.QuerySqlTemplateParser;
 import org.onetwo.common.db.dquery.annotation.Sql;
+import org.onetwo.common.db.dquery.annotation.SqlScript;
 import org.onetwo.common.db.filequery.TemplateNameIsSqlTemplateParser;
 import org.onetwo.common.db.spi.QueryConfigData;
 import org.onetwo.common.db.spi.QueryWrapper;
@@ -38,6 +39,7 @@ import org.onetwo.common.utils.LangUtils;
 import org.onetwo.common.utils.Page;
 import org.onetwo.common.utils.PageRequest;
 import org.onetwo.common.utils.StringUtils;
+import org.onetwo.dbm.exception.DbmException;
 import org.onetwo.dbm.exception.FileNamedQueryException;
 import org.onetwo.dbm.mapping.DbmEnumValueMapping;
 import org.onetwo.dbm.utils.DbmUtils;
@@ -53,7 +55,8 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 	}
 
 	public static final List<String> EXECUTE_UPDATE_PREFIX = LangUtils.newArrayList("save", "update", "remove", "delete", "insert", "create");
-	public static final List<String> BATCH_PREFIX = LangUtils.newArrayList("batch", "batchUpdate", "batchInsert", "batchSave");
+//	public static final List<String> BATCH_PREFIX = LangUtils.newArrayList("batch", "batchUpdate", "batchInsert", "batchSave");
+	public static final List<String> BATCH_PREFIX = LangUtils.newArrayList("batchUpdate", "batchInsert", "batchSave");
 //	public static final String FIELD_NAME_SPERATOR = "By";
 	
 //	private final Method method;
@@ -97,13 +100,27 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 	private DynamicMethodParameter parseContextParameter;
 	private QueryParseContext queryParseContext;
 //	private Set<String> varAsJdbcParameter = Sets.newHashSet();
+	private SqlScript sqlScript;
 	
 	private Set<DynamicMethodParameter> specialParameters = Sets.newHashSet();
 	
 	public DynamicMethod(Method method){
 		super(method);
+
+//		Class<?> returnClass = method.getReturnType();
+		// example: List
+		Class<?> returnClass = getActualReturnType();
+		// example: List<User> => User.class
+		Class<?> compClass = getActualComponentType();
 		
-		this.checkAndSetExecuteType();
+		this.sqlScript = method.getAnnotation(SqlScript.class);
+		
+		// 如果不是sql script，检查和设置@ExecuteUpdate
+		if (sqlScript==null) {
+			this.checkAndSetExecuteType();
+		} else if (returnClass!=void.class) {
+			throw new DbmException("sql script method must return void: " + method.getName());
+		}
 		this.findAndConfigSqlTemplateParser();
 
 		//check query swither
@@ -112,11 +129,6 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 //		checkAndFindQueryNameParameter(parameters);
 		checkAndFindSpecialParameters(parameters);
 		
-//		Class<?> returnClass = method.getReturnType();
-		// example: List
-		Class<?> returnClass = getActualReturnType();
-		// example: List<User> => User.class
-		Class<?> compClass = getActualComponentType();
 		
 		if(returnClass==void.class){
 //			DynamicMethodParameter firstParamter = parameters.get(0);
@@ -438,8 +450,10 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 			this.batchUpdate = executeUpdate.isBatch();
 			this.batchSize = executeUpdate.batchSize();
 		}else{
-			this.update = EXECUTE_UPDATE_PREFIX.contains(StringUtils.getFirstWord(this.method.getName()));
-			this.batchUpdate = BATCH_PREFIX.contains(StringUtils.getFirstWord(this.method.getName()));
+//			this.update = EXECUTE_UPDATE_PREFIX.contains(StringUtils.getFirstWord(this.method.getName()));
+			this.update = StringUtils.isStringStartWithAnyOne(this.method.getName(), EXECUTE_UPDATE_PREFIX);
+//			this.batchUpdate = BATCH_PREFIX.contains(StringUtils.getFirstWord(this.method.getName()));
+			this.batchUpdate = StringUtils.isStringStartWithAnyOne(this.method.getName(), BATCH_PREFIX);
 		}
 		if(!batchUpdate){
 			this.batchUpdate = judgeBatchUpdateFromParameterObjects(parameters);
@@ -608,6 +622,14 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 		return batchUpdate;//(executeUpdate!=null && executeUpdate.isBatch()) || );
 	}
 	
+	public boolean isScript() {
+		return this.sqlScript!=null;
+	}
+	
+	public SqlScript getSqlScript() {
+		return sqlScript;
+	}
+
 	public QueryConfigData getQueryConfig() {
 		return queryConfig;
 	}

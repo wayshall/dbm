@@ -85,7 +85,12 @@ public class SelectExtQueryImpl extends AbstractExtQuery implements SelectExtQue
 	
 	
 	public boolean needSetRange(){
-		return this.firstResult>=MIN_RESULT_INDEX && this.maxResults>=AT_LEAST_RESULTS_SIZE;
+//		return this.firstResult>=MIN_RESULT_INDEX && this.maxResults>=AT_LEAST_RESULTS_SIZE;
+		return isLimitQuery(this.firstResult, maxResults);
+	}
+	
+	static public boolean isLimitQuery(int first, int maxResults){
+		return first>=MIN_RESULT_INDEX && maxResults>=AT_LEAST_RESULTS_SIZE;
 	}
 
 	/***

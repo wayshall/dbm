@@ -17,7 +17,7 @@ import org.hibernate.validator.constraints.NotBlank;
 import org.onetwo.dbm.annotation.DbmBindValueToField;
 import org.onetwo.dbm.annotation.DbmSensitiveField;
 import org.onetwo.dbm.annotation.DbmSensitiveField.SensitiveOns;
-import org.onetwo.dbm.mapping.DbmEnumIntMapping;
+import org.onetwo.dbm.mapping.DbmEnumValueMapping;
 import org.springframework.format.annotation.DateTimeFormat;
 
 
@@ -90,13 +90,14 @@ public class UserEntity {
 	}
 	
 
-	public static enum UserGenders implements DbmEnumIntMapping {
+	public static enum UserGenders implements DbmEnumValueMapping<Double> {
 		FEMALE("女性", 10),
+		LADYBOY("人妖", 10.5),
 		MALE("男性", 11);
 		
 		final private String label;
-		final private int value;
-		private UserGenders(String label, int value) {
+		final private double value;
+		private UserGenders(String label, double value) {
 			this.label = label;
 			this.value = value;
 		}
@@ -104,7 +105,7 @@ public class UserEntity {
 			return label;
 		}
 		@Override
-		public int getMappingValue() {
+		public Double getEnumMappingValue() {
 			return value;
 		}
 		

@@ -151,7 +151,7 @@ public abstract class ExtQueryUtils {
 	
 	public static String buildCountSql(String sql, String countValue){
 		if(SqlUtils.isDruidPresent()){
-			return DruidUtils.toCountSql(sql, countValue);
+			return DruidUtils.toCountSql(sql);
 		}
 
 		//不能全部转为小写，因为会改变 命名参数，导致设置jdbc参数值时取不到对应的值而出错:No value supplied for the SQL parameter

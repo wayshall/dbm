@@ -51,11 +51,16 @@ public class NoAutoIdUserService {
 		baseEntityManager.getSessionFactory().getSession().batchInsert(userlist);
 	}
 	
-	public void batchInsertOrUpdateUser(String prefix, int startId, int insertCount){
+	public List<UserEntity> batchInsertOrUpdateUser(String prefix, int startId, int insertCount){
 		List<UserEntity> userlist = Stream.iterate(startId, item->item+1).limit(insertCount)
 					.map(i->createUserEntity(prefix, i))
 					.collect(Collectors.toList());
 		
+		baseEntityManager.getSessionFactory().getSession().batchInsertOrUpdate(userlist, null);
+		return userlist;
+	}
+
+	public void batchInsertOrUpdateUser(List<UserEntity> userlist){
 		baseEntityManager.getSessionFactory().getSession().batchInsertOrUpdate(userlist, null);
 	}
 	
@@ -63,7 +68,7 @@ public class NoAutoIdUserService {
 		String userName = "unique_user_name______________________";
 		Stream.iterate(startId, item->item+1).limit(insertCount).forEach(item->{
 			UserEntity entity = createUserEntity("test", item);
-			entity.setUserName(userName);
+			entity.setUserName(userName+item);
 			baseEntityManager.save(entity);
 		});
 	}

@@ -526,10 +526,19 @@ public class DbmSessionImpl extends AbstractDbmSession implements DbmSessionEven
 	}
 	
 	/****
+	 * no limit
 	 * Extractor: RowMapperResultSetExtractor
 	 */
 	public <T> List<T> findList(DbmQueryValue queryValue, RowMapper<T> rowMapper){
 		return this.dbmJdbcOperations.query(queryValue.getSql(), queryValue.asMap(), rowMapper);
+	}
+	
+	public <T> List<T> findListWihtLimit(DbmQueryValue queryValue, RowMapper<T> rowMapper, int first, int maxResults){
+//		return this.dbmJdbcOperations.query(queryValue.getSql(), queryValue.asMap(), rowMapper);
+		DbmQuery jq = createDbmQuery(queryValue.getSql(), null);
+		jq.setParameters(queryValue.asMap());
+		List<T> results = jq.setFirstResult(first).setMaxResults(maxResults).getResultList();
+		return results;
 	}
 	
 	public int executeUpdate(DbmQueryValue queryValue){

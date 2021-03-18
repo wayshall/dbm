@@ -19,7 +19,7 @@ import lombok.Getter;
  */
 @Target({FIELD, METHOD})
 @Retention(RetentionPolicy.RUNTIME)
-@DbmField(converterClass=JsonFieldValueConverter.class)
+@DbmFieldConvert(converterClass=JsonFieldValueConverter.class)
 public @interface DbmJsonField {
 	
 	/***
@@ -37,7 +37,7 @@ public @interface DbmJsonField {
 	JsonConvertibleTypes convertibleJavaType() default JsonConvertibleTypes.STRING;
 	
 	/****
-	 * 当映射当类型为泛型容器时，使用此属性指定容器当值类型
+	 * 当映射的类型为泛型容器(Collection<T>)时，使用此属性指定容器的值类型
 	 * @author weishao zeng
 	 * @return
 	 */

@@ -6,7 +6,7 @@
 
 
 
-交流群：  604158262
+联系邮箱：  wayshall@qq.com
 
 
 
@@ -25,6 +25,7 @@
 - [DbmRepository动态sql查询接口](#DbmRepository动态sql查询接口)
 - [sql片段支持](#sql片段支持)
 - [动态sql查询的语法和指令](#动态sql查询的语法和指令)
+- [用DbmRepository执行脚本](#用DbmRepository执行脚本)
 - [DbmRepository接口的多数据源支持](#dbmrepository接口的多数据源支持)
 - [DbmRepository接口对其它orm框架的兼容](#dbmrepository接口对其它orm框架的兼容)
 - [查询映射](#查询映射)
@@ -41,6 +42,7 @@
 - [充血模型支持](#充血模型支持)
 - [参数配置](#参数配置)
 - [代码生成器](#代码生成器)
+- [辅助工具：导出表结构为excel](#辅助工具：导出表结构为excel)
 - [捐赠](#捐赠)
 
 
@@ -69,7 +71,12 @@
 
 - 支持json映射，直接把数据库的json或者varchar类型（存储内容为json数据）的列映射为Java对象
 
+- 支持非int和String类型的枚举映射
+
+- 内置支持SnowFlake id生成算法
+
 - 支持敏感字段映射
+- Repository接口支持执行sql脚本
 
    
 ## 示例项目   
@@ -343,7 +350,7 @@ public class UserEntity {
 	@Enumerated(EnumType.ORDINAL)
 	UserGenders gender;
 
-	public static enum UserGenders implements DbmEnumValueMapping {
+	public static enum UserGenders implements DbmEnumValueMapping<Integer> {
 		FEMALE("女性", 10),
 		MALE("男性", 11);
 		
@@ -357,13 +364,49 @@ public class UserEntity {
 			return label;
 		}
 		@Override
-		public int getMappingValue() {
+		public Integer getEnumMappingValue() {
 			return value;
 		}
 		
 	}
 }
 ```
+
+### 非int和String类型的枚举映射支持
+在jpa里，@Enumerated 注解支持int和String两种枚举值类型。
+在dbm里，只要属性的类型是枚举类型，并且实现了DbmEnumValueMapping接口，dbm就会自动处理枚举类型，不需要@Enumerated注解标记。
+而DbmEnumValueMapping是个泛型接口，可以支持任意类型的枚举值，只要数据值从数据库取回时可以和getEnumMappingValue()返回的值匹配上（eqauls）即可。
+比如项目比较奇葩，需要把枚举类型映射到Double类型：
+```java
+@Entity
+@Table(name="TEST_USER")
+@Data
+public class UserEntity {
+    @SnowflakeId
+    Long id;
+    UserGenders gender;
+}
+static enum UserGenders implements DbmEnumValueMapping<Double> {
+        FEMALE("女性", 0),
+        LADYBOY("人妖", 0.5),
+        MALE("男性", 1);
+        
+        final private String label;
+        final private double value;
+        private UserGenders(String label, double value) {
+            this.label = label;
+            this.value = value;
+        }
+        public String getLabel() {
+            return label;
+        }
+        @Override
+        public Double getEnumMappingValue() {
+            return value;
+        }
+}
+```
+
 
 ### 枚举属性查询时的处理
 
@@ -524,9 +567,10 @@ DbmSensitiveField 属性解释如下：
 
 
 
-### @DbmField注解
-@DbmField 注解可自定义一个值转换器，用于从数据库表获取的字段值转换为Java对象的属性值，和把Java对象的属性值转换为数据库表的字段值。   
+### @DbmFieldConvert注解
+@DbmFieldConvert 注解可自定义一个值转换器，用于从数据库表获取的字段值转换为Java对象的属性值，和把Java对象的属性值转换为数据库表的字段值。   
 @DbmJsonField 注解实际上是包装了@DbmField注解实现的。
+字段支持重复多个@DbmFieldConvert 注解
 
 
 
@@ -1106,7 +1150,42 @@ where
 
 - 支持Optional类型的返回值
 
+## 用DbmRepository执行脚本
+4.8.0版本后，DbmRepository支持执行sql脚本。
+只需要在DbmRepository的方法上加上注解@SqlScript，方法对应的sql即会被当做sql脚本执行。
+但需要注意：
+- 执行脚本必须返回void
+- 脚本无法设置 jdbc 参数
 
+如：
+```Java
+@DbmRepository
+public interface SqlScriptDao {
+    @SqlScript
+    void createTables();
+}
+```
+对应的sql文件：
+```sql
+/**
+ * @name: createTables
+ */
+SET NAMES utf8mb4;
+SET FOREIGN_KEY_CHECKS = 0;
+
+-- ----------------------------
+-- Table structure for wx_access_token
+-- ----------------------------
+DROP TABLE IF EXISTS `test_table`;
+CREATE TABLE `test_table`  (
+  `id` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `create_at` datetime(0) NOT NULL,
+  `update_at` datetime(0) NOT NULL,
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_bin ROW_FORMAT = Compact;
+
+SET FOREIGN_KEY_CHECKS = 1;
+```
 
 ## DbmRepository接口的多数据源支持
 DbmRepository 查询接口还可以通过注解支持绑定不同的数据源，dataSource的值为spring bean的名称：
@@ -1386,6 +1465,10 @@ public interface UserAutoidDao {
 
 
 ```
+**说明**
+- 方法名称以batchInsert、batchUpdate、batchSave开头命名即被视为批量操作，否则需要使用@ExecuteUpdate(isBatch=true)来注明该方法是批量操作
+- 因为是批量操作，第一个必须是Collection集合类型，若有多个参数且第一个参数不是集合类型，则必须使用@BatchObject标记集合类型的参数
+- values语句里面的userName等字段对应集合里面元素（对象）的属性
 
 ### 批量插入或更新
 dbm也利用了mysql的on duplicate key update语法，支持批量插入或更新：
@@ -1550,6 +1633,22 @@ DbmGenerator.createWithDburl("jdbc:mysql://localhost:3306/test?useUnicode=true&c
 					.end()
 					.build()
 					.generate();//生成文件
+```
+
+## 辅助工具导出表结构为excel
+可以通过ExcelExporter类导出表结构为excel
+
+```Java
+    TableExportParam params = new TableExportParam();
+    params.setExportFilePath("f:/test/表字段说明.xls"); // 导出的excel文件保存路径
+    params.addTable("table1", // 导出的表名
+            "table2");
+    params.setConfigurer(it -> {
+        // 满足条件的字段才会被导出
+        it.setCondition("#column.name!='create_at' && #column.name!='update_at'");
+    });
+    ExcelExporter export = ExcelExporter.create(dataSource);
+    export.exportTableShema(params); // 导出
 ```
 
 

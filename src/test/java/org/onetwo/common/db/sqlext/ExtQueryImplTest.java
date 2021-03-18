@@ -13,6 +13,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.onetwo.common.date.DateUtils;
+import org.onetwo.common.date.NiceDate;
 import org.onetwo.common.db.EntityManagerProvider;
 import org.onetwo.common.db.Magazine;
 import org.onetwo.common.db.Magazine.EntityWithDataFilter;
@@ -603,7 +604,7 @@ public class ExtQueryImplTest {
 
 		properties = CUtils.asLinkedMap(
 				"lastUpdateTime:date in", ":yesterday", 
-				"createTime:date in", ":today",
+				"createTime:date in", NiceDate.Now(),
 						"&lower(name):like", "tom%", 
 						"age:=", 17, 
 						"regiestTime:date in", new Date());

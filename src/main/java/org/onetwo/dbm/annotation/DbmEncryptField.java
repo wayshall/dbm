@@ -17,6 +17,6 @@ import org.onetwo.dbm.mapping.converter.EncryptFieldValueConverter;
  */
 @Target({FIELD, METHOD})
 @Retention(RetentionPolicy.RUNTIME)
-@DbmField(converterClass=EncryptFieldValueConverter.class)
+@DbmFieldConvert(converterClass=EncryptFieldValueConverter.class)
 public @interface DbmEncryptField {
 }

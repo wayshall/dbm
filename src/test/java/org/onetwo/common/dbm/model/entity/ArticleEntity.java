@@ -41,5 +41,6 @@ public class ArticleEntity extends TenentBaseEntity {
 	@Version
 	private int dataVersion;
 	
+	private Long authorUserId;
 	
 }

@@ -1,10 +1,12 @@
 package org.onetwo.common.db.builder;
 
 import java.util.Map;
+import java.util.function.Supplier;
 
 import javax.persistence.metamodel.SingularAttribute;
 
 import org.onetwo.common.db.builder.QueryBuilderImpl.SubQueryBuilder;
+import org.onetwo.common.db.filter.DataQueryParamaterEnhancer;
 import org.onetwo.common.db.sqlext.ExtQuery.K;
 import org.onetwo.common.db.sqlext.ExtQuery.KeyObject;
 import org.onetwo.common.reflect.ReflectUtils;
@@ -56,6 +58,9 @@ public class DefaultWhereCauseBuilder<E> implements WhereCauseBuilder<E> {
 	}
 	
 	public DefaultWhereCauseBuilder<E> addFields(Object entity, boolean useLikeIfStringVlue){
+		if (entity==null) {
+			return self();
+		}
 		DbmSessionFactory sf = queryBuilder.getBaseEntityManager().getSessionFactory();
 		DbmMappedEntry entry = sf.getMappedEntryManager().getEntry(entity);
 		Map<String, Object> fieldMap = ReflectUtils.toMap(entity, (p, v)->{
@@ -110,6 +115,26 @@ public class DefaultWhereCauseBuilder<E> implements WhereCauseBuilder<E> {
 	@Override
 	public DefaultWhereCauseBuilder<E> disabledDataFilter() {
 		this.params.put(K.DATA_FILTER, false);
+		return self();
+	}
+	
+	/***
+	 * 
+	 * @author weishao zeng
+	 * @param predicate 返回true时，禁止使用DataQueryParamaterEnhancer
+	 * @return
+	 */
+	@Override
+	public DefaultWhereCauseBuilder<E> disabledDataQueryParamaterEnhancer(Supplier<Boolean> predicate) {
+		if (predicate!=null && predicate.get()) {
+			disabledDataQueryParamaterEnhancer();
+		}
+		return self();
+	}
+	
+	@Override
+	public DefaultWhereCauseBuilder<E> disabledDataQueryParamaterEnhancer() {
+		this.params.put(DataQueryParamaterEnhancer.class, false);
 		return self();
 	}
 	

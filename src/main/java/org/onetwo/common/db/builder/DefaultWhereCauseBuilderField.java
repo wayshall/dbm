@@ -214,10 +214,22 @@ public class DefaultWhereCauseBuilderField<E> extends WhereCauseBuilderField<E> 
 		return queryBuilder;*/
 	}
 	
+	/***
+	 * 如果只有第一个参数，则条件为：>=start这天的零点，<start+1天的零点
+	 * 如果两个参数，则条件为：>=start, <start+1
+	 * @author weishao zeng
+	 * @param start
+	 * @param end
+	 * @return
+	 */
 	public WhereCauseBuilder<E> dateIn(Date start, Date end) {
 		return this.doWhenPredicate(()->{
 			this.op = FieldOP.date_in;
-			this.values = new Date[]{start, end};
+			if (end==null) {
+				this.values = new Date[]{start};
+			} else {
+				this.values = new Date[]{start, end};
+			}
 		});
 		/*
 		this.op = FieldOP.date_in;

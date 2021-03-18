@@ -10,7 +10,7 @@ import org.onetwo.common.db.filequery.MultipCommentsSqlFileParserTest;
 import org.onetwo.common.db.sqlext.ExtQueryImplTest;
 import org.onetwo.common.db.sqlext.JFishExtQueryImplTest;
 import org.onetwo.common.dbm.BaseCrudEntityManagerTest;
-import org.onetwo.common.dbm.BatchInsertTest;
+import org.onetwo.common.dbm.DbmBatchInsertOrUpdateTest;
 import org.onetwo.common.dbm.CompositeIDTest;
 import org.onetwo.common.dbm.CustomDaoTest;
 import org.onetwo.common.dbm.DbmDaoTest;
@@ -21,6 +21,7 @@ import org.onetwo.common.dbm.DbmLongVersionTest;
 import org.onetwo.common.dbm.DbmNestedMappingTest;
 import org.onetwo.common.dbm.DbmSensitiveFieldTest;
 import org.onetwo.common.dbm.DbmSnowflakeTest;
+import org.onetwo.common.dbm.DbmSqlScriptTest;
 import org.onetwo.common.dbm.EncryptFieldTest;
 import org.onetwo.common.dbm.InQueryWithArrayTest;
 import org.onetwo.common.dbm.JsonFieldTest;
@@ -52,7 +53,7 @@ import org.onetwo.dbm.utils.SpringAnnotationFinderTest;
 	DbmDataFilterTest.class,
 //	DBCheckerTest.class,
 //	OneBatchInsertTest.class, // 耗时太长
-	BatchInsertTest.class,
+	DbmBatchInsertOrUpdateTest.class,
 	BaseCrudEntityManagerTest.class,
 	DbmNestedMappingTest.class,
 	TransactionalListenerTest.class,
@@ -74,7 +75,8 @@ import org.onetwo.dbm.utils.SpringAnnotationFinderTest;
 	HibernateNestedMappingTest.class,
 	UserQueryHibernateDaoTest.class,
 	EncryptFieldTest.class,
-	SimpleDBLockerTest.class
+	SimpleDBLockerTest.class,
+	DbmSqlScriptTest.class
 //	RichModelTest.class
 })
 public class DbmTestCase {

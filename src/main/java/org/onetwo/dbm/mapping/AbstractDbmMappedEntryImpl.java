@@ -678,8 +678,9 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 		JdbcStatementContextBuilder dsb = JdbcStatementContextBuilder.create(DbmEventAction.insert, this, insertOrUpdateSqlBuilder);
 		if(LangUtils.isMultiple(entity)){
 			List<Object> list = LangUtils.asList(entity);
-			if(LangUtils.isEmpty(list))
+			if(LangUtils.isEmpty(list)) {
 				return null;
+			}
 			for(Object en : list){
 				this.processIBaseEntity(en, true);
 				this.vailidateEntity(en, OnInsert.class, OnUpdate.class);

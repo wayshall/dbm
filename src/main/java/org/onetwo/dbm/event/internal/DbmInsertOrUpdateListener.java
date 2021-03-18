@@ -75,6 +75,8 @@ public class DbmInsertOrUpdateListener extends AbstractDbmEventListener {
 			if (timeEntity!=null) {
 				timeEntity.setCreateAt(createAt);
 			}
+			// DuplicateKeyException异常时，转为update
+			// TODO：这里有点问题，DuplicateKeyException异常，不一定就是主键重复，可能是其它唯一约束冲突，此时转为（通过id的）update，也一样是错误的
 			if(insertOrUpdate.isDynamicUpdate()){
 				updateCount = insertOrUpdate.getEventSource().dymanicUpdate(entity);
 			}else{

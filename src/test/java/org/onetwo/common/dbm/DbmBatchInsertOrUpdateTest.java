@@ -10,23 +10,28 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.onetwo.common.base.DbmBaseTest;
 import org.onetwo.common.date.NiceDate;
+import org.onetwo.common.dbm.model.entity.ArticleEntity;
 import org.onetwo.common.dbm.model.entity.UserAutoidEntity;
 import org.onetwo.common.dbm.model.entity.UserAutoidEntity.UserStatus;
 import org.onetwo.common.dbm.model.hib.entity.UserEntity;
+import org.onetwo.common.dbm.model.service.ArticleService;
 import org.onetwo.common.dbm.model.service.NoAutoIdUserService;
 import org.onetwo.common.dbm.model.service.UserAutoidServiceImpl;
 import org.onetwo.common.profiling.TimeCounter;
 import org.onetwo.common.utils.Page;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.test.annotation.Rollback;
 
 //@Rollback(false)
-public class BatchInsertTest extends DbmBaseTest {
+public class DbmBatchInsertOrUpdateTest extends DbmBaseTest {
 
 	@Resource
 	private UserAutoidServiceImpl userAutoidServiceImpl;
 	@Autowired
 	private NoAutoIdUserService noAutoIdUserService;
+	@Autowired
+	ArticleService articleService;
 	
 	@Test
 	public void testBatchInsert(){
@@ -106,28 +111,30 @@ public class BatchInsertTest extends DbmBaseTest {
 		int count = noAutoIdUserService.count();
 		assertThat(count).isEqualTo(insertCount*2);
 	}
-	
-	@Test
-	public void testQuerySwitcher(){
-		this.userAutoidServiceImpl.removeAll();
-		int insertCount = 10;
-		//精确到秒，否则会有误差，比如2015-05-06 13:49:09.783存储到mysql后会变成2015-05-06 13:49:10，mysql的datetime只能精确到秒
-		String userNamePrefix = "testQuerySwitcher";
-		NiceDate niceNowSeconde = NiceDate.New().preciseAtSec();
-		int count = this.userAutoidServiceImpl.daoBatchInsert(userNamePrefix, UserStatus.NORMAL, niceNowSeconde.getTime(), insertCount);
-		Assert.assertEquals(insertCount, count);
-		
-		count = this.userAutoidServiceImpl.daoBatchInsert(userNamePrefix, UserStatus.DELETE, niceNowSeconde.getTime(), insertCount);
-		Assert.assertEquals(insertCount, count);
-		
-		List<UserAutoidEntity> userlist = userAutoidServiceImpl.findUserList(UserStatus.NORMAL.name());
-		Assert.assertEquals(insertCount, userlist.size());
-		userlist = userAutoidServiceImpl.findUserList(UserStatus.DELETE.name());
-		Assert.assertEquals(insertCount, userlist.size());
-		
-		count = this.userAutoidServiceImpl.removeByUserName(userNamePrefix);
-		System.out.println("delete count: " + count);
-		Assert.assertTrue(count==insertCount*2);
-	}
 
+	@Test
+	@Rollback(false)
+	public void testBatchInsertOrUpdateWithForeignKey(){
+		articleService.removeAll();
+		noAutoIdUserService.deleteAll();
+		
+//		articleService.addArtilceForeignKey();
+		
+		int insertCount = 100;
+		int startId = 1;
+		String prefix1 = "testBatchInsertOrUpdate";
+		List<UserEntity> userlist = this.noAutoIdUserService.batchInsertOrUpdateUser(prefix1, startId, insertCount);
+		
+		ArticleEntity art = new ArticleEntity();
+		art.setTenementId(300L);
+		art.setTitle("插入有作者的文章");
+		art.setContent(art.getTitle());
+		art.setAuthorUserId(Long.valueOf(startId));
+		this.articleService.saveForBatchUpdateForeignKey(art);
+		
+		this.noAutoIdUserService.batchInsertOrUpdateUser(userlist);
+		
+		articleService.removeAll();
+//		articleService.dropArtilceForeignKey();
+	}
 }
