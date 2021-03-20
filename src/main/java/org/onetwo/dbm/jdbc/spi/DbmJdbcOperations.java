@@ -7,7 +7,6 @@ import java.util.Map;
 import javax.sql.DataSource;
 
 import org.onetwo.dbm.annotation.DbmJdbcOperationMark;
-import org.onetwo.dbm.jdbc.AroundPreparedStatementExecute;
 import org.onetwo.dbm.jdbc.DbmNamedJdbcTemplate;
 import org.onetwo.dbm.jdbc.internal.SimpleArgsPreparedStatementCreator;
 import org.springframework.dao.DataAccessException;
@@ -59,6 +58,8 @@ public interface DbmJdbcOperations /*extends JdbcOperations*/ {
 
 	@DbmJdbcOperationMark(type=DbmJdbcOperationType.EXECUTE)
 	void execute(String sql) throws DataAccessException;
+
+	@DbmJdbcOperationMark(type=DbmJdbcOperationType.EXECUTE)
 	Object execute(String sql, Map<String, ?> paramMap) throws DataAccessException ;
 
 	@DbmJdbcOperationMark(type=DbmJdbcOperationType.UPDATE)
@@ -67,11 +68,11 @@ public interface DbmJdbcOperations /*extends JdbcOperations*/ {
 	@DbmJdbcOperationMark(type=DbmJdbcOperationType.UPDATE)
 	int updateWith(final SimpleArgsPreparedStatementCreator spsc) throws DataAccessException;
 
-	@DbmJdbcOperationMark(type=DbmJdbcOperationType.UPDATE)
-	int updateWith(final SimpleArgsPreparedStatementCreator spsc, final AroundPreparedStatementExecute action) throws DataAccessException;
+//	@DbmJdbcOperationMark(type=DbmJdbcOperationType.UPDATE)
+//	int updateWith(final SimpleArgsPreparedStatementCreator spsc, final AroundPreparedStatementExecute action) throws DataAccessException;
 
-	@DbmJdbcOperationMark(type=DbmJdbcOperationType.UPDATE)
-	int updateWith(String sql, Object[] args, final AroundPreparedStatementExecute action) throws DataAccessException;
+//	@DbmJdbcOperationMark(type=DbmJdbcOperationType.UPDATE)
+//	int updateWith(String sql, Object[] args, final AroundPreparedStatementExecute action) throws DataAccessException;
 
 	@DbmJdbcOperationMark(type=DbmJdbcOperationType.BATCH_UPDATE)
 	int[] batchUpdate(String sql, Map<String, ?>[] batchValues) throws DataAccessException;
