@@ -113,7 +113,7 @@ public class DbmJdbcTemplate extends JdbcTemplate implements DbmJdbcOperations {
 		return update(spsc, pss);
 	}
 	
-	@Override
+//	@Override
 	public int updateWith(final SimpleArgsPreparedStatementCreator spsc, final AroundPreparedStatementExecute action) throws DataAccessException {
 		final PreparedStatementSetter pss = this.newArgPreparedStatementSetter(spsc.getSqlParameters());
 		return execute(spsc, new PreparedStatementCallback<Integer>() {
@@ -144,7 +144,7 @@ public class DbmJdbcTemplate extends JdbcTemplate implements DbmJdbcOperations {
 	}
 	
 	
-	@Override
+//	@Override
 	public int updateWith(String sql, Object[] args, final AroundPreparedStatementExecute action) throws DataAccessException {
 		SimpleArgsPreparedStatementCreator psc = new SimpleArgsPreparedStatementCreator(sql, args);
 		return updateWith(psc, action);
