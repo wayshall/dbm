@@ -243,7 +243,7 @@ abstract public class AbstractDbmEventListener implements DbmEventListener<DbmSe
 		DbmMappedField versionField = entry.getVersionField();
 		JdbcStatementContext<Object[]> versionContext = entry.makeSelectVersion(singleEntity);
 		
-		Object id = entry.getId(singleEntity);
+		Object[] id = entry.getIds(singleEntity);
 		try {
 			Object last = es.getDbmJdbcOperations().queryForObject(versionContext.getSql(), versionField.getColumnType(), id);
 			return last;

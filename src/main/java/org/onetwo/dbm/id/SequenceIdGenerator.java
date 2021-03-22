@@ -39,21 +39,21 @@ public class SequenceIdGenerator extends AbstractIdentifierGenerator {
 	}
 
 
-	private Long generateOneSeq(DbmSessionImplementor session) {
-		SequenceNameManager sequenceNameManager = session.getSequenceNameManager();
-		String seqSql = sequenceNameManager.getSequenceSql(attrs.getSequenceName(), null);
-		Long id = null;
-		try {
-			id = session.getDbmJdbcOperations().queryForObject(seqSql, Long.class);
-		} catch (BadSqlGrammarException e) {
-			if(createSeqIfNecessary(e, session)){
-				id = session.getDbmJdbcOperations().queryForObject(seqSql, Long.class);
-				if(id==null)
-					throw e;
-			}
-		}
-		return id;
-	}
+//	private Long generateOneSeq(DbmSessionImplementor session) {
+//		SequenceNameManager sequenceNameManager = session.getSequenceNameManager();
+//		String seqSql = sequenceNameManager.getSequenceSql(attrs.getSequenceName(), null);
+//		Long id = null;
+//		try {
+//			id = session.getDbmJdbcOperations().queryForObject(seqSql, Long.class);
+//		} catch (BadSqlGrammarException e) {
+//			if(createSeqIfNecessary(e, session)){
+//				id = session.getDbmJdbcOperations().queryForObject(seqSql, Long.class);
+//				if(id==null)
+//					throw e;
+//			}
+//		}
+//		return id;
+//	}
 	
 	private boolean createSeqIfNecessary(BadSqlGrammarException e, DbmSessionImplementor session){
 		SequenceNameManager sequenceNameManager = session.getSequenceNameManager();

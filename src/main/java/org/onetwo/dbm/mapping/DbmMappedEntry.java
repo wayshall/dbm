@@ -17,7 +17,20 @@ public interface DbmMappedEntry extends DbmMappedEntryMeta {
 
 	void setId(Object entity, Object value);
 
+	/***
+	 * 如果是复合主键，则返回复合主键对象
+	 * @author weishao zeng
+	 * @param entity
+	 * @return
+	 */
 	Object getId(Object entity);
+	/****
+	 * 如果是复合主键，则返回多个值
+	 * @author weishao zeng
+	 * @param entity
+	 * @return
+	 */
+	Object[] getIds(Object entity);
 
 	void setFieldValue(Object entity, String fieldName, Object value);
 
