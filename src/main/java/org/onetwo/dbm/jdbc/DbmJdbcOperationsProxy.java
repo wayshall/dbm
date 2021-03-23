@@ -20,8 +20,8 @@ import org.onetwo.dbm.core.internal.AbstractDbmInterceptorChain.JdbcDbmIntercept
 import org.onetwo.dbm.core.internal.DbmInterceptorManager;
 import org.onetwo.dbm.core.spi.DbmInterceptor;
 import org.onetwo.dbm.core.spi.DbmInterceptorChain;
-import org.onetwo.dbm.jdbc.internal.DbmJdbcTemplate;
 import org.onetwo.dbm.jdbc.internal.SimpleArgsPreparedStatementCreator;
+import org.onetwo.dbm.jdbc.spi.DbmJdbcOperations;
 import org.onetwo.dbm.utils.JdbcParamValueConvers;
 import org.slf4j.Logger;
 import org.springframework.jdbc.core.PreparedStatementSetter;
@@ -38,11 +38,11 @@ public class DbmJdbcOperationsProxy {
 //	private static boolean printRelacedSql = true;
 //	private DbmEventListenerManager eventListenerManager;
 	final private DbmInterceptorManager interceptorManager;
-	final private DbmJdbcTemplate dbmJdbcTemplate;
+	final private DbmJdbcOperations dbmJdbcTemplate;
 	
 
 	public DbmJdbcOperationsProxy(DbmInterceptorManager interceptorManager,
-			DbmJdbcTemplate dbmJdbcTemplate) {
+			DbmJdbcOperations dbmJdbcTemplate) {
 		super();
 		this.interceptorManager = interceptorManager;
 		this.dbmJdbcTemplate = dbmJdbcTemplate;

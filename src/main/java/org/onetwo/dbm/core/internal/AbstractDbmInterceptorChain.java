@@ -9,19 +9,19 @@ import java.util.LinkedList;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import org.onetwo.common.annotation.AnnotationUtils;
 import org.onetwo.common.db.dquery.DynamicMethod;
 import org.onetwo.common.db.dquery.MethodDynamicQueryInvokeContext;
 import org.onetwo.common.utils.LangUtils;
 import org.onetwo.dbm.annotation.DbmInterceptorFilter.InterceptorType;
-import org.onetwo.dbm.annotation.DbmJdbcOperationMark;
 import org.onetwo.dbm.core.spi.DbmInterceptor;
 import org.onetwo.dbm.core.spi.DbmInterceptorChain;
 import org.onetwo.dbm.exception.DbmException;
+import org.onetwo.dbm.jdbc.annotation.DbmJdbcOperationMark;
 import org.onetwo.dbm.jdbc.spi.DbmJdbcOperationType;
 import org.onetwo.dbm.jdbc.spi.DbmJdbcOperationType.DatabaseOperationType;
 import org.springframework.core.NestedRuntimeException;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
+import org.springframework.core.annotation.AnnotationUtils;
 
 abstract public class AbstractDbmInterceptorChain implements DbmInterceptorChain {
 	
@@ -198,7 +198,8 @@ abstract public class AbstractDbmInterceptorChain implements DbmInterceptorChain
 		@Override
 		public Optional<DbmJdbcOperationType> getJdbcOperationType() {
 			if(dbmJdbcOperationType==null){
-				DbmJdbcOperationMark operation = AnnotationUtils.findAnnotationWithStopClass(getTargetObject().getClass(), getTargetMethod(), DbmJdbcOperationMark.class);
+//				DbmJdbcOperationMark operation = AnnotationUtils.findAnnotationWithStopClass(getTargetObject().getClass(), getTargetMethod(), DbmJdbcOperationMark.class);
+				DbmJdbcOperationMark operation = AnnotationUtils.findAnnotation(getTargetMethod(), DbmJdbcOperationMark.class);
 				Optional<DbmJdbcOperationType> dbmJdbcOperationType = operation==null?Optional.empty():Optional.ofNullable(operation.type());
 				this.dbmJdbcOperationType = dbmJdbcOperationType;
 				return dbmJdbcOperationType;
