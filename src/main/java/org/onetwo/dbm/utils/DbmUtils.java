@@ -290,7 +290,9 @@ final public class DbmUtils {
 		Object sqlArgs = null;
 		if (invokeMethod.getSqlParameter()!=null) {
 			sql = (String)args[invokeMethod.getSqlParameter().getParameterIndex()];
-			sqlArgs = args[invokeMethod.getSqlArgsParameter().getParameterIndex()];
+			if (invokeMethod.getSqlArgsParameter()!=null) {
+				sqlArgs = args[invokeMethod.getSqlArgsParameter().getParameterIndex()];
+			}
 		} else if (invokeMethod.getSqlProviderParameter()!=null) {
 			SqlProvider sqlProvider = (SqlProvider) args[invokeMethod.getSqlProviderParameter().getParameterIndex()];
 			sql = sqlProvider.getSql();
@@ -362,8 +364,11 @@ final public class DbmUtils {
 	
 	public static Object formatValueIfNeed(Object arg) {
 		Object val = arg;
-		if (arg instanceof Date) {
-			val = DateUtils.formatDateTime((Date)arg);
+		if (val instanceof SqlParameterValue) {
+			val = ((SqlParameterValue)val).getValue();
+		}
+		if (val instanceof Date) {
+			val = DateUtils.formatDateTime((Date)val);
 		}
 		return val;
 	}

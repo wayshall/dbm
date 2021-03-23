@@ -78,7 +78,7 @@ public interface DbmJdbcOperations /*extends JdbcOperations*/ {
 
 	
 	@DbmJdbcOperationMark(type=DbmJdbcOperationType.BATCH_UPDATE)
-	int[] batchUpdate(@DbmJdbcSqlMark String sql, List<Map<String, ?>> batchValues, int processSizePerBatch) throws DataAccessException;
+	int[] batchUpdate(@DbmJdbcSqlMark String sql, @DbmJdbcArgsMark List<Map<String, ?>> batchValues, int processSizePerBatch) throws DataAccessException;
 
 	@DbmJdbcOperationMark(type=DbmJdbcOperationType.UPDATE)
 	int update(@DbmJdbcSqlMark String sql, @DbmJdbcArgsMark Object... args) throws DataAccessException;
