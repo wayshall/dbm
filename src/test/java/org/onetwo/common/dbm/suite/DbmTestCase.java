@@ -10,9 +10,9 @@ import org.onetwo.common.db.filequery.MultipCommentsSqlFileParserTest;
 import org.onetwo.common.db.sqlext.ExtQueryImplTest;
 import org.onetwo.common.db.sqlext.JFishExtQueryImplTest;
 import org.onetwo.common.dbm.BaseCrudEntityManagerTest;
-import org.onetwo.common.dbm.DbmBatchInsertOrUpdateTest;
 import org.onetwo.common.dbm.CompositeIDTest;
 import org.onetwo.common.dbm.CustomDaoTest;
+import org.onetwo.common.dbm.DbmBatchInsertOrUpdateTest;
 import org.onetwo.common.dbm.DbmDaoTest;
 import org.onetwo.common.dbm.DbmDataFilterTest;
 import org.onetwo.common.dbm.DbmDateVersionTest;
@@ -77,6 +77,7 @@ import org.onetwo.dbm.utils.SpringAnnotationFinderTest;
 	EncryptFieldTest.class,
 	SimpleDBLockerTest.class,
 	DbmSqlScriptTest.class
+	
 //	RichModelTest.class
 })
 public class DbmTestCase {

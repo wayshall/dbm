@@ -36,6 +36,7 @@ import org.onetwo.dbm.core.spi.DbmTransaction;
 import org.onetwo.dbm.exception.DbmException;
 import org.onetwo.dbm.exception.UpdateCountException;
 import org.onetwo.dbm.jdbc.JdbcUtils;
+import org.onetwo.dbm.jdbc.method.JdbcOperationMethod;
 import org.onetwo.dbm.jdbc.spi.SqlParametersProvider;
 import org.onetwo.dbm.mapping.DbmEntityFieldListener;
 import org.onetwo.dbm.mapping.DbmMappedField;
@@ -284,10 +285,29 @@ final public class DbmUtils {
 	}
 	
 
+	public static Pair<String, Object> findSqlAndParams(JdbcOperationMethod invokeMethod, Object[] args){
+		String sql;
+		Object sqlArgs = null;
+		if (invokeMethod.getSqlParameter()!=null) {
+			sql = (String)args[invokeMethod.getSqlParameter().getParameterIndex()];
+			sqlArgs = args[invokeMethod.getSqlArgsParameter().getParameterIndex()];
+		} else if (invokeMethod.getSqlProviderParameter()!=null) {
+			SqlProvider sqlProvider = (SqlProvider) args[invokeMethod.getSqlProviderParameter().getParameterIndex()];
+			sql = sqlProvider.getSql();
+			if (sqlProvider instanceof SqlParametersProvider) {
+				sqlArgs = ((SqlParametersProvider)sqlProvider).getSqlParameters();
+			}
+		} else {
+			throw new DbmException("sql parameter not found: " + invokeMethod.getMethod().getName());
+		}
+		Pair<String, Object> sqlParams = Pair.of(sql, sqlArgs);
+		return sqlParams;
+	}
+	
 	public static Pair<String, Object> findSqlAndParams(Object[] args){
 		String sql = null;
 		Object params = null;
-		int maxArgSize = 50;
+//		int maxArgSize = 50;
 		for (int i = 0; i < args.length; i++) {
 			Object arg = args[i];
 			if(arg==null){
@@ -312,9 +332,9 @@ final public class DbmUtils {
 					params = ((SqlParametersProvider)arg).getSqlParameterList();
 				}
 			}
-			if (LangUtils.size(params)>maxArgSize) {
-				params = "<<Parameter Size is more than " + maxArgSize + ">>";
-			}
+//			if (LangUtils.size(params)>maxArgSize) {
+//				params = "<<Parameter Size is more than " + maxArgSize + ">>";
+//			}
 		}
 		if(sql==null){
 			return null;

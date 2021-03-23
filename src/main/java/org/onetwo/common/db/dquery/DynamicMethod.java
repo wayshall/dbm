@@ -170,7 +170,7 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 		checkAndFindAsCountQuery(componentClass);
 		findAndSetQueryName(this.asCountQuery);
 		
-		LangUtils.println("resultClass: ${0}, componentClass:${1}", resultClass, compClass);
+//		LangUtils.println("resultClass: ${0}, componentClass:${1}", resultClass, compClass);
 	}
 	
 	private void findAndConfigSqlTemplateParser() {
