@@ -17,6 +17,8 @@ import org.onetwo.dbm.mapping.DbmMappedEntry;
 import com.google.common.collect.Maps;
 
 public class DefaultWhereCauseBuilder<E> implements WhereCauseBuilder<E> {
+	public static final String[] EXCLUDE_PROPERTIES = new String[] { "page", "pageNo", "pageSize", "pagination", "autoCount" };
+	
 	final protected QueryBuilderImpl<E> queryBuilder;
 	final protected Map<Object, Object> params;
 	private DefaultWhereCauseBuilder<E> parent;
@@ -61,11 +63,22 @@ public class DefaultWhereCauseBuilder<E> implements WhereCauseBuilder<E> {
 		if (entity==null) {
 			return self();
 		}
+		
 		DbmSessionFactory sf = queryBuilder.getBaseEntityManager().getSessionFactory();
-		DbmMappedEntry entry = sf.getMappedEntryManager().getEntry(entity);
-		Map<String, Object> fieldMap = ReflectUtils.toMap(entity, (p, v)->{
-			return v!=null && entry.contains(p.getName());
-		});
+		DbmMappedEntry entry = sf.getMappedEntryManager().findEntry(entity);
+		
+		// 排除分页参数
+		Map<String, Object> fieldMap = null;
+		if (entry!=null) {
+			fieldMap = ReflectUtils.toMap(entity, (p, v)->{
+				return v!=null && entry.contains(p.getName());
+			}, EXCLUDE_PROPERTIES);
+		} else {
+			fieldMap = ReflectUtils.toMap(entity, (p, v)->{
+				return v!=null;
+			}, EXCLUDE_PROPERTIES);
+		}
+		
 		fieldMap.entrySet().forEach(e->{
 			if(useLikeIfStringVlue && String.class.isInstance(e.getValue())){
 				field(e.getKey()).like(e.getValue().toString());

@@ -286,6 +286,27 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 	}
 	
 	@Override
+	public Object[] getIds(Object entity){
+//		if(getIdentifyField()==null)
+//			return null;
+//		return getIdentifyField().getValue(entity);
+		if (!isCompositePK()) {
+			Object idValue = this.getIdentifyFields().get(0).getValue(entity);
+			return new Object[] {idValue};
+		}
+		
+		List<DbmMappedField> idFields = this.getIdentifyFields();
+		Object[] idValues = new Object[idFields.size()];
+		int index = 0;
+		for (DbmMappedField field : idFields) {
+			Object fieldValue = field.getValue(entity);
+			idValues[index] = fieldValue;
+			index++;
+		}
+		return idValues;
+	}
+	
+	@Override
 	public void setFieldValue(Object entity, String fieldName, Object value){
 		getField(fieldName).setValue(entity, value);
 	}
