@@ -1,4 +1,4 @@
-package org.onetwo.dbm.annotation;
+package org.onetwo.dbm.jdbc.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

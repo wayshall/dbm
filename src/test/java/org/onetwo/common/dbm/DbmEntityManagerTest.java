@@ -5,6 +5,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 
+import java.util.Date;
 import java.util.List;
 
 import javax.annotation.Resource;
@@ -26,7 +27,6 @@ import org.onetwo.common.utils.LangOps;
 import org.onetwo.common.utils.LangUtils;
 import org.onetwo.common.utils.Page;
 import org.onetwo.dbm.utils.DbmLock;
-import org.springframework.test.annotation.Rollback;
 
 public class DbmEntityManagerTest extends DbmBaseTest {
 
@@ -51,6 +51,7 @@ public class DbmEntityManagerTest extends DbmBaseTest {
 		user.setMobile("1333333333");
 		user.setEmail("test@test.com");
 		user.setStatus(UserStatus.NORMAL);
+		user.setBirthday(new Date());
 		
 		//save
 		Long userId = entityManager.save(user).getId();

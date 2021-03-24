@@ -3,6 +3,7 @@ package org.onetwo.dbm.core.internal;
 import org.apache.commons.lang3.tuple.Pair;
 import org.onetwo.common.log.JFishLoggerFactory;
 import org.onetwo.common.profiling.TimeCounter;
+import org.onetwo.common.utils.LangUtils;
 import org.onetwo.dbm.annotation.DbmInterceptorFilter;
 import org.onetwo.dbm.annotation.DbmInterceptorFilter.InterceptorType;
 import org.onetwo.dbm.core.spi.DbmInterceptor;
@@ -25,7 +26,7 @@ import org.springframework.core.Ordered;
 @DbmInterceptorFilter(type=InterceptorType.JDBC)
 public class LogSqlInterceptor implements DbmInterceptor, Ordered {
 	
-	final private static Logger logger = JFishLoggerFactory.getLogger(LogSqlInterceptor.class);
+	final protected static Logger logger = JFishLoggerFactory.getLogger(LogSqlInterceptor.class);
 	
 	final private DbmConfig dbmConfig;
 	final private DbmSessionFactory sessionFactory;
@@ -47,21 +48,32 @@ public class LogSqlInterceptor implements DbmInterceptor, Ordered {
 			return chain.invoke();
 		}
 		
+		return this.invokeAndLogSql(chain, sqlParams);
+	}
+	
+	protected Object invokeAndLogSql(DbmInterceptorChain chain, Pair<String, Object> sqlParams) {
 		if(dbmConfig.isEnabledDebugContext()){
 			DebugContextInterceptor.getCurrentDebugContextData().ifPresent(data->{
 				data.addSqlAndParams(sqlParams);
 			});
 		}
+
 		if(logger.isTraceEnabled()){
 			long txId = sessionFactory.getSession().getTransaction()!=null?sessionFactory.getSession().getTransaction().getId():DbmIds.UNKNOW_TX_ID;
-			Object sqlParamValues = DbmUtils.formatContainerValueIfNeed(sqlParams.getValue());
+			Object sqlParamValues = sqlParams.getValue();
+			int maxArgSize = 50;
+			if (LangUtils.size(sqlParamValues)>maxArgSize) {
+				sqlParamValues = "<<Parameter Size is more than " + maxArgSize + ">>";
+			} else {
+				sqlParamValues = DbmUtils.formatContainerValueIfNeed(sqlParamValues);
+			}
 			logger.trace("tx[{}] dbm sql: {}, sql parameters: {}", txId, sqlParams.getKey(), sqlParamValues);
 		}
 		
 		TimeCounter counter = TimeCounter.start("dbm jdbc: ");
 		try {
 			return chain.invoke();
-		}finally{
+		} finally {
 			counter.stop(false);
 			if(logger.isTraceEnabled()){
 				logger.trace(counter.getMessage());
@@ -72,6 +84,14 @@ public class LogSqlInterceptor implements DbmInterceptor, Ordered {
 	@Override
 	public int getOrder() {
 		return DbmInterceptorOrder.LOG_SQL;
+	}
+
+	protected DbmConfig getDbmConfig() {
+		return dbmConfig;
+	}
+
+	protected DbmSessionFactory getSessionFactory() {
+		return sessionFactory;
 	}
 	
 	
