@@ -135,6 +135,9 @@ public interface DbmSession {
 	@DbmJdbcOperationMark(type=DbmJdbcOperationType.BATCH_INSERT)
 	public <T> int batchInsert(Collection<T> entities, Integer batchSize);
 	
+	@DbmJdbcOperationMark(type=DbmJdbcOperationType.BATCH_INSERT)
+	public <T> int batchInsertOrIgnore(Collection<T> entities, Integer batchSize);
+	
 	/***
 	 * 目前只支持mysql
 	 * 批量插入或更新，触发的是batchInsert事件

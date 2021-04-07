@@ -86,6 +86,7 @@ public interface DbmMappedEntry extends DbmMappedEntryMeta {
 	JdbcStatementContext<List<Object[]>> makeInsert(Object entity);
 	
 	JdbcStatementContext<List<Object[]>> makeMysqlInsertOrUpdate(Object entity);
+	JdbcStatementContext<List<Object[]>> makeMysqlInsertOrIgnore(Object entity);
 
 	/***
 	 * make delete by id

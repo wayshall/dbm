@@ -288,6 +288,16 @@ public class DbmSessionImpl extends AbstractDbmSession implements DbmSessionEven
 		return event.getUpdateCount();
 	}
 	
+	@Override
+	public <T> int batchInsertOrIgnore(Collection<T> entities, Integer batchSize) {
+		DbmBatchInsertEvent event = new DbmBatchInsertEvent(entities, this);
+		event.setAction(DbmEventAction.batchInsertOrIgnore);
+		event.setBatchSize(batchSize);
+		this.fireEvents(event);
+		return event.getUpdateCount();
+	}
+	
+	
 	/*protected void fireEvents(JFishEventListener[] listeners, JFishEvent event){
 		for(JFishEventListener listern : listeners){
 			listern.doEvent(event);
