@@ -53,4 +53,13 @@ public class SimpleArgsPreparedStatementCreator implements PreparedStatementCrea
 		}
 		return Arrays.asList(args);
 	}
+
+	public String[] getColumnNames() {
+		return columnNames;
+	}
+	
+	public SimpleArgsPreparedStatementCreator cloneWithNewSql(String sql) {
+		return new SimpleArgsPreparedStatementCreator(sql, this.args, this.columnNames);
+	}
+	
 }

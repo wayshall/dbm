@@ -113,6 +113,8 @@ public class SimpleDbmInnerServiceRegistry implements DbmInnerServiceRegistry {
 	
 	private ApplicationContext applicationContext;
 	
+	private JdbcOperationMethodCachingService jdbcOperationMethodCachingService;
+	
 	private <T> T initializeComponent(T component, Class<T> componentClass, Supplier<T> initializer){
 		if(component!=null){
 			return component;
@@ -217,6 +219,9 @@ public class SimpleDbmInnerServiceRegistry implements DbmInnerServiceRegistry {
 		edgeEventBus = initializeComponent(this.edgeEventBus, EdgeEventBus.class, null);
 		Assert.notNull(edgeEventBus, "Dbm Edge EventBus can not be null");
 		
+
+		jdbcOperationMethodCachingService = initializeComponent(new JdbcOperationMethodCachingService(), JdbcOperationMethodCachingService.class, null);
+		
 		//add
 		this.interceptorManager = initializeComponent(interceptorManager, DbmInterceptorManager.class, ()->{
 			List<DbmInterceptor> interceptors = Lists.newArrayList();
@@ -226,7 +231,7 @@ public class SimpleDbmInnerServiceRegistry implements DbmInnerServiceRegistry {
 			}
 			interceptors.add(new SessionCacheInterceptor(context.getSessionFactory()));
 			interceptors.add(new LogSqlInterceptor(dataBaseConfig, context.getSessionFactory()));
-//			interceptors.add(new LogSqlByAnnotationInterceptor(dataBaseConfig, context.getSessionFactory()));
+//			interceptors.add(new LogSqlByAnnotationInterceptor(dataBaseConfig, context.getSessionFactory(), jdbcOperationMethodCachingService));
 			interceptors.add(new JdbcEventInterceptor(edgeEventBus));
 			/*if(this.interceptors!=null){
 				interceptors.addAll(this.interceptors);
@@ -366,6 +371,10 @@ public class SimpleDbmInnerServiceRegistry implements DbmInnerServiceRegistry {
 
 	public EdgeEventBus getEdgeEventBus() {
 		return edgeEventBus;
+	}
+
+	public JdbcOperationMethodCachingService getJdbcOperationMethodCachingService() {
+		return jdbcOperationMethodCachingService;
 	}
 
 

@@ -4,6 +4,7 @@ import org.onetwo.common.db.spi.SqlParamterPostfixFunctionRegistry;
 import org.onetwo.common.db.sql.SequenceNameManager;
 import org.onetwo.common.db.sqlext.SQLSymbolManager;
 import org.onetwo.dbm.core.internal.DbmInterceptorManager;
+import org.onetwo.dbm.core.internal.JdbcOperationMethodCachingService;
 import org.onetwo.dbm.core.internal.SimpleDbmInnerServiceRegistry.DbmServiceRegistryCreateContext;
 import org.onetwo.dbm.dialet.DBDialect;
 import org.onetwo.dbm.dialet.DefaultDatabaseDialetManager;
@@ -55,5 +56,7 @@ public interface DbmInnerServiceRegistry {
 	SqlParamterPostfixFunctionRegistry getSqlParamterPostfixFunctionRegistry();
 	
 	EdgeEventBus getEdgeEventBus();
+	
+	JdbcOperationMethodCachingService getJdbcOperationMethodCachingService();
 
 }

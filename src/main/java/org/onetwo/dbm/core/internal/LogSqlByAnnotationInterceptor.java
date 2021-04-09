@@ -1,22 +1,15 @@
 package org.onetwo.dbm.core.internal;
 
-import java.lang.reflect.Method;
-import java.util.concurrent.ExecutionException;
-
 import org.apache.commons.lang3.tuple.Pair;
 import org.onetwo.dbm.annotation.DbmInterceptorFilter;
 import org.onetwo.dbm.annotation.DbmInterceptorFilter.InterceptorType;
 import org.onetwo.dbm.core.spi.DbmInterceptor;
 import org.onetwo.dbm.core.spi.DbmInterceptorChain;
 import org.onetwo.dbm.core.spi.DbmSessionFactory;
-import org.onetwo.dbm.exception.DbmException;
 import org.onetwo.dbm.jdbc.method.JdbcOperationMethod;
 import org.onetwo.dbm.mapping.DbmConfig;
 import org.onetwo.dbm.utils.DbmUtils;
 import org.springframework.core.Ordered;
-
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 
 /**
  * mysql驱动本身可通过配置连接字符串打印sql，详见：
@@ -29,11 +22,13 @@ import com.google.common.cache.CacheBuilder;
 @DbmInterceptorFilter(type=InterceptorType.JDBC)
 public class LogSqlByAnnotationInterceptor extends LogSqlInterceptor implements DbmInterceptor, Ordered {
 	
-	final protected static Cache<Method, JdbcOperationMethod> JDBC_METHOD_CACHES = CacheBuilder.newBuilder().<Method, JdbcOperationMethod>build();
-	final private Cache<Method, JdbcOperationMethod> methodCache = JDBC_METHOD_CACHES;
+//	final protected static Cache<Method, JdbcOperationMethod> JDBC_METHOD_CACHES = CacheBuilder.newBuilder().<Method, JdbcOperationMethod>build();
+//	final private Cache<Method, JdbcOperationMethod> methodCache = JDBC_METHOD_CACHES;
+	private JdbcOperationMethodCachingService jdbcOperationMethodCachingService;
 	
-	public LogSqlByAnnotationInterceptor(DbmConfig dbmConfig, DbmSessionFactory sessionFactory) {
+	public LogSqlByAnnotationInterceptor(DbmConfig dbmConfig, DbmSessionFactory sessionFactory, JdbcOperationMethodCachingService jdbcOperationMethodCachingService) {
 		super(dbmConfig, sessionFactory);
+		this.jdbcOperationMethodCachingService = jdbcOperationMethodCachingService;
 	}
 
 	@Override
@@ -43,22 +38,10 @@ public class LogSqlByAnnotationInterceptor extends LogSqlInterceptor implements 
 			return chain.invoke();
 		}
 		
-		JdbcOperationMethod invokeMethod;
-		try {
-			invokeMethod = methodCache.get(chain.getTargetMethod(), () -> {
-				return createMethod(chain.getTargetMethod());
-			});
-		} catch (ExecutionException e) {
-			throw new DbmException("find jdbc method from cache error: " + e.getMessage(), e);
-		}
-		
+		JdbcOperationMethod invokeMethod = jdbcOperationMethodCachingService.getJdbcOperationMethod(chain.getTargetMethod());
 		Pair<String, Object> sqlParams = DbmUtils.findSqlAndParams(invokeMethod, chain.getTargetArgs());
 		
 		return invokeAndLogSql(chain, sqlParams);
-	}
-
-	protected JdbcOperationMethod createMethod(Method method) {
-		return new JdbcOperationMethod(method);
 	}
 
 }
