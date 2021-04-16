@@ -85,7 +85,8 @@ public class DefaultSQLSymbolManagerImpl implements SQLSymbolManager {
 		.register(new LikeSQLSymbolParser(this, FieldOP.not_like2, FieldOP.not_like))
 		.register(new InSymbolParser(this, FieldOP.in))
 		.register(new InSymbolParser(this, FieldOP.not_in))
-		.register(new DateRangeSymbolParser(this, FieldOP.date_in));
+		.register(new DateRangeSymbolParser(this, FieldOP.date_in))
+		.register(new BetweenSymbolParser(this));
 		return this;
 	}
 

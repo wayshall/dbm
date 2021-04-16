@@ -7,7 +7,6 @@ import org.onetwo.common.date.DateUtils;
 import org.onetwo.common.date.NiceDate;
 import org.onetwo.common.db.builder.QueryField;
 import org.onetwo.common.db.sqlext.ExtQuery.K.IfNull;
-import org.onetwo.common.exception.ServiceException;
 import org.onetwo.dbm.exception.DbmException;
 
 /****
@@ -40,7 +39,7 @@ public class DateRangeSymbolParser extends CommonSQLSymbolParser implements HqlS
 		List paramlist = convertValues(field, value, ifNull);
 
 		if(paramlist.size()>2)
-			throw new ServiceException("the parameters of "+symbol+" can not greater than 2, acutal: " + paramlist.size());
+			throw new DbmException("the operator [" + symbol + "] excepted 1 or 2 parameters, acutal: " + paramlist.size());
 		
 		Date startDate = null;
 		Date endDate = null;

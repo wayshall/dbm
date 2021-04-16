@@ -27,6 +27,7 @@ public interface SQLSymbolManager {
 		public static final String neq = "!=";
 		public static final String neq2 = "<>";
 		public static final String in = "in";
+		public static final String between = "between";
 		public static final String not_in = "not in";
 		public static final String date_in = "date in";
 		public static final String is_null = "is null";
