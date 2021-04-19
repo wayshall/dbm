@@ -65,6 +65,10 @@ public abstract class ExtQueryUtils {
 		
 	}
 	
+	public static String[] appendOperationToFields(String[] fields, QueryDSLOps op){
+		return appendOperationToFields(fields, op.getOperator());
+	}
+	
 	public static String[] appendOperationToFields(String[] fields, String op){
 		Assert.notEmpty(fields);
 		String[] newFileds = null;

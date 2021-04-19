@@ -17,7 +17,7 @@ import org.onetwo.dbm.exception.DbmException;
  */
 public class DateRangeSymbolParser extends CommonSQLSymbolParser implements HqlSymbolParser {
 	
-	public DateRangeSymbolParser(SQLSymbolManager sqlSymbolManager, String symbol){
+	public DateRangeSymbolParser(SQLSymbolManager sqlSymbolManager, QueryDSLOps symbol){
 		super(sqlSymbolManager, symbol);
 	}
 	

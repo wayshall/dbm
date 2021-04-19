@@ -21,23 +21,23 @@ abstract public class AbstractSQLSymbolParser implements HqlSymbolParser{
 	protected Logger logger = JFishLoggerFactory.getLogger(this.getClass());
 	
 //	protected boolean like;
-	protected final String mappedOperator;
+	protected final QueryDSLOps mappedOperator;
 	protected final String actualOperator;
 	
-	AbstractSQLSymbolParser(String symbol){
-		Assert.hasText(symbol);
+	AbstractSQLSymbolParser(QueryDSLOps symbol){
+		Assert.notNull(symbol);
 		this.mappedOperator = symbol;
-		this.actualOperator = symbol;
+		this.actualOperator = symbol.getActualOperator();
 	}
 	
-	AbstractSQLSymbolParser(String mappedOperator, String actualOperator){
-		Assert.hasText(mappedOperator);
-		Assert.hasText(actualOperator);
+	AbstractSQLSymbolParser(QueryDSLOps mappedOperator, String actualOperator){
+		Assert.notNull(mappedOperator);
+		Assert.hasText(actualOperator, "actual operator must has text!");
 		this.mappedOperator = mappedOperator;
 		this.actualOperator = actualOperator;
 	}
 	
-	public String getMappedOperator() {
+	public QueryDSLOps getMappedOperator() {
 		return mappedOperator;
 	}
 

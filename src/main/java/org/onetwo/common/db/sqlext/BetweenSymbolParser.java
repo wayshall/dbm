@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.onetwo.common.db.builder.QueryField;
 import org.onetwo.common.db.sqlext.ExtQuery.K.IfNull;
-import org.onetwo.common.db.sqlext.SQLSymbolManager.FieldOP;
 import org.onetwo.dbm.exception.DbmException;
 
 /****
@@ -19,7 +18,7 @@ public class BetweenSymbolParser extends CommonSQLSymbolParser implements HqlSym
 //	private DateRangeSymbolParser dateIn;
 	
 	public BetweenSymbolParser(SQLSymbolManager sqlSymbolManager){
-		super(sqlSymbolManager, FieldOP.between);
+		super(sqlSymbolManager, QueryDSLOps.BETWEEN);
 //		this.dateIn = new DateRangeSymbolParser(sqlSymbolManager, FieldOP.date_in);
 	}
 	

@@ -14,7 +14,7 @@ import org.onetwo.common.utils.LangUtils;
  */
 public class InSymbolParser extends CommonSQLSymbolParser implements HqlSymbolParser {
 	
-	public InSymbolParser(SQLSymbolManager sqlSymbolManager, String symbol){
+	public InSymbolParser(SQLSymbolManager sqlSymbolManager, QueryDSLOps symbol){
 		super(sqlSymbolManager, symbol);
 	}
 	

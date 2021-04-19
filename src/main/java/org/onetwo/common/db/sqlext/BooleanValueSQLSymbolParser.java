@@ -8,7 +8,7 @@ public class BooleanValueSQLSymbolParser extends AbstractSupportedSubQuerySQLSym
 	private String whenTrue;
 	private String whenFalse;
 	
-	public BooleanValueSQLSymbolParser(SQLSymbolManager sqlSymbolManager, String symbol, String whenTrue, String whenFalse) {
+	public BooleanValueSQLSymbolParser(SQLSymbolManager sqlSymbolManager, QueryDSLOps symbol, String whenTrue, String whenFalse) {
 		super(sqlSymbolManager, symbol);
 		this.whenTrue = whenTrue;
 		this.whenFalse = whenFalse;

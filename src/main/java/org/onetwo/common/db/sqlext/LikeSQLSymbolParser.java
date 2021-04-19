@@ -3,7 +3,6 @@ package org.onetwo.common.db.sqlext;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.onetwo.common.db.sqlext.SQLSymbolManager.FieldOP;
 import org.onetwo.common.exception.ServiceException;
 
 
@@ -16,22 +15,19 @@ import org.onetwo.common.exception.ServiceException;
 public class LikeSQLSymbolParser extends CommonSQLSymbolParser {
 	
 	@SuppressWarnings("serial")
-	private static Set<String> SYMBOL_SET = new HashSet<String>(){
+	private static Set<QueryDSLOps> SYMBOL_SET = new HashSet<QueryDSLOps>(){
 		{
-			add(FieldOP.like);
-			add(FieldOP.not_like);
-			add(FieldOP.like2);
-			add(FieldOP.not_like2);
+			add(QueryDSLOps.LIKE);
+			add(QueryDSLOps.NOT_LIKE);
+			add(QueryDSLOps.LIKE2);
+			add(QueryDSLOps.NOT_LIKE2);
 		}
 	};
 	
 
-	LikeSQLSymbolParser(SQLSymbolManager sqlSymbolManager, String mappedOperator) {
-		this(sqlSymbolManager, mappedOperator, mappedOperator);
-	}
-	LikeSQLSymbolParser(SQLSymbolManager sqlSymbolManager, String mappedOperator, String actualOperator) {
-		super(sqlSymbolManager, mappedOperator, actualOperator);
-		if(!SYMBOL_SET.contains(mappedOperator.toLowerCase())){
+	LikeSQLSymbolParser(SQLSymbolManager sqlSymbolManager, QueryDSLOps mappedOperator) {
+		super(sqlSymbolManager, mappedOperator);
+		if(!SYMBOL_SET.contains(mappedOperator)){
 			throw new IllegalArgumentException("only support : " + SYMBOL_SET.toString());
 		}
 	}

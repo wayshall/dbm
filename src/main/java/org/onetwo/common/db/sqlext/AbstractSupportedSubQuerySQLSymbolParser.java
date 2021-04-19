@@ -19,16 +19,11 @@ abstract public class AbstractSupportedSubQuerySQLSymbolParser extends AbstractS
 	
 	protected SQLSymbolManager sqlSymbolManager;
 	
-	AbstractSupportedSubQuerySQLSymbolParser(SQLSymbolManager sqlSymbolManager, String symbol){
+	AbstractSupportedSubQuerySQLSymbolParser(SQLSymbolManager sqlSymbolManager, QueryDSLOps symbol){
 		super(symbol);
 		this.sqlSymbolManager = sqlSymbolManager;
 	}
 	
-	AbstractSupportedSubQuerySQLSymbolParser(SQLSymbolManager sqlSymbolManager, String mappedOperator, String actualOperator){
-		super(mappedOperator, actualOperator);
-		this.sqlSymbolManager = sqlSymbolManager;
-	}
-
 	/************
 	 * map.put("userName:in", new Object[]{UserEntity.class, "userName", "age:>=", 25});
 	 * ==>

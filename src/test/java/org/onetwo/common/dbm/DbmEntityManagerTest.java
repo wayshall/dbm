@@ -24,10 +24,11 @@ import org.onetwo.common.dbm.model.hib.entity.UserEntity;
 import org.onetwo.common.dbm.model.hib.entity.UserEntity.UserGenders;
 import org.onetwo.common.utils.JodatimeUtils;
 import org.onetwo.common.utils.LangOps;
-import org.onetwo.common.utils.LangUtils;
 import org.onetwo.common.utils.Page;
 import org.onetwo.dbm.utils.DbmLock;
+import org.springframework.test.annotation.Rollback;
 
+@Rollback(false)
 public class DbmEntityManagerTest extends DbmBaseTest {
 
 	@Resource
