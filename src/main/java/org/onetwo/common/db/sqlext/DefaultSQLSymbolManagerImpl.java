@@ -4,8 +4,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.onetwo.common.exception.ServiceException;
 import org.onetwo.common.utils.Assert;
+import org.onetwo.dbm.exception.DbmException;
 
 
 /***
@@ -98,7 +98,7 @@ public class DefaultSQLSymbolManagerImpl implements SQLSymbolManager {
 	public HqlSymbolParser getHqlSymbolParser(QueryDSLOps symbol) {
 		HqlSymbolParser parser = this.parser.get(symbol);
 		if (parser == null)
-			throw new ServiceException("do not support symbol : [" + symbol+"]");
+			throw new DbmException("do not support symbol : [" + symbol+"]");
 		return parser;
 	}
 

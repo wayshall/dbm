@@ -6,8 +6,8 @@ import org.onetwo.common.db.builder.QueryField;
 import org.onetwo.common.db.sqlext.ExtQuery.K.IfNull;
 import org.onetwo.common.log.JFishLoggerFactory;
 import org.onetwo.common.utils.Assert;
-import org.onetwo.common.utils.LangUtils;
 import org.onetwo.common.utils.StringUtils;
+import org.onetwo.dbm.exception.DbmException;
 import org.slf4j.Logger;
 
 
@@ -77,8 +77,9 @@ abstract public class AbstractSQLSymbolParser implements HqlSymbolParser{
 	}
 	
 	public String parse(String actualOperator, QueryField qfield){
-		if(StringUtils.isBlank(actualOperator))
-			LangUtils.throwBaseException("symbol can not be blank : " + actualOperator);
+		if(StringUtils.isBlank(actualOperator)) {
+			throw new DbmException("symbol can not be blank : " + actualOperator);
+		}
 		
 		String field = qfield.getActualFieldName();
 		Object value = qfield.getValue();
@@ -94,8 +95,9 @@ abstract public class AbstractSQLSymbolParser implements HqlSymbolParser{
 		}
 		boolean mutiValue = list.size()>1;
 		Object v = null;
-		if(mutiValue)
+		if(mutiValue) {
 			hql.append("(");
+		}
 		for(int i=0; i<list.size(); i++){
 			v = list.get(i);
 

@@ -2,7 +2,6 @@ package org.onetwo.common.db.builder;
 
 import java.util.Map;
 
-import org.onetwo.common.db.sqlext.ExtQuery.K;
 import org.onetwo.dbm.dialet.DBDialect.LockInfo;
 
 /***

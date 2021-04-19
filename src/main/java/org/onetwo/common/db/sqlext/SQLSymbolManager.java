@@ -3,8 +3,6 @@ package org.onetwo.common.db.sqlext;
 import java.util.List;
 import java.util.Map;
 
-import org.onetwo.common.db.builder.QueryField;
-
 /***
  * sql操作符管理
  * 
@@ -16,8 +14,7 @@ public interface SQLSymbolManager {
 	/***
 	 * 用 QueryDSLOperators 代替这些操作符常量
 	 * @author way
-	 *
-	 */
+	 
 	@Deprecated
 	public static class FieldOP {
 		public static final char SPLIT_SYMBOL = QueryField.SPLIT_SYMBOL;
@@ -50,7 +47,8 @@ public interface SQLSymbolManager {
 		public static final String qstr(String name, String op){
 			return name + QueryField.SPLIT_SYMBOL + op;
 		}
-	}
+	}*
+	 */
 
 	ExtQueryDialet getSqlDialet();
 
