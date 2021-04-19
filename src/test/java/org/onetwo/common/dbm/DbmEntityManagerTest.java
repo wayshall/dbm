@@ -169,7 +169,7 @@ public class DbmEntityManagerTest extends DbmBaseTest {
 	
 
 	@Test
-	public void testJFishQuery(){
+	public void testExtQueryLike(){
 		entityManager.removeAll(UserEntity.class);
 		List<UserEntity> users = LangOps.generateList(20, i->{
 			UserEntity user = new UserEntity();
@@ -185,10 +185,37 @@ public class DbmEntityManagerTest extends DbmBaseTest {
 		Page<UserEntity> page = new Page<UserEntity>();
 		entityManager.findPage(UserEntity.class, page, "user_name:like", "%Jdbc%");
 		Assert.assertEquals(page.getPageSize(), page.getSize());
-		for(UserEntity u : page.getResult()){
-			LangUtils.println("id: ${0}, name: ${1}", u.getId(), u.getUserName());
-		}
+//		for(UserEntity u : page.getResult()){
+//			LangUtils.println("id: ${0}, name: ${1}", u.getId(), u.getUserName());
+//		}
+	}
+
+	@Test
+	public void testExtQueryBetween(){
+		entityManager.removeAll(UserEntity.class);
+		List<UserEntity> users = LangOps.generateList(20, i->{
+			UserEntity user = new UserEntity();
+			user.setId(i+1L);
+			user.setUserName("JdbcTest"+i);
+			user.setBirthday(DateUtils.now());
+			user.setEmail("username@qq.com");
+			user.setHeight(3.3f);
+			user.setAge(10+i);
+			return user;
+		});
+		entityManager.save(users);
+		Page<UserEntity> page = new Page<UserEntity>();
+		
+		int start = 15;
+		int end = 20;
+		entityManager.findPage(UserEntity.class, page, "age:between", new int[] {start, end});
+		assertThat(page.getResult().size()).isEqualTo(end-start+1);
+		
+		int count = entityManager.from(UserEntity.class)
+					.where()
+						.field("age").between(15, 20)
+					.toQuery().count().intValue();
+		assertThat(count).isEqualTo(end-start+1);
 	}
 	
-
 }

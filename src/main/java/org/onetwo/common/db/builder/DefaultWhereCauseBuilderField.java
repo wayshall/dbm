@@ -216,7 +216,7 @@ public class DefaultWhereCauseBuilderField<E> extends WhereCauseBuilderField<E> 
 	
 	/***
 	 * 如果只有第一个参数，则条件为：>=start这天的零点，<start+1天的零点
-	 * 如果两个参数，则条件为：>=start, <start+1
+	 * 如果两个参数，则条件为：>=start, <end
 	 * @author weishao zeng
 	 * @param start
 	 * @param end
@@ -238,6 +238,22 @@ public class DefaultWhereCauseBuilderField<E> extends WhereCauseBuilderField<E> 
 		return queryBuilder;*/
 	}
 
+	/****
+	 * 解释为sql的between start and end
+	 * 是否包含边界值需要根据数据库来确定
+	 * mysql 和 oracle均包含边界值
+	 * @author weishao zeng
+	 * @param start
+	 * @param end
+	 * @return
+	 */
+	public WhereCauseBuilder<E> between(final Object start, final Object end) {
+		return this.doWhenPredicate(()->{
+			this.op = FieldOP.between;
+			this.values = new Object[]{start, end};
+		});
+	}
+	
 	/****
 	 * 大于或者等于
 	 * @param values

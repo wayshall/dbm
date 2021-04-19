@@ -1,6 +1,5 @@
 package org.onetwo.common.db.sqlext;
 
-import java.util.Date;
 import java.util.List;
 
 import org.onetwo.common.db.builder.QueryField;
@@ -10,17 +9,18 @@ import org.onetwo.dbm.exception.DbmException;
 
 /****
  * 对between操作符的解释
- * 解释为：startValue <= field < endValue
+ * 解释为sql的between start and end
+ * 是否包含边界值需要根据数据库来确定
  * @author weishao
  *
  */
 public class BetweenSymbolParser extends CommonSQLSymbolParser implements HqlSymbolParser {
 	
-	private DateRangeSymbolParser dateIn;
+//	private DateRangeSymbolParser dateIn;
 	
 	public BetweenSymbolParser(SQLSymbolManager sqlSymbolManager){
 		super(sqlSymbolManager, FieldOP.between);
-		this.dateIn = new DateRangeSymbolParser(sqlSymbolManager, FieldOP.date_in);
+//		this.dateIn = new DateRangeSymbolParser(sqlSymbolManager, FieldOP.date_in);
 	}
 	
 	@SuppressWarnings("rawtypes")
@@ -47,28 +47,24 @@ public class BetweenSymbolParser extends CommonSQLSymbolParser implements HqlSym
 			throw new DbmException("the type of between parameter value can not be difference");
 		}
 		
-		if (startValue instanceof Date) {
-			return this.dateIn.parse(symbol, context);
-		}
+//		if (startValue instanceof Date) {
+//			return this.dateIn.parse(symbol, context);
+//		}
 		
 		field = this.getFieldName(field);
 		StringBuilder hql = new StringBuilder();
 
-		if(!this.subQuery(field, symbol, paramlist, paramValues, hql)){
-			hql.append("( ");
-			
-			// startValue
-			hql.append(field).append(" >= ");
-			paramValues.addValue(field, startValue, hql);
-			hql.append(" and ");
-			
-			// endValue
-			hql.append(field).append(" < ");
-			paramValues.addValue(field, endValue, hql);
-			
-			hql.append(" ) ");
-			return hql.toString();
-		}
+//		hql.append("( ");
+		
+		// startValue
+		hql.append(field).append(" between ");
+		paramValues.addValue(field, startValue, hql);
+		hql.append(" and ");
+		
+		// endValue
+		paramValues.addValue(field, endValue, hql);
+		
+//		hql.append(" ) ");
 		
 		return hql.toString();
 	}

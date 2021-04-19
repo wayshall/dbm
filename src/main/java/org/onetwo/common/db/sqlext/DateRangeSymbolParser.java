@@ -62,22 +62,35 @@ public class DateRangeSymbolParser extends CommonSQLSymbolParser implements HqlS
 		
 		field = this.getFieldName(field);
 		StringBuilder hql = new StringBuilder();
-
-		if(!this.subQuery(field, symbol, paramlist, paramValues, hql)){
-			hql.append("( ");
-			if(startDate!=null){
-				hql.append(field).append(" >= ");
-				paramValues.addValue(field, startDate, hql);
-				if(endDate!=null)
-					hql.append(" and ");
-			}
-			if(endDate!=null){
-				hql.append(field).append(" < ");
-				paramValues.addValue(field, endDate, hql);
-			}
-			hql.append(" ) ");
-			return hql.toString();
+		
+		hql.append("( ");
+		if(startDate!=null){
+			hql.append(field).append(" >= ");
+			paramValues.addValue(field, startDate, hql);
+			if(endDate!=null)
+				hql.append(" and ");
 		}
+		if(endDate!=null){
+			hql.append(field).append(" < ");
+			paramValues.addValue(field, endDate, hql);
+		}
+		hql.append(" ) ");
+
+//		if(!this.subQuery(field, symbol, paramlist, paramValues, hql)){
+//			hql.append("( ");
+//			if(startDate!=null){
+//				hql.append(field).append(" >= ");
+//				paramValues.addValue(field, startDate, hql);
+//				if(endDate!=null)
+//					hql.append(" and ");
+//			}
+//			if(endDate!=null){
+//				hql.append(field).append(" < ");
+//				paramValues.addValue(field, endDate, hql);
+//			}
+//			hql.append(" ) ");
+//			return hql.toString();
+//		}
 		
 		return hql.toString();
 	}
