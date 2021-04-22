@@ -19,6 +19,7 @@ import javax.sql.DataSource;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.onetwo.common.date.DateUtils;
+import org.onetwo.common.db.dquery.condition.directive.DynamicConditionDirective;
 import org.onetwo.common.db.filequery.directive.SetDirective;
 import org.onetwo.common.db.filequery.directive.WhereDirective;
 import org.onetwo.common.log.JFishLoggerFactory;
@@ -436,6 +437,8 @@ final public class DbmUtils {
 		configurer.addDirective(new StrDirective());
 		configurer.addDirective(new WhereDirective());
 		configurer.addDirective(new SetDirective());
+		
+		configurer.addDirective(new DynamicConditionDirective());
 	}
 	
 	private DbmUtils(){
