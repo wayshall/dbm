@@ -18,7 +18,6 @@ public class InSymbolParser extends CommonSQLSymbolParser implements HqlSymbolPa
 		super(sqlSymbolManager, symbol);
 	}
 	
-	@SuppressWarnings("rawtypes")
 	public String parse(String symbol, QueryField context){
 
 		String field = context.getActualFieldName();
@@ -34,7 +33,7 @@ public class InSymbolParser extends CommonSQLSymbolParser implements HqlSymbolPa
 			return null;
 		}*/
 
-		List paramlist = convertValues(field, value, ifNull);
+		List<?> paramlist = convertValues(field, value, ifNull);
 		if (LangUtils.isEmpty(paramlist)) {
 			return null;
 		}

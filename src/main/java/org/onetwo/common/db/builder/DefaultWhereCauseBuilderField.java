@@ -1,5 +1,6 @@
 package org.onetwo.common.db.builder;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -19,7 +20,7 @@ public class DefaultWhereCauseBuilderField<E> extends WhereCauseBuilderField<E> 
 	
 	private String[] fields;
 	private QueryDSLOps op;
-	private Object[] values;
+	private Object values;
 	
 	private Supplier<Boolean> whenPredicate;
 
@@ -194,6 +195,13 @@ public class DefaultWhereCauseBuilderField<E> extends WhereCauseBuilderField<E> 
 			this.op = QueryDSLOps.IN;
 			this.values = values;
 		});
+	}
+	
+	public <T> WhereCauseBuilder<E> in(Collection<T> values) {
+		return this.doWhenPredicate(()->{
+			this.op = QueryDSLOps.IN;
+			this.values = values;
+		});
 		/*
 		this.op = FieldOP.in;
 		this.values = values;
@@ -329,17 +337,18 @@ public class DefaultWhereCauseBuilderField<E> extends WhereCauseBuilderField<E> 
 	}
 	
 	protected void setValues(Object val){
-		this.values = new Object[this.fields.length];
+		Object[] values = new Object[this.fields.length];
 		for(int i=0; i<this.fields.length; i++){
-			this.values[i] = val;
+			values[i] = val;
 		}
+		this.values = values;
 	}
 	
 	public String[] getOPFields(){
 		return ExtQueryUtils.appendOperationToFields(fields, op);
 	}
 
-	public Object[] getValues() {
+	public Object getValues() {
 		return values;
 	}
 

@@ -140,7 +140,7 @@ abstract public class AbstractSQLSymbolParser implements HqlSymbolParser{
 		sqlScript.append(" ");
 	}
 	
-	protected List convertValues(Object fields, Object values, IfNull ifNull){
+	protected List<?> convertValues(Object fields, Object values, IfNull ifNull){
 		return ExtQueryUtils.processValue(fields, values, ifNull, false);
 	}
 	
