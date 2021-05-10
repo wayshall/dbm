@@ -8,6 +8,7 @@ import java.util.Optional;
 
 import org.onetwo.common.utils.Page;
 import org.onetwo.dbm.jdbc.DbmMapRowMapperResultSetExtractor;
+import org.onetwo.dbm.jdbc.SimpleMapRowMapperResultSetExtractor;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowMapper;
 
@@ -54,6 +55,16 @@ public interface QueryAction<E> {
 	}
 	
 	<K, V> Map<K, V> asMap(DbmMapRowMapperResultSetExtractor<K, V> rse);
+	
+	/****
+	 * 此接口参数只有一个，更加简单
+	 * @author weishao zeng
+	 * @param <K>
+	 * @param <V>
+	 * @param rse
+	 * @return
+	 */
+	<K, V> Map<K, V> asMap(SimpleMapRowMapperResultSetExtractor<K, V> rse);
 	
 	@FunctionalInterface
 	public interface SingleArgRowMapper<T> extends RowMapper<T> {

@@ -14,6 +14,7 @@ import org.onetwo.common.utils.Page;
 import org.onetwo.dbm.core.spi.DbmEntityManager;
 import org.onetwo.dbm.exception.DbmException;
 import org.onetwo.dbm.jdbc.DbmMapRowMapperResultSetExtractor;
+import org.onetwo.dbm.jdbc.SimpleMapRowMapperResultSetExtractor;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowMapper;
 
@@ -147,16 +148,12 @@ public class QueryActionImpl<E> implements QueryAction<E> {
 		return res;
 	}
 	
-//	public <K, V> Map<K, V> asMap(){
-//		ResultSetExtractor<Map<K, V>> rse = new DbmMapRowMapperResultSetExtractor<K, V>() {
-//			public void putToMap(Map<K, V> results, ResultSet rs, int rowNum) {
-//				
-//			}
-//		};
-//		Map<K, V> res = this.getDbmEntityManager().getCurrentSession().find(convertAsDbmQueryValue(getExtQuery()), rse);
-//		return res;
-//	}
-	
+	@Override
+	public <K, V> Map<K, V> asMap(SimpleMapRowMapperResultSetExtractor<K, V> rse) {
+		Map<K, V> res = this.getDbmEntityManager().getCurrentSession().find(convertAsDbmQueryValue(getExtQuery()), rse);
+		return res;
+	}
+
 	public <T> List<T> listWith(RowMapper<T> rowMapper) {
 		SelectExtQuery query = getExtQuery();
 		DbmQueryValue dqv = convertAsDbmQueryValue(query);
