@@ -1,5 +1,6 @@
 package org.onetwo.dbm.mapping;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
@@ -23,7 +24,7 @@ public interface DbmMappedEntry extends DbmMappedEntryMeta {
 	 * @param entity
 	 * @return
 	 */
-	Object getId(Object entity);
+	Serializable getId(Object entity);
 	/****
 	 * 如果是复合主键，则返回多个值
 	 * @author weishao zeng

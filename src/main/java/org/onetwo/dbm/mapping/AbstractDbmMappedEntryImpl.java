@@ -1,5 +1,6 @@
 package org.onetwo.dbm.mapping;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -264,15 +265,15 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 	 * 如果是复合主键，只要有一个主键为null，即返回null
 	 */
 	@Override
-	public Object getId(Object entity){
+	public Serializable getId(Object entity){
 //		if(getIdentifyField()==null)
 //			return null;
 //		return getIdentifyField().getValue(entity);
 		if (!isCompositePK()) {
-			Object idValue = this.getIdentifyFields().get(0).getValue(entity);
+			Serializable idValue = (Serializable)getIdentifyFields().get(0).getValue(entity);
 			return idValue;
 		}
-		Object idValue = ReflectUtils.newInstance(idClass);
+		Serializable idValue = (Serializable)ReflectUtils.newInstance(idClass);
 		ConfigurablePropertyAccessor accesor = SpringUtils.newPropertyAccessor(idValue, true);
 		for (DbmMappedField field : this.getIdentifyFields()) {
 			Object fieldValue = field.getValue(entity);

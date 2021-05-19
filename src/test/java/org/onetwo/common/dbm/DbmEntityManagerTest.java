@@ -47,6 +47,7 @@ public class DbmEntityManagerTest extends DbmBaseTest {
 
 	@Test
 	public void testSample(){
+		entityManager.removeAll(UserAutoidEntity.class);
 		UserAutoidEntity user = new UserAutoidEntity();
 		user.setUserName("dbm");
 		user.setMobile("1333333333");
