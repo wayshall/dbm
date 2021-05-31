@@ -80,9 +80,13 @@ public class DefaultWhereCauseBuilder<E> implements WhereCauseBuilder<E> {
 		}
 		
 		fieldMap.entrySet().forEach(e->{
-			if(useLikeIfStringVlue && String.class.isInstance(e.getValue())){
-				field(e.getKey()).like(e.getValue().toString());
-			}else{
+			if (String.class.isInstance(e.getValue())) {
+				if(useLikeIfStringVlue){
+					field(e.getKey()).like(e.getValue().toString());
+				}else{
+					field(e.getKey()).equalTo(e.getValue());
+				}
+			} else {
 				field(e.getKey()).equalTo(e.getValue());
 			}
 		});
