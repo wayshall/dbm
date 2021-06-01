@@ -73,4 +73,6 @@ public interface WhereCauseBuilder<E> {
 	
 	QueryBuilder<E> end();
 	QueryAction<E> toQuery();
+	
+	ExecuteAction toExecute();
 }

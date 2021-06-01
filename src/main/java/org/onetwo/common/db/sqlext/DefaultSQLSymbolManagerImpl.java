@@ -47,8 +47,8 @@ public class DefaultSQLSymbolManagerImpl implements SQLSymbolManager {
 	}*/
 
 	@Override
-	public ExtQueryInner createDeleteQuery(Class<?> entityClass, Map<Object, Object> properties) {
-		ExtQueryInner q = new DeleteExtQueryImpl(entityClass, null, properties, this, this.listeners);
+	public DeleteExtQuery createDeleteQuery(Class<?> entityClass, Map<Object, Object> properties) {
+		DeleteExtQuery q = new DeleteExtQueryImpl(entityClass, null, properties, this, this.listeners);
 		q.initQuery();
 		return q;
 	}

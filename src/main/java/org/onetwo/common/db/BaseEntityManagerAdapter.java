@@ -9,6 +9,7 @@ import org.onetwo.common.db.builder.QueryBuilder;
 import org.onetwo.common.db.spi.QueryWrapper;
 import org.onetwo.common.db.spi.SqlParamterPostfixFunctionRegistry;
 import org.onetwo.common.db.sql.SequenceNameManager;
+import org.onetwo.common.db.sqlext.DeleteExtQuery;
 import org.onetwo.common.db.sqlext.ExtQuery.K;
 import org.onetwo.common.db.sqlext.SelectExtQuery;
 import org.onetwo.common.exception.BaseException;
@@ -99,6 +100,13 @@ public abstract class BaseEntityManagerAdapter implements InnerBaseEntityManager
 	public <T> List<T> select(SelectExtQuery extQuery) {
 		extQuery.build();
 		return createQuery(extQuery).getResultList();
+	}
+
+	@Override
+	public int remove(DeleteExtQuery deleteQuery) {
+		deleteQuery.build();
+		QueryWrapper q = this.createQuery(deleteQuery.getSql(), deleteQuery.getParamsValue().asMap());
+		return q.executeUpdate();
 	}
 
 //	@Override

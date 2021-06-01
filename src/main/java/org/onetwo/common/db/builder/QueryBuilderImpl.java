@@ -8,7 +8,6 @@ import org.onetwo.common.db.InnerBaseEntityManager;
 import org.onetwo.common.db.RawSqlWrapper;
 import org.onetwo.common.db.sqlext.ExtQuery;
 import org.onetwo.common.db.sqlext.ExtQuery.K;
-import org.onetwo.common.db.sqlext.ExtQueryInner;
 import org.onetwo.common.db.sqlext.SQLSymbolManager;
 import org.onetwo.common.utils.LangUtils;
 import org.onetwo.common.utils.StringUtils;
@@ -217,13 +216,19 @@ public class QueryBuilderImpl<E> implements QueryBuilder<E> {
 	public QueryAction<E> toSelect(){
 		return createQueryAction();
 	}
-
-	public int delete(){
-		InnerBaseEntityManager em = (InnerBaseEntityManager) baseEntityManager;
-		ExtQueryInner query = em.getSQLSymbolManager().createDeleteQuery(entityClass, params);
-		ExtQuery q = query.build();
-		return em.createQuery(q.getSql(), q.getParamsValue().asMap()).executeUpdate();
+	
+	@Override
+	public ExecuteAction toExecute() {
+		ExecuteAction executeAction = new ExecuteActionImpl(this);
+		return executeAction;
 	}
+
+//	public int delete(){
+//		InnerBaseEntityManager em = (InnerBaseEntityManager) baseEntityManager;
+//		ExtQueryInner query = em.getSQLSymbolManager().createDeleteQuery(entityClass, params);
+//		ExtQuery q = query.build();
+//		return em.createQuery(q.getSql(), q.getParamsValue().asMap()).executeUpdate();
+//	}
 	
 	/*public ParamValues getParamValues(){
 		return extQuery.getParamsValue();
