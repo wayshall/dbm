@@ -15,6 +15,7 @@ import org.onetwo.dbm.core.spi.DbmEntityManager;
 import org.onetwo.dbm.exception.DbmException;
 import org.onetwo.dbm.jdbc.DbmMapRowMapperResultSetExtractor;
 import org.onetwo.dbm.jdbc.SimpleMapRowMapperResultSetExtractor;
+import org.onetwo.dbm.jdbc.mapper.JdbcDaoRowMapperFactory.SingleColumnRowMapperAdapter;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowMapper;
 
@@ -114,7 +115,9 @@ public class QueryActionImpl<E> implements QueryAction<E> {
 	public <T> List<T> listAs(Class<T> toClass){
 		checkOperation();
 		if (LangUtils.isSimpleType(toClass)) {
-			throw new DbmException("target class can not be a simple type: " + toClass);
+//			throw new DbmException("target class can not be a simple type: " + toClass);
+			RowMapper<T> rowMapper = new SingleColumnRowMapperAdapter<>(toClass);
+			return listWith(rowMapper);
 		}
 		List<?> datas = baseEntityManager.select(getSelectQuery());
 		return CopyUtils.copy(toClass, datas);
