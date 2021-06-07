@@ -23,6 +23,9 @@ public class EnableDbmSelector extends AbstractImportSelector<EnableDbm> {
 		if(enableDbmRepository){
 			classNames.add(DbmRepositoryRegistarOfEnableDbm.class.getName());
 		}
+		
+//		classNames.add(DbmLockerConfiguration.class.getName());
+		
 		return classNames;
 	}
 	

@@ -5,18 +5,13 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.onetwo.dbm.jdbc.spi.DbmJdbcOperationType;
-
-/*****
- * 标记session操作db相关方法
- * @author way
- *
+/**
+ * 对应 jpa @GeneratedValue 
+ * @author wayshall
+ * <br/>
  */
-@Target({ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface DbmJdbcOperationMark {
+@Target({ElementType.TYPE, ElementType.FIELD, ElementType.METHOD})
+public @interface DbmId {
 	
-	DbmJdbcOperationType type();
-	
-
 }

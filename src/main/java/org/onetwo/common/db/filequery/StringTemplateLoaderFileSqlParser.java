@@ -1,66 +1,55 @@
 package org.onetwo.common.db.filequery;
 
-import java.util.Map;
 import java.util.Map.Entry;
 
-import org.onetwo.common.db.filequery.directive.SetDirective;
-import org.onetwo.common.db.filequery.directive.WhereDirective;
 import org.onetwo.common.db.spi.NamedQueryFile;
 import org.onetwo.common.db.spi.NamedQueryFileListener;
-import org.onetwo.common.db.spi.NamedQueryInfo;
 import org.onetwo.common.propconf.ResourceAdapter;
 import org.onetwo.common.spring.ftl.AbstractFreemarkerTemplateConfigurer;
-import org.onetwo.common.spring.ftl.DateRangeDirective;
-import org.onetwo.common.spring.ftl.DefaultTemplateParser;
-import org.onetwo.common.spring.ftl.ForeachDirective;
-import org.onetwo.common.spring.ftl.StrDirective;
-import org.onetwo.common.spring.ftl.TemplateParser;
+import org.onetwo.dbm.utils.DbmUtils;
 
 import freemarker.cache.StringTemplateLoader;
 import freemarker.cache.TemplateLoader;
 import freemarker.template.Configuration;
 
-public class StringTemplateLoaderFileSqlParser extends AbstractFreemarkerTemplateConfigurer implements TemplateParser, NamedQueryFileListener {
+/****
+ * 基于StringTemplateLoader的sql模板解释器
+ * @author way
+ *
+ */
+public class StringTemplateLoaderFileSqlParser extends AbstractFreemarkerTemplateConfigurer implements FreemarkerSqlTemplateParser, NamedQueryFileListener {
 
 //	public static final String QUERY_POSTFIX = ".query";//for ftl
 	
 //	private JFishNamedSqlFileManager<T> sqlManager;
 	private StringTemplateLoader templateLoader;
-	final private TemplateParser parser;
+//	final private TemplateParser parser;
 	
 	
 	public StringTemplateLoaderFileSqlParser() {
 		super();
 //		this.sqlManager = sqlm;
-
-		addDirective(new ForeachDirective());
-		addDirective(new DateRangeDirective());
-		addDirective(new StrDirective());
-		addDirective(new WhereDirective());
-		addDirective(new SetDirective());
+		DbmUtils.initSqlTemplateDirective(this);
 		this.templateLoader = new StringTemplateLoader();
 		
-		DefaultTemplateParser p = new DefaultTemplateParser(this);
+//		DefaultTemplateParser p = new DefaultTemplateParser(this);
 		
-		parser = p;
+//		parser = p;
 	}
 	
 
+//	@Override
+//	public void afterBuild(Map<String, NamedQueryFile> namespaceInfos, ResourceAdapter<?>... sqlfileArray) {
+//		this.initialize();
+//		for(NamedQueryFile namespace : namespaceInfos.values()){
+//			this.putTemplateByNamespaceInfo(namespace);
+//		}
+//	}
+
 	@Override
-	public String parse(String name, Object context) {
-		return parser.parse(name, context);
+	public void afterBuild(ResourceAdapter<?> file, NamedQueryFile namepsaceInfo) {
+		this.putTemplateByNamespaceInfo(namepsaceInfo);
 	}
-
-
-	@Override
-	public void afterBuild(Map<String, NamedQueryFile> namespaceInfos, ResourceAdapter<?>... sqlfileArray) {
-		this.initialize();
-		for(NamedQueryFile namespace : namespaceInfos.values()){
-			this.putTemplateByNamespaceInfo(namespace);
-		}
-	}
-
-
 
 
 	@Override
@@ -75,8 +64,10 @@ public class StringTemplateLoaderFileSqlParser extends AbstractFreemarkerTemplat
 		this.initialize();
 	}*/
 	
+
+
 	private void putTemplateByNamespaceInfo(NamedQueryFile namespace){
-		for(NamedQueryInfo info : namespace.getNamedProperties()){
+		for(FileBaseNamedQueryInfo info : namespace.getNamedProperties()){
 			if(logger.isInfoEnabled()){
 				logger.info("put query template: {}", info.getFullName());
 			}

@@ -49,6 +49,9 @@ public interface QueryBuilder<E> {
 	public QueryBuilder<E> asc(String... fields);
 
 	public QueryBuilder<E> desc(String... fields);
+	
+	QueryBuilderImpl<E> ascRand(Object seed);
+	QueryBuilderImpl<E> descRand(Object seed);
 
 	public QueryBuilder<E> distinct(String... fields);
 	public QueryBuilder<E> lock(LockInfo lock);
@@ -63,9 +66,11 @@ public interface QueryBuilder<E> {
 	public QueryAction<E> toQuery();
 	public QueryAction<E> toSelect();
 	
-	public int delete();
+//	public int delete();
 	
 	public Map<Object, Object> getParams();
+
+	ExecuteAction toExecute();
 	
 //	public ParamValues getParamValues();
 //	public String getSql();

@@ -6,9 +6,9 @@ import java.util.Map;
 
 import org.onetwo.common.db.sqlext.DefaultExtQueryDialetImpl;
 import org.onetwo.common.db.sqlext.DefaultSQLSymbolManagerImpl;
+import org.onetwo.common.db.sqlext.DeleteExtQuery;
 import org.onetwo.common.db.sqlext.DeleteExtQueryImpl;
 import org.onetwo.common.db.sqlext.ExtQueryDialet;
-import org.onetwo.common.db.sqlext.ExtQueryInner;
 import org.onetwo.common.db.sqlext.ExtQueryListener;
 import org.onetwo.common.db.sqlext.SQLSymbolManager;
 import org.onetwo.common.db.sqlext.SelectExtQuery;
@@ -48,9 +48,9 @@ public class JFishSQLSymbolManagerImpl extends DefaultSQLSymbolManagerImpl {
 	}
 
 	@Override
-	public ExtQueryInner createDeleteQuery(Class<?> entityClass, Map<Object, Object> properties) {
+	public DeleteExtQuery createDeleteQuery(Class<?> entityClass, Map<Object, Object> properties) {
 		DbmMappedEntry entry = getDbmMappedEntry(entityClass);
-		ExtQueryInner q = new DbmDeleteExtQueryImpl(entry, entityClass, null, properties, this, this.getListeners());
+		DeleteExtQuery q = new DbmDeleteExtQueryImpl(entry, entityClass, null, properties, this, this.getListeners());
 		q.initQuery();
 		return q;
 	}

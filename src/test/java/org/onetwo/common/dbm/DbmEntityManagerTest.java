@@ -5,6 +5,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 
+import java.util.Date;
 import java.util.List;
 
 import javax.annotation.Resource;
@@ -23,10 +24,11 @@ import org.onetwo.common.dbm.model.hib.entity.UserEntity;
 import org.onetwo.common.dbm.model.hib.entity.UserEntity.UserGenders;
 import org.onetwo.common.utils.JodatimeUtils;
 import org.onetwo.common.utils.LangOps;
-import org.onetwo.common.utils.LangUtils;
 import org.onetwo.common.utils.Page;
 import org.onetwo.dbm.utils.DbmLock;
+import org.springframework.test.annotation.Rollback;
 
+@Rollback(false)
 public class DbmEntityManagerTest extends DbmBaseTest {
 
 	@Resource
@@ -45,11 +47,13 @@ public class DbmEntityManagerTest extends DbmBaseTest {
 
 	@Test
 	public void testSample(){
+		entityManager.removeAll(UserAutoidEntity.class);
 		UserAutoidEntity user = new UserAutoidEntity();
 		user.setUserName("dbm");
 		user.setMobile("1333333333");
 		user.setEmail("test@test.com");
 		user.setStatus(UserStatus.NORMAL);
+		user.setBirthday(new Date());
 		
 		//save
 		Long userId = entityManager.save(user).getId();
@@ -108,9 +112,9 @@ public class DbmEntityManagerTest extends DbmBaseTest {
 		user.setHeight(3.3f);
 		user.setAge(28);
 		user.setId(10000000000L);
-		user.setGender(UserGenders.MALE);
+		user.setGender(UserGenders.LADYBOY);
 		entityManager.save(user);
-		Assert.assertEquals(10000000000L, user.getId(), 0);
+		assertThat(user.getId()).isEqualTo(10000000000L);
 		
 		UserEntity quser = entityManager.findById(UserEntity.class, user.getId());
 		Assert.assertNotNull(quser);
@@ -167,12 +171,12 @@ public class DbmEntityManagerTest extends DbmBaseTest {
 	
 
 	@Test
-	public void testJFishQuery(){
+	public void testExtQueryLike(){
 		entityManager.removeAll(UserEntity.class);
 		List<UserEntity> users = LangOps.generateList(20, i->{
 			UserEntity user = new UserEntity();
 			user.setId(i+1L);
-			user.setUserName("JdbcTest");
+			user.setUserName("JdbcTest"+i);
 			user.setBirthday(DateUtils.now());
 			user.setEmail("username@qq.com");
 			user.setHeight(3.3f);
@@ -183,10 +187,37 @@ public class DbmEntityManagerTest extends DbmBaseTest {
 		Page<UserEntity> page = new Page<UserEntity>();
 		entityManager.findPage(UserEntity.class, page, "user_name:like", "%Jdbc%");
 		Assert.assertEquals(page.getPageSize(), page.getSize());
-		for(UserEntity u : page.getResult()){
-			LangUtils.println("id: ${0}, name: ${1}", u.getId(), u.getUserName());
-		}
+//		for(UserEntity u : page.getResult()){
+//			LangUtils.println("id: ${0}, name: ${1}", u.getId(), u.getUserName());
+//		}
+	}
+
+	@Test
+	public void testExtQueryBetween(){
+		entityManager.removeAll(UserEntity.class);
+		List<UserEntity> users = LangOps.generateList(20, i->{
+			UserEntity user = new UserEntity();
+			user.setId(i+1L);
+			user.setUserName("JdbcTest"+i);
+			user.setBirthday(DateUtils.now());
+			user.setEmail("username@qq.com");
+			user.setHeight(3.3f);
+			user.setAge(10+i);
+			return user;
+		});
+		entityManager.save(users);
+		Page<UserEntity> page = new Page<UserEntity>();
+		
+		int start = 15;
+		int end = 20;
+		entityManager.findPage(UserEntity.class, page, "age:between", new int[] {start, end});
+		assertThat(page.getResult().size()).isEqualTo(end-start+1);
+		
+		int count = entityManager.from(UserEntity.class)
+					.where()
+						.field("age").between(15, 20)
+					.toQuery().count().intValue();
+		assertThat(count).isEqualTo(end-start+1);
 	}
 	
-
 }

@@ -6,8 +6,8 @@ import org.onetwo.common.db.builder.QueryField;
 import org.onetwo.common.db.sqlext.ExtQuery.K.IfNull;
 import org.onetwo.common.log.JFishLoggerFactory;
 import org.onetwo.common.utils.Assert;
-import org.onetwo.common.utils.LangUtils;
 import org.onetwo.common.utils.StringUtils;
+import org.onetwo.dbm.exception.DbmException;
 import org.slf4j.Logger;
 
 
@@ -21,23 +21,23 @@ abstract public class AbstractSQLSymbolParser implements HqlSymbolParser{
 	protected Logger logger = JFishLoggerFactory.getLogger(this.getClass());
 	
 //	protected boolean like;
-	protected final String mappedOperator;
+	protected final QueryDSLOps mappedOperator;
 	protected final String actualOperator;
 	
-	AbstractSQLSymbolParser(String symbol){
-		Assert.hasText(symbol);
+	AbstractSQLSymbolParser(QueryDSLOps symbol){
+		Assert.notNull(symbol);
 		this.mappedOperator = symbol;
-		this.actualOperator = symbol;
+		this.actualOperator = symbol.getActualOperator();
 	}
 	
-	AbstractSQLSymbolParser(String mappedOperator, String actualOperator){
-		Assert.hasText(mappedOperator);
-		Assert.hasText(actualOperator);
+	AbstractSQLSymbolParser(QueryDSLOps mappedOperator, String actualOperator){
+		Assert.notNull(mappedOperator);
+		Assert.hasText(actualOperator, "actual operator must has text!");
 		this.mappedOperator = mappedOperator;
 		this.actualOperator = actualOperator;
 	}
 	
-	public String getMappedOperator() {
+	public QueryDSLOps getMappedOperator() {
 		return mappedOperator;
 	}
 
@@ -77,8 +77,9 @@ abstract public class AbstractSQLSymbolParser implements HqlSymbolParser{
 	}
 	
 	public String parse(String actualOperator, QueryField qfield){
-		if(StringUtils.isBlank(actualOperator))
-			LangUtils.throwBaseException("symbol can not be blank : " + actualOperator);
+		if(StringUtils.isBlank(actualOperator)) {
+			throw new DbmException("symbol can not be blank : " + actualOperator);
+		}
 		
 		String field = qfield.getActualFieldName();
 		Object value = qfield.getValue();
@@ -94,8 +95,9 @@ abstract public class AbstractSQLSymbolParser implements HqlSymbolParser{
 		}
 		boolean mutiValue = list.size()>1;
 		Object v = null;
-		if(mutiValue)
+		if(mutiValue) {
 			hql.append("(");
+		}
 		for(int i=0; i<list.size(); i++){
 			v = list.get(i);
 
@@ -138,7 +140,7 @@ abstract public class AbstractSQLSymbolParser implements HqlSymbolParser{
 		sqlScript.append(" ");
 	}
 	
-	protected List convertValues(Object fields, Object values, IfNull ifNull){
+	protected List<?> convertValues(Object fields, Object values, IfNull ifNull){
 		return ExtQueryUtils.processValue(fields, values, ifNull, false);
 	}
 	

@@ -65,7 +65,7 @@ public class JdbcDaoRowMapperFactory implements RowMapperFactory {
 
 	@Override
 	public DataRowMapper<?> createRowMapper(NamedQueryInvokeContext invokeContext) {
-		return createRowMapper(invokeContext.getDynamicMethod().getComponentClass());
+		return createRowMapper(invokeContext.getResultComponentClass());
 	}
 
 	protected DataRowMapper<?> getBeanPropertyRowMapper(Class<?> entityClass) {
@@ -73,14 +73,14 @@ public class JdbcDaoRowMapperFactory implements RowMapperFactory {
 		return new BeanPropertyRowMapperAdapter<>(entityClass);
 	}
 	
-	static class CamelNameRowMapper extends ColumnMapRowMapper implements DataRowMapper<Map<String, Object>>{
+	public static class CamelNameRowMapper extends ColumnMapRowMapper implements DataRowMapper<Map<String, Object>>{
 
 		protected Map<String, Object> createColumnMap(int columnCount) {
 			return new CamelMap<Object>(columnCount);
 		}
 	}
 	
-	static class SingleColumnRowMapperAdapter<T> extends SingleColumnRowMapper<T> implements DataRowMapper<T>{
+	public static class SingleColumnRowMapperAdapter<T> extends SingleColumnRowMapper<T> implements DataRowMapper<T>{
 
 		public SingleColumnRowMapperAdapter() {
 		}
@@ -90,7 +90,7 @@ public class JdbcDaoRowMapperFactory implements RowMapperFactory {
 		}
 	}
 
-	static class BeanPropertyRowMapperAdapter<T> extends BeanPropertyRowMapper<T> implements DataRowMapper<T>{
+	public static class BeanPropertyRowMapperAdapter<T> extends BeanPropertyRowMapper<T> implements DataRowMapper<T>{
 
 		public BeanPropertyRowMapperAdapter() {
 		}

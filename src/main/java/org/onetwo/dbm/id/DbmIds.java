@@ -5,6 +5,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.lang3.StringUtils;
 import org.onetwo.common.convert.Types;
+import org.onetwo.common.log.JFishLoggerFactory;
 import org.onetwo.common.utils.NetUtils;
 import org.onetwo.dbm.exception.DbmException;
 
@@ -44,9 +45,17 @@ public class DbmIds {
 	 */
 	public static SnowflakeIdGenerator createIdGeneratorByAddress() {
 		//根据ip地址来创建生成器
-		String[] strs = StringUtils.split(NetUtils.getHostAddress(), ".");
-		int datacenterId = Types.asValue(strs[strs.length-2], int.class, 1)%32;
-		int machineId = Types.asValue(strs[strs.length-1], int.class, 1)%32;
+//		String[] strs = StringUtils.split(NetUtils.getHostAddress(), ".");
+		String[] strs = StringUtils.split(NetUtils.getLocalHostLANIp(), ".");
+		int datacenterId = 0;
+		int machineId = 0;
+		if (strs!=null && strs.length>=2) {
+			datacenterId = Types.asValue(strs[strs.length-2], int.class, 1)%32;
+			machineId = Types.asValue(strs[strs.length-1], int.class, 1)%32;
+			JFishLoggerFactory.getCommonLogger().info("[dbm] createIdGeneratorByAddress, datacenterId: {}, machineId: {}", datacenterId, machineId);
+		} else {
+			JFishLoggerFactory.getCommonLogger().info("[dbm] localhost lanip not found, createIdGeneratorByAddress user default value , datacenterId: {}, machineId: {}", datacenterId, machineId);
+		}
 		SnowflakeIdGenerator idGenerator = createIdGenerator(new SnowflakeIdKey(datacenterId, machineId));
 		return idGenerator;
 	}
@@ -71,6 +80,31 @@ public class DbmIds {
 	public static class SnowflakeIdKey {
 		final private long datacenterId;
 		final private long machineId;
+		
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			SnowflakeIdKey other = (SnowflakeIdKey) obj;
+			if (datacenterId != other.datacenterId)
+				return false;
+			if (machineId != other.machineId)
+				return false;
+			return true;
+		}
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + (int) (datacenterId ^ (datacenterId >>> 32));
+			result = prime * result + (int) (machineId ^ (machineId >>> 32));
+			return result;
+		}
+		
 	}
 	
 	private DbmIds() {

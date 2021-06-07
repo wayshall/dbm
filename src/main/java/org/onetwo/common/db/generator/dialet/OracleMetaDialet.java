@@ -4,6 +4,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.sql.DataSource;
 
@@ -11,7 +12,6 @@ import org.onetwo.common.db.generator.DBConnecton;
 import org.onetwo.common.db.generator.meta.ColumnMeta;
 import org.onetwo.common.db.generator.meta.TableMeta;
 import org.onetwo.common.db.generator.utils.DBUtils;
-import org.onetwo.common.exception.BaseException;
 import org.onetwo.common.utils.Assert;
 import org.onetwo.common.utils.StringUtils;
 
@@ -42,14 +42,31 @@ public class OracleMetaDialet extends BaseMetaDialet implements DatabaseMetaDial
 				this.tableNames.add(tableName);
 			}
 		} catch (SQLException e) {
-			DBUtils.handleDBException(e);
+			handleDBException("get table names error", e);
 		}finally{
 			dbcon.close();
 		}
 		return this.tableNames;
 	}
+	
+	@Override
+	protected Optional<TableMeta> findTableMeta(DBConnecton dbcon, String tableName) throws SQLException {
+		Map<String, Object> rowMap = null;
+		ResultSet rs = dbcon.query(SELECT_TABLE_COMMENTS, "tableName", tableName);
+		if(rs.next()){
+			rowMap = DBUtils.toMap(rs);
+		}else{
+//			throw new BaseException("not table found: " + tableName);
+			return Optional.empty();
+		}
 
-	public TableMeta getTableMeta(String tableName){
+		String tname = (String)rowMap.get("TABLE_NAME");
+		String comment = (String)rowMap.get("COMMENTS");
+		TableMeta table = new TableMeta(tname, comment);
+		return Optional.of(table);
+	}
+
+	/*public TableMeta getTableMeta(String tableName){
 		Map<String, Object> rowMap = null;
 		ResultSet rs = null;
 		DBConnecton dbcon = newDBConnecton();
@@ -73,7 +90,7 @@ public class OracleMetaDialet extends BaseMetaDialet implements DatabaseMetaDial
 			dbcon.close();
 		}
 		return table;
-	}
+	}*/
 
 
 	protected void createPrimaryKey(DBConnecton dbcon, TableMeta table) throws SQLException {
@@ -87,7 +104,7 @@ public class OracleMetaDialet extends BaseMetaDialet implements DatabaseMetaDial
 				table.setPrimaryKey(column);
 			}
 		} catch (Exception e) {
-			throw new BaseException("createTablePrimaryKey error ", e);
+			handleDBException("createTablePrimaryKey error ", e);
 		} finally{
 			DBUtils.closeResultSet(rs);
 		}

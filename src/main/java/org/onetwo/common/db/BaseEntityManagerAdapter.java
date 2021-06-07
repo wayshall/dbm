@@ -9,6 +9,7 @@ import org.onetwo.common.db.builder.QueryBuilder;
 import org.onetwo.common.db.spi.QueryWrapper;
 import org.onetwo.common.db.spi.SqlParamterPostfixFunctionRegistry;
 import org.onetwo.common.db.sql.SequenceNameManager;
+import org.onetwo.common.db.sqlext.DeleteExtQuery;
 import org.onetwo.common.db.sqlext.ExtQuery.K;
 import org.onetwo.common.db.sqlext.SelectExtQuery;
 import org.onetwo.common.exception.BaseException;
@@ -65,23 +66,6 @@ public abstract class BaseEntityManagerAdapter implements InnerBaseEntityManager
 	public Number countRecord(Class<?> entityClass, Object... params) {
 		return countRecordByProperties(entityClass, CUtils.asLinkedMap(params));
 	}
-	public void delete(ILogicDeleteEntity entity){
-		entity.deleted();
-		this.save(entity);
-	}
-
-	public <T extends ILogicDeleteEntity> T deleteById(Class<T> entityClass, Serializable id){
-		Object entity = this.findById(entityClass, id);
-		if(entity==null)
-			return null;
-		if(!ILogicDeleteEntity.class.isAssignableFrom(entity.getClass())){
-			throw new ServiceException("实体不支持逻辑删除，请实现相关接口！");
-		}
-		T logicDeleteEntity = (T) entity;
-		logicDeleteEntity.deleted();
-		this.save(logicDeleteEntity);
-		return logicDeleteEntity;
-	}
 	
 	public <T> List<T> findList(QueryBuilder<T> squery) {
 		return findListByProperties((Class<T>)squery.getEntityClass(), squery.getParams());
@@ -106,6 +90,9 @@ public abstract class BaseEntityManagerAdapter implements InnerBaseEntityManager
 	public Number count(SelectExtQuery extQuery) {
 		extQuery.build();
 		Number countNumber = (Number)this.findUnique(extQuery.getCountSql(), extQuery.getParamsValue().asMap());
+		if (countNumber==null) {
+			countNumber = 0;
+		}
 		return countNumber;
 	}
 
@@ -116,13 +103,35 @@ public abstract class BaseEntityManagerAdapter implements InnerBaseEntityManager
 	}
 
 	@Override
-	public <T> T selectOne(SelectExtQuery extQuery) {
-		List<T> list = select(extQuery);
-		T entity = null;
-		if(LangUtils.hasElement(list))
-			entity = list.get(0);
-		return entity;
+	public int remove(DeleteExtQuery deleteQuery) {
+		deleteQuery.build();
+		QueryWrapper q = this.createQuery(deleteQuery.getSql(), deleteQuery.getParamsValue().asMap());
+		return q.executeUpdate();
 	}
+
+//	@Override
+//	public <T> T selectOne(SelectExtQuery extQuery) {
+//		// 限制返回一条
+//		extQuery.limit(0, 1);
+//		List<T> list = select(extQuery);
+//		T entity = null;
+//		if(LangUtils.hasElement(list))
+//			entity = list.get(0);
+//		return entity;
+//	}
+//	
+//	/****
+//	 * 检测数据是否存在，只select id即可
+//	 * @author weishao zeng
+//	 * @param extQuery
+//	 * @return
+//	 */
+//	@Override
+//	public boolean exist(SelectExtQuery extQuery) {
+//		extQuery.selectId();
+//		Object dataWithId = selectOne(extQuery);
+//		return dataWithId!=null;
+//	}
 
 	/****
 	 * 查找唯一结果，如果找不到则返回null，找到多个则抛异常 IncorrectResultSizeDataAccessException，详见：DataAccessUtils.requiredSingleResult

@@ -12,6 +12,7 @@ import org.onetwo.common.db.builder.QueryBuilder;
 import org.onetwo.common.db.sqlext.SQLSymbolManager;
 import org.onetwo.common.utils.Page;
 import org.onetwo.dbm.core.spi.DbmSessionFactory;
+import org.onetwo.dbm.dialet.DBDialect.LockInfo;
 import org.onetwo.dbm.utils.DbmLock;
 
 /****
@@ -27,15 +28,23 @@ public interface BaseEntityManager {
 	public <T> T findById(Class<T> entityClass, Serializable id);
 	
 	/***
-	 * 
+	 * @see org.onetwo.dbm.dialet.DBDialect$LockInfo
 	 * @author wayshall
 	 * @param entityClass
 	 * @param id
 	 * @param lock
-	 * @param timeoutInMillis lock forevaer if null
-	 * @return
+	 * @param timeoutInMillis lock forevaer if null, support: oracle, not support: mysql
+	 * @return return the target or null if not found
 	 */
 	public <T> T lock(Class<T> entityClass, Serializable id, DbmLock lock, Integer timeoutInMillis);
+	
+	default <T> T lockWrite(Class<T> entityClass, Serializable id) {
+		return lock(entityClass, id, DbmLock.PESSIMISTIC_WRITE, LockInfo.WAIT_FOREVER);
+	}
+	
+	default <T> T lockRead(Class<T> entityClass, Serializable id) {
+		return lock(entityClass, id, DbmLock.PESSIMISTIC_READ, LockInfo.WAIT_FOREVER);
+	}
 
 	public <T> T save(T entity);
 	public <T> Collection<T> saves(Collection<T> entities);
@@ -55,11 +64,14 @@ public interface BaseEntityManager {
 	public void dymanicUpdate(Object entity);
 
 	/****
+	 * 执行此方法时，若实体实现了逻辑删除接口ILogicDeleteEntity，则只是更新状态
 	 * @param entity
 	 */
 	public int remove(Object entity);
 	
 	/***
+	 * 执行此方法时，若实体实现了逻辑删除接口ILogicDeleteEntity，则只是更新状态
+	 * 
 	 * 返回updateCount
 	 * 注意：某些数据库或版本的jdbc driver，批量删除时，updateCount并不正确
 	 * @author wayshall
@@ -77,8 +89,8 @@ public interface BaseEntityManager {
 	 */
 	public <T> Collection<T> removeByIds(Class<T> entityClass, Serializable[] id);
 	/***
-	 * 如果updateCount为1，则返回删除实体，否则返回null
-	 * 也就是说，即使实体不存在，也不会抛错。若需要抱错，请根据返回结果是否为null判断
+	 * 执行此方法时，若实体实现了逻辑删除接口ILogicDeleteEntity，则只是更新状态
+	 * 若找不到数据，则抛错
 	 * @author wayshall
 	 * @param entityClass
 	 * @param id
@@ -86,6 +98,7 @@ public interface BaseEntityManager {
 	 */
 	public <T> T removeById(Class<T> entityClass, Serializable id);
 	/***
+	 * 物理删除，不判断实体是否实现 ILogicDeleteEntity 接口
 	 * 返回updateCount
 	 * @author wayshall
 	 * @param entityClass
@@ -98,7 +111,7 @@ public interface BaseEntityManager {
 	 * @author wayshall
 	 * @param entity
 	 */
-	public void delete(ILogicDeleteEntity entity);
+//	public void delete(ILogicDeleteEntity entity);
 
 	/***
 	 * 逻辑删除
@@ -107,7 +120,7 @@ public interface BaseEntityManager {
 	 * @param id
 	 * @return
 	 */
-	public <T extends ILogicDeleteEntity> T deleteById(Class<T> entityClass, Serializable id);
+//	public <T extends ILogicDeleteEntity> T deleteById(Class<T> entityClass, Serializable id);
 
 	public <T> List<T> findAll(Class<T> entityClass);
 

@@ -1,10 +1,12 @@
 package org.onetwo.common.db.builder;
 
 import java.util.Map;
+import java.util.function.Supplier;
 
 import javax.persistence.metamodel.SingularAttribute;
 
 import org.onetwo.common.db.builder.QueryBuilderImpl.SubQueryBuilder;
+import org.onetwo.common.db.filter.DataQueryParamaterEnhancer;
 import org.onetwo.common.db.sqlext.ExtQuery.K;
 import org.onetwo.common.db.sqlext.ExtQuery.KeyObject;
 import org.onetwo.common.reflect.ReflectUtils;
@@ -15,6 +17,8 @@ import org.onetwo.dbm.mapping.DbmMappedEntry;
 import com.google.common.collect.Maps;
 
 public class DefaultWhereCauseBuilder<E> implements WhereCauseBuilder<E> {
+	public static final String[] EXCLUDE_PROPERTIES = new String[] { "page", "pageNo", "pageSize", "pagination", "autoCount" };
+	
 	final protected QueryBuilderImpl<E> queryBuilder;
 	final protected Map<Object, Object> params;
 	private DefaultWhereCauseBuilder<E> parent;
@@ -56,15 +60,33 @@ public class DefaultWhereCauseBuilder<E> implements WhereCauseBuilder<E> {
 	}
 	
 	public DefaultWhereCauseBuilder<E> addFields(Object entity, boolean useLikeIfStringVlue){
+		if (entity==null) {
+			return self();
+		}
+		
 		DbmSessionFactory sf = queryBuilder.getBaseEntityManager().getSessionFactory();
-		DbmMappedEntry entry = sf.getMappedEntryManager().getEntry(entity);
-		Map<String, Object> fieldMap = ReflectUtils.toMap(entity, (p, v)->{
-			return v!=null && entry.contains(p.getName());
-		});
+		DbmMappedEntry entry = sf.getMappedEntryManager().findEntry(entity);
+		
+		// 排除分页参数
+		Map<String, Object> fieldMap = null;
+		if (entry!=null) {
+			fieldMap = ReflectUtils.toMap(entity, (p, v)->{
+				return v!=null && entry.contains(p.getName());
+			}, EXCLUDE_PROPERTIES);
+		} else {
+			fieldMap = ReflectUtils.toMap(entity, (p, v)->{
+				return v!=null;
+			}, EXCLUDE_PROPERTIES);
+		}
+		
 		fieldMap.entrySet().forEach(e->{
-			if(useLikeIfStringVlue && String.class.isInstance(e.getValue())){
-				field(e.getKey()).like(e.getValue().toString());
-			}else{
+			if (String.class.isInstance(e.getValue())) {
+				if(useLikeIfStringVlue){
+					field(e.getKey()).like(e.getValue().toString());
+				}else{
+					field(e.getKey()).equalTo(e.getValue());
+				}
+			} else {
 				field(e.getKey()).equalTo(e.getValue());
 			}
 		});
@@ -113,6 +135,26 @@ public class DefaultWhereCauseBuilder<E> implements WhereCauseBuilder<E> {
 		return self();
 	}
 	
+	/***
+	 * 
+	 * @author weishao zeng
+	 * @param predicate 返回true时，禁止使用DataQueryParamaterEnhancer
+	 * @return
+	 */
+	@Override
+	public DefaultWhereCauseBuilder<E> disabledDataQueryParamaterEnhancer(Supplier<Boolean> predicate) {
+		if (predicate!=null && predicate.get()) {
+			disabledDataQueryParamaterEnhancer();
+		}
+		return self();
+	}
+	
+	@Override
+	public DefaultWhereCauseBuilder<E> disabledDataQueryParamaterEnhancer() {
+		this.params.put(DataQueryParamaterEnhancer.class, false);
+		return self();
+	}
+	
 	@Override
 	public DefaultWhereCauseBuilder<E> throwIfNull(){
 		this.params.put(K.IF_NULL, K.IfNull.Throw);
@@ -157,5 +199,10 @@ public class DefaultWhereCauseBuilder<E> implements WhereCauseBuilder<E> {
 	@Override
 	public QueryAction<E> toQuery(){
 		return queryBuilder.toQuery();
+	}
+
+	@Override
+	public ExecuteAction toExecute() {
+		return queryBuilder.toExecute();
 	}
 }

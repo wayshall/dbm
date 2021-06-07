@@ -2,6 +2,7 @@ package org.onetwo.dbm.event.internal;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 import org.onetwo.common.log.JFishLoggerFactory;
 import org.onetwo.common.utils.ArrayUtils;
@@ -13,6 +14,7 @@ import org.onetwo.dbm.event.spi.DbmEventListener;
 import org.onetwo.dbm.event.spi.DbmInsertOrUpdateEvent;
 import org.onetwo.dbm.event.spi.DbmSessionEvent;
 import org.onetwo.dbm.exception.DbmException;
+import org.onetwo.dbm.exception.EntityNotFoundException;
 import org.onetwo.dbm.exception.EntityVersionException;
 import org.onetwo.dbm.jdbc.internal.SimpleArgsPreparedStatementCreator;
 import org.onetwo.dbm.mapping.DbmConfig;
@@ -24,6 +26,7 @@ import org.onetwo.dbm.mapping.EntrySQLBuilder;
 import org.onetwo.dbm.mapping.JdbcStatementContext;
 import org.onetwo.dbm.utils.DbmUtils;
 import org.slf4j.Logger;
+import org.springframework.dao.EmptyResultDataAccessException;
 
 @SuppressWarnings("unchecked")
 abstract public class AbstractDbmEventListener implements DbmEventListener<DbmSessionEventSource, DbmSessionEvent> {
@@ -34,6 +37,9 @@ abstract public class AbstractDbmEventListener implements DbmEventListener<DbmSe
 	@Override
 	public void doEvent(DbmSessionEvent event) {
 		Object entity = event.getObject();
+		if (entity instanceof Optional) {
+			throw new DbmException("operation is not support Optional Type, entity: " + entity);
+		}
 		DbmInsertOrUpdateEvent insertOrUpdate = (DbmInsertOrUpdateEvent) event;
 
 		int updateCount = 0;
@@ -102,10 +108,23 @@ abstract public class AbstractDbmEventListener implements DbmEventListener<DbmSe
 	 * @return
 	 */
 	protected int executeJdbcUpdate(boolean userBatch, String sql, List<Object[]> args, DbmSessionEventSource es){
+		return executeJdbcUpdate(userBatch, sql, args, es, es.getDataBaseConfig().getProcessSizePerBatch());
+	}
+	/***
+	 * 
+	 * @author weishao zeng
+	 * @param userBatch
+	 * @param sql
+	 * @param args
+	 * @param es
+	 * @param configBatchSize 批量处理时，每次提交的数据量
+	 * @return
+	 */
+	protected int executeJdbcUpdate(boolean userBatch, String sql, List<Object[]> args, DbmSessionEventSource es, Integer configBatchSize){
 		int count = 0;
 		if(userBatch){
 //			int[] ups = es.getJFishJdbcTemplate().batchUpdate(sql, args);
-			int batchSize = es.getDataBaseConfig().getProcessSizePerBatch();
+			int batchSize = configBatchSize!=null?configBatchSize:es.getDataBaseConfig().getProcessSizePerBatch();
 			int[][] ups = es.getDbmJdbcOperations().batchUpdateWith(sql, args, batchSize/*, new ParameterizedPreparedStatementSetter<Object[]>(){
 
 				@Override
@@ -177,6 +196,24 @@ abstract public class AbstractDbmEventListener implements DbmEventListener<DbmSe
 		DbmUtils.throwIfEffectiveCountError(operation + " error.", expectCount, effectiveCount);
 	}
 	
+	/****
+	 * t1 {
+	 * 		select(a) //a.version=1
+	 * 		update(a) //a.version=2
+	 * 		isolation: REQUIRES_NEW
+	 * 		t2 {
+	 * 			select(a.version) //t1未提交，a.version==1
+	 * 			update(a) // check(a.version==1) 出错
+	 * 			commit-t2()
+	 * 		}
+	 * 		commit-t1() //
+	 * }
+	 * @author weishao zeng
+	 * @param es
+	 * @param entry
+	 * @param singleEntity
+	 * @return
+	 */
 	protected final Object checkEntityLastVersion(DbmSessionEventSource es, DbmMappedEntry entry, Object singleEntity) {
 		Object currentTransactionVersion = null;
 		if(entry.isVersionControll()){
@@ -205,8 +242,14 @@ abstract public class AbstractDbmEventListener implements DbmEventListener<DbmSe
 	private Object getLastVersion(DbmSessionEventSource es, DbmMappedEntry entry, Object singleEntity) {
 		DbmMappedField versionField = entry.getVersionField();
 		JdbcStatementContext<Object[]> versionContext = entry.makeSelectVersion(singleEntity);
-		Object last = es.getDbmJdbcOperations().queryForObject(versionContext.getSql(), versionField.getColumnType(), entry.getId(singleEntity));
-		return last;
+		
+		Object[] id = entry.getIds(singleEntity);
+		try {
+			Object last = es.getDbmJdbcOperations().queryForObject(versionContext.getSql(), versionField.getColumnType(), id);
+			return last;
+		} catch (EmptyResultDataAccessException e) {
+			throw new EntityNotFoundException("get entity version error: ", entry.getEntityClass(), id);
+		}
 	}
 	
 	/***

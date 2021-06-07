@@ -41,7 +41,7 @@ abstract public class InsertEventListener extends AbstractDbmEventListener {
 		return executeJdbcUpdate(event, sql, args, es);
 	}*/
 	
-	protected void setIdIfNecessary(DbmInsertEvent event, DbmMappedEntry entry, Object entity) {
+	static public void setIdIfNecessary(DbmSessionEventSource es, DbmMappedEntry entry, Object entity) {
 //		if(entry.isEntity() && entry.getIdentifyField().isGeneratedValue()){
 //			Serializable id = generatedIdentifyBeforeInsert(event, entry);
 //			entry.setId(entity, id);
@@ -52,14 +52,13 @@ abstract public class InsertEventListener extends AbstractDbmEventListener {
 		for (DbmMappedField idField : entry.getIdentifyFields()) {
 //			if (idField.isGeneratedValue()) {
 			if (!entry.hasIdentifyValue(entity) && idField.isGeneratedValue()) {
-				Object id = generatedIdentifyBeforeInsert(event, idField);
+				Object id = generatedIdentifyBeforeInsert(es, idField);
 				idField.setValue(entity, id);
 			}
 		}
 	}
 
-	public Serializable generatedIdentifyBeforeInsert(DbmInsertEvent event, DbmMappedField idField){
-		DbmSessionEventSource es = event.getEventSource();
+	static public Serializable generatedIdentifyBeforeInsert(DbmSessionEventSource es, DbmMappedField idField){
 		IdentifierGenerator<?> idGenerator = idField.getIdGenerator();
 		Serializable id = idGenerator.generate(es);
 		return id;

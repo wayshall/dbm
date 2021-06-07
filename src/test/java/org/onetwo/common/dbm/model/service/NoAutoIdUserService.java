@@ -22,6 +22,14 @@ import org.springframework.transaction.annotation.Transactional;
 public class NoAutoIdUserService {
 	@Autowired
 	BaseEntityManager baseEntityManager;
+	
+	public int count() {
+		return baseEntityManager.countRecord(UserEntity.class).intValue();
+	}
+	
+	public UserEntity findById(Long id) {
+		return baseEntityManager.findById(UserEntity.class, id);
+	}
 
 	public int deleteAll(){
 		return this.baseEntityManager.removeAll(UserEntity.class);
@@ -35,7 +43,7 @@ public class NoAutoIdUserService {
 		baseEntityManager.getSessionFactory().getSession().batchInsert(userlist);
 	}
 	
-	public void insertList(int startId, int insertCount){
+	public void batchInsertUser(int startId, int insertCount){
 		List<UserEntity> userlist = Stream.iterate(startId, item->item+1).limit(insertCount)
 					.map(i->createUserEntity("testList", i))
 					.collect(Collectors.toList());
@@ -43,11 +51,24 @@ public class NoAutoIdUserService {
 		baseEntityManager.getSessionFactory().getSession().batchInsert(userlist);
 	}
 	
+	public List<UserEntity> batchInsertOrUpdateUser(String prefix, int startId, int insertCount){
+		List<UserEntity> userlist = Stream.iterate(startId, item->item+1).limit(insertCount)
+					.map(i->createUserEntity(prefix, i))
+					.collect(Collectors.toList());
+		
+		baseEntityManager.getSessionFactory().getSession().batchInsertOrUpdate(userlist, null);
+		return userlist;
+	}
+
+	public void batchInsertOrUpdateUser(List<UserEntity> userlist){
+		baseEntityManager.getSessionFactory().getSession().batchInsertOrUpdate(userlist, null);
+	}
+	
 	public void insertByStep(int startId, int insertCount){
 		String userName = "unique_user_name______________________";
 		Stream.iterate(startId, item->item+1).limit(insertCount).forEach(item->{
 			UserEntity entity = createUserEntity("test", item);
-			entity.setUserName(userName);
+			entity.setUserName(userName+item);
 			baseEntityManager.save(entity);
 		});
 	}

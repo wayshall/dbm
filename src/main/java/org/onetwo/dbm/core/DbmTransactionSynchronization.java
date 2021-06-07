@@ -1,5 +1,6 @@
 package org.onetwo.dbm.core;
 
+import org.onetwo.common.spring.SpringUtils;
 import org.onetwo.dbm.core.internal.DbmSessionResourceHolder;
 import org.onetwo.dbm.core.internal.DebugContextInterceptor;
 import org.slf4j.Logger;
@@ -20,7 +21,7 @@ public class DbmTransactionSynchronization extends TransactionSynchronizationAda
 	
 	@Override
 	public int getOrder() {
-		return DataSourceUtils.CONNECTION_SYNCHRONIZATION_ORDER - 100;
+		return SpringUtils.higherThan(DataSourceUtils.CONNECTION_SYNCHRONIZATION_ORDER);
 	}
 
 	/***

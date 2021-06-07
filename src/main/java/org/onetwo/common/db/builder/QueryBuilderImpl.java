@@ -8,11 +8,11 @@ import org.onetwo.common.db.InnerBaseEntityManager;
 import org.onetwo.common.db.RawSqlWrapper;
 import org.onetwo.common.db.sqlext.ExtQuery;
 import org.onetwo.common.db.sqlext.ExtQuery.K;
-import org.onetwo.common.db.sqlext.ExtQueryInner;
 import org.onetwo.common.db.sqlext.SQLSymbolManager;
 import org.onetwo.common.utils.LangUtils;
 import org.onetwo.common.utils.StringUtils;
 import org.onetwo.dbm.dialet.DBDialect.LockInfo;
+import org.onetwo.dbm.exception.DbmException;
 
 /*********
  * 提供简易有明确api的查询构造器
@@ -59,6 +59,9 @@ public class QueryBuilderImpl<E> implements QueryBuilder<E> {
 	}
 
 	protected QueryBuilderImpl(InnerBaseEntityManager baseEntityManager, Class<?> entityClass){
+		if (entityClass==null) {
+			throw new DbmException("entity class can not be null");
+		}
 		this.entityClass = entityClass;
 		this.alias = StringUtils.uncapitalize(entityClass.getSimpleName());
 		this.baseEntityManager = baseEntityManager;
@@ -142,6 +145,18 @@ public class QueryBuilderImpl<E> implements QueryBuilder<E> {
 	}
 	
 	@Override
+	public QueryBuilderImpl<E> ascRand(Object seed){
+		this.params.put(K.ASC, K.RAND.withkey(seed));
+		return self();
+	}
+	
+	@Override
+	public QueryBuilderImpl<E> descRand(Object seed){
+		this.params.put(K.DESC, K.RAND.withkey(seed));
+		return self();
+	}
+	
+	@Override
 	public QueryBuilderImpl<E> desc(String...fields){
 		this.params.put(K.DESC, fields);
 		return self();
@@ -201,13 +216,19 @@ public class QueryBuilderImpl<E> implements QueryBuilder<E> {
 	public QueryAction<E> toSelect(){
 		return createQueryAction();
 	}
-
-	public int delete(){
-		InnerBaseEntityManager em = (InnerBaseEntityManager) baseEntityManager;
-		ExtQueryInner query = em.getSQLSymbolManager().createDeleteQuery(entityClass, params);
-		ExtQuery q = query.build();
-		return em.createQuery(q.getSql(), q.getParamsValue().asMap()).executeUpdate();
+	
+	@Override
+	public ExecuteAction toExecute() {
+		ExecuteAction executeAction = new ExecuteActionImpl(this);
+		return executeAction;
 	}
+
+//	public int delete(){
+//		InnerBaseEntityManager em = (InnerBaseEntityManager) baseEntityManager;
+//		ExtQueryInner query = em.getSQLSymbolManager().createDeleteQuery(entityClass, params);
+//		ExtQuery q = query.build();
+//		return em.createQuery(q.getSql(), q.getParamsValue().asMap()).executeUpdate();
+//	}
 	
 	/*public ParamValues getParamValues(){
 		return extQuery.getParamsValue();
@@ -226,7 +247,8 @@ public class QueryBuilderImpl<E> implements QueryBuilder<E> {
 		extQuery = createExtQuery(entityClass, alias, params);
 		extQuery.build();*/
 		
-		QueryActionImpl<E> queryAction = new QueryActionImpl<E>(this, entityClass, alias, params);
+//		QueryActionImpl<E> queryAction = new QueryActionImpl<E>(this, entityClass, alias, params);
+		QueryActionImpl<E> queryAction = new QueryActionImpl<E>(this);
 		
 		/*JFishQueryValue qv = JFishQueryValue.create(getSQLSymbolManager().getPlaceHolder(), extQuery.getSql());
 		qv.setResultClass(extQuery.getEntityClass());

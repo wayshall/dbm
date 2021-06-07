@@ -1,5 +1,7 @@
 package org.onetwo.common.db.builder;
 
+import java.util.function.Supplier;
+
 import javax.persistence.metamodel.SingularAttribute;
 
 
@@ -46,6 +48,21 @@ public interface WhereCauseBuilder<E> {
 	WhereCauseBuilder<E> ignoreIfNull();
 	
 	WhereCauseBuilder<E> disabledDataFilter();
+	
+	/***
+	 * 通过条件断言关闭DataQueryParamaterEnhancer功能
+	 * @author weishao zeng
+	 * @param predicate
+	 * @return
+	 */
+	WhereCauseBuilder<E> disabledDataQueryParamaterEnhancer(Supplier<Boolean> predicate);
+	
+	/***
+	 * 关闭DataQueryParamaterEnhancer功能
+	 * @author weishao zeng
+	 * @return
+	 */
+	WhereCauseBuilder<E> disabledDataQueryParamaterEnhancer();
 
 	WhereCauseBuilder<E> throwIfNull();
 
@@ -56,4 +73,6 @@ public interface WhereCauseBuilder<E> {
 	
 	QueryBuilder<E> end();
 	QueryAction<E> toQuery();
+	
+	ExecuteAction toExecute();
 }

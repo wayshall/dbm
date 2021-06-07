@@ -8,6 +8,8 @@ import java.util.concurrent.atomic.AtomicLong;
 import javax.sql.DataSource;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.onetwo.common.db.generator.dialet.DatabaseMetaDialet;
+import org.onetwo.common.db.generator.dialet.DelegateDatabaseMetaDialet;
 import org.onetwo.common.db.sql.SequenceNameManager;
 import org.onetwo.common.db.sqlext.SQLSymbolManager;
 import org.onetwo.common.log.JFishLoggerFactory;
@@ -70,6 +72,8 @@ public class DbmSessionFactoryImpl implements InitializingBean, DbmSessionFactor
 	
 	private boolean autoCreatedTransactionManager;
 	
+	private DatabaseMetaDialet databaseMetaDialet;
+	
 	public DbmSessionFactoryImpl(ApplicationContext applicationContext, PlatformTransactionManager transactionManager,
 			DataSource dataSource) {
 		super();
@@ -126,6 +130,8 @@ public class DbmSessionFactoryImpl implements InitializingBean, DbmSessionFactor
 		this.sqlSymbolManager = serviceRegistry.getSqlSymbolManager();
 		this.rowMapperFactory = serviceRegistry.getRowMapperFactory();
 		this.sequenceNameManager = serviceRegistry.getSequenceNameManager();
+		
+		this.databaseMetaDialet = new DelegateDatabaseMetaDialet(dataSource);
 		
 		if(ArrayUtils.isNotEmpty(packagesToScan)){
 			mappedEntryManager.scanPackages(packagesToScan);
@@ -352,6 +358,10 @@ public class DbmSessionFactoryImpl implements InitializingBean, DbmSessionFactor
 
 	public void setPackagesToScan(String[] packagesToScan) {
 		this.packagesToScan = packagesToScan;
+	}
+
+	public DatabaseMetaDialet getDatabaseMetaDialet() {
+		return databaseMetaDialet;
 	}
 
 	@Override

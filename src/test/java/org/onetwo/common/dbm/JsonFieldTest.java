@@ -50,6 +50,7 @@ public class JsonFieldTest extends DbmBaseTest {
 		extInfo.setProperty(11);
 		company.setExtInfo(extInfo);
 		company.setBuildAt(LocalDateTime.of(2017, 10, 10, 15, 57));
+		company.setLinkPhones(Arrays.asList("13666666666"));
 		
 		DbmModuleConfigTestVO config = new DbmModuleConfigTestVO();
 		config.setValue("1000");
@@ -60,6 +61,8 @@ public class JsonFieldTest extends DbmBaseTest {
 		
 		company.setConfigData(CUtils.asMap("config1", config, "config2", config2));
 		
+		company.setExtInfoList(Arrays.asList(extInfo));
+		
 		baseEntityManager.save(company);
 		
 		JsonCompanyEntity dbCompany = baseEntityManager.findOne(JsonCompanyEntity.class, "name", company.getName());
@@ -67,6 +70,7 @@ public class JsonFieldTest extends DbmBaseTest {
 		assertThat(dbCompany.getName()).isEqualTo(company.getName());
 		assertThat(dbCompany.getBuildAt()).isEqualTo(company.getBuildAt());
 		assertThat(dbCompany.getExtInfo()).isEqualTo(company.getExtInfo());
+		assertThat(dbCompany.getLinkPhones().get(0)).isEqualTo(company.getLinkPhones().get(0));
 		assertThat(dbCompany.getConfigData().get("config2")).isEqualTo(config2);
 		assertThat(dbCompany.getConfigData().get("config1").getTypeValue(Integer.class)).isEqualTo(1000);
 		
@@ -82,6 +86,7 @@ public class JsonFieldTest extends DbmBaseTest {
 		assertThat(dbCompany).isNotNull();
 		assertThat(dbCompany.getName()).isEqualTo(company.getName());
 		assertThat(dbCompany.getExtInfo()).isEqualTo(company.getExtInfo());
+		assertThat(dbCompany.getExtInfoList().get(0)).isEqualTo(company.getExtInfoList().get(0));
 		
 		
 		dbCompany = jsonCompanyDao.findOne(company.getName());
@@ -105,9 +110,13 @@ public class JsonFieldTest extends DbmBaseTest {
 	public static class JsonCompanyEntity extends CompanyEntity {
 		@DbmJsonField
 		protected ExtInfo extInfo;
+		@DbmJsonField(valueType=ExtInfo.class)
+		protected List<ExtInfo> extInfoList;
 		protected LocalDateTime buildAt;
 		@DbmJsonField(storeTyping=true)
 		private Map<String, DbmModuleConfigTestVO> configData;
+		@DbmJsonField
+		protected List<String> linkPhones;
 
 		public ExtInfo getExtInfo() {
 			return extInfo;
@@ -132,7 +141,22 @@ public class JsonFieldTest extends DbmBaseTest {
 		public void setConfigData(Map<String, DbmModuleConfigTestVO> configData) {
 			this.configData = configData;
 		}
-		
+
+		public List<ExtInfo> getExtInfoList() {
+			return extInfoList;
+		}
+
+		public void setExtInfoList(List<ExtInfo> extInfoList) {
+			this.extInfoList = extInfoList;
+		}
+
+		public List<String> getLinkPhones() {
+			return linkPhones;
+		}
+
+		public void setLinkPhones(List<String> linkPhones) {
+			this.linkPhones = linkPhones;
+		}
 		
 	}
 	
@@ -164,6 +188,7 @@ public class JsonFieldTest extends DbmBaseTest {
 		public void setPhones(List<String> phones) {
 			this.phones = phones;
 		}
+		
 		@Override
 		public int hashCode() {
 			final int prime = 31;

@@ -4,6 +4,7 @@ import java.util.Optional;
 
 import javax.sql.DataSource;
 
+import org.onetwo.common.db.generator.dialet.DatabaseMetaDialet;
 import org.onetwo.common.db.sql.SequenceNameManager;
 import org.onetwo.common.db.sqlext.SQLSymbolManager;
 import org.onetwo.dbm.core.internal.DbmInterceptorManager;
@@ -60,5 +61,7 @@ public interface DbmSessionFactory {
 	DefaultDatabaseDialetManager getDatabaseDialetManager();
 
 	DbmConfig getDataBaseConfig();
+	
+	DatabaseMetaDialet getDatabaseMetaDialet();
 
 }

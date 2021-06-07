@@ -17,7 +17,9 @@ public enum DbmEventAction {
 	extQuery,
 	
 	batchInsert,
-	batchUpdate
+	batchUpdate,
+	batchInsertOrUpdate,
+	batchInsertOrIgnore
 //	saveRef,
 //	dropRef
 	

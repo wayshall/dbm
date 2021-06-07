@@ -2,7 +2,6 @@ package org.onetwo.common.db.dquery;
 
 import java.lang.reflect.Method;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.onetwo.common.db.filequery.SpringBasedSqlFileScanner;
 import org.onetwo.common.db.spi.NamedSqlFileManager;
@@ -57,13 +56,13 @@ public class FileScanBasicDynamicQueryObjectRegister implements DynamicQueryObje
 	public boolean registerQueryBeans() {
 		logger.info("start to register dao bean ....");
 		Map<String, ResourceAdapter<?>> sqlfiles = sqlFileScanner.scanMatchSqlFiles(null);
-		for(Entry<String, ResourceAdapter<?>> f: sqlfiles.entrySet()){
+		sqlfiles.entrySet().parallelStream().forEach(f -> {
 			String className = f.getKey();
 			if(NamedSqlFileManager.GLOBAL_NS_KEY.equalsIgnoreCase(className)){
-				continue;
+				return;
 			}
 			if(registry.containsBeanDefinition(className)){
-				continue;
+				return;
 			}
 			final Class<?> interfaceClass = ReflectUtils.loadClass(className);
 			BeanDefinition beandef = BeanDefinitionBuilder.rootBeanDefinition(DynamicQueryHandlerProxyCreator.class)
@@ -75,7 +74,7 @@ public class FileScanBasicDynamicQueryObjectRegister implements DynamicQueryObje
 								.getBeanDefinition();
 			registry.registerBeanDefinition(className, beandef);
 			logger.info("register dao bean: {} -> {}", className, f.getValue().getFile());
-		}
+		});
 		return true;
 		
 	}

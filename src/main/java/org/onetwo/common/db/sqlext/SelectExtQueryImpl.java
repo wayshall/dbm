@@ -85,7 +85,12 @@ public class SelectExtQueryImpl extends AbstractExtQuery implements SelectExtQue
 	
 	
 	public boolean needSetRange(){
-		return this.firstResult>=MIN_RESULT_INDEX && this.maxResults>=AT_LEAST_RESULTS_SIZE;
+//		return this.firstResult>=MIN_RESULT_INDEX && this.maxResults>=AT_LEAST_RESULTS_SIZE;
+		return isLimitQuery(this.firstResult, maxResults);
+	}
+	
+	static public boolean isLimitQuery(int first, int maxResults){
+		return first>=MIN_RESULT_INDEX && maxResults>=AT_LEAST_RESULTS_SIZE;
 	}
 
 	/***
@@ -388,7 +393,8 @@ public class SelectExtQueryImpl extends AbstractExtQuery implements SelectExtQue
 		boolean hasOrderBy = false;
 		List<Object> orderbys = new ArrayList<>(3);
 		for(Map.Entry<Object, Object> entry : (Set<Map.Entry<Object, Object>>)this.params.entrySet()){
-			if(K.ORDER_BY_MAP.containsKey(entry.getKey())){
+			Object orderByKey = entry.getKey();
+			if(K.ORDER_BY_MAP.containsKey(orderByKey)){
 				orderbys.add(entry.getKey());
 			}
 		}
@@ -417,6 +423,15 @@ public class SelectExtQueryImpl extends AbstractExtQuery implements SelectExtQue
 		return "";
 	}
 	
+	/***
+	 * :orderBy field
+	 * :asc field
+	 * :desc field
+	 * :asc rand:1
+	 * @author weishao zeng
+	 * @param orderKeyword
+	 * @return
+	 */
 	protected boolean buildOrderby0(Object orderKeyword){
 		boolean hasOrderBy = false;
 		if(!params.keySet().contains(orderKeyword))
@@ -426,12 +441,16 @@ public class SelectExtQueryImpl extends AbstractExtQuery implements SelectExtQue
 		if(ascValue==null)
 			return false;
 		
+		// asc , desc
 		Object orderValue = K.getMappedValue(orderKeyword);
 		Object[] orderList = null;
-		if(LangUtils.isMultiple(ascValue))
+		if (LangUtils.isMultiple(ascValue)) {
+			// 排序的值是个数组
 			orderList = (Object[]) LangUtils.asList(ascValue).toArray();
-		else
+		} else {
+			// 排序的值是用逗号分隔的字符串: field1, field2, field3
 			orderList = StringUtils.split(ascValue.toString(), ",");
+		}
 		String orderField = null;
 
 		if(orderBy==null || orderBy.length()<1){
@@ -446,17 +465,31 @@ public class SelectExtQueryImpl extends AbstractExtQuery implements SelectExtQue
 			} else{
 				orderBy.append(", ");
 			}
-			int oIndex = orderField.indexOf(':');
-			if(oIndex==-1){
-				if(K.ORDERBY.equals(orderKeyword))
+//			int oIndex = orderField.indexOf(':');
+			String[] orderByValues = StringUtils.split(orderField, ":");
+			if(orderByValues.length == 1){
+				orderField = orderByValues[0];
+				// 如果是 :orderBy， 允许是个sql片段，不检查field,
+				if(K.ORDERBY.equals(orderKeyword)) {
+					// order by field1 asc orderBy
 					orderBy.append(orderField).append(orderValue);
-				else
+				} else {
 					orderBy.append(getFieldName(orderField)).append(orderValue);
+				}
 			}else{
-				String f = orderField.substring(0, oIndex);
-				String nullsOrder = orderField.substring(oIndex+1);
-				nullsOrder = symbolManager.getSqlDialet().getNullsOrderby(nullsOrder);
-				orderBy.append(getFieldName(f)).append(" ").append(nullsOrder).append(" ").append(orderValue);
+				// rand:1
+				String funStr = orderByValues[0];
+				orderField = orderByValues[1];
+				KeyObject funKey = KeyObject.builder().key(funStr).build();
+				if (funKey.equals(K.RAND)) {
+					orderBy.append(funKey.keyFunc(orderField)).append(orderValue);
+				} else {
+					String nullsOrder = funStr;
+					// order by some_column DESC NULLS LAST ?
+					nullsOrder = symbolManager.getSqlDialet().getNullsOrderby(nullsOrder);
+	//				orderBy.append(getFieldName(f)).append(" ").append(nullsOrder).append(" ").append(orderValue);
+					orderBy.append(getFieldName(orderField)).append(orderValue).append(" ").append(nullsOrder);
+				}
 			}
 		}
 		return hasOrderBy;
@@ -555,6 +588,17 @@ public class SelectExtQueryImpl extends AbstractExtQuery implements SelectExtQue
 
 	public LockInfo getLockInfo() {
 		return lockInfo;
+	}
+
+	@Override
+	public void limit(int first, int size) {
+		this.params.put(K.FIRST_RESULT, first);
+		this.params.put(K.MAX_RESULTS, size);
+	}
+
+	@Override
+	public void select(String... fields) {
+		this.params.put(K.SELECT, fields);
 	}
 
 }

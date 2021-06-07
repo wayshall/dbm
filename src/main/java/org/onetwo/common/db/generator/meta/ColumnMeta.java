@@ -85,6 +85,9 @@ public class ColumnMeta {
 	}
 
 	public String getUiType(){
+		if (this.commentsInfo==null) {
+			return "";
+		}
 		String type = this.commentsInfo.get(UITypes.KEY_TYPE);
 		return type==null?"":type;
 	}

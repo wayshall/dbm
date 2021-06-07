@@ -1,7 +1,14 @@
 # dbm
 ------
 基于spring jdbc实现的轻量级orm   
-交流群：  604158262
+
+项目github地址：[ dbm ]( https://github.com/wayshall/dbm )
+
+
+
+联系邮箱：  wayshall@qq.com
+
+
 
 ## 目录
 - [特色](#特色)
@@ -15,7 +22,10 @@
 - [其它特有的映射](#其它特有的映射)
 - [BaseEntityManager接口和QueryDSL](#BaseEntityManager接口和QueryDSL)
 - [CrudEntityManager接口](#crudentitymanager接口)
-- [DbmRepository接口](#dbmrepository接口)
+- [DbmRepository动态sql查询接口](#DbmRepository动态sql查询接口)
+- [sql片段支持](#sql片段支持)
+- [动态sql查询的语法和指令](#动态sql查询的语法和指令)
+- [用DbmRepository执行脚本](#用DbmRepository执行脚本)
 - [DbmRepository接口的多数据源支持](#dbmrepository接口的多数据源支持)
 - [DbmRepository接口对其它orm框架的兼容](#dbmrepository接口对其它orm框架的兼容)
 - [查询映射](#查询映射)
@@ -25,11 +35,14 @@
 - [json映射](#json映射)
 - [敏感字段映射](#敏感字段映射)
 - [字段绑定](#字段绑定)
+- [从其它地方加载DbmRepository接口的sql](#从其它地方加载DbmRepository接口的sql)
+- [直接传入要执行的sql作为参数](#直接传入要执行的sql作为参数)
 - [其它映射特性](#其它映射特性)
 - [批量插入](#批量插入)
 - [充血模型支持](#充血模型支持)
 - [参数配置](#参数配置)
 - [代码生成器](#代码生成器)
+- [辅助工具：导出表结构为excel](#辅助工具：导出表结构为excel)
 - [捐赠](#捐赠)
 
 
@@ -58,7 +71,12 @@
 
 - 支持json映射，直接把数据库的json或者varchar类型（存储内容为json数据）的列映射为Java对象
 
+- 支持非int和String类型的枚举映射
+
+- 内置支持SnowFlake id生成算法
+
 - 支持敏感字段映射
+- Repository接口支持执行sql脚本
 
    
 ## 示例项目   
@@ -90,7 +108,7 @@ spring 4.0+
 <dependency>
     <groupId>org.onetwo4j</groupId>
     <artifactId>onetwo-dbm</artifactId>
-    <version>4.7.4-SNAPSHOT</version>
+    <version>4.8.0-SNAPSHOT</version>
 </dependency>
 
 ```
@@ -217,6 +235,25 @@ public class UserEntity implements Serializable {
 }
 ```
 
+
+### @SnowFlakeId 注解
+
+4.7.4 版本后，使用内置的snowFlakeId生成主键id时，可直接使用 @SnowflakeId 简化配置：
+
+```Java
+@Entity
+@Table(name="t_user")
+public class UserEntity {
+	@SnowflakeId 
+	protected Long id;
+}
+```
+
+
+
+
+
+
 ## 复合主键映射
 jpa支持三种复合主键映射策略，dbm目前只支持一种： @IdClass 映射。
 映射方法如下：
@@ -313,7 +350,7 @@ public class UserEntity {
 	@Enumerated(EnumType.ORDINAL)
 	UserGenders gender;
 
-	public static enum UserGenders implements DbmEnumValueMapping {
+	public static enum UserGenders implements DbmEnumValueMapping<Integer> {
 		FEMALE("女性", 10),
 		MALE("男性", 11);
 		
@@ -327,13 +364,49 @@ public class UserEntity {
 			return label;
 		}
 		@Override
-		public int getMappingValue() {
+		public Integer getEnumMappingValue() {
 			return value;
 		}
 		
 	}
 }
 ```
+
+### 非int和String类型的枚举映射支持
+在jpa里，@Enumerated 注解支持int和String两种枚举值类型。
+在dbm里，只要属性的类型是枚举类型，并且实现了DbmEnumValueMapping接口，dbm就会自动处理枚举类型，不需要@Enumerated注解标记。
+而DbmEnumValueMapping是个泛型接口，可以支持任意类型的枚举值，只要数据值从数据库取回时可以和getEnumMappingValue()返回的值匹配上（eqauls）即可。
+比如项目比较奇葩，需要把枚举类型映射到Double类型：
+```java
+@Entity
+@Table(name="TEST_USER")
+@Data
+public class UserEntity {
+    @SnowflakeId
+    Long id;
+    UserGenders gender;
+}
+static enum UserGenders implements DbmEnumValueMapping<Double> {
+        FEMALE("女性", 0),
+        LADYBOY("人妖", 0.5),
+        MALE("男性", 1);
+        
+        final private String label;
+        final private double value;
+        private UserGenders(String label, double value) {
+            this.label = label;
+            this.value = value;
+        }
+        public String getLabel() {
+            return label;
+        }
+        @Override
+        public Double getEnumMappingValue() {
+            return value;
+        }
+}
+```
+
 
 ### 枚举属性查询时的处理
 
@@ -494,9 +567,10 @@ DbmSensitiveField 属性解释如下：
 
 
 
-### @DbmField注解
-@DbmField 注解可自定义一个值转换器，用于从数据库表获取的字段值转换为Java对象的属性值，和把Java对象的属性值转换为数据库表的字段值。   
+### @DbmFieldConvert注解
+@DbmFieldConvert 注解可自定义一个值转换器，用于从数据库表获取的字段值转换为Java对象的属性值，和把Java对象的属性值转换为数据库表的字段值。   
 @DbmJsonField 注解实际上是包装了@DbmField注解实现的。
+字段支持重复多个@DbmFieldConvert 注解
 
 
 
@@ -679,7 +753,7 @@ public class UserAutoidEntity {
 
 
 
-## DbmRepository接口
+## DbmRepository动态sql查询接口
 DbmRepository接口支持类似mybatis的sql语句与接口绑定，但sql文件不是写在丑陋的xml里，而是直接写在sql文件里，这样用eclipse或者相关支持sql的编辑器打开时，就可以语法高亮，更容易阅读。
 
 ### 1、定义一个接口   
@@ -765,8 +839,102 @@ public interface UserDao {
 }
 ```
 
-### sql模板文件的语法和指令支持
+## sql片段支持
+有时候，两个查询方法的sql里，大部分是相同的（比如查询条件），只有小部分不同，如果写两份，就需要维护两份sql。这时候，你可以使用sql片段@fragment
+
+比如有两个sql查询
+
+sql1是findUserListLikeName:
+
+```sql
+/***
+ * @name: findUserListLikeName
+ */
+select 
+    usr.*
+from 
+    test_user usr
+where 
+    user_name like :userName?likeString
+```
+
+sql2是countUserLikeName:
+
+```sql
+/***
+ * @name: countUserLikeName
+ */
+select 
+    count(1)
+from 
+    test_user usr
+where 
+    user_name like :userName?likeString
+```
+
+两个方法的查询条件是一样的，只是select的数据不同，此时可以把相同的部分抽取出来：
+
+```sql
+/***
+ * @name: queryUser
+ * @fragment: subWhere
+ */
+from 
+    test_user usr
+where 
+    user_name like :userName?likeString
+
+```
+
+findUserListLikeName的sql可以改写为：
+
+```sql
+/***
+ * @name: findUserListLikeName
+ */
+select 
+    usr.*
+${fragment['queryUser.fragment.subWhere']}
+```
+
+countUserLikeName改写为：
+
+```sql
+/***
+ * @name: countUserLikeName
+ */
+select 
+    count(1)
+${fragment['queryUser.fragment.subWhere']}
+```
+
+
+
+
+
+
+## 动态sql查询的语法和指令
+
+### 常用指令
 sql模板使用的实际上是freemarker模板引擎，因此freemarker支持的语法都可以使用。
+一般比较常用到的指令如下：
+- if 指令
+```sql
+[#if 条件表达式]
+......
+[/#if]
+```
+- list 迭代指令
+```sql
+[#list 可迭代的变量 as item]
+......t.column_name = ${item.property1}
+[/#list]
+```
+条件表达式除了通常的逻辑判断外，还有一些比较常用到的表达式：
+- 变量??,双问号，用于判断一个变量是否存在
+- 变量?has_content，用于判断变量是有内容，比如字符串的话，相等于判断是否为空。
+
+### dbm扩展指令
 另外增加了一些特定的指令以帮助处理sql，包括：
 
 - @foreach
@@ -895,6 +1063,14 @@ set  指令与where指令类似，只是@str指令的包装，用于sql更新语
         id = :query.id
 ```
 
+### dateRange
+
+```sql
+        // 以天（date）为间隔，遍历输出从10月1日到11日（不包含）的日期，日期按照format格式化为字符串，format参数不写，则dateVar为Date类型对象
+   [@dateRange from='2014-10-01' to='2014-10-11' type='date' format='yyyyMMdd' joiner=' or '; dateVar, index]
+        t.date = '${dateVar}'
+   [/@dateRange]
+```
 
 ### 其他特性
 
@@ -974,7 +1150,42 @@ where
 
 - 支持Optional类型的返回值
 
+## 用DbmRepository执行脚本
+4.8.0版本后，DbmRepository支持执行sql脚本。
+只需要在DbmRepository的方法上加上注解@SqlScript，方法对应的sql即会被当做sql脚本执行。
+但需要注意：
+- 执行脚本必须返回void
+- 脚本无法设置 jdbc 参数
 
+如：
+```Java
+@DbmRepository
+public interface SqlScriptDao {
+    @SqlScript
+    void createTables();
+}
+```
+对应的sql文件：
+```sql
+/**
+ * @name: createTables
+ */
+SET NAMES utf8mb4;
+SET FOREIGN_KEY_CHECKS = 0;
+
+-- ----------------------------
+-- Table structure for wx_access_token
+-- ----------------------------
+DROP TABLE IF EXISTS `test_table`;
+CREATE TABLE `test_table`  (
+  `id` varchar(64) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
+  `create_at` datetime(0) NOT NULL,
+  `update_at` datetime(0) NOT NULL,
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_bin ROW_FORMAT = Compact;
+
+SET FOREIGN_KEY_CHECKS = 1;
+```
 
 ## DbmRepository接口的多数据源支持
 DbmRepository 查询接口还可以通过注解支持绑定不同的数据源，dataSource的值为spring bean的名称：
@@ -1211,9 +1422,23 @@ public class CustomDaoTest {
 
 ## 批量插入
 
-### 使用DbmRepository查询批量插入
 在mybatis里，批量插入非常麻烦，我见过有些人甚至使用for循环生成value语句来批量插入的，这种方法插入的数据量如果很大，生成的sql语句以吨计，如果用jdbc接口执行这条语句，系统必挂无疑。   
-在dbm里，使用批量接口很简单。   
+在dbm里，批量插入有几种方式。
+
+- 注意，批量操作不会触发 DbmEntityListener 接口的回调
+
+### 使用session接口的批量插入接口
+```java   
+List<UserEntity> userList = new ArrayList<>();
+userList.add(user);
+...
+baseEntityManager.getSessionFactory().getSession().batchInsert(userList)
+
+```
+
+### 使用DbmRepository查询批量插入
+在dbm里，使用编写sql的方式批量接口很简单。   
+
 定义接口：   
 ```java   
 
@@ -1223,16 +1448,99 @@ public interface UserAutoidDao {
 }
 
 ```
-定义sql：     
-![batcchInsert](doc/sql.batcchInsert.jpg)
+
+然后定义sql：     
+
+```sql
+
+/*****
+ * @name: batchInsert
+ * 批量插入     */
+    insert 
+    into
+        test_user_autoid
+        (birthday, email, gender, mobile, nick_name, password, status, user_name) 
+    values
+        (:birthday, :email, :gender, :mobile, :nickName, :password?encrypt, :status.value, :userName)
 
 
+```
+**说明**
+- 方法名称以batchInsert、batchUpdate、batchSave开头命名即被视为批量操作，否则需要使用@ExecuteUpdate(isBatch=true)来注明该方法是批量操作
+- 因为是批量操作，第一个必须是Collection集合类型，若有多个参数且第一个参数不是集合类型，则必须使用@BatchObject标记集合类型的参数
+- values语句里面的userName等字段对应集合里面元素（对象）的属性
 
-搞掂！   
+### 批量插入或更新
+dbm也利用了mysql的on duplicate key update语法，支持批量插入或更新：
+```java   
+List<UserEntity> userList = new ArrayList<>();
+userList.add(user);
+...
+baseEntityManager.getSessionFactory().getSession().batchInsertOrUpdate(userList, 10000)
+
+```
+
+### 从其它地方加载DbmRepository接口的sql
+4.8.0 版本后DbmRepository接口的sql可以自定义加载方式。
+DbmRepository接口默认是自动绑定接口名称对应的 ".jfish.sql"后缀的sql文件的，但有些场景，我们需要从其它地方加载sql。   
+这时，你可以通过@QueryName注解，标注命名查询的参数，动态设置查询名称（正常情况下，名称是类名+方法名），   
+使用@QuerySqlTemplateParser注解配置加载和解释sql的具体过程：
+```java
+@DbmRepository
+public interface SqlExecutor {
+    @QuerySqlTemplateParser(SimpleSqlTemplateParser.class) // 使用SimpleSqlTemplateParser解释命名查询
+    <T> T executeSql(@QueryName String name, // 标记此参数是命名查询的名字参数
+                    UserStatus status, 
+                    @QueryResultType Class<T> resultType);//对应查询的结果返回的类型
+
+}
+
+public class SimpleSqlTemplateParser implements SqlTemplateParser {
+
+    @Override
+    public String parseSql(String name, Object context) {
+        if ("countDisabledUser".equals(name)) {
+            return "select count(1) from test_user t where  t.status = :status";
+        }
+        return name;
+    }
+    
+}
+
+
+SqlExecutor.executeSql("countDisabledUser", // 执行名称为"countDisabledUser"的查询，而这个命名查询的sql就是SimpleSqlTemplateParser返回的sql
+                    UserStatus.DISABLED, 
+                    Long.class); // countDisabledUser实际执行的是一条统计sql，所以这里返回Long类型
+```
+
+### 直接传入要执行的sql作为参数
+4.8.0 版本支持。
+在一些更加复杂和需要动态化的场景，sql可能不是从某个地方加载的，而是需要从参数传入，然后直接执行，类似于原始的jdbc的execteSql功能，但同时又需要使用dbm的sql解释和参数化功能，也是没问题的。
+
+```java
+@DbmRepository
+public interface SqlExecutor {
+    
+    <T> T executeSql(@Sql String sql,
+                    UserStatus status, 
+                    @QueryResultType Class<T> resultType, //对应查询的结果返回的类型
+                    @QueryParseContext Map<String, Object> ctx);
+
+}
+
+Map<String, Object> ctx = Maps.newHashMap();
+ctx.put("now", new NiceData());
+SqlExecutor.executeSql("select count(1) from test_user t where  t.status = :status and t.birthDay=${now.format('yyyy-MM-dd')}", 
+                    UserStatus.DISABLED, 
+                    Long.class); // countDisabledUser实际执行的是一条统计sql，所以这里返回Long类型
+```
 
 ## 其它映射特性
 
+
+
 ### 注解@DbmRowMapper
+
 用于配置DbmRepository类的数据映射器，配置指定的mapper，默认为ENTITY模式。
 由于标注为实体的映射规则和Pojo默认的映射规则不一致，导致有时候某些查询返回需要用到两种规则时无法兼容，使用此注解的MIXTURE 混合模式可以兼容两种规则。
 
@@ -1325,6 +1633,22 @@ DbmGenerator.createWithDburl("jdbc:mysql://localhost:3306/test?useUnicode=true&c
 					.end()
 					.build()
 					.generate();//生成文件
+```
+
+## 辅助工具导出表结构为excel
+可以通过ExcelExporter类导出表结构为excel
+
+```Java
+    TableExportParam params = new TableExportParam();
+    params.setExportFilePath("f:/test/表字段说明.xls"); // 导出的excel文件保存路径
+    params.addTable("table1", // 导出的表名
+            "table2");
+    params.setConfigurer(it -> {
+        // 满足条件的字段才会被导出
+        it.setCondition("#column.name!='create_at' && #column.name!='update_at'");
+    });
+    ExcelExporter export = ExcelExporter.create(dataSource);
+    export.exportTableShema(params); // 导出
 ```
 
 

@@ -11,8 +11,8 @@ import org.onetwo.common.db.sql.SequenceNameManager;
 import org.onetwo.common.db.sqlext.SQLSymbolManager;
 import org.onetwo.common.db.sqlext.SelectExtQuery;
 import org.onetwo.common.utils.Page;
-import org.onetwo.dbm.annotation.DbmJdbcOperationMark;
 import org.onetwo.dbm.dialet.DBDialect;
+import org.onetwo.dbm.jdbc.annotation.DbmJdbcOperationMark;
 import org.onetwo.dbm.jdbc.spi.DbmJdbcOperationType;
 import org.onetwo.dbm.jdbc.spi.DbmJdbcOperations;
 import org.onetwo.dbm.mapping.DbmConfig;
@@ -78,6 +78,9 @@ public interface DbmSessionImplementor extends DbmSession {
 
 	@DbmJdbcOperationMark(type=DbmJdbcOperationType.QUERY)
 	public <T> List<T> findList(DbmQueryValue queryValue, RowMapper<T> rowMapper);
+	
+	@DbmJdbcOperationMark(type=DbmJdbcOperationType.QUERY)
+	public <T> List<T> findListWihtLimit(DbmQueryValue queryValue, RowMapper<T> rowMapper, int first, int maxResults);
 	
 	public DBDialect getDialect();
 

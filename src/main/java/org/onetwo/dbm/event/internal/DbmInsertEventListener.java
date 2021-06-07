@@ -25,7 +25,7 @@ public class DbmInsertEventListener extends InsertEventListener{
 		Object entity = event.getObject();
 		
 		throwIfEntityIsMultiple(entity);
-		setIdIfNecessary(event, entry, entity);
+		setIdIfNecessary(event.getEventSource(), entry, entity);
 
 		/*if(entry.isEntity() && entry.getIdentifyField().isGeneratedValue()){
 			Serializable id = null;
@@ -43,7 +43,7 @@ public class DbmInsertEventListener extends InsertEventListener{
 	}
 	
 	/***
-	 * 另外提供了batchInsert，简直insert的参数为集合类型
+	 * 另外提供了batchInsert，batchInsert的参数为集合类型
 	 * 
 	 * @author weishao zeng
 	 * @param entity

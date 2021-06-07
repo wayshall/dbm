@@ -21,6 +21,14 @@ import org.springframework.transaction.support.DefaultTransactionDefinition;
  */
 public class TableIdGenerator extends AbstractIdentifierGenerator {
 	
+	/****
+	 * CREATE TABLE `gen_ids` (
+		`gen_name`  varchar(255) NOT NULL ,
+		`gen_value`  bigint NOT NULL ,
+		PRIMARY KEY (`gen_name`)
+		)
+		;
+	 */
 	private static final String TEMPLATE_CREATE_TABLE_SQL = " CREATE TABLE `${table}` ("
 			+ "`${pkColumnName}`  varchar(255) NOT NULL ,"
 			+ "`${valueColumnName}`  bigint NOT NULL ,"
@@ -39,6 +47,10 @@ public class TableIdGenerator extends AbstractIdentifierGenerator {
 	final private String insertSql;
 	final private String updateSql;
 	final private TableGeneratorAttrs attrs;
+	/***
+	 * 默认使用 PROPAGATION_REQUIRES_NEW 
+	 */
+	private int transactionPropagation = TransactionDefinition.PROPAGATION_REQUIRES_NEW;
 	
 	public TableIdGenerator(TableGeneratorAttrs attrs) {
 		super(attrs.getName());
@@ -48,6 +60,7 @@ public class TableIdGenerator extends AbstractIdentifierGenerator {
 		this.selectSql = parser.parseByProvider(TEMPLATE_SELECT_SQL, provider);
 		this.insertSql = parser.parseByProvider(TEMPLATE_INSERT_SQL, provider);
 		this.updateSql = parser.parseByProvider(TEMPLATE_UPDATE_SQL, provider);
+		this.transactionPropagation = attrs.getTransactionPropagation();
 	}
 
 
@@ -69,7 +82,7 @@ public class TableIdGenerator extends AbstractIdentifierGenerator {
 //		System.out.println("==========> batchGenerate");
 		DbmSessionImplementor session = (DbmSessionImplementor)contextSession.getSessionFactory().openSession();
 		DefaultTransactionDefinition definition = new DefaultTransactionDefinition();
-		definition.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+		definition.setPropagationBehavior(transactionPropagation);
 		DbmTransaction transaction = session.beginTransaction(definition);
 		try {
 			Long currentId = null;
@@ -112,41 +125,6 @@ public class TableIdGenerator extends AbstractIdentifierGenerator {
 			throw new DbmException("generate id error", e);
 		} 
 	}
-	/*public Pair<Long, Long> batchGenerate(DbmSessionImplementor contextSession, int batchSize) {
-		DbmSessionImplementor session = (DbmSessionImplementor)contextSession.getSessionFactory().openSession();
-		DefaultTransactionDefinition definition = new DefaultTransactionDefinition();
-		definition.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
-		DbmTransaction transaction = session.beginTransaction(definition);
-		try {
-			Long nextId = null;
-			try {
-				nextId = session.getDbmJdbcOperations().queryForObject(selectSql, Long.class, attrs.getPkColumnValue());
-			} catch (BadSqlGrammarException e) {
-				//MySQLSyntaxErrorException SQLState=42S02 vendorCode=1146
-//				throw e;
-				this.createSeqTable(session);
-			}catch (EmptyResultDataAccessException e) {
-				//no result
-			}
-			if(nextId==null){
-				int res = session.getDbmJdbcOperations().update(insertSql, attrs.getPkColumnValue(), attrs.getInitialValue());
-				if(res!=1){
-					throw new DbmException("error insert table sequeue : "+attrs.getPkColumnValue());
-				}
-				nextId = Long.valueOf(attrs.getInitialValue());
-			}
-			Long maxId = nextId + attrs.getAllocationSize();
-			int res = session.getDbmJdbcOperations().update(updateSql, maxId, attrs.getPkColumnValue(), nextId);
-			if(res!=1){
-				throw new DbmException("error update table sequeue : "+attrs.getPkColumnValue()+", updateSql:"+updateSql);
-			}
-			transaction.commit();
-			return Pair.of(nextId, maxId-1);
-		} catch (Exception e) {
-			transaction.rollback();
-			throw new DbmException("generate id error", e);
-		} 
-	}*/
 	
 	private void createSeqTable(DbmSessionImplementor session){
 		try {

@@ -13,6 +13,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.onetwo.common.date.DateUtils;
+import org.onetwo.common.date.NiceDate;
 import org.onetwo.common.db.EntityManagerProvider;
 import org.onetwo.common.db.Magazine;
 import org.onetwo.common.db.Magazine.EntityWithDataFilter;
@@ -261,6 +262,16 @@ public class ExtQueryImplTest {
 		
 		System.out.println("testOrderBy: " + q.getSql());
 		String sql = "select object from Object object order by object.sort asc, object.id desc";
+		Assert.assertEquals(sql.trim(), q.getSql().trim());
+		
+
+		properties = new LinkedHashMap<Object, Object>();
+		properties.put(K.ASC, "rand:1");
+		properties.put(K.DESC, "rand:2");
+		q = sqlSymbolManagerFactory.getJPA().createSelectQuery(Object.class, properties);
+		q.build();
+		System.out.println("testOrderBy rand: " + q.getSql());
+		sql = "select object from Object object order by rand(1) asc, rand(2) desc";
 		Assert.assertEquals(sql.trim(), q.getSql().trim());
 	}
 	
@@ -593,7 +604,7 @@ public class ExtQueryImplTest {
 
 		properties = CUtils.asLinkedMap(
 				"lastUpdateTime:date in", ":yesterday", 
-				"createTime:date in", ":today",
+				"createTime:date in", NiceDate.Now(),
 						"&lower(name):like", "tom%", 
 						"age:=", 17, 
 						"regiestTime:date in", new Date());
@@ -725,7 +736,6 @@ public class ExtQueryImplTest {
 //		System.out.println("testHas: " + q.getParamsValue().getValues().toString());
 		Assert.assertEquals(sql.trim(), q.getSql().trim());
 		Assert.assertEquals(paramsting, q.getParamsValue().getValues().toString());
-		
 	}
 
 	@Test

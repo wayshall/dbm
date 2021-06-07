@@ -163,7 +163,7 @@ public class DefaultSqlFileParser implements NamedQueryInfoParser {
 				logger.info(str);
 			}
 		}
-		NamedQueryInfo propBean = null;
+		FileBaseNamedQueryInfo propBean = null;
 		boolean newBean = true;
 		String preKey = null;
 //		String val = "";
@@ -176,7 +176,7 @@ public class DefaultSqlFileParser implements NamedQueryInfoParser {
 					extBuildNamedInfoBean(propBean);
 					namespaceInfo.put(propBean.getName(), propBean, true);
 				}
-				propBean = new NamedQueryInfo();
+				propBean = new FileBaseNamedQueryInfo();
 				String val = wrapper.getAndThrowIfEmpty(key);
 				/*if(key.endsWith(IGNORE_NULL_KEY)){
 					throw new BaseException("the query name["+key+"] cant be end with: " + IGNORE_NULL_KEY);
@@ -185,7 +185,7 @@ public class DefaultSqlFileParser implements NamedQueryInfoParser {
 				propBean.setValue(val);
 //				propBean.setNamespace(namespace);
 				newBean = false;
-				preKey = key+NamedQueryInfo.DOT_KEY;
+				preKey = key+FileBaseNamedQueryInfo.DOT_KEY;
 				propBean.setSrcfile(resource);
 				propBean.setConfig(jp.getConfig());
 				propBean.setDbmNamedQueryFile(namespaceInfo);
@@ -218,8 +218,8 @@ public class DefaultSqlFileParser implements NamedQueryInfoParser {
 	protected void extBuildNamedInfoBean(NamedQueryInfo propBean){
 	}
 	protected void setNamedInfoProperty(NamedQueryInfo bean, String prop, Object val){
-		if(prop.indexOf(NamedQueryInfo.DOT_KEY)!=-1){
-			prop = StringUtils.toCamel(prop, NamedQueryInfo.DOT_KEY, false);
+		if(prop.indexOf(FileBaseNamedQueryInfo.DOT_KEY)!=-1){
+			prop = StringUtils.toCamel(prop, FileBaseNamedQueryInfo.DOT_KEY, false);
 		}
 		try {
 			ReflectUtils.setExpr(bean, prop, val);

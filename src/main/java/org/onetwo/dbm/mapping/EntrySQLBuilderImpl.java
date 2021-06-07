@@ -19,6 +19,9 @@ public class EntrySQLBuilderImpl implements EntrySQLBuilder {
 	public static final String SQL_MYSQL_PK = "select max(${id}) from ${tableName}";
 	
 	public static final String SQL_INSERT = "insert into ${tableName} ( ${insertFields} ) values ( ${namedFields} )";
+	public static final String SQL_INSERT_OR_UPDATE = "insert into ${tableName} ( ${insertFields} ) values ( ${namedFields} ) "
+													+ "on duplicate key update ${duplicateKeyUpdateFields}";
+	public static final String SQL_INSERT_OR_IGNORE = "insert ignore into ${tableName} ( ${insertFields} ) values ( ${namedFields} ) ";
 	public static final String SQL_UPDATE = "update ${tableName} set ${updateFields} where ${whereCause}";
 	public static final String SQL_DELETE = "delete from ${tableName}";
 	public static final String SQL_QUERY = "select ${selectFields} from ${tableName} ${alias}";
@@ -119,23 +122,27 @@ public class EntrySQLBuilderImpl implements EntrySQLBuilder {
 		if(StringUtils.isNotBlank(sql))
 			return sql;
 		
-		if(SqlBuilderType.insert==type){
+		if (SqlBuilderType.insert==type) {
 			this.sql = this.buildInsert();
-		}else if(SqlBuilderType.update==type){
+		} else if (SqlBuilderType.insertOrIgnore==type) {
+			this.sql = this.buildInsertOrIgnore();
+		} else if (SqlBuilderType.insertOrUpdate==type) {
+			this.sql = this.buildInsertOrUpdate();
+		} else if (SqlBuilderType.update==type) {
 			this.sql = this.buildUpdate();
-		}else if(SqlBuilderType.delete==type){
+		} else if (SqlBuilderType.delete==type) {
 			this.sql = this.buildDelete();
-		}else if(SqlBuilderType.query==type){
+		} else if (SqlBuilderType.query==type) {
 			this.sql = this.buildQuery();
 		}
 //		else if(SqlBuilderType.primaryKey==type){
 //			this.sql = this.buildPrimaryKey();
 //		}
-		else if(SqlBuilderType.seq==type){
+		else if (SqlBuilderType.seq==type) {
 			this.sql = this.buildSeq();
-		}else if(SqlBuilderType.createSeq==type){
+		} else if (SqlBuilderType.createSeq==type) {
 			this.sql = this.buildCreateSeq();
-		}else{
+		} else {
 			LangUtils.throwBaseException("unsupported type: " + type);
 		}
 		return this.sql;
@@ -154,6 +161,38 @@ public class EntrySQLBuilderImpl implements EntrySQLBuilder {
 				"namedFields", StringUtils.join(namedFields, ", "));
 		if(isDebug())
 			LangUtils.println("build insert sql : ${0}", insertSql);
+		return insertSql;
+	}
+	
+	private String buildInsertOrIgnore(){
+		Assert.notEmpty(fields);
+		String insertSql = "";
+		List<String> insertFields = nameToString(fields, false);
+		List<String> namedFields = javaNameToNamedString(fields, false);
+		insertSql = PARSER.parse(SQL_INSERT_OR_IGNORE, 
+				"tableName", tableName, 
+				"insertFields", StringUtils.join(insertFields, ", "),
+				"namedFields", StringUtils.join(namedFields, ", "));
+		if(isDebug())
+			LangUtils.println("build insert sql : ${0}", insertSql);
+		return insertSql;
+	}
+	
+	private String buildInsertOrUpdate(){
+		Assert.notEmpty(fields);
+//		List<String> fields = sqlBuildable.getFieldNames(entityClass);
+		String insertSql = "";
+		List<String> insertFields = nameToString(fields, false);
+		List<String> namedFields = javaNameToNamedString(fields, false);
+		List<String> duplicateKeyUpdateFields = duplicateKeyUpdateSqlString(fields);
+		insertSql = PARSER.parse(SQL_INSERT_OR_UPDATE, 
+				"tableName", tableName, 
+				"insertFields", StringUtils.join(insertFields, ", "),
+				"namedFields", StringUtils.join(namedFields, ", "),
+				"duplicateKeyUpdateFields", StringUtils.join(duplicateKeyUpdateFields, ", ")
+				);
+		if(isDebug())
+			LangUtils.println("build insertOrUpdate sql : ${0}", insertSql);
 		return insertSql;
 	}
 	
@@ -253,11 +292,12 @@ public class EntrySQLBuilderImpl implements EntrySQLBuilder {
 		for(DbmMappedField field : columns){
 			fstr = alias?field.getColumn().getNameWithAlias():field.getColumn().getName();
 			fstr = dialet.wrapKeywordColumnName(fstr);
+			String op = " = ";
 			if(namedPlaceHoder){
 				namedStr = alias?field.getColumn().getNamedPlaceHolderWithAlias():field.getColumn().getNamedPlaceHolder();
-				strs.add(fstr+" = " + namedStr);
+				strs.add(fstr + op + namedStr);
 			}else{
-				strs.add(fstr+" = "+namedStr);
+				strs.add(fstr + op +namedStr);
 			}
 		}
 		return strs;
@@ -286,6 +326,13 @@ public class EntrySQLBuilderImpl implements EntrySQLBuilder {
 		return strs;
 	}
 	
+	/***
+	 * :name
+	 * @author weishao zeng
+	 * @param columns
+	 * @param alias
+	 * @return
+	 */
 	protected List<String> javaNameToNamedString(Collection<DbmMappedField> columns, boolean alias){
 		List<String> strs = new ArrayList<String>();
 		for(DbmMappedField field : columns){
@@ -297,6 +344,27 @@ public class EntrySQLBuilderImpl implements EntrySQLBuilder {
 		return strs;
 	}
 
+	/***
+	 * ON DUPLICATE KEY UPDATE  field =  VALUES(field);
+	 * 
+	 * @author weishao zeng
+	 * @param columns
+	 * @return
+	 */
+	protected List<String> duplicateKeyUpdateSqlString(Collection<DbmMappedField> columns){
+		List<String> strs = new ArrayList<String>();
+		for(DbmMappedField field : columns){
+			// 忽略主键
+			if (field.isIdentify()) {
+				continue ;
+			}
+			String columnName = dialet.wrapKeywordColumnName(field.getColumn().getName());
+			String duplicateKeyUpdateSql = columnName + " = values( " + columnName + " )";
+			strs.add(duplicateKeyUpdateSql);
+//			strs.add(field.getColumn().getDuplicateKeyUpdateSql());
+		}
+		return strs;
+	}
 	/*public DbmMappedField getIdentifyField() {
 		return identifyField;
 	}*/

@@ -11,7 +11,7 @@ import org.onetwo.dbm.mapping.MappedType;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface DbmEntity {
 
-//	String name();
+	String name() default "";
 	String table();
 	
 	MappedType type() default MappedType.ENTITY;

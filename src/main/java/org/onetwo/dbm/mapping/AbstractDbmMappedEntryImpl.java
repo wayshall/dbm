@@ -1,5 +1,6 @@
 package org.onetwo.dbm.mapping;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -12,6 +13,7 @@ import java.util.Map;
 
 import javax.persistence.IdClass;
 
+import org.apache.commons.lang3.StringUtils;
 import org.onetwo.common.annotation.AnnotationInfo;
 import org.onetwo.common.db.TimeRecordableEntity;
 import org.onetwo.common.log.JFishLoggerFactory;
@@ -24,6 +26,8 @@ import org.onetwo.dbm.annotation.DbmBindValueToField;
 import org.onetwo.dbm.annotation.DbmEntityListeners;
 import org.onetwo.dbm.annotation.DbmFieldListeners;
 import org.onetwo.dbm.annotation.DbmValidatorEnabled;
+import org.onetwo.dbm.annotation.DbmValidatorEnabled.OnInsert;
+import org.onetwo.dbm.annotation.DbmValidatorEnabled.OnUpdate;
 import org.onetwo.dbm.core.spi.DbmInnerServiceRegistry;
 import org.onetwo.dbm.dialet.DBDialect;
 import org.onetwo.dbm.event.spi.DbmEventAction;
@@ -58,8 +62,8 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 	private AnnotationInfo annotationInfo;
 
 //	protected Map<String, Collection<DbmMappedField>> bindedFields = new LinkedHashMap<>();
-	protected Map<String, AbstractMappedField> mappedFields = new LinkedHashMap<String, AbstractMappedField>();
-	protected Map<String, AbstractMappedField> mappedColumns = new HashMap<String, AbstractMappedField>();
+	protected Map<String, DbmMappedField> mappedFields = new LinkedHashMap<>();
+	protected Map<String, DbmMappedField> mappedColumns = new HashMap<>();
 	private Class<?> idClass = null;
 	private List<DbmMappedField> identifyFields = Lists.newArrayList();
 	private DbmMappedField versionField;
@@ -73,7 +77,7 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 	private List<DbmEntityListener> entityListeners = Collections.EMPTY_LIST;
 	private List<DbmEntityFieldListener> fieldListeners = Collections.EMPTY_LIST;
 
-	private final boolean enabledEntithyValidator;
+	private final DbmValidatorEnabled dbmValidatorEnabled;
 //	private final SimpleDbmInnserServiceRegistry serviceRegistry;
 	private EntityValidator entityValidator;
 	
@@ -91,13 +95,21 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 	}*/
 	
 	public AbstractDbmMappedEntryImpl(AnnotationInfo annotationInfo, TableInfo tableInfo, DbmInnerServiceRegistry serviceRegistry) {
+		this(null, annotationInfo, tableInfo, serviceRegistry);
+	}
+	
+	public AbstractDbmMappedEntryImpl(String entityName, AnnotationInfo annotationInfo, TableInfo tableInfo, DbmInnerServiceRegistry serviceRegistry) {
 		Assert.notNull(serviceRegistry, "serviceRegistry can not be null");
 		this.dbDialect = serviceRegistry.getDialect();
 		this.entityClass = annotationInfo.getSourceClass();
 		this.annotationInfo = annotationInfo;
 		this.sqlTypeMapping = serviceRegistry.getTypeMapping();
 //		this.serviceRegistry = serviceRegistry;
-		this.entityName = this.entityClass.getName();
+		if (StringUtils.isBlank(entityName)) {
+			this.entityName = this.entityClass.getName();
+		} else {
+			this.entityName = entityName;
+		}
 		this.tableInfo = tableInfo;
 		IdClass idclass = annotationInfo.getAnnotation(IdClass.class);
 		if (idclass!=null) {
@@ -120,12 +132,16 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 		if(fieldListenersAnntation!=null){
 			this.fieldListeners = DbmUtils.initDbmEntityFieldListeners(fieldListenersAnntation);
 		}
-		this.enabledEntithyValidator = annotationInfo.hasAnnotation(DbmValidatorEnabled.class);
-		if(enabledEntithyValidator){
+		this.dbmValidatorEnabled = annotationInfo.getAnnotation(DbmValidatorEnabled.class);
+		if(dbmValidatorEnabled!=null){
 			this.entityValidator = serviceRegistry.getEntityValidator();
 			Assert.notNull(entityValidator, "no entity validator config!");
 		}
 //		this.buildIdGenerators();
+	}
+	
+	final protected void setEntityName(String entityName) {
+		this.entityName = entityName;
 	}
 	
 	/*protected void putEntrySQLBuilder(SqlBuilderType type, EntrySQLBuilder builder){
@@ -188,17 +204,17 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 		return sqlTypeMapping;
 	}
 
-	public Collection<AbstractMappedField> getFields(){
+	public Collection<DbmMappedField> getFields(){
 		return this.mappedFields.values();
 	}
 	
-	public Collection<AbstractMappedField> getFields(DbmMappedFieldType... types){
-		List<AbstractMappedField> flist = new ArrayList<AbstractMappedField>(mappedFields.values().size());
+	public Collection<DbmMappedField> getFields(DbmMappedFieldType... types){
+		List<DbmMappedField> flist = new ArrayList<>(mappedFields.values().size());
 		if(LangUtils.isEmpty(types)){
 			Collections.sort(flist, SORT_BY_LENGTH);
 			return flist;
 		}
-		for(AbstractMappedField field : mappedFields.values()){
+		for(DbmMappedField field : mappedFields.values()){
 			if(ArrayUtils.contains(types, field.getMappedFieldType())){
 				flist.add(field);
 			}
@@ -249,15 +265,15 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 	 * 如果是复合主键，只要有一个主键为null，即返回null
 	 */
 	@Override
-	public Object getId(Object entity){
+	public Serializable getId(Object entity){
 //		if(getIdentifyField()==null)
 //			return null;
 //		return getIdentifyField().getValue(entity);
 		if (!isCompositePK()) {
-			Object idValue = this.getIdentifyFields().get(0).getValue(entity);
+			Serializable idValue = (Serializable)getIdentifyFields().get(0).getValue(entity);
 			return idValue;
 		}
-		Object idValue = ReflectUtils.newInstance(idClass);
+		Serializable idValue = (Serializable)ReflectUtils.newInstance(idClass);
 		ConfigurablePropertyAccessor accesor = SpringUtils.newPropertyAccessor(idValue, true);
 		for (DbmMappedField field : this.getIdentifyFields()) {
 			Object fieldValue = field.getValue(entity);
@@ -268,6 +284,27 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 			accesor.setPropertyValue(field.getName(), fieldValue);
 		}
 		return idValue;
+	}
+	
+	@Override
+	public Object[] getIds(Object entity){
+//		if(getIdentifyField()==null)
+//			return null;
+//		return getIdentifyField().getValue(entity);
+		if (!isCompositePK()) {
+			Object idValue = this.getIdentifyFields().get(0).getValue(entity);
+			return new Object[] {idValue};
+		}
+		
+		List<DbmMappedField> idFields = this.getIdentifyFields();
+		Object[] idValues = new Object[idFields.size()];
+		int index = 0;
+		for (DbmMappedField field : idFields) {
+			Object fieldValue = field.getValue(entity);
+			idValues[index] = fieldValue;
+			index++;
+		}
+		return idValues;
 	}
 	
 	@Override
@@ -360,7 +397,7 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 		
 		this.checkEntry();
 		
-		for(AbstractMappedField field : this.mappedFields.values()){
+		for(DbmMappedField field : this.mappedFields.values()){
 			if (field.getColumn()!=null) {
 				this.mappedColumns.put(field.getColumn().getName().toLowerCase(), field);
 			}
@@ -376,10 +413,10 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 //		freezing();
 	}
 	
-	protected void processBindFields(AbstractMappedField field) {
+	protected void processBindFields(DbmMappedField field) {
 		DbmBindValueToField bindFieldInfo = field.getPropertyInfo().getAnnotation(DbmBindValueToField.class);
 		if (bindFieldInfo!=null) {
-			AbstractMappedField bindToField = this.mappedFields.get(bindFieldInfo.name());
+			DbmMappedField bindToField = this.mappedFields.get(bindFieldInfo.name());
 			if (bindToField==null) {
 				throw new DbmException("the bind field[" + bindFieldInfo.name() + "] not found, "
 										+ "entity: [" + getEntityName() + "], field: [" + field.getName() + "]");
@@ -513,6 +550,12 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 		}
 	}
 
+	protected EntrySQLBuilderImpl getStaticInsertOrUpdateSqlBuilder() {
+		throw new UnsupportedOperationException();
+	}
+	protected EntrySQLBuilderImpl getStaticInsertOrIgnoreSqlBuilder() {
+		throw new UnsupportedOperationException();
+	}
 	abstract protected EntrySQLBuilderImpl getStaticInsertSqlBuilder();
 	abstract protected EntrySQLBuilderImpl getStaticUpdateSqlBuilder();
 	abstract protected EntrySQLBuilderImpl getStaticDeleteSqlBuilder();
@@ -630,14 +673,14 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 				return null;
 			for(Object en : list){
 				this.processIBaseEntity(en, true);
-				this.vailidateEntity(en);
+				this.vailidateEntity(en, OnInsert.class);
 //				dsb.setColumnValuesFromEntity(en).addBatch();
 //				doEveryMappedFieldInStatementContext(dsb, en).addBatch();
 				dsb.processColumnValues(en).addBatch();
 			}
 		}else{
 			this.processIBaseEntity(entity, true);
-			this.vailidateEntity(entity);
+			this.vailidateEntity(entity, OnInsert.class);
 //			dsb.setColumnValuesFromEntity(entity);
 			dsb.processColumnValues(entity);
 		}
@@ -646,10 +689,65 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 //		JdbcStatementContext<List<Object[]>> context = SqlBuilderJdbcStatementContext.create(dsb.getSql(), dsb); 
 		return dsb;
 	}
+
+	/****
+	 * 利用mysql特有语法插入或忽略：insert ignore into
+	 * @author weishao zeng
+	 * @param entity
+	 * @return
+	 */
+	@Override
+	public JdbcStatementContext<List<Object[]>> makeMysqlInsertOrIgnore(Object entity) {
+		this.throwIfQueryableOnly();
+		EntrySQLBuilderImpl insertOrUpdateSqlBuilder = getStaticInsertOrIgnoreSqlBuilder();
+		JdbcStatementContextBuilder dsb = JdbcStatementContextBuilder.create(DbmEventAction.insert, this, insertOrUpdateSqlBuilder);
+		makeJdbcStatementContext(dsb, entity);
+		dsb.build();
+		return dsb;
+	}
 	
-	private void vailidateEntity(Object entity){
+	/****
+	 * 利用mysql特有语法插入或更新：ON DUPLICATE KEY UPDATE
+	 * @author weishao zeng
+	 * @param entity
+	 * @return
+	 */
+	@Override
+	public JdbcStatementContext<List<Object[]>> makeMysqlInsertOrUpdate(Object entity) {
+		this.throwIfQueryableOnly();
+		EntrySQLBuilderImpl insertOrUpdateSqlBuilder = getStaticInsertOrUpdateSqlBuilder();
+		JdbcStatementContextBuilder dsb = JdbcStatementContextBuilder.create(DbmEventAction.insert, this, insertOrUpdateSqlBuilder);
+		makeJdbcStatementContext(dsb, entity);
+		dsb.build();
+		return dsb;
+	}
+
+	protected JdbcStatementContext<List<Object[]>> makeJdbcStatementContext(JdbcStatementContextBuilder dsb, Object entity) {
+		if(LangUtils.isMultiple(entity)){
+			List<Object> list = LangUtils.asList(entity);
+			if(LangUtils.isEmpty(list)) {
+				return null;
+			}
+			for(Object en : list){
+				this.processIBaseEntity(en, true);
+				this.vailidateEntity(en, OnInsert.class, OnUpdate.class);
+//				dsb.setColumnValuesFromEntity(en).addBatch();
+//				doEveryMappedFieldInStatementContext(dsb, en).addBatch();
+				dsb.processColumnValues(en).addBatch();
+			}
+		}else{
+			this.processIBaseEntity(entity, true);
+			this.vailidateEntity(entity, OnInsert.class);
+//			dsb.setColumnValuesFromEntity(entity);
+			dsb.processColumnValues(entity);
+		}
+		return dsb;
+	}
+	
+	private void vailidateEntity(Object entity, Class<?>... validateGroup){
 		if(this.entityValidator!=null){
 			this.entityValidator.validate(entity);
+			this.entityValidator.validate(entity, validateGroup);
 		}
 	}
 	
@@ -736,7 +834,7 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 				dsb.processWhereCauseValuesFromEntity(en); // 先处理where字段值，因为如果使用了类似updateAt的字段做版本，processIBaseEntity方法会修改updateAt字段的值
 				this.processIBaseEntity(en, false);
 				
-				this.vailidateEntity(entity);
+				this.vailidateEntity(entity, OnUpdate.class);
 				
 //				dsb.setColumnValuesFromEntity(en)
 				dsb.processColumnValues(en)
@@ -748,7 +846,7 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 			dsb.processWhereCauseValuesFromEntity(entity); // 先处理where字段值，因为如果使用了类似updateAt的字段做版本，processIBaseEntity方法会修改updateAt字段的值
 			this.processIBaseEntity(entity, false);
 			
-			this.vailidateEntity(entity);
+			this.vailidateEntity(entity, OnUpdate.class);
 //			dsb.setColumnValuesFromEntity(entity);
 			dsb.processColumnValues(entity);
 //			dsb.processWhereCauseValuesFromEntity(entity); 上移到processIBaseEntity之前
@@ -850,12 +948,12 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 	}
 	
 	@Override
-	public Map<String, AbstractMappedField> getMappedFields() {
+	public Map<String, DbmMappedField> getMappedFields() {
 		return mappedFields;
 	}
 	
 
-	public Map<String, AbstractMappedField> getMappedColumns() {
+	public Map<String, DbmMappedField> getMappedColumns() {
 		return mappedColumns;
 	}
 

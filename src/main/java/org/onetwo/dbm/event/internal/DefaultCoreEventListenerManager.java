@@ -9,6 +9,7 @@ import org.onetwo.dbm.event.spi.DbmCoreEventListenerManager;
 import org.onetwo.dbm.event.spi.DbmEvent;
 import org.onetwo.dbm.event.spi.DbmEventAction;
 import org.onetwo.dbm.event.spi.DbmEventListener;
+import org.onetwo.dbm.exception.DbmException;
 
 @SuppressWarnings("rawtypes")
 public class DefaultCoreEventListenerManager implements RegisterManager<DbmEventAction, Collection<DbmEventListener>> /*DbEventListenerManager*/, DbmCoreEventListenerManager {
@@ -60,6 +61,9 @@ public class DefaultCoreEventListenerManager implements RegisterManager<DbmEvent
 	@SuppressWarnings("unchecked")
 	public void fireEvents(DbmEvent event){
 		DbmEventListener[] listeners = getListeners(event.getAction());
+		if (listeners.length<1) {
+			throw new DbmException("event listenner not found for event action: " + event.getAction());
+		}
 		for(DbmEventListener listern : listeners){
 			listern.doEvent(event);
 		}

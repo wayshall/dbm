@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.onetwo.common.db.sqlext.ExtQueryUtils;
+import org.onetwo.common.db.sqlext.QueryDSLOps;
 import org.onetwo.common.db.sqlext.SQLKeys;
-import org.onetwo.common.db.sqlext.SQLSymbolManager.FieldOP;
 import org.onetwo.common.utils.LangUtils;
 import org.onetwo.common.utils.StringUtils;
 
@@ -74,15 +74,18 @@ public class Condition {
 	
 	
 	public String toSqlString(){
-		if(FieldOP.in.equalsIgnoreCase(getOp())){
+		if(QueryDSLOps.IN.equals(getOp())){
 			return toSqlStringWithIn();
 		}else{
 			return toSqlStringWithOr();
 		}
 	}
 	
-	public String getOp() {
-		return ctoken.getOp();
+//	public String getOp() {
+//		return ctoken.getOp();
+//	}
+	public QueryDSLOps getOp() {
+		return QueryDSLOps.operatorOf(ctoken.getOp());
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -119,12 +122,12 @@ public class Condition {
 	
 	protected void appendOneSqlScript(StringBuilder sql, Object val, int valueIndex){
 		if(SQLKeys.Null.equals(val)){
-			String op = getOp();
+			QueryDSLOps op = getOp();
 			boolean remove = false;
-			if(FieldOP.eq.equals(getOp())){
+			if(QueryDSLOps.EQ.equals(getOp())){
 				sql.append(getName()).append(" is null");
 				remove = true;
-			}else if(FieldOP.neq.equals(getOp()) || FieldOP.neq2.equals(getOp())){
+			}else if(QueryDSLOps.NEQ.equals(getOp()) || QueryDSLOps.NEQ2.equals(getOp())){
 				sql.append(getName()).append(" is not null");
 				remove = true;
 			}else{
@@ -138,7 +141,7 @@ public class Condition {
 				}
 			}
 		}else{
-			if(FieldOP.like.equals(getOp())){
+			if(QueryDSLOps.LIKE.equals(getOp())){
 				String valStr = val==null?"":val.toString();
 				if(valStr.indexOf("%")==-1){
 					valStr = ExtQueryUtils.getLikeString(valStr);

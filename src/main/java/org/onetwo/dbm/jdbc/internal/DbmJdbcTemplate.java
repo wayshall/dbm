@@ -15,6 +15,10 @@ import org.onetwo.common.log.JFishLoggerFactory;
 import org.onetwo.dbm.jdbc.AroundPreparedStatementExecute;
 import org.onetwo.dbm.jdbc.DbmListRowMapperResultSetExtractor;
 import org.onetwo.dbm.jdbc.DbmNamedJdbcTemplate;
+import org.onetwo.dbm.jdbc.annotation.DbmJdbcArgsMark;
+import org.onetwo.dbm.jdbc.annotation.DbmJdbcOperationMark;
+import org.onetwo.dbm.jdbc.annotation.DbmJdbcSqlMark;
+import org.onetwo.dbm.jdbc.spi.DbmJdbcOperationType;
 import org.onetwo.dbm.jdbc.spi.DbmJdbcOperations;
 import org.onetwo.dbm.jdbc.spi.JdbcStatementParameterSetter;
 import org.onetwo.dbm.utils.DbmUtils;
@@ -80,6 +84,7 @@ public class DbmJdbcTemplate extends JdbcTemplate implements DbmJdbcOperations {
 	}
 	
 	@Override
+	@DbmJdbcOperationMark(type=DbmJdbcOperationType.UPDATE)
 	public int updateWith(final SimpleArgsPreparedStatementCreator spsc, final KeyHolder generatedKeyHolder) throws DataAccessException {
 		return updateWith(spsc, new AroundPreparedStatementExecute() {
 			
@@ -108,12 +113,13 @@ public class DbmJdbcTemplate extends JdbcTemplate implements DbmJdbcOperations {
 	}
 
 	@Override
+	@DbmJdbcOperationMark(type=DbmJdbcOperationType.UPDATE)
 	public int updateWith(final SimpleArgsPreparedStatementCreator spsc) throws DataAccessException {
 		final PreparedStatementSetter pss = this.newArgPreparedStatementSetter(spsc.getSqlParameters());
 		return update(spsc, pss);
 	}
 	
-	@Override
+//	@Override
 	public int updateWith(final SimpleArgsPreparedStatementCreator spsc, final AroundPreparedStatementExecute action) throws DataAccessException {
 		final PreparedStatementSetter pss = this.newArgPreparedStatementSetter(spsc.getSqlParameters());
 		return execute(spsc, new PreparedStatementCallback<Integer>() {
@@ -144,13 +150,14 @@ public class DbmJdbcTemplate extends JdbcTemplate implements DbmJdbcOperations {
 	}
 	
 	
-	@Override
+//	@Override
 	public int updateWith(String sql, Object[] args, final AroundPreparedStatementExecute action) throws DataAccessException {
 		SimpleArgsPreparedStatementCreator psc = new SimpleArgsPreparedStatementCreator(sql, args);
 		return updateWith(psc, action);
 	}
 	
-	public <T> int[][] batchUpdateWith(String sql, Collection<T[]> batchArgs, int batchSize) throws DataAccessException {
+	@DbmJdbcOperationMark(type=DbmJdbcOperationType.BATCH_UPDATE)
+	public <T> int[][] batchUpdateWith(@DbmJdbcSqlMark String sql, @DbmJdbcArgsMark Collection<T[]> batchArgs, int batchSize) throws DataAccessException {
 		int[][] ups = super.batchUpdate(sql, batchArgs, batchSize, new ParameterizedPreparedStatementSetter<T[]>(){
 
 			@Override
@@ -280,16 +287,24 @@ public class DbmJdbcTemplate extends JdbcTemplate implements DbmJdbcOperations {
 	}
 
 	@Override
-	public <T> List<T> query(String sql, Object[] args, RowMapper<T> rowMapper) throws DataAccessException {
+	@DbmJdbcOperationMark(type=DbmJdbcOperationType.QUERY)
+	public <T> List<T> query(@DbmJdbcSqlMark String sql, @DbmJdbcArgsMark Object[] args, RowMapper<T> rowMapper) throws DataAccessException {
 		return query(sql, args, new DbmListRowMapperResultSetExtractor<T>(rowMapper));
 	}
+	
+	@DbmJdbcOperationMark(type=DbmJdbcOperationType.EXECUTE)
+	public void execute(@DbmJdbcSqlMark String sql) throws DataAccessException {
+		super.execute(sql);
+	}
+	
 	@Override
 	public <T> List<T> query(String sql, RowMapper<T> rowMapper, Object... args) throws DataAccessException {
 		return query(sql, args, new DbmListRowMapperResultSetExtractor<T>(rowMapper));
 	}
 
 	@Override
-	public int[] batchUpdate(String sql, Map<String, ?>[] batchValues) {
+	@DbmJdbcOperationMark(type=DbmJdbcOperationType.BATCH_UPDATE)
+	public int[] batchUpdate(@DbmJdbcSqlMark String sql, @DbmJdbcArgsMark Map<String, ?>[] batchValues) throws DataAccessException {
 		return this.dbmNamedJdbcOperations.batchUpdate(sql, batchValues);
 	}
 	
@@ -297,7 +312,8 @@ public class DbmJdbcTemplate extends JdbcTemplate implements DbmJdbcOperations {
 		return this.dbmNamedJdbcOperations.batchUpdate(sql, DbmUtils.createBatch(batchValues));
 	}
 	
-	public int[] batchUpdate(String sql, List<Map<String, ?>> batchValues, int processSizePerBatch) {
+	@DbmJdbcOperationMark(type=DbmJdbcOperationType.BATCH_UPDATE)
+	public int[] batchUpdate(@DbmJdbcSqlMark String sql, List<Map<String, ?>> batchValues, int processSizePerBatch) throws DataAccessException {
 		int insertSize = batchValues.size();
 		if (processSizePerBatch==-1 || insertSize<=processSizePerBatch) {
 			return batchUpdateList(sql, batchValues);
@@ -317,19 +333,27 @@ public class DbmJdbcTemplate extends JdbcTemplate implements DbmJdbcOperations {
 		}
 		return res;
 	}
+	
+	@DbmJdbcOperationMark(type=DbmJdbcOperationType.UPDATE)
+	public int update(@DbmJdbcSqlMark String sql, @DbmJdbcArgsMark Object... args) throws DataAccessException {
+		return super.update(sql, args);
+	}
 
 	@Override
-	public int update(String sql, Map<String, ?> paramMap) throws DataAccessException {
+	@DbmJdbcOperationMark(type=DbmJdbcOperationType.UPDATE)
+	public int update(@DbmJdbcSqlMark String sql, @DbmJdbcArgsMark Map<String, ?> paramMap) throws DataAccessException {
 		return this.dbmNamedJdbcOperations.update(sql, paramMap);
 	}
 
 	@Override
-	public <T> T query(String sql, Map<String, ?> paramMap, ResultSetExtractor<T> rse) throws DataAccessException {
+	@DbmJdbcOperationMark(type=DbmJdbcOperationType.QUERY)
+	public <T> T query(@DbmJdbcSqlMark String sql, @DbmJdbcArgsMark Map<String, ?> paramMap, ResultSetExtractor<T> rse) throws DataAccessException {
 		return this.dbmNamedJdbcOperations.query(sql, paramMap, rse);
 	}
 
 	@Override
-	public <T> List<T> query(String sql, Map<String, ?> paramMap, RowMapper<T> rowMapper) throws DataAccessException {
+	@DbmJdbcOperationMark(type=DbmJdbcOperationType.QUERY)
+	public <T> List<T> query(@DbmJdbcSqlMark String sql, @DbmJdbcArgsMark Map<String, ?> paramMap, RowMapper<T> rowMapper) throws DataAccessException {
 		return this.dbmNamedJdbcOperations.query(sql, paramMap, rowMapper);
 	}
 
@@ -337,13 +361,30 @@ public class DbmJdbcTemplate extends JdbcTemplate implements DbmJdbcOperations {
 	 * 返回结果会调用  DataAccessUtils.requiredSingleResult 过滤
 	 */
 	@Override
-	public <T> T queryForObject(String sql, Map<String, ?> paramMap, RowMapper<T> rowMapper) throws DataAccessException {
+	@DbmJdbcOperationMark(type=DbmJdbcOperationType.QUERY)
+	public <T> T queryForObject(@DbmJdbcSqlMark String sql, @DbmJdbcArgsMark Map<String, ?> paramMap, RowMapper<T> rowMapper) throws DataAccessException {
 		return this.dbmNamedJdbcOperations.queryForObject(sql, paramMap, rowMapper);
 	}
 
 	@Override
-	public Object execute(String sql, Map<String, ?> paramMap) throws DataAccessException {
+	@DbmJdbcOperationMark(type=DbmJdbcOperationType.EXECUTE)
+	public Object execute(@DbmJdbcSqlMark String sql, @DbmJdbcArgsMark Map<String, ?> paramMap) throws DataAccessException {
 		return this.dbmNamedJdbcOperations.execute(sql, paramMap);
+	}
+	
+	@DbmJdbcOperationMark(type=DbmJdbcOperationType.QUERY)
+	public <T> List<T> queryForList(@DbmJdbcSqlMark String sql, Class<T> elementType, @DbmJdbcArgsMark Object... args) throws DataAccessException {
+		return super.queryForList(sql, elementType, args);
+	}
+	
+	@DbmJdbcOperationMark(type=DbmJdbcOperationType.QUERY)
+	public <T> T queryForObject(@DbmJdbcSqlMark String sql, Class<T> requiredType, @DbmJdbcArgsMark Object... args) throws DataAccessException {
+		return super.queryForObject(sql, requiredType, args);
+	}
+	
+	@DbmJdbcOperationMark(type=DbmJdbcOperationType.QUERY)
+	public <T> T queryForObject(@DbmJdbcSqlMark String sql, @DbmJdbcArgsMark Object[] args, RowMapper<T> rowMapper) throws DataAccessException {
+		return super.queryForObject(sql, args, rowMapper);
 	}
 	
 	protected Connection getConnection(){

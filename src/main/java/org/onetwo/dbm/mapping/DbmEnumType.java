@@ -1,18 +1,21 @@
 package org.onetwo.dbm.mapping;
 
-public enum DbmEnumType {
-    ORDINAL(int.class),
-    MAPPING(int.class),
-    STRING(String.class);
+import org.onetwo.dbm.mapping.enums.OrdinalEnumType;
+import org.onetwo.dbm.mapping.enums.StringEnumType;
+
+public interface DbmEnumType {
+	DbmEnumType ORDINAL = new OrdinalEnumType();
+    DbmEnumType STRING = new StringEnumType();
     
-    private final Class<?> javaType;
-
-	private DbmEnumType(Class<?> javaType) {
-		this.javaType = javaType;
-	}
-
-	public Class<?> getJavaType() {
-		return javaType;
-	}
+    /***
+     * 获取枚举实际映射的java类型
+     * @author weishao zeng
+     * @return
+     */
+    Class<?> getJavaType();
+    
+	Object forJava(DbmMappedField field, Object value);
+	
+	Object forStore(DbmMappedField field, Object value);
     
 }

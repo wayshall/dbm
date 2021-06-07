@@ -68,6 +68,12 @@
     </dependency>
     
     <dependency>
+      <groupId>org.onetwo4j</groupId>
+      <artifactId>onetwo-poi</artifactId>
+      <optional>true</optional>
+    </dependency>
+    
+	<dependency>
 	    <groupId>org.jasypt</groupId>
 	    <artifactId>jasypt</artifactId>
 	    <version>1.9.2</version>

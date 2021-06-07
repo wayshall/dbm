@@ -2,9 +2,9 @@ package org.onetwo.common.db.builder;
 
 import org.onetwo.common.db.sqlext.ExtQuery.K;
 import org.onetwo.common.db.sqlext.ExtQueryInner;
-import org.onetwo.common.exception.ServiceException;
-import org.onetwo.common.utils.LangUtils;
+import org.onetwo.common.db.sqlext.QueryDSLOps;
 import org.onetwo.common.utils.StringUtils;
+import org.onetwo.dbm.exception.DbmException;
 
 public class QueryFieldImpl implements QueryField {
 	
@@ -16,7 +16,7 @@ public class QueryFieldImpl implements QueryField {
 		}else if(p instanceof QueryField){
 			qf = (QueryField) p;
 		}else{
-			LangUtils.throwBaseException("error field expression : " + p);
+			throw new DbmException("error field expression : " + p);
 		}
 		return qf;
 	}
@@ -37,7 +37,7 @@ public class QueryFieldImpl implements QueryField {
 		if(sp.length==2)
 			this.operator = sp[1];
 		else
-			this.operator = "=";
+			this.operator = QueryDSLOps.EQ.getActualOperator();
 	}
 	
 	public void init(ExtQueryInner extQuery, Object value){
@@ -62,12 +62,12 @@ public class QueryFieldImpl implements QueryField {
 		int leftParentheses = f.indexOf('(');
 		int rightParentheses = f.indexOf(')');
 		if(leftParentheses==-1 || rightParentheses==-1)
-			throw new ServiceException("the function must with parentheses : " + f);
+			throw new DbmException("the function must with parentheses : " + f);
 		
 		String fname = f.substring(K.FUNC.length(), leftParentheses);
 		String paramString = f.substring(leftParentheses+1, rightParentheses);
 		if(StringUtils.isBlank(paramString))
-			throw new ServiceException("the function's parameter can not be emtpy : " + paramString);
+			throw new DbmException("the function's parameter can not be emtpy : " + paramString);
 		
 		String[] args = StringUtils.split(paramString, ",");
 		args[0] = extQuery.getFieldName(args[0]);

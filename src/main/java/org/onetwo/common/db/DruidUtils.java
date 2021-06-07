@@ -22,8 +22,8 @@ import com.alibaba.druid.util.JdbcUtils;
 
 abstract public class DruidUtils {
 
-	public static String toCountSql(String sql, Object value){
-		return changeAsCountStatement(sql, value).toString();
+	public static String toCountSql(String sql){
+		return changeAsCountStatement(sql).toString();
 	}
 
 	/*public static String toCountSql2(String sql, Object value){
@@ -46,8 +46,13 @@ abstract public class DruidUtils {
 		SQLSelectStatement selectStatement = (SQLSelectStatement)statements.get(index);
 		return selectStatement;
 	}
-	public static SQLSelectStatement changeAsCountStatement(String sql, Object value){
-		List<SQLStatement> statements = SQLUtils.parseStatements(sql, JdbcUtils.MYSQL);
+	
+	public static SQLSelectStatement changeAsCountStatement(String sql){
+		return changeAsCountStatement(JdbcUtils.MYSQL, sql);
+	}
+	
+	public static SQLSelectStatement changeAsCountStatement(String dbType, String sql){
+		List<SQLStatement> statements = SQLUtils.parseStatements(sql, dbType);
 		SQLSelectStatement selectStatement = getSQLSelectStatement(statements, 0);
 		if(selectStatement==null){
 			throw new DbmException("it must be a select query, sql: " + sql);
@@ -59,7 +64,7 @@ abstract public class DruidUtils {
 		selectStatement.accept(new TrimOrderBySQLASTVisitorAdapter());
 		if(query.getGroupBy()!=null){
 			SQLSelectQueryBlock countquery = new SQLSelectQueryBlock();	
-			SQLSelectStatement countSql = new SQLSelectStatement(new SQLSelect(countquery), JdbcUtils.MYSQL);
+			SQLSelectStatement countSql = new SQLSelectStatement(new SQLSelect(countquery), dbType);
 			
 			SQLSelectItem countItem = createCountSelectForQuery(countquery, "");
 			

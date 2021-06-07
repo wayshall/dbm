@@ -65,6 +65,10 @@ public abstract class ExtQueryUtils {
 		
 	}
 	
+	public static String[] appendOperationToFields(String[] fields, QueryDSLOps op){
+		return appendOperationToFields(fields, op.getActualOperator());
+	}
+	
 	public static String[] appendOperationToFields(String[] fields, String op){
 		Assert.notEmpty(fields);
 		String[] newFileds = null;
@@ -98,14 +102,14 @@ public abstract class ExtQueryUtils {
 				/*valueList = new ArrayList();
 				valueList.add(values);*/
 				if(LangUtils.isMultiple(values)){
-					valueList = CUtils.tolist(values, false);
+					valueList = CUtils.tolist(values, trimNull);
 				}else{
 					valueList = new ArrayList();
 					valueList.add(values);
 				}
 			}
 		}else{
-			valueList = LangUtils.asList(values, trimNull);
+			valueList = CUtils.tolist(values, trimNull);
 		}
 		return valueList;
 	}
@@ -151,12 +155,13 @@ public abstract class ExtQueryUtils {
 	
 	public static String buildCountSql(String sql, String countValue){
 		if(SqlUtils.isDruidPresent()){
-			return DruidUtils.toCountSql(sql, countValue);
+			return DruidUtils.toCountSql(sql);
 		}
 
 		//不能全部转为小写，因为会改变 命名参数，导致设置jdbc参数值时取不到对应的值而出错:No value supplied for the SQL parameter
 //		sql = sql.toLowerCase();
-		String[] tokens = StringUtils.split(sql.toLowerCase(), " ");
+		String separatorChars = " \n";
+		String[] tokens = StringUtils.split(sql.toLowerCase(), separatorChars);
 		
 		int groupIndex = ArrayUtils.indexOf(tokens, "group");
 		if(groupIndex!=-1 && tokens.length>(groupIndex+1) && "by".equals(tokens[groupIndex+1])){
@@ -177,7 +182,7 @@ public abstract class ExtQueryUtils {
 		int fromIndex = ArrayUtils.indexOf(tokens, "from");
 		if(fromIndex!=-1){
 //			hql = StringUtils.substringAfter(hql, "from");
-			String[] rawTokens = StringUtils.split(sql, " ");
+			String[] rawTokens = StringUtils.split(sql, separatorChars);
 			hql = StringUtils.join(ArrayUtils.subarray(rawTokens, fromIndex+1, tokens.length), " ");
 		}
 		int orderByIndex = ArrayUtils.indexOf(tokens, "order");

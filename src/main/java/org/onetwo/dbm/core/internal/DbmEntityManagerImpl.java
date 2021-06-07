@@ -14,6 +14,7 @@ import org.onetwo.common.db.BaseEntityManagerAdapter;
 import org.onetwo.common.db.DataBase;
 import org.onetwo.common.db.DbmQueryValue;
 import org.onetwo.common.db.EntityManagerProvider;
+import org.onetwo.common.db.ILogicDeleteEntity;
 import org.onetwo.common.db.builder.QueryBuilder;
 import org.onetwo.common.db.builder.Querys;
 import org.onetwo.common.db.filequery.DbmNamedSqlFileManager;
@@ -36,6 +37,7 @@ import org.onetwo.dbm.core.spi.DbmEntityManager;
 import org.onetwo.dbm.core.spi.DbmInterceptor;
 import org.onetwo.dbm.core.spi.DbmSessionFactory;
 import org.onetwo.dbm.core.spi.DbmSessionImplementor;
+import org.onetwo.dbm.exception.DbmException;
 import org.onetwo.dbm.exception.EntityNotFoundException;
 import org.onetwo.dbm.jdbc.mapper.RowMapperFactory;
 import org.onetwo.dbm.jdbc.spi.DbmJdbcOperations;
@@ -161,9 +163,20 @@ public class DbmEntityManagerImpl extends BaseEntityManagerAdapter implements Qu
 		throwIfEffectiveCountError("persist", expectsize, rs);*/
 	}
 
+	/****
+	 * 执行此方法时，若实体实现了逻辑删除接口ILogicDeleteEntity，则只是更新状态
+	 */
 	@Override
 	public int remove(Object entity) {
-		return getCurrentSession().delete(entity);
+		int updateCount = 0;
+		if (entity instanceof ILogicDeleteEntity) {
+			((ILogicDeleteEntity)entity).deleted();
+			updateCount = getCurrentSession().update(entity);
+		} else {
+			updateCount = getCurrentSession().delete(entity);
+		}
+		return updateCount;
+//		return getCurrentSession().delete(entity);
 		/*int rs = getDbmDao().delete(entity);
 		int expectsize = LangUtils.size(entity);
 		throwIfEffectiveCountError("remove", expectsize, rs);*/
@@ -179,15 +192,27 @@ public class DbmEntityManagerImpl extends BaseEntityManagerAdapter implements Qu
 		if (id==null) {
 			throw new IllegalArgumentException("id can not be null");
 		}
-		T entity = getCurrentSession().findById(entityClass, id);
-		if (entity==null)
-			return null;
-//		T entity = load(entityClass, id);
-		int updateCount = getCurrentSession().delete(entity);
-		/*int rs = getDbmDao().delete(entity);
-		throwIfEffectiveCountError("removeById", 1, rs);*/
+		
+//		T entity = getCurrentSession().findById(entityClass, id);
+//		if (entity==null)
+//			return null;
+//		int updateCount = getCurrentSession().delete(entity);
 		//如果成功删除，则返回实体，否则返回null
-		return updateCount==1?entity:null;
+//		return updateCount==1?entity:null;
+		
+		T entity = load(entityClass, id);
+//		int updateCount = getCurrentSession().delete(entity);
+		int updateCount = 0;
+		if (entity instanceof ILogicDeleteEntity) {
+			((ILogicDeleteEntity)entity).deleted();
+			updateCount = getCurrentSession().update(entity);
+		} else {
+			updateCount = getCurrentSession().delete(entity);
+		}
+		if (updateCount!=1) {
+			throw new DbmException("remove entity error, id: " + id + ", entity: " + entityClass);
+		}
+		return entity;
 	}
 
 	@Override

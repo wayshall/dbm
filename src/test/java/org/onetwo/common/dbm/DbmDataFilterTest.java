@@ -29,7 +29,7 @@ public class DbmDataFilterTest extends DbmBaseTest {
 		List<UserWithDataFilterEntity> users = LangOps.generateList(20, i->{
 			UserWithDataFilterEntity user = new UserWithDataFilterEntity();
 			user.setId(i+1L);
-			user.setUserName("JdbcTest");
+			user.setUserName("JdbcTest"+i);
 			user.setBirthday(DateUtils.now());
 			user.setEmail("username@qq.com");
 			user.setHeight(3.3f);

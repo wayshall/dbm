@@ -4,21 +4,25 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
+import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 
+import org.onetwo.common.reflect.ReflectUtils;
 import org.onetwo.common.spring.SpringUtils;
 import org.onetwo.common.utils.Assert;
 import org.onetwo.common.utils.JFishProperty;
 import org.onetwo.common.utils.LangUtils;
 import org.onetwo.common.utils.StringUtils;
-import org.onetwo.dbm.annotation.DbmField;
+import org.onetwo.dbm.annotation.DbmFieldConvert;
 import org.onetwo.dbm.annotation.DbmFieldListeners;
 import org.onetwo.dbm.annotation.DbmGenerated;
 import org.onetwo.dbm.annotation.DbmJsonField;
 import org.onetwo.dbm.event.spi.DbmEventAction;
 import org.onetwo.dbm.id.StrategyType;
 import org.onetwo.dbm.jpa.GeneratedValueIAttrs;
+import org.onetwo.dbm.mapping.enums.DbmMappingEnumType;
 import org.onetwo.dbm.mapping.version.VersionableType;
 import org.onetwo.dbm.utils.DbmUtils;
 import org.onetwo.dbm.utils.SpringAnnotationFinder;
@@ -56,7 +60,7 @@ abstract public class AbstractMappedField implements DbmMappedField{
 	 */
 	private Class<?> actualMappingColumnType;
 	final private DbmJsonField jsonFieldAnnotation;
-	final private DbmField dbmFieldAnnotation;
+//	final private DbmFieldConvert dbmFieldAnnotation;
 	
 	private DbmEnumType enumType;
 	
@@ -81,13 +85,18 @@ abstract public class AbstractMappedField implements DbmMappedField{
 		
 		if(propertyInfo.hasAnnotation(Enumerated.class)){
 			Enumerated enumerated = propertyInfo.getAnnotation(Enumerated.class);
-			this.enumType = DbmEnumType.valueOf(enumerated.value().name());
-		}else if(Enum.class.isAssignableFrom(propertyInfo.getType())){
+			if (enumerated.value()==EnumType.STRING) {
+				this.enumType = DbmEnumType.STRING;
+			} else {
+				this.enumType = DbmEnumType.ORDINAL;
+			}
+		} else if (Enum.class.isAssignableFrom(propertyInfo.getType())){
 			this.enumType = DbmEnumType.STRING;
 		}
-		// 如果配置了ORDINAL，并且实现了DbmEnumValueMapping接口，则设置为MAPPING
-		if(enumType==DbmEnumType.ORDINAL && DbmEnumValueMapping.class.isAssignableFrom(this.propertyInfo.getType())) {
-			this.enumType = DbmEnumType.MAPPING;
+		// 如果配置了ORDINAL，并且实现了DbmEnumValueMapping接口，则修改为DbmMappingEnumType
+		if(DbmEnumValueMapping.class.isAssignableFrom(this.propertyInfo.getType())) {
+			Class<?> actualEnumValueType = ReflectUtils.resolveClassOfGenericType(DbmEnumValueMapping.class, this.propertyInfo.getType());
+			this.enumType = new DbmMappingEnumType(actualEnumValueType);
 		}
 		
 		DbmFieldListeners listenersAnntation = propertyInfo.getAnnotation(DbmFieldListeners.class);
@@ -98,32 +107,50 @@ abstract public class AbstractMappedField implements DbmMappedField{
 				this.fieldListeners = new ArrayList<DbmEntityFieldListener>(entry.getFieldListeners());
 			}
 		}
+		this.jsonFieldAnnotation = propertyInfo.getAnnotation(DbmJsonField.class);
+		
 
+//		CompositedFieldValueConverter compositedConverter = CompositedFieldValueConverter.composited();
+//		if(enumType!=null){
+//			compositedConverter.addFieldValueConverter(CompositedFieldValueConverter.ENUM_CONVERTER);
+//		}
+		/*if (getName().equals("appCode") && getEntry().getEntityName().equals("org.onetwo.common.dbm.model.hib.entity.UserEntity")) {
+			System.out.println("test");
+		}*/
+//		this.dbmFieldAnnotation = propertyInfo.getAnnotation(DbmField.class);
+		/*if(jsonFieldAnnotation != null){
+			compositedConverter.addFieldValueConverter(JsonFieldValueConverter.getInstance());
+		}*/
+//		if(this.dbmFieldAnnotation!=null){
+//			Class<? extends DbmFieldValueConverter> converterClass = this.dbmFieldAnnotation.converterClass();
+//			DbmFieldValueConverter converter = DbmUtils.createDbmBean(converterClass);
+//			compositedConverter.addFieldValueConverter(converter);
+//			/*this.dbmFieldAnnotation.forEach(f -> {
+//				Class<? extends DbmFieldValueConverter> converterClass = f.converterClass();
+//				DbmFieldValueConverter converter = DbmUtils.createDbmBean(converterClass);
+//				compositedConverter.addFieldValueConverter(converter);
+//			});*/
+//		}
+		this.fieldValueConverter = this.scanDbmFieldConverters(propertyInfo);
+		
+		
+		this.obtainActaulMappingType();
+	}
+	
+	private CompositedFieldValueConverter scanDbmFieldConverters(JFishProperty propertyInfo) {
 		CompositedFieldValueConverter compositedConverter = CompositedFieldValueConverter.composited();
 		if(enumType!=null){
 			compositedConverter.addFieldValueConverter(CompositedFieldValueConverter.ENUM_CONVERTER);
 		}
-		/*if (getName().equals("appCode") && getEntry().getEntityName().equals("org.onetwo.common.dbm.model.hib.entity.UserEntity")) {
-			System.out.println("test");
-		}*/
-		this.dbmFieldAnnotation = propertyInfo.getAnnotation(DbmField.class);
-		this.jsonFieldAnnotation = propertyInfo.getAnnotation(DbmJsonField.class);
-		/*if(jsonFieldAnnotation != null){
-			compositedConverter.addFieldValueConverter(JsonFieldValueConverter.getInstance());
-		}*/
-		if(this.dbmFieldAnnotation!=null){
-			Class<? extends DbmFieldValueConverter> converterClass = this.dbmFieldAnnotation.converterClass();
+		
+		Set<DbmFieldConvert> fieldAnnos = propertyInfo.getMergedRepeatableAnnotations(DbmFieldConvert.class);
+		fieldAnnos.forEach(f -> {
+			Class<? extends DbmFieldValueConverter> converterClass = f.converterClass();
 			DbmFieldValueConverter converter = DbmUtils.createDbmBean(converterClass);
 			compositedConverter.addFieldValueConverter(converter);
-			/*this.dbmFieldAnnotation.forEach(f -> {
-				Class<? extends DbmFieldValueConverter> converterClass = f.converterClass();
-				DbmFieldValueConverter converter = DbmUtils.createDbmBean(converterClass);
-				compositedConverter.addFieldValueConverter(converter);
-			});*/
-		}
-		this.fieldValueConverter = compositedConverter;
-		
-		this.obtainActaulMappingType();
+		});
+		compositedConverter.sort();
+		return compositedConverter;
 	}
 	
 	private void obtainActaulMappingType(){
@@ -131,7 +158,8 @@ abstract public class AbstractMappedField implements DbmMappedField{
 		if(enumType!=null){
 			actualType = this.enumType.getJavaType();
 		}else if(this.jsonFieldAnnotation !=null ){
-			actualType = String.class;
+//			actualType = String.class;
+			actualType = this.jsonFieldAnnotation.convertibleJavaType().getJavaType();
 		}
 		this.actualMappingColumnType = actualType;
 	}
@@ -148,9 +176,16 @@ abstract public class AbstractMappedField implements DbmMappedField{
 		return enumType!=null;
 	}
 	
+	/****
+	 * 和 {@link #getValue(Object)}对应
+	 * 把value（一般从数据库获取）设置为实体的实际值（经过转换器转换的值，如转为java枚举量）
+	 * @see 和 {@link #getValue(Object)}对应
+	 */
 	@Override
 	public void setValue(Object entity, Object value){
-		Object actaulValue = this.fieldValueConverter.forJava(this, value);;
+		value = DbmUtils.convertFromSqlParameterValue(this, value);
+//		Object actaulValue = this.fieldValueConverter.forJava(this, value);;
+		Object actaulValue = this.getActualJavaValue(value);;
 		propertyInfo.setValue(entity, actaulValue);
 		
 		// 同时设置此字段绑定的字段的值
@@ -174,7 +209,13 @@ abstract public class AbstractMappedField implements DbmMappedField{
 		}
 	}
 	
-	
+	/***
+	 * 
+	 * 和 {@link #setValue(Object)}对应
+	 * 根据字段的配置信息，获取实体字段的实际值，用于保存到数据库
+	 * 
+	 * @see {@link #setValue(Object)}
+	 */
 	@Override
 	public Object getValue(Object entity){
 		Assert.notNull(entity);
@@ -194,7 +235,23 @@ abstract public class AbstractMappedField implements DbmMappedField{
 		} else {
 			value = propertyInfo.getValue(entity);
 		}
-		value = this.fieldValueConverter.forStore(this, value);
+//		value = this.fieldValueConverter.forStore(this, value);
+		value = this.getActualStoreValue(value);
+		return value;
+	}
+	
+
+	@Override
+	public Object getActualStoreValue(Object fieldValue) {
+//		Assert.notNull(fieldValue);
+		Object value = this.fieldValueConverter.forStore(this, fieldValue);
+		return value;
+	}
+
+	@Override
+	public Object getActualJavaValue(Object fieldValue) {
+//		Assert.notNull(fieldValue);
+		Object value = this.fieldValueConverter.forJava(this, fieldValue);
 		return value;
 	}
 	
@@ -291,6 +348,9 @@ abstract public class AbstractMappedField implements DbmMappedField{
 		return this.strategyType==StrategyType.SEQ;
 	}
 
+	/***
+	 * 是否id自增策略
+	 */
 	@Override
 	public boolean isIdentityStrategy() {
 		return this.strategyType==StrategyType.IDENTITY;
@@ -372,7 +432,7 @@ abstract public class AbstractMappedField implements DbmMappedField{
 	public DbmEnumType getEnumType() {
 		return enumType;
 	}
-
+	
 	public DbmJsonField getJsonFieldAnnotation() {
 		return jsonFieldAnnotation;
 	}

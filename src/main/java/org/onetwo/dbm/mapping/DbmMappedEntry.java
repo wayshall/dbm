@@ -1,5 +1,6 @@
 package org.onetwo.dbm.mapping;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
@@ -17,7 +18,20 @@ public interface DbmMappedEntry extends DbmMappedEntryMeta {
 
 	void setId(Object entity, Object value);
 
-	Object getId(Object entity);
+	/***
+	 * 如果是复合主键，则返回复合主键对象
+	 * @author weishao zeng
+	 * @param entity
+	 * @return
+	 */
+	Serializable getId(Object entity);
+	/****
+	 * 如果是复合主键，则返回多个值
+	 * @author weishao zeng
+	 * @param entity
+	 * @return
+	 */
+	Object[] getIds(Object entity);
 
 	void setFieldValue(Object entity, String fieldName, Object value);
 
@@ -71,6 +85,9 @@ public interface DbmMappedEntry extends DbmMappedEntryMeta {
 //	JdbcStatementContext<Object[]> makeLockSelect(Object object, LockInfo lock);
 	
 	JdbcStatementContext<List<Object[]>> makeInsert(Object entity);
+	
+	JdbcStatementContext<List<Object[]>> makeMysqlInsertOrUpdate(Object entity);
+	JdbcStatementContext<List<Object[]>> makeMysqlInsertOrIgnore(Object entity);
 
 	/***
 	 * make delete by id
@@ -85,8 +102,8 @@ public interface DbmMappedEntry extends DbmMappedEntryMeta {
 
 	JdbcStatementContext<List<Object[]>> makeDymanicUpdate(Object entity);
 
-	Map<String, AbstractMappedField> getMappedFields();
-	Map<String, AbstractMappedField> getMappedColumns();
+	Map<String, DbmMappedField> getMappedFields();
+	Map<String, DbmMappedField> getMappedColumns();
 
 	/*boolean isQueryableOnly();
 

@@ -1,7 +1,6 @@
 package org.onetwo.common.db.sqlext;
 
-import org.onetwo.common.db.sqlext.SQLSymbolManager.FieldOP;
-import org.onetwo.common.utils.LangUtils;
+import org.onetwo.dbm.exception.DbmException;
 
 
 /***
@@ -19,15 +18,10 @@ public class CommonSQLSymbolParser extends AbstractSupportedSubQuerySQLSymbolPar
 	
 //	protected boolean like;
 
-	CommonSQLSymbolParser(SQLSymbolManager sqlSymbolManager, String symbol){
+	CommonSQLSymbolParser(SQLSymbolManager sqlSymbolManager, QueryDSLOps symbol){
 		super(sqlSymbolManager, symbol);
 	}
 
-	CommonSQLSymbolParser(SQLSymbolManager sqlSymbolManager, String mappedOperator, String actualOperator){
-		super(sqlSymbolManager, mappedOperator, actualOperator);
-//		this.mappedSymbol = mappedSymbol;
-	}
-	
 	/*CommonSQLSymbolParser(SQLSymbolManager sqlSymbolManager, String symbol, boolean like){
 		this(sqlSymbolManager, symbol, symbol);
 		this.like = like;
@@ -39,14 +33,15 @@ public class CommonSQLSymbolParser extends AbstractSupportedSubQuerySQLSymbolPar
 	}*/
 	
 	
-	protected void processKey(String field, String symbol, SQLKeys key, StringBuilder hql){
-		if(SQLKeys.Null==key){
-			if(FieldOP.eq.equals(symbol)){
+	protected void processKey(String field, String op, SQLKeys key, StringBuilder hql){
+		if (SQLKeys.Null==key) {
+			QueryDSLOps symbol = QueryDSLOps.operatorOf(op);
+			if (QueryDSLOps.EQ.equals(symbol)) {
 				hql.append(field).append(" is null ");
-			}else if(FieldOP.neq.equals(symbol) || FieldOP.neq2.equals(symbol)){
+			} else if (QueryDSLOps.NEQ.equals(symbol) || QueryDSLOps.NEQ2.equals(symbol)) {
 				hql.append(field).append(" is not null ");
-			}else{
-				LangUtils.throwBaseException("unsupported symbol: " + symbol);
+			} else {
+				throw new DbmException("unsupported symbol: " + symbol);
 			}
 		}
 	}

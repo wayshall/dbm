@@ -17,7 +17,7 @@ import org.onetwo.dbm.mapping.converter.SensitiveFieldValueConverter;
  */
 @Target({FIELD, METHOD})
 @Retention(RetentionPolicy.RUNTIME)
-@DbmField(converterClass=SensitiveFieldValueConverter.class)
+@DbmFieldConvert(converterClass=SensitiveFieldValueConverter.class)
 public @interface DbmSensitiveField {
 	
 	/***

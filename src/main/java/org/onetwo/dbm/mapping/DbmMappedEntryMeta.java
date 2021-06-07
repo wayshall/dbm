@@ -7,8 +7,8 @@ import org.onetwo.common.annotation.AnnotationInfo;
 
 public interface DbmMappedEntryMeta {
 
-	Collection<AbstractMappedField> getFields();
-	Collection<AbstractMappedField> getFields(DbmMappedFieldType... type);
+	Collection<DbmMappedField> getFields();
+	Collection<DbmMappedField> getFields(DbmMappedFieldType... type);
 	
 	DbmMappedField getField(String fieldName);
 	
@@ -40,6 +40,10 @@ public interface DbmMappedEntryMeta {
 
 	List<DbmMappedField> getIdentifyFields();
 	
+	/****
+	 * 是否id自增策略
+	 * @return
+	 */
 	default boolean hasIdentityStrategyField() {
 		return getIdentifyFields().stream().anyMatch(field -> field.isIdentityStrategy());
 	}

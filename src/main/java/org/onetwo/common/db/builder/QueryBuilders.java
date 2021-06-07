@@ -7,8 +7,8 @@ package org.onetwo.common.db.builder;
  */
 final public class QueryBuilders {
 
-	public static QueryBuilder create(Class<?> entityClass){
-		QueryBuilderImpl q = new QueryBuilderImpl(null, entityClass);
+	public static QueryBuilder<?> create(Class<?> entityClass){
+		QueryBuilderImpl<?> q = new QueryBuilderImpl<>(null, entityClass);
 		return q;
 	}
 	

@@ -4,6 +4,7 @@ import java.lang.annotation.Annotation;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -11,15 +12,24 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import javax.sql.DataSource;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.onetwo.common.date.DateUtils;
+import org.onetwo.common.db.dquery.condition.directive.DynamicConditionDirective;
+import org.onetwo.common.db.filequery.directive.SetDirective;
+import org.onetwo.common.db.filequery.directive.WhereDirective;
 import org.onetwo.common.log.JFishLoggerFactory;
 import org.onetwo.common.reflect.ReflectUtils;
 import org.onetwo.common.spring.SpringUtils;
 import org.onetwo.common.spring.Springs;
+import org.onetwo.common.spring.ftl.AbstractFreemarkerTemplateConfigurer;
+import org.onetwo.common.spring.ftl.DateRangeDirective;
+import org.onetwo.common.spring.ftl.ForeachDirective;
+import org.onetwo.common.spring.ftl.StrDirective;
 import org.onetwo.common.utils.CUtils;
 import org.onetwo.common.utils.LangUtils;
 import org.onetwo.dbm.annotation.DbmFieldListeners;
@@ -27,8 +37,10 @@ import org.onetwo.dbm.core.spi.DbmTransaction;
 import org.onetwo.dbm.exception.DbmException;
 import org.onetwo.dbm.exception.UpdateCountException;
 import org.onetwo.dbm.jdbc.JdbcUtils;
+import org.onetwo.dbm.jdbc.method.JdbcOperationMethod;
 import org.onetwo.dbm.jdbc.spi.SqlParametersProvider;
 import org.onetwo.dbm.mapping.DbmEntityFieldListener;
+import org.onetwo.dbm.mapping.DbmMappedField;
 import org.onetwo.dbm.spring.EnableDbm;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.ListableBeanFactory;
@@ -36,6 +48,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.data.transaction.ChainedTransactionManager;
+import org.springframework.jdbc.core.SqlParameterValue;
 import org.springframework.jdbc.core.SqlProvider;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
@@ -49,6 +62,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 final public class DbmUtils {
 	
@@ -123,6 +137,25 @@ final public class DbmUtils {
 		ListableBeanFactory bf = (ListableBeanFactory)applicationContext.getAutowireCapableBeanFactory();
 		return scanEnableDbmPackages(bf);
 	}
+	
+	/***
+	 * 首先找到标注了 annotationCLass 注解（比如 @EnableDbm ）的bean
+	 * 然后读取注解的packagesToScan属性值，有则返回此值
+	 * 没有则返回标注了注解的bean所在包，作为返回值
+	 * 
+	 * sample:
+	 *  
+	 * @EnableDbm
+	 * class EnableDbmBean {
+	 * }
+	 * 
+	 * Set<String> packageNames = SpringAnnotationUtils.scanAnnotationPackages(applicationContext, EnableDbmBean.class)
+	 * packageNames = EnableDbmUIBean.class.getPackage().getName();
+	 * 
+	 * @author weishao zeng
+	 * @param beanFactory
+	 * @return
+	 */
 	public static List<String> scanEnableDbmPackages(ListableBeanFactory beanFactory){
 		List<String> packageNames = new ArrayList<String>();
 		SpringUtils.scanAnnotation(beanFactory, EnableDbm.class, (beanDef, beanClass)->{
@@ -144,6 +177,7 @@ final public class DbmUtils {
 		});
 		return packageNames;
 	}
+	
 	/*public static List<String> scanDbmPackages(ApplicationContext applicationContext){
 		ListableBeanFactory bf = (ListableBeanFactory)applicationContext.getAutowireCapableBeanFactory();
 		return scanDbmPackages(bf);
@@ -253,10 +287,32 @@ final public class DbmUtils {
 		return false;
 	}
 	
+
+	public static Pair<String, Object> findSqlAndParams(JdbcOperationMethod invokeMethod, Object[] args){
+		String sql;
+		Object sqlArgs = null;
+		if (invokeMethod.getSqlParameter()!=null) {
+			sql = (String)args[invokeMethod.getSqlParameter().getParameterIndex()];
+			if (invokeMethod.getSqlArgsParameter()!=null) {
+				sqlArgs = args[invokeMethod.getSqlArgsParameter().getParameterIndex()];
+			}
+		} else if (invokeMethod.getSqlProviderParameter()!=null) {
+			SqlProvider sqlProvider = (SqlProvider) args[invokeMethod.getSqlProviderParameter().getParameterIndex()];
+			sql = sqlProvider.getSql();
+			if (sqlProvider instanceof SqlParametersProvider) {
+				sqlArgs = ((SqlParametersProvider)sqlProvider).getSqlParameters();
+			}
+		} else {
+			throw new DbmException("sql parameter not found: " + invokeMethod.getMethod().getName());
+		}
+		Pair<String, Object> sqlParams = Pair.of(sql, sqlArgs);
+		return sqlParams;
+	}
+	
 	public static Pair<String, Object> findSqlAndParams(Object[] args){
 		String sql = null;
 		Object params = null;
-		int maxArgSize = MAX_PRINTABLE_ARG_SIZE;
+//		int maxArgSize = 50;
 		for (int i = 0; i < args.length; i++) {
 			Object arg = args[i];
 			if(arg==null){
@@ -264,6 +320,8 @@ final public class DbmUtils {
 			}
 			if(arg instanceof String){
 				sql = (String)arg;
+			}else if(arg instanceof Date){
+				params = DateUtils.formatDateTimeMillis((Date)arg);
 			}else if(arg instanceof Map){
 				params = arg;
 			}else if(arg.getClass().isArray()){
@@ -279,9 +337,9 @@ final public class DbmUtils {
 					params = ((SqlParametersProvider)arg).getSqlParameterList();
 				}
 			}
-			if (LangUtils.size(params)>maxArgSize) {
-				params = "<<Parameter Size is more than " + maxArgSize + ">>";
-			}
+//			if (LangUtils.size(params)>maxArgSize) {
+//				params = "<<Parameter Size is more than " + maxArgSize + ">>";
+//			}
 		}
 		if(sql==null){
 			return null;
@@ -304,6 +362,35 @@ final public class DbmUtils {
 		} else {
 			return LangUtils.toString(obj);
 		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static Object formatContainerValueIfNeed(Object arg) {
+		if (arg instanceof Map) {
+			Map<?, ?> temp = (Map<?, ?>) arg;
+			Map<Object, Object> newParams = Maps.newLinkedHashMap();
+			temp.forEach((k, v)->{
+				newParams.put(k, formatValueIfNeed(v));
+			});
+			return newParams;
+		} else if (arg!=null && arg.getClass().isArray()){
+			return CUtils.tolist(arg, false).stream().map(v -> formatValueIfNeed(v)).collect(Collectors.toList());
+		} else if (arg instanceof Collection){//batch operation...
+			Collection<?> c = (Collection<?>) arg;
+			return c.stream().map(v -> formatValueIfNeed(v)).collect(Collectors.toList());
+		} 
+		return arg;
+	}
+	
+	public static Object formatValueIfNeed(Object arg) {
+		Object val = arg;
+		if (val instanceof SqlParameterValue) {
+			val = ((SqlParameterValue)val).getValue();
+		}
+		if (val instanceof Date) {
+			val = DateUtils.formatDateTime((Date)val);
+		}
+		return val;
 	}
 	
 
@@ -337,6 +424,40 @@ final public class DbmUtils {
 			bean = ReflectUtils.newInstance(clazz);
 		}
 		return bean;
+	}
+	
+	public static SqlParameterValue convert2SqlParameterValue(DbmMappedField field, Object value){
+		return new DbmSqlParameterValue(field.getColumn().getSqlType(), value);
+	}
+	
+	public static Object convertFromSqlParameterValue(DbmMappedField field, Object sqlParametableValue){
+		Object val = sqlParametableValue;
+		if (sqlParametableValue instanceof SqlParameterValue) {
+			SqlParameterValue spv = (SqlParameterValue) sqlParametableValue;
+			val = spv.getValue();
+		}
+		return val;
+	}
+	
+	public static class DbmSqlParameterValue extends SqlParameterValue {
+
+		public DbmSqlParameterValue(int sqlType, Object value) {
+			super(sqlType, value);
+		}
+		
+		public String toString() {
+			return getValue()==null?"NULL":getValue().toString();
+		}
+	}
+	
+	public static void initSqlTemplateDirective(AbstractFreemarkerTemplateConfigurer configurer) {
+		configurer.addDirective(new ForeachDirective());
+		configurer.addDirective(new DateRangeDirective());
+		configurer.addDirective(new StrDirective());
+		configurer.addDirective(new WhereDirective());
+		configurer.addDirective(new SetDirective());
+		
+		configurer.addDirective(new DynamicConditionDirective());
 	}
 	
 	private DbmUtils(){

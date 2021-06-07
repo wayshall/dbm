@@ -16,13 +16,26 @@ public interface ExtQuery {
 		public static final String THROW_IF_NULL_MSG = "the case value can not be null!";
 	}
 	@Data
-	public class KeyObject {
+	static public class KeyObject {
 		final private String key;
 		@Builder
 		private KeyObject(String key) {
 			super();
 			this.key = key;
 		}
+		
+		public String key() {
+			return key;
+		}
+		
+		public String withkey(Object value) {
+			return key + ":" + value;
+		}
+		
+		public String keyFunc(String arg) {
+			return key + "(" + arg + ")";
+		}
+		
 		@Override
 		public boolean equals(Object obj) {
 			if (this == obj)
@@ -77,12 +90,14 @@ public interface ExtQuery {
 		 */
 		public static final Object FIRST_RESULT = KeyObject.builder().key(":firstResult").build(); // ":firstResult";
 		public static final Object MAX_RESULTS = KeyObject.builder().key(":maxResults").build(); // ":maxResults";
+		public static final KeyObject RAND = KeyObject.builder().key("rand").build(); // ":or";
 		public static final Object OR = KeyObject.builder().key(":or").build(); // ":or";
 		public static final Object AND = KeyObject.builder().key(":and").build(); //":and";
 		public static final Object ASC = KeyObject.builder().key(":asc").build(); // ":asc";
 		public static final Object DESC = KeyObject.builder().key(":desc").build(); // ":desc";
 //		public static final String RAW_QL = ":raw-ql";
 
+		public static final Object ORDERBY = KeyObject.builder().key(":orderBy").build();//":orderBy";
 		public static final Object QUERY_CONFIG = KeyObject.builder().key(":query_tips").build();//":query_config";
 		public static final Object DEBUG = KeyObject.builder().key(":debug").build(); //"_EXTQUERY_DEBUG_NAME_KEY";
 		public static final Object IF_NULL = KeyObject.builder().key(":if-null").build(); //":if-null";
@@ -94,7 +109,6 @@ public interface ExtQuery {
 		public static final Object COUNT = KeyObject.builder().key(":count").build(); //":count";
 //		public static final String CACHEABLE = ":cacheable";//是否缓存查询对象，避免重复解释，暂时没实现
 		
-		public static final Object ORDERBY = KeyObject.builder().key(":orderBy").build();//":orderBy";
 
 		public static final Object DATA_FILTER = KeyObject.builder().key(":dataFilter").build();//":dataFilter";
 //		public static final String INCLUDE = ":include";
@@ -153,7 +167,7 @@ public interface ExtQuery {
 
 //	public void setParams(Map params);
 	
-	
+	Object getParamByName(String name);
 
 	public ParamValues getParamsValue();
 	

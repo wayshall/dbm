@@ -12,7 +12,9 @@ public interface SQLBuilderFactory {
 //		createTable,
 //		dropTable,
 		seq,
-		createSeq
+		createSeq,
+		insertOrUpdate,
+		insertOrIgnore
 	}
 	
 //	public EntrySQLBuilder createNamed(DbmMappedEntryMeta entry, String alias, SqlBuilderType type);

@@ -12,6 +12,8 @@ import org.onetwo.dbm.mapping.SQLBuilderFactory.SqlBuilderType;
 public class DbmMappedEntryImpl extends AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 	
 
+	private EntrySQLBuilderImpl staticInsertOrUpdateSqlBuilder;
+	private EntrySQLBuilderImpl staticInsertOrIgnoreSqlBuilder;
 	private EntrySQLBuilderImpl staticInsertSqlBuilder;
 	private EntrySQLBuilderImpl staticUpdateSqlBuilder;
 	private EntrySQLBuilderImpl staticFetchAllSqlBuilder;
@@ -23,8 +25,8 @@ public class DbmMappedEntryImpl extends AbstractDbmMappedEntryImpl implements Db
 	private EntrySQLBuilderImpl staticSelectVersionSqlBuilder;
 //	private EntrySQLBuilderImpl staticSelectLockSqlBuilder;
 	
-	public DbmMappedEntryImpl(AnnotationInfo annotationInfo, TableInfo tableInfo, DbmInnerServiceRegistry serviceRegistry) {
-		super(annotationInfo, tableInfo, serviceRegistry);
+	public DbmMappedEntryImpl(String entityName, AnnotationInfo annotationInfo, TableInfo tableInfo, DbmInnerServiceRegistry serviceRegistry) {
+		super(entityName, annotationInfo, tableInfo, serviceRegistry);
 	}
 
 
@@ -68,6 +70,14 @@ public class DbmMappedEntryImpl extends AbstractDbmMappedEntryImpl implements Db
 	protected void buildStaticSQL(TableInfo taboleInfo){
 //		List<ColumnInfo> idColumns = taboleInfo.getPrimaryKey().getColumns();
 
+		staticInsertOrUpdateSqlBuilder = createSQLBuilder(SqlBuilderType.insertOrUpdate);
+		staticInsertOrUpdateSqlBuilder.append(getInsertableFields());
+		staticInsertOrUpdateSqlBuilder.build();
+
+		staticInsertOrIgnoreSqlBuilder = createSQLBuilder(SqlBuilderType.insertOrIgnore);
+		staticInsertOrIgnoreSqlBuilder.append(getInsertableFields());
+		staticInsertOrIgnoreSqlBuilder.build();
+		
 		staticInsertSqlBuilder = createSQLBuilder(SqlBuilderType.insert);
 		staticInsertSqlBuilder.append(getInsertableFields());
 		staticInsertSqlBuilder.build();
@@ -125,6 +135,17 @@ public class DbmMappedEntryImpl extends AbstractDbmMappedEntryImpl implements Db
 		return staticSelectLockSqlBuilder;
 	}*/
 
+
+
+	@Override
+	protected EntrySQLBuilderImpl getStaticInsertOrIgnoreSqlBuilder() {
+		return staticInsertOrIgnoreSqlBuilder;
+	}
+
+	@Override
+	protected EntrySQLBuilderImpl getStaticInsertOrUpdateSqlBuilder() {
+		return staticInsertOrUpdateSqlBuilder;
+	}
 
 	@Override
 	protected EntrySQLBuilderImpl getStaticInsertSqlBuilder() {

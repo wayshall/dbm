@@ -32,6 +32,7 @@ public class QueryConfigTest extends DbmBaseTest {
 		user.setId(Integer.valueOf(index).longValue());
 		user.setNickName("nickName"+index);
 		user.setEmail("test"+index+"@test.com");
+		user.setId(Integer.valueOf(index).longValue());
 		
 		return user;
 	}
