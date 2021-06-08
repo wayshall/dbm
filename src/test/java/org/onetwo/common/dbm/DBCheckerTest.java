@@ -11,7 +11,6 @@ import org.onetwo.common.utils.Assert;
 import org.onetwo.dbm.core.spi.DbmSession;
 import org.onetwo.dbm.utils.Dbms;
 import org.springframework.test.annotation.Rollback;
-import org.springframework.util.Assert;
 
 @Rollback
 public class DBCheckerTest extends DbmBaseTest {

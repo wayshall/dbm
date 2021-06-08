@@ -112,7 +112,7 @@ public class SpecificationQuerys<T> implements Specification<T>, Serializable {
 	}
 
 	public SpecificationQuerys<T> orderBy(Order... orders) {
-		this.sort = new Sort(orders);
+		this.sort = Sort.by(orders);
 		return this;
 	}
 	
