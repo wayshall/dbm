@@ -10,7 +10,9 @@ import org.onetwo.common.dbm.model.entity.UserAutoidEntity;
 import org.onetwo.common.utils.Assert;
 import org.onetwo.dbm.core.spi.DbmSession;
 import org.onetwo.dbm.utils.Dbms;
+import org.springframework.test.annotation.Rollback;
 
+@Rollback
 public class DBCheckerTest extends DbmBaseTest {
 	
 	@Resource

@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.hibernate.LockOptions;
-import org.hibernate.SQLQuery;
+import org.hibernate.query.NativeQuery;
 import org.onetwo.common.db.AbstractQueryWrapper;
 import org.onetwo.common.db.spi.QueryWrapper;
 import org.onetwo.common.reflect.ReflectUtils;
@@ -20,9 +20,9 @@ import org.springframework.jdbc.core.RowMapper;
 @SuppressWarnings({ "unchecked" })
 public class HibernateDbmQueryWrapper extends AbstractQueryWrapper implements QueryWrapper {
 	
-	final private SQLQuery sqlQuery;
+	final private NativeQuery<?> sqlQuery;
 
-	public HibernateDbmQueryWrapper(SQLQuery sqlQuery) {
+	public HibernateDbmQueryWrapper(NativeQuery<?> sqlQuery) {
 		super();
 		this.sqlQuery = sqlQuery;
 	}
@@ -43,7 +43,7 @@ public class HibernateDbmQueryWrapper extends AbstractQueryWrapper implements Qu
 
 	@Override
 	public <T> List<T> getResultList() {
-		return sqlQuery.list();
+		return (List<T>) sqlQuery.list();
 	}
 
 	@Override

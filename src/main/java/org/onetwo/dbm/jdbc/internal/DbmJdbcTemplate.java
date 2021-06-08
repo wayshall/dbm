@@ -206,9 +206,9 @@ public class DbmJdbcTemplate extends JdbcTemplate implements DbmJdbcOperations {
 					long quyeryEnd = System.currentTimeMillis();
 					
 					ResultSet rsToUse = rs;
-					if (getNativeJdbcExtractor() != null) {
+					/*if (getNativeJdbcExtractor() != null) {
 						rsToUse = getNativeJdbcExtractor().getNativeResultSet(rs);
-					}
+					}*/
 					
 					T result = rse.extractData(rsToUse);
 					

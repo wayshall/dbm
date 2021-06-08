@@ -19,6 +19,7 @@ import org.onetwo.dbm.exception.DbmException;
 import org.onetwo.dbm.jdbc.annotation.DbmJdbcOperationMark;
 import org.onetwo.dbm.jdbc.spi.DbmJdbcOperationType;
 import org.onetwo.dbm.jdbc.spi.DbmJdbcOperationType.DatabaseOperationType;
+import org.onetwo.dbm.utils.DbmUtils;
 import org.springframework.core.NestedRuntimeException;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.annotation.AnnotationUtils;

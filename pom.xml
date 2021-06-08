@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>org.onetwo4j</groupId>
-  <version>4.8.0-SNAPSHOT</version>
+  <version>5.0.0-SNAPSHOT</version>
   <artifactId>onetwo-dbm</artifactId>
   <packaging>jar</packaging>
 
@@ -12,7 +12,7 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <onetwo.version>4.8.0-SNAPSHOT</onetwo.version>
+    <onetwo.version>5.0.0-SNAPSHOT</onetwo.version>
     <java.version>1.8</java.version>
   </properties>
   
@@ -71,6 +71,21 @@
       <groupId>org.onetwo4j</groupId>
       <artifactId>onetwo-poi</artifactId>
       <optional>true</optional>
+    </dependency>
+            
+    <dependency>
+      <groupId>javax.persistence</groupId>
+      <artifactId>javax.persistence-api</artifactId>
+    </dependency>
+    
+    <dependency>
+      <groupId>javax.validation</groupId>
+      <artifactId>validation-api</artifactId>
+    </dependency>
+  
+    <dependency>
+      <groupId>org.hibernate.validator</groupId>
+      <artifactId>hibernate-validator</artifactId>
     </dependency>
     
 	<dependency>
@@ -161,7 +176,7 @@
         <optional>true</optional>
 	</dependency>
     
-    <dependency>
+    <!-- <dependency>
        <groupId>org.hibernate.javax.persistence</groupId>
        <artifactId>hibernate-jpa-2.1-api</artifactId>
     </dependency>
@@ -169,8 +184,8 @@
     <dependency>
         <groupId>org.hibernate</groupId>
         <artifactId>hibernate-validator</artifactId>
-    </dependency>
-        
+    </dependency> -->
+    
     <dependency>
         <groupId>org.jsoup</groupId>
         <artifactId>jsoup</artifactId>

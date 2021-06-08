@@ -68,6 +68,8 @@ final public class DbmUtils {
 	
 	private static final Logger logger = JFishLoggerFactory.getLogger(DbmUtils.class);
 	
+	public static final int MAX_PRINTABLE_ARG_SIZE = 50;
+	
 	public final static ConversionService CONVERSION_SERVICE = new DefaultConversionService();
 	
 	private static final String CHAINED_TRANSACTION_MANAGER = "org.springframework.data.transaction.ChainedTransactionManager";
@@ -343,6 +345,23 @@ final public class DbmUtils {
 			return null;
 		}
 		return Pair.of(sql, params);
+	}
+
+	public static String objectToString(Object obj){
+		if (obj!=null && obj.getClass().isArray()) {
+			Object[] rawArgs = (Object[]) obj;
+			Object[] args = new Object[rawArgs.length];
+			for (int i = 0; i < rawArgs.length; i++) {
+				if (LangUtils.isMultiple(rawArgs[i]) && LangUtils.size(rawArgs[i]) > MAX_PRINTABLE_ARG_SIZE) {
+					args[i] = "<<Argutment Size is more than " + MAX_PRINTABLE_ARG_SIZE + ">>"; 
+				} else {
+					args[i] = rawArgs[i];
+				}
+			}
+			return LangUtils.toString(args);
+		} else {
+			return LangUtils.toString(obj);
+		}
 	}
 	
 	@SuppressWarnings("unchecked")

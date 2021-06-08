@@ -12,6 +12,7 @@ import javax.persistence.PersistenceContext;
 import javax.sql.DataSource;
 
 import org.hibernate.SQLQuery;
+import org.hibernate.query.NativeQuery;
 import org.onetwo.common.db.ParsedSqlContext;
 import org.onetwo.common.db.dquery.DynamicMethod;
 import org.onetwo.common.db.dquery.NamedQueryInvokeContext;
@@ -86,7 +87,9 @@ public class HibernateJPAQueryProvideManager implements QueryProvideManager, Ini
 	@Override
 	public QueryWrapper createQuery(CreateQueryCmd createQueryCmd) {
 		if(createQueryCmd.isNativeSql()){
-			SQLQuery sqlQuery = entityManager.createNativeQuery(createQueryCmd.getSql()).unwrap(SQLQuery.class);
+			NativeQuery<?> sqlQuery = entityManager.createNativeQuery(createQueryCmd.getSql()).unwrap(NativeQuery.class);
+//			sqlQuery.getParameterMetadata().setOrdinalParametersZeroBased(true);
+//			sqlQuery.getParameterMetadata().setOrdinalParametersZeroBased(true);
 			HibernateDbmQueryWrapper wrapper = new HibernateDbmQueryWrapper(sqlQuery);
 			return wrapper;
 		}else{
