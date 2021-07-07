@@ -21,6 +21,7 @@ public class EntrySQLBuilderImpl implements EntrySQLBuilder {
 	public static final String SQL_INSERT = "insert into ${tableName} ( ${insertFields} ) values ( ${namedFields} )";
 	public static final String SQL_INSERT_OR_UPDATE = "insert into ${tableName} ( ${insertFields} ) values ( ${namedFields} ) "
 													+ "on duplicate key update ${duplicateKeyUpdateFields}";
+	public static final String SQL_INSERT_OR_IGNORE = "insert ignore into ${tableName} ( ${insertFields} ) values ( ${namedFields} ) ";
 	public static final String SQL_UPDATE = "update ${tableName} set ${updateFields} where ${whereCause}";
 	public static final String SQL_DELETE = "delete from ${tableName}";
 	public static final String SQL_QUERY = "select ${selectFields} from ${tableName} ${alias}";
@@ -123,9 +124,11 @@ public class EntrySQLBuilderImpl implements EntrySQLBuilder {
 		
 		if (SqlBuilderType.insert==type) {
 			this.sql = this.buildInsert();
+		} else if (SqlBuilderType.insertOrIgnore==type) {
+			this.sql = this.buildInsertOrIgnore();
 		} else if (SqlBuilderType.insertOrUpdate==type) {
 			this.sql = this.buildInsertOrUpdate();
-		}  else if (SqlBuilderType.update==type) {
+		} else if (SqlBuilderType.update==type) {
 			this.sql = this.buildUpdate();
 		} else if (SqlBuilderType.delete==type) {
 			this.sql = this.buildDelete();
@@ -153,6 +156,20 @@ public class EntrySQLBuilderImpl implements EntrySQLBuilder {
 		List<String> insertFields = nameToString(fields, false);
 		List<String> namedFields = javaNameToNamedString(fields, false);
 		insertSql = PARSER.parse(SQL_INSERT, 
+				"tableName", tableName, 
+				"insertFields", StringUtils.join(insertFields, ", "),
+				"namedFields", StringUtils.join(namedFields, ", "));
+		if(isDebug())
+			LangUtils.println("build insert sql : ${0}", insertSql);
+		return insertSql;
+	}
+	
+	private String buildInsertOrIgnore(){
+		Assert.notEmpty(fields);
+		String insertSql = "";
+		List<String> insertFields = nameToString(fields, false);
+		List<String> namedFields = javaNameToNamedString(fields, false);
+		insertSql = PARSER.parse(SQL_INSERT_OR_IGNORE, 
 				"tableName", tableName, 
 				"insertFields", StringUtils.join(insertFields, ", "),
 				"namedFields", StringUtils.join(namedFields, ", "));

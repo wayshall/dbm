@@ -18,7 +18,8 @@ public enum DbmEventAction {
 	
 	batchInsert,
 	batchUpdate,
-	batchInsertOrUpdate
+	batchInsertOrUpdate,
+	batchInsertOrIgnore
 //	saveRef,
 //	dropRef
 	

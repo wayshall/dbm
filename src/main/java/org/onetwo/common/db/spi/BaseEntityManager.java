@@ -70,6 +70,8 @@ public interface BaseEntityManager {
 	public int remove(Object entity);
 	
 	/***
+	 * 执行此方法时，若实体实现了逻辑删除接口ILogicDeleteEntity，则只是更新状态
+	 * 
 	 * 返回updateCount
 	 * 注意：某些数据库或版本的jdbc driver，批量删除时，updateCount并不正确
 	 * @author wayshall
@@ -87,8 +89,8 @@ public interface BaseEntityManager {
 	 */
 	public <T> Collection<T> removeByIds(Class<T> entityClass, Serializable[] id);
 	/***
-	 * 如果updateCount为1，则返回删除实体，否则返回null
-	 * 也就是说，即使实体不存在，也不会抛错。若需要抱错，请根据返回结果是否为null判断
+	 * 执行此方法时，若实体实现了逻辑删除接口ILogicDeleteEntity，则只是更新状态
+	 * 若找不到数据，则抛错
 	 * @author wayshall
 	 * @param entityClass
 	 * @param id
@@ -96,6 +98,7 @@ public interface BaseEntityManager {
 	 */
 	public <T> T removeById(Class<T> entityClass, Serializable id);
 	/***
+	 * 物理删除，不判断实体是否实现 ILogicDeleteEntity 接口
 	 * 返回updateCount
 	 * @author wayshall
 	 * @param entityClass

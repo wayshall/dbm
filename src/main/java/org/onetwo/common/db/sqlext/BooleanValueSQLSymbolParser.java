@@ -2,13 +2,14 @@ package org.onetwo.common.db.sqlext;
 
 import org.onetwo.common.db.builder.QueryField;
 import org.onetwo.common.utils.LangUtils;
+import org.onetwo.dbm.exception.DbmException;
 
 public class BooleanValueSQLSymbolParser extends AbstractSupportedSubQuerySQLSymbolParser {
 
 	private String whenTrue;
 	private String whenFalse;
 	
-	public BooleanValueSQLSymbolParser(SQLSymbolManager sqlSymbolManager, String symbol, String whenTrue, String whenFalse) {
+	public BooleanValueSQLSymbolParser(SQLSymbolManager sqlSymbolManager, QueryDSLOps symbol, String whenTrue, String whenFalse) {
 		super(sqlSymbolManager, symbol);
 		this.whenTrue = whenTrue;
 		this.whenFalse = whenFalse;
@@ -19,16 +20,18 @@ public class BooleanValueSQLSymbolParser extends AbstractSupportedSubQuerySQLSym
 	public String getActualDbOperator(QueryField context) {
 		Object value = context.getValue();
 		if(LangUtils.isMultiple(value)){
-			LangUtils.throwBaseException("symbol[${0}] is unsupport mutil value : " + LangUtils.toString(value));
+			throw new DbmException("symbol[${0}] is unsupport mutil value : " + LangUtils.toString(value));
 		}
-		if(!(value instanceof Boolean))
-			LangUtils.throwBaseException(LangUtils.toString("symbol[${0}] is unsupport the type : ${1}", (whenTrue+" | "+whenFalse), value==null?"NULL":value.getClass()));
+		if(!(value instanceof Boolean)) {
+			throw new DbmException(LangUtils.toString("symbol[${0}] is unsupport the type : ${1}", (whenTrue+" | "+whenFalse), value==null?"NULL":value.getClass()));
+		}
 		boolean val = (Boolean) context.getValue();
 		String symbol;
-		if(val)
+		if (val) {
 			symbol = whenTrue;
-		else
+		} else {
 			symbol = whenFalse;
+		}
 		return symbol;
 	}
 

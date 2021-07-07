@@ -3,7 +3,7 @@ package org.onetwo.common.db.sqlext;
 import java.util.List;
 import java.util.Map;
 
-public class DeleteExtQueryImpl extends AbstractExtQuery {
+public class DeleteExtQueryImpl extends AbstractExtQuery implements DeleteExtQuery {
 	
 	public DeleteExtQueryImpl(Class<?> entityClass, String alias, Map<Object, Object> params,
 			SQLSymbolManager symbolManager, List<ExtQueryListener> listeners) {

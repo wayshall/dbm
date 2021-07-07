@@ -348,6 +348,9 @@ abstract public class AbstractMappedField implements DbmMappedField{
 		return this.strategyType==StrategyType.SEQ;
 	}
 
+	/***
+	 * 是否id自增策略
+	 */
 	@Override
 	public boolean isIdentityStrategy() {
 		return this.strategyType==StrategyType.IDENTITY;

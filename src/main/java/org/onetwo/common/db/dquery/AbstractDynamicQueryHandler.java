@@ -231,16 +231,21 @@ abstract public class AbstractDynamicQueryHandler implements DynamicQueryHandler
 		} else if (dmethod.hasPageParamter()){
 			Page<?> page = dmethod.getPageParamter(args);
 			result = em.getFileNamedQueryManager().findPage(page, invokeContext);
+			
+		} else if (dmethod.getPageParamter(args)!=null) {
+			// 通过是否能获取page参数再次判断是否分页查询
+			Page<?> page = dmethod.getPageParamter(args);
+			result = em.getFileNamedQueryManager().findPage(page, invokeContext);
+			
 		} else if (Collection.class.isAssignableFrom(resultClass)){
 			List<?> datalist = em.getFileNamedQueryManager().findList(invokeContext);
-			if(resultClass.isAssignableFrom(datalist.getClass())){
+			if (resultClass.isAssignableFrom(datalist.getClass())){
 				result = datalist;
-			}else{
+			} else {
 				Collection<Object> collections = CUtils.newCollections((Class<Collection<Object>>)resultClass, datalist.size());
 				collections.addAll(datalist);
 				result = collections;
 			}
-			
 		} else if (QueryWrapper.class.isAssignableFrom(resultClass)){
 			QueryWrapper dq = em.getFileNamedQueryManager().createQuery(invokeContext);
 			return dq;

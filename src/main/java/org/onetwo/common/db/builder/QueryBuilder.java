@@ -2,7 +2,6 @@ package org.onetwo.common.db.builder;
 
 import java.util.Map;
 
-import org.onetwo.common.db.sqlext.ExtQuery.K;
 import org.onetwo.dbm.dialet.DBDialect.LockInfo;
 
 /***
@@ -67,9 +66,11 @@ public interface QueryBuilder<E> {
 	public QueryAction<E> toQuery();
 	public QueryAction<E> toSelect();
 	
-	public int delete();
+//	public int delete();
 	
 	public Map<Object, Object> getParams();
+
+	ExecuteAction toExecute();
 	
 //	public ParamValues getParamValues();
 //	public String getSql();

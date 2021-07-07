@@ -27,6 +27,7 @@ import org.onetwo.common.db.dquery.annotation.QueryResultType;
 import org.onetwo.common.db.dquery.annotation.QuerySqlTemplateParser;
 import org.onetwo.common.db.dquery.annotation.Sql;
 import org.onetwo.common.db.dquery.annotation.SqlScript;
+import org.onetwo.common.db.dquery.condition.DynamicFieldCondition;
 import org.onetwo.common.db.filequery.TemplateNameIsSqlTemplateParser;
 import org.onetwo.common.db.spi.QueryConfigData;
 import org.onetwo.common.db.spi.QueryWrapper;
@@ -103,6 +104,12 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 	private SqlScript sqlScript;
 	
 	private Set<DynamicMethodParameter> specialParameters = Sets.newHashSet();
+	
+	/***
+	 * 动态传入查询所需要的各种参数，和@QueryParseContext类似
+	 * 实现了此参数，后续可废除@QueryParseContext和@QueryResultType？
+	 */
+	private DynamicMethodParameter dynamicQuerySettingsParameter;
 	
 	public DynamicMethod(Method method){
 		super(method);
@@ -312,6 +319,7 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 				}
 				parseContextParameter = parameter;
 				queryParseContext = this.parseContextParameter.getParameterAnnotation(QueryParseContext.class);
+				
 			} else if (PageRequest.class.isAssignableFrom(parameter.getParameterType())) {
 				this.pageRequestParamter = parameter;
 //				specialParameters.add(parameter);
@@ -319,6 +327,8 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 			} else if (Page.class.isAssignableFrom(parameter.getParameterType())) {
 				this.pageParamter = parameter;
 //				specialParameters.add(parameter);
+			} else if (DynamicQuerySettings.class.isAssignableFrom(parameter.getParameterType())) {
+				this.dynamicQuerySettingsParameter = parameter;
 			} 
 //			else if (DynamicQueryMetaProvider.class.isAssignableFrom(parameter.getParameterType())) {
 //				this.dynamicQueryMetaProviderParameter = parameter;
@@ -386,12 +396,22 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 	}
 	
 	public Page<?> getPageParamter(Object[] args) {
+		Map<?, ?> queryParseContext = getQueryParseContext(args);
 		if (this.pageParamter!=null) {
 			return (Page<?>)args[pageParamter.getParameterIndex()];
-		} else {
+			
+		} else if (pageRequestParamter!=null) {
 			PageRequest pageRequest = (PageRequest)args[pageRequestParamter.getParameterIndex()];
 			return pageRequest.toPageObject();
+			
+		} else if (queryParseContext!=null) {
+			PageRequest pageRequest = (PageRequest)queryParseContext.get(PageRequest.class);
+			if (pageRequest==null) {
+				return null;
+			}
+			return pageRequest.toPageObject();
 		}
+		return null;
 	}
 
 	public String getQueryName(Object[] args) {
@@ -406,6 +426,17 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 		if (this.parseContextParameter!=null) {
 			Map<?, ?> ctx = (Map<?, ?>)args[parseContextParameter.getParameterIndex()];
 			return ctx;
+		} else if (this.dynamicQuerySettingsParameter!=null) {
+			DynamicQuerySettings settings = getDynamicQuerySettings(args);
+			return settings.getQueryParseContext();
+		}
+		return null;
+	}
+
+	public DynamicQuerySettings getDynamicQuerySettings(Object[] args) {
+		if (this.dynamicQuerySettingsParameter!=null) {
+			DynamicQuerySettings settings = (DynamicQuerySettings) args[dynamicQuerySettingsParameter.getParameterIndex()];
+			return settings;
 		}
 		return null;
 	}
@@ -418,6 +449,9 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 			} else {
 				return (Class<?>)types;
 			}
+		} else if (this.dynamicQuerySettingsParameter!=null) {
+			DynamicQuerySettings settings = getDynamicQuerySettings(args);
+			return settings.getResultType();
 		}
 		return resultClass;
 	}
@@ -430,6 +464,9 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 			} else {
 				return (Class<?>)types;
 			}
+		} else if (this.dynamicQuerySettingsParameter!=null) {
+			DynamicQuerySettings settings = getDynamicQuerySettings(args);
+			return settings.getRowType();
 		}
 		return componentClass;
 	}
@@ -593,6 +630,13 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 			pvalue = args[mp.getParameterIndex()];
 //			handleArg(values, parserContext, mp, pvalue);
 			handleArg(values, mp, pvalue);
+		}
+		
+		DynamicQuerySettings settings = getDynamicQuerySettings(args);
+		if (settings!=null && settings.getDynamicFields()!=null) {
+			for (DynamicFieldCondition cond : settings.getDynamicFields()) {
+				putArg2Map(values, null, cond.getParameterName(), cond.getValue());
+			}
 		}
 		
 //		buildQueryConfig(parserContext);

@@ -9,7 +9,7 @@ public interface HqlSymbolParser {
 	 * 操作符
 	 * @return
 	 */
-	public String getMappedOperator();
+	public QueryDSLOps getMappedOperator();
 	
 	public String parse(QueryField field);
 

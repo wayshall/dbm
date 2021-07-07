@@ -15,6 +15,6 @@ abstract public class WhereCauseBuilderField<E> {
 
 	abstract public String[] getOPFields();
 	
-	abstract public Object[] getValues();
+	abstract public Object getValues();
 
 }

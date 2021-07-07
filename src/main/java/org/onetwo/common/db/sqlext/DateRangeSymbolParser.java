@@ -7,7 +7,6 @@ import org.onetwo.common.date.DateUtils;
 import org.onetwo.common.date.NiceDate;
 import org.onetwo.common.db.builder.QueryField;
 import org.onetwo.common.db.sqlext.ExtQuery.K.IfNull;
-import org.onetwo.common.exception.ServiceException;
 import org.onetwo.dbm.exception.DbmException;
 
 /****
@@ -18,7 +17,7 @@ import org.onetwo.dbm.exception.DbmException;
  */
 public class DateRangeSymbolParser extends CommonSQLSymbolParser implements HqlSymbolParser {
 	
-	public DateRangeSymbolParser(SQLSymbolManager sqlSymbolManager, String symbol){
+	public DateRangeSymbolParser(SQLSymbolManager sqlSymbolManager, QueryDSLOps symbol){
 		super(sqlSymbolManager, symbol);
 	}
 	
@@ -40,7 +39,7 @@ public class DateRangeSymbolParser extends CommonSQLSymbolParser implements HqlS
 		List paramlist = convertValues(field, value, ifNull);
 
 		if(paramlist.size()>2)
-			throw new ServiceException("the parameters of "+symbol+" can not greater than 2, acutal: " + paramlist.size());
+			throw new DbmException("the operator [" + symbol + "] excepted 1 or 2 parameters, acutal: " + paramlist.size());
 		
 		Date startDate = null;
 		Date endDate = null;
@@ -63,22 +62,35 @@ public class DateRangeSymbolParser extends CommonSQLSymbolParser implements HqlS
 		
 		field = this.getFieldName(field);
 		StringBuilder hql = new StringBuilder();
-
-		if(!this.subQuery(field, symbol, paramlist, paramValues, hql)){
-			hql.append("( ");
-			if(startDate!=null){
-				hql.append(field).append(" >= ");
-				paramValues.addValue(field, startDate, hql);
-				if(endDate!=null)
-					hql.append(" and ");
-			}
-			if(endDate!=null){
-				hql.append(field).append(" < ");
-				paramValues.addValue(field, endDate, hql);
-			}
-			hql.append(" ) ");
-			return hql.toString();
+		
+		hql.append("( ");
+		if(startDate!=null){
+			hql.append(field).append(" >= ");
+			paramValues.addValue(field, startDate, hql);
+			if(endDate!=null)
+				hql.append(" and ");
 		}
+		if(endDate!=null){
+			hql.append(field).append(" < ");
+			paramValues.addValue(field, endDate, hql);
+		}
+		hql.append(" ) ");
+
+//		if(!this.subQuery(field, symbol, paramlist, paramValues, hql)){
+//			hql.append("( ");
+//			if(startDate!=null){
+//				hql.append(field).append(" >= ");
+//				paramValues.addValue(field, startDate, hql);
+//				if(endDate!=null)
+//					hql.append(" and ");
+//			}
+//			if(endDate!=null){
+//				hql.append(field).append(" < ");
+//				paramValues.addValue(field, endDate, hql);
+//			}
+//			hql.append(" ) ");
+//			return hql.toString();
+//		}
 		
 		return hql.toString();
 	}

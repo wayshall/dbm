@@ -1,5 +1,6 @@
 package org.onetwo.dbm.mapping;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -264,15 +265,15 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 	 * 如果是复合主键，只要有一个主键为null，即返回null
 	 */
 	@Override
-	public Object getId(Object entity){
+	public Serializable getId(Object entity){
 //		if(getIdentifyField()==null)
 //			return null;
 //		return getIdentifyField().getValue(entity);
 		if (!isCompositePK()) {
-			Object idValue = this.getIdentifyFields().get(0).getValue(entity);
+			Serializable idValue = (Serializable)getIdentifyFields().get(0).getValue(entity);
 			return idValue;
 		}
-		Object idValue = ReflectUtils.newInstance(idClass);
+		Serializable idValue = (Serializable)ReflectUtils.newInstance(idClass);
 		ConfigurablePropertyAccessor accesor = SpringUtils.newPropertyAccessor(idValue, true);
 		for (DbmMappedField field : this.getIdentifyFields()) {
 			Object fieldValue = field.getValue(entity);
@@ -552,6 +553,9 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 	protected EntrySQLBuilderImpl getStaticInsertOrUpdateSqlBuilder() {
 		throw new UnsupportedOperationException();
 	}
+	protected EntrySQLBuilderImpl getStaticInsertOrIgnoreSqlBuilder() {
+		throw new UnsupportedOperationException();
+	}
 	abstract protected EntrySQLBuilderImpl getStaticInsertSqlBuilder();
 	abstract protected EntrySQLBuilderImpl getStaticUpdateSqlBuilder();
 	abstract protected EntrySQLBuilderImpl getStaticDeleteSqlBuilder();
@@ -687,6 +691,22 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 	}
 
 	/****
+	 * 利用mysql特有语法插入或忽略：insert ignore into
+	 * @author weishao zeng
+	 * @param entity
+	 * @return
+	 */
+	@Override
+	public JdbcStatementContext<List<Object[]>> makeMysqlInsertOrIgnore(Object entity) {
+		this.throwIfQueryableOnly();
+		EntrySQLBuilderImpl insertOrUpdateSqlBuilder = getStaticInsertOrIgnoreSqlBuilder();
+		JdbcStatementContextBuilder dsb = JdbcStatementContextBuilder.create(DbmEventAction.insert, this, insertOrUpdateSqlBuilder);
+		makeJdbcStatementContext(dsb, entity);
+		dsb.build();
+		return dsb;
+	}
+	
+	/****
 	 * 利用mysql特有语法插入或更新：ON DUPLICATE KEY UPDATE
 	 * @author weishao zeng
 	 * @param entity
@@ -697,6 +717,12 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 		this.throwIfQueryableOnly();
 		EntrySQLBuilderImpl insertOrUpdateSqlBuilder = getStaticInsertOrUpdateSqlBuilder();
 		JdbcStatementContextBuilder dsb = JdbcStatementContextBuilder.create(DbmEventAction.insert, this, insertOrUpdateSqlBuilder);
+		makeJdbcStatementContext(dsb, entity);
+		dsb.build();
+		return dsb;
+	}
+
+	protected JdbcStatementContext<List<Object[]>> makeJdbcStatementContext(JdbcStatementContextBuilder dsb, Object entity) {
 		if(LangUtils.isMultiple(entity)){
 			List<Object> list = LangUtils.asList(entity);
 			if(LangUtils.isEmpty(list)) {
@@ -715,9 +741,6 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 //			dsb.setColumnValuesFromEntity(entity);
 			dsb.processColumnValues(entity);
 		}
-		dsb.build();
-//		KVEntry<String, List<Object[]>> kv = new KVEntry<String, List<Object[]>>(dsb.getSql(), dsb.getValues());
-//		JdbcStatementContext<List<Object[]>> context = SqlBuilderJdbcStatementContext.create(dsb.getSql(), dsb); 
 		return dsb;
 	}
 	

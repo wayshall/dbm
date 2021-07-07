@@ -4,8 +4,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.onetwo.common.exception.ServiceException;
 import org.onetwo.common.utils.Assert;
+import org.onetwo.dbm.exception.DbmException;
 
 
 /***
@@ -21,7 +21,7 @@ public class DefaultSQLSymbolManagerImpl implements SQLSymbolManager {
 		return sql;
 	}
 	
-	protected Map<String, HqlSymbolParser> parser;
+	protected Map<QueryDSLOps, HqlSymbolParser> parser;
 	private ExtQueryDialet sqlDialet;
 //	private PlaceHolder placeHolder;
 	
@@ -33,7 +33,7 @@ public class DefaultSQLSymbolManagerImpl implements SQLSymbolManager {
 	}*/
 
 	public DefaultSQLSymbolManagerImpl(ExtQueryDialet sqlDialet) {
-		parser = new HashMap<String, HqlSymbolParser>();
+		parser = new HashMap<>();
 		this.sqlDialet = sqlDialet;
 		this.initParser();
 	}
@@ -47,8 +47,8 @@ public class DefaultSQLSymbolManagerImpl implements SQLSymbolManager {
 	}*/
 
 	@Override
-	public ExtQueryInner createDeleteQuery(Class<?> entityClass, Map<Object, Object> properties) {
-		ExtQueryInner q = new DeleteExtQueryImpl(entityClass, null, properties, this, this.listeners);
+	public DeleteExtQuery createDeleteQuery(Class<?> entityClass, Map<Object, Object> properties) {
+		DeleteExtQuery q = new DeleteExtQueryImpl(entityClass, null, properties, this, this.listeners);
 		q.initQuery();
 		return q;
 	}
@@ -69,37 +69,43 @@ public class DefaultSQLSymbolManagerImpl implements SQLSymbolManager {
 	 * @return
 	 */
 	public SQLSymbolManager initParser() {
-		register(new CommonSQLSymbolParser(this, FieldOP.eq))
-		.register(new BooleanValueSQLSymbolParser(this, FieldOP.is_null, "is null", "is not null"))
-		.register(new CommonSQLSymbolParser(this, FieldOP.gt))
-		.register(new CommonSQLSymbolParser(this, FieldOP.ge))
-		.register(new CommonSQLSymbolParser(this, FieldOP.lt))
-		.register(new CommonSQLSymbolParser(this, FieldOP.le))
-		.register(new CommonSQLSymbolParser(this, FieldOP.neq))
-		.register(new CommonSQLSymbolParser(this, FieldOP.neq2))
+		register(new CommonSQLSymbolParser(this, QueryDSLOps.EQ))
+		.register(new BooleanValueSQLSymbolParser(this, QueryDSLOps.IS_NULL, "is null", "is not null"))
+		.register(new CommonSQLSymbolParser(this, QueryDSLOps.GT))
+		.register(new CommonSQLSymbolParser(this, QueryDSLOps.GE))
+		.register(new CommonSQLSymbolParser(this, QueryDSLOps.LT))
+		.register(new CommonSQLSymbolParser(this, QueryDSLOps.LE))
+		.register(new CommonSQLSymbolParser(this, QueryDSLOps.NEQ))
+		.register(new CommonSQLSymbolParser(this, QueryDSLOps.NEQ2))
 //		.register(new CommonSQLSymbolParser(this, FieldOP.like, true))
 //		.register(new CommonSQLSymbolParser(this, FieldOP.not_like, true))
-		.register(new LikeSQLSymbolParser(this, FieldOP.like))
-		.register(new LikeSQLSymbolParser(this, FieldOP.like2, FieldOP.like))
-		.register(new LikeSQLSymbolParser(this, FieldOP.not_like))
-		.register(new LikeSQLSymbolParser(this, FieldOP.not_like2, FieldOP.not_like))
-		.register(new InSymbolParser(this, FieldOP.in))
-		.register(new InSymbolParser(this, FieldOP.not_in))
-		.register(new DateRangeSymbolParser(this, FieldOP.date_in));
+		.register(new LikeSQLSymbolParser(this, QueryDSLOps.LIKE))
+		.register(new LikeSQLSymbolParser(this, QueryDSLOps.LIKE2))
+		.register(new LikeSQLSymbolParser(this, QueryDSLOps.NOT_LIKE))
+		.register(new LikeSQLSymbolParser(this, QueryDSLOps.NOT_LIKE2))
+		.register(new InSymbolParser(this, QueryDSLOps.IN))
+		.register(new InSymbolParser(this, QueryDSLOps.NOT_IN))
+		.register(new DateRangeSymbolParser(this, QueryDSLOps.DATE_IN))
+		.register(new BetweenSymbolParser(this));
 		return this;
 	}
 
 	public HqlSymbolParser getHqlSymbolParser(String symbol) {
+		QueryDSLOps ops = QueryDSLOps.operatorOf(symbol);
+		return getHqlSymbolParser(ops);
+	}
+	
+	public HqlSymbolParser getHqlSymbolParser(QueryDSLOps symbol) {
 		HqlSymbolParser parser = this.parser.get(symbol);
 		if (parser == null)
-			throw new ServiceException("do not support symbol : [" + symbol+"]");
+			throw new DbmException("do not support symbol : [" + symbol+"]");
 		return parser;
 	}
 
 	/****
 	 * 注册操作符和对应的解释类
 	 */
-	public SQLSymbolManager register(String symbol, HqlSymbolParser parser) {
+	public SQLSymbolManager register(QueryDSLOps symbol, HqlSymbolParser parser) {
 		Assert.notNull(parser);
 		this.parser.put(symbol, parser);
 		return this;

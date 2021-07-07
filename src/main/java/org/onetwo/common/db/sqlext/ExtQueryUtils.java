@@ -65,6 +65,10 @@ public abstract class ExtQueryUtils {
 		
 	}
 	
+	public static String[] appendOperationToFields(String[] fields, QueryDSLOps op){
+		return appendOperationToFields(fields, op.getActualOperator());
+	}
+	
 	public static String[] appendOperationToFields(String[] fields, String op){
 		Assert.notEmpty(fields);
 		String[] newFileds = null;
@@ -98,14 +102,14 @@ public abstract class ExtQueryUtils {
 				/*valueList = new ArrayList();
 				valueList.add(values);*/
 				if(LangUtils.isMultiple(values)){
-					valueList = CUtils.tolist(values, false);
+					valueList = CUtils.tolist(values, trimNull);
 				}else{
 					valueList = new ArrayList();
 					valueList.add(values);
 				}
 			}
 		}else{
-			valueList = LangUtils.asList(values, trimNull);
+			valueList = CUtils.tolist(values, trimNull);
 		}
 		return valueList;
 	}
