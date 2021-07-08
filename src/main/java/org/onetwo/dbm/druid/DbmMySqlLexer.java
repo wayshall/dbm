@@ -17,6 +17,9 @@ public class DbmMySqlLexer extends MySqlLexer {
 		super(input);
 	}
 
+	/****
+	 * 整个方法复制自父类，主要替换了 isIdentifierChar(ch)的实现，因为isIdentifierChar为静态方法，无法覆盖
+	 */
     public void scanVariable() {
         if (ch != '@' && ch != ':' && ch != '#' && ch != '$') {
             throw new ParserException("illegal variable");
@@ -80,6 +83,7 @@ public class DbmMySqlLexer extends MySqlLexer {
             for (;;) {
                 ch = charAt(++pos);
 
+                //主要替换druid的这一行实现
                 if (!isValidVarChar(ch)) {
                     break;
                 }
