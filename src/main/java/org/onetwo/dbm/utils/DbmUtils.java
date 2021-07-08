@@ -48,9 +48,12 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.data.transaction.ChainedTransactionManager;
+import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.core.SqlParameterValue;
 import org.springframework.jdbc.core.SqlProvider;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterUtils;
+import org.springframework.jdbc.core.namedparam.ParsedSql;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSourceUtils;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
@@ -439,6 +442,22 @@ final public class DbmUtils {
 		configurer.addDirective(new SetDirective());
 		
 		configurer.addDirective(new DynamicConditionDirective());
+	}
+	
+	/***
+	 * for test
+	 * @author weishao zeng
+	 * @param sql
+	 * @param paramSource
+	 * @return
+	 */
+	@Deprecated
+	public static ParsedSql parseNamedSql(String sql, SqlParameterSource paramSource) {
+		ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(sql);
+		String sqlToUse = NamedParameterUtils.substituteNamedParameters(parsedSql, paramSource);
+//		Object[] params = NamedParameterUtils.buildValueArray(parsedSql, paramSource, null);
+		List<SqlParameter> declaredParameters = NamedParameterUtils.buildSqlParameterList(parsedSql, paramSource);
+		return parsedSql;
 	}
 	
 	private DbmUtils(){
