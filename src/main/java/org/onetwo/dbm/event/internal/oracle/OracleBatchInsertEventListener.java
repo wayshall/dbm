@@ -10,6 +10,7 @@ import org.onetwo.dbm.id.IdentifierGenerator;
 import org.onetwo.dbm.mapping.DbmMappedEntry;
 import org.onetwo.dbm.mapping.DbmMappedField;
 import org.onetwo.dbm.mapping.JdbcStatementContext;
+import org.springframework.jdbc.core.SqlParameterValue;
 
 public class OracleBatchInsertEventListener extends OracleInsertEventListener {
 	
@@ -68,7 +69,7 @@ public class OracleBatchInsertEventListener extends OracleInsertEventListener {
 		
 		this.beforeDoInsert(event, entry);
 
-		JdbcStatementContext<List<Object[]>> insert = entry.makeInsert(event.getObject());
+		JdbcStatementContext<List<SqlParameterValue[]>> insert = entry.makeInsert(event.getObject());
 		TimeCounter counter = new TimeCounter("batch insert "+insert.getValue().size()+"...");
 		counter.start();
 		int count = this.executeJdbcUpdate(true, insert.getSql(), insert.getValue(), event.getEventSource());

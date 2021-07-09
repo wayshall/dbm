@@ -6,8 +6,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.onetwo.dbm.druid.DbmMySqlLexer;
 import org.onetwo.dbm.exception.DbmException;
 
+import com.alibaba.druid.DbType;
 import com.alibaba.druid.DruidRuntimeException;
-import com.alibaba.druid.sql.SQLUtils;
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.expr.SQLAggregateExpr;
 import com.alibaba.druid.sql.ast.expr.SQLIdentifierExpr;
@@ -21,6 +21,7 @@ import com.alibaba.druid.sql.ast.statement.SQLSubqueryTableSource;
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlSelectQueryBlock;
 import com.alibaba.druid.sql.dialect.mysql.parser.MySqlStatementParser;
 import com.alibaba.druid.sql.dialect.mysql.visitor.MySqlASTVisitorAdapter;
+import com.alibaba.druid.sql.parser.Lexer;
 import com.alibaba.druid.sql.parser.Token;
 import com.alibaba.druid.util.JdbcUtils;
 
@@ -52,13 +53,17 @@ abstract public class DruidUtils {
 	}
 	
 
-    public static List<SQLStatement> parseStatements(String sql, String dbType) {
+	public static List<SQLStatement> parseStatements(String sql, DbType dbType) {
     	DbmMySqlLexer lexer = new DbmMySqlLexer(sql);
+		return parseStatements(lexer, dbType);
+	}
+	
+    public static List<SQLStatement> parseStatements(Lexer lexer, DbType dbType) {
     	lexer.nextToken();
     	MySqlStatementParser parser = new MySqlStatementParser(lexer);
 		List<SQLStatement> stmtList = parser.parseStatementList();
         if (parser.getLexer().token() != Token.EOF) {
-            throw new DruidRuntimeException("syntax error : " + sql);
+            throw new DruidRuntimeException("syntax error : " + lexer.text);
         }
         return stmtList;
     }
@@ -67,7 +72,7 @@ abstract public class DruidUtils {
 		return changeAsCountStatement(JdbcUtils.MYSQL, sql);
 	}
 	
-	public static SQLSelectStatement changeAsCountStatement(String dbType, String sql){
+	public static SQLSelectStatement changeAsCountStatement(DbType dbType, String sql){
 //		List<SQLStatement> statements = SQLUtils.parseStatements(sql, dbType);
 		List<SQLStatement> statements = parseStatements(sql, dbType);
 		

@@ -7,6 +7,7 @@ import org.onetwo.dbm.event.internal.DbmSessionEventSource;
 import org.onetwo.dbm.event.spi.DbmInsertEvent;
 import org.onetwo.dbm.mapping.DbmMappedEntry;
 import org.onetwo.dbm.mapping.JdbcStatementContext;
+import org.springframework.jdbc.core.SqlParameterValue;
 
 public class OracleInsertEventListener extends DbmInsertEventListener {
 
@@ -22,7 +23,7 @@ public class OracleInsertEventListener extends DbmInsertEventListener {
 		this.beforeDoInsert(event, entry);
 		
 		Object entity = event.getObject();
-		JdbcStatementContext<List<Object[]>> insert = entry.makeInsert(entity);
+		JdbcStatementContext<List<SqlParameterValue[]>> insert = entry.makeInsert(entity);
 		/*
 		String sql = insert.getSql();
 		List<Object[]> args = insert.getValue();

@@ -11,6 +11,7 @@ import org.onetwo.dbm.exception.EntityNotFoundException;
 import org.onetwo.dbm.exception.EntityVersionException;
 import org.onetwo.dbm.mapping.DbmMappedEntry;
 import org.onetwo.dbm.mapping.JdbcStatementContext;
+import org.springframework.jdbc.core.SqlParameterValue;
 
 public class DbmDeleteEventListener extends AbstractDbmEventListener {
 
@@ -33,16 +34,16 @@ public class DbmDeleteEventListener extends AbstractDbmEventListener {
 		
 		int count = 0;
 		if(deleteEvent.isDeleteAll()){
-			JdbcStatementContext<Object[]> delete = entry.makeDeleteAll();
+			JdbcStatementContext<SqlParameterValue[]> delete = entry.makeDeleteAll();
 //			count = es.getJFishJdbcTemplate().update(delete.getSql(), delete.getValue());
-			List<Object[]> argList = new ArrayList<>(1);
+			List<SqlParameterValue[]> argList = new ArrayList<>(1);
 			argList.add(delete.getValue());
 			count = this.executeJdbcUpdate(delete.getSql(), argList, es);
 		}else{
 			checkEntityLastVersion(es, entry, entity);
 			
-			JdbcStatementContext<List<Object[]>> delete = entry.makeDelete(entity);
-			List<List<Object[]>> argList = new ArrayList<>(1);
+			JdbcStatementContext<List<SqlParameterValue[]>> delete = entry.makeDelete(entity);
+			List<List<SqlParameterValue[]>> argList = new ArrayList<>(1);
 			argList.add(delete.getValue());
 			count = this.executeJdbcUpdate(delete.getSql(), delete.getValue(), es);
 			

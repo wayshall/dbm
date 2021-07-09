@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.onetwo.common.utils.ArrayUtils;
+import org.apache.commons.compress.utils.Lists;
 import org.onetwo.common.utils.Assert;
 import org.onetwo.common.utils.CUtils;
 import org.onetwo.common.utils.LangUtils;
@@ -13,7 +13,7 @@ import org.onetwo.dbm.mapping.SQLBuilderFactory.SqlBuilderType;
 import org.onetwo.dbm.utils.DbmUtils;
 import org.springframework.jdbc.core.SqlParameterValue;
 
-public class JdbcStatementContextBuilder implements JdbcStatementContext<List<Object[]>> {
+public class JdbcStatementContextBuilder implements JdbcStatementContext<List<SqlParameterValue[]>> {
 /*
 	public static DymanicSQLBuilder create(JFishMappedEntry entry, DSqlType dtype){
 		SQLBuilder sb = sqlBuilderFactory.createQMark(entry.getTableInfo().getName(), entry.getTableInfo().getAlias(), dtype);
@@ -26,28 +26,28 @@ public class JdbcStatementContextBuilder implements JdbcStatementContext<List<Ob
 	
 	private AbstractDbmMappedEntryImpl entry;
 	private EntrySQLBuilderImpl sqlBuilder;
-	private Map<DbmMappedField, Object> columnValues = CUtils.newLinkedHashMap();
-	private List<Object> causeValues = new ArrayList<Object>(5);
-	private List<Object[]> values;
+	private Map<DbmMappedField, SqlParameterValue> columnValues = CUtils.newLinkedHashMap();
+	private List<SqlParameterValue> causeValues = new ArrayList<>();
+	private List<SqlParameterValue[]> values;
 	private final DbmEventAction eventAction;
 
 	private JdbcStatementContextBuilder(DbmEventAction eventAction, AbstractDbmMappedEntryImpl entry, EntrySQLBuilderImpl sqlBuilder) {
 		super();
 		this.entry = entry;
 		this.sqlBuilder = sqlBuilder;
-		this.values = new ArrayList<Object[]>();
+		this.values = new ArrayList<>();
 		this.eventAction = eventAction;
 	}
 	
 	public JdbcStatementContextBuilder append(DbmMappedField field, Object val){
 		this.sqlBuilder.append(field);
-		this.columnValues.put(field, val);
+		this.columnValues.put(field, convertSqlParameterValue(field, val));
 		return this;
 	}
 	
-	public JdbcStatementContextBuilder appendWhere(DbmMappedField column, Object val){
-		this.sqlBuilder.appendWhere(column);
-		this.causeValues.add(val);
+	public JdbcStatementContextBuilder appendWhere(DbmMappedField field, Object val){
+		this.sqlBuilder.appendWhere(field);
+		this.causeValues.add(convertSqlParameterValue(field, val));
 		return this;
 	}
 	
@@ -84,34 +84,43 @@ public class JdbcStatementContextBuilder implements JdbcStatementContext<List<Ob
 	}
 	
 	public JdbcStatementContextBuilder addBatch(){
-		Object[] batchValues = null;
+		List<SqlParameterValue> batchValues = Lists.newArrayList();
 		SqlBuilderType sqltype = getSqlType();
 		if(SqlBuilderType.update==sqltype){
 //			this.getColumnValues().addAll(getCauseValues());
-			batchValues = ArrayUtils.addAll(this.columnValues.values().toArray(), causeValues.toArray());
+//			batchValues = ArrayUtils.addAll(this.columnValues.values().toArray(), causeValues.toArray());
+			batchValues.addAll(columnValues.values());
+			batchValues.addAll(causeValues);
 			
 		}else if(SqlBuilderType.insert==sqltype){
-			batchValues = columnValues.values().toArray();
+//			batchValues = columnValues.values().toArray();
+			batchValues.addAll(columnValues.values());
 			
 		}else if(SqlBuilderType.insertOrUpdate==sqltype){
-			batchValues = columnValues.values().toArray();
+//			batchValues = columnValues.values().toArray();
+			batchValues.addAll(columnValues.values());
 			
 		}else if(SqlBuilderType.insertOrIgnore==sqltype){
-			batchValues = columnValues.values().toArray();
+//			batchValues = columnValues.values().toArray();
+			batchValues.addAll(columnValues.values());
 			
 		}else if(SqlBuilderType.delete==sqltype){
 //			this.getColumnValues().addAll(getCauseValues());
-			batchValues = ArrayUtils.addAll(columnValues.values().toArray(), causeValues.toArray());
+//			batchValues = ArrayUtils.addAll(columnValues.values().toArray(), causeValues.toArray());
+			batchValues.addAll(columnValues.values());
+			batchValues.addAll(causeValues);
 			
 		}else if(SqlBuilderType.query==sqltype){
 //			this.getColumnValues().addAll(getCauseValues());
-			batchValues = ArrayUtils.addAll(columnValues.values().toArray(), causeValues.toArray());
+//			batchValues = ArrayUtils.addAll(columnValues.values().toArray(), causeValues.toArray());
+			batchValues.addAll(columnValues.values());
+			batchValues.addAll(causeValues);
 			
 		}else{
 			LangUtils.throwBaseException("not support type : " + getSqlType());
 		}
-		if(!LangUtils.isEmpty(batchValues)){
-			this.values.add(batchValues);
+		if(!batchValues.isEmpty()){
+			this.values.add(batchValues.toArray(new SqlParameterValue[0]));
 			this.causeValues.clear();
 			this.columnValues.clear();
 		}
@@ -146,8 +155,8 @@ public class JdbcStatementContextBuilder implements JdbcStatementContext<List<Ob
 		return DbmUtils.convert2SqlParameterValue(field, value);
 	}
 	
-	public JdbcStatementContextBuilder addCauseValue(Object value){
-		causeValues.add(value);
+	public JdbcStatementContextBuilder addCauseValue(DbmMappedField field, Object value){
+		causeValues.add(convertSqlParameterValue(field, value));
 		return this;
 	}
 	public JdbcStatementContextBuilder build(){
@@ -164,7 +173,7 @@ public class JdbcStatementContextBuilder implements JdbcStatementContext<List<Ob
 		return sqlBuilder.getSql();
 	}
 
-	public List<Object[]> getValue() {
+	public List<SqlParameterValue[]> getValue() {
 		return values;
 	}
 

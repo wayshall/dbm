@@ -7,6 +7,7 @@ import java.util.Map;
 import org.onetwo.dbm.dialet.DBDialect;
 import org.onetwo.dbm.id.IdentifierGenerator;
 import org.onetwo.dbm.mapping.SQLBuilderFactory.SqlBuilderType;
+import org.springframework.jdbc.core.SqlParameterValue;
 
 public interface DbmMappedEntry extends DbmMappedEntryMeta {
 	DBDialect getDbDialect();
@@ -67,11 +68,11 @@ public interface DbmMappedEntry extends DbmMappedEntryMeta {
 	/*String getStaticSeqSql();
 	String getStaticCreateSeqSql();*/
 	
-	JdbcStatementContext<Object[]> makeSelectVersion(Object object);
+	JdbcStatementContext<SqlParameterValue[]> makeSelectVersion(Object object);
 	
-	JdbcStatementContext<Object[]> makeFetchAll();
+	JdbcStatementContext<SqlParameterValue[]> makeFetchAll();
 	
-	JdbcStatementContext<Object[]> makeDeleteAll();
+	JdbcStatementContext<SqlParameterValue[]> makeDeleteAll();
 	
 	/****
 	 * 
@@ -80,14 +81,14 @@ public interface DbmMappedEntry extends DbmMappedEntryMeta {
 	 * @param isIdentify 是否根据id查询
 	 * @return
 	 */
-	JdbcStatementContext<List<Object[]>> makeFetch(Object objects, boolean isIdentify);
+	JdbcStatementContext<List<SqlParameterValue[]>> makeFetch(Object objects, boolean isIdentify);
 	
 //	JdbcStatementContext<Object[]> makeLockSelect(Object object, LockInfo lock);
 	
-	JdbcStatementContext<List<Object[]>> makeInsert(Object entity);
+	JdbcStatementContext<List<SqlParameterValue[]>> makeInsert(Object entity);
 	
-	JdbcStatementContext<List<Object[]>> makeMysqlInsertOrUpdate(Object entity);
-	JdbcStatementContext<List<Object[]>> makeMysqlInsertOrIgnore(Object entity);
+	JdbcStatementContext<List<SqlParameterValue[]>> makeMysqlInsertOrUpdate(Object entity);
+	JdbcStatementContext<List<SqlParameterValue[]>> makeMysqlInsertOrIgnore(Object entity);
 
 	/***
 	 * make delete by id
@@ -96,11 +97,11 @@ public interface DbmMappedEntry extends DbmMappedEntryMeta {
 	 * @param objects
 	 * @return
 	 */
-	JdbcStatementContext<List<Object[]>> makeDelete(Object objects);
+	JdbcStatementContext<List<SqlParameterValue[]>> makeDelete(Object objects);
 
-	JdbcStatementContext<List<Object[]>> makeUpdate(Object entity);
+	JdbcStatementContext<List<SqlParameterValue[]>> makeUpdate(Object entity);
 
-	JdbcStatementContext<List<Object[]>> makeDymanicUpdate(Object entity);
+	JdbcStatementContext<List<SqlParameterValue[]>> makeDymanicUpdate(Object entity);
 
 	Map<String, DbmMappedField> getMappedFields();
 	Map<String, DbmMappedField> getMappedColumns();

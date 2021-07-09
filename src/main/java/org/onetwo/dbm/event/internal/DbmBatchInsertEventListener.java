@@ -9,6 +9,7 @@ import org.onetwo.dbm.event.spi.DbmInsertEvent;
 import org.onetwo.dbm.exception.DbmException;
 import org.onetwo.dbm.mapping.DbmMappedEntry;
 import org.onetwo.dbm.mapping.JdbcStatementContext;
+import org.springframework.jdbc.core.SqlParameterValue;
 
 /*******
  * 和普通insert的区别只在，当实体的id策略是自增时，不会通过Statement#getGeneratedKeys接口获取数据库递增的id值和回写到实体的id
@@ -43,7 +44,7 @@ public class DbmBatchInsertEventListener extends DbmInsertEventListener {
 	protected void batchInsert(DbmBatchInsertEvent event, DbmMappedEntry entry, DbmSessionEventSource es) {
 		Object entity = event.getObject();
 		
-		JdbcStatementContext<List<Object[]>> insert = entry.makeInsert(entity);
+		JdbcStatementContext<List<SqlParameterValue[]>> insert = entry.makeInsert(entity);
 		int total = this.executeJdbcUpdate(true, insert.getSql(), insert.getValue(), es, event.getBatchSize());
 		event.setUpdateCount(total);
 	}

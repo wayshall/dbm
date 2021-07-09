@@ -1,6 +1,11 @@
 package org.onetwo.dbm.mapping;
 
+import java.util.List;
+
+import org.onetwo.dbm.sharding.ShardingTableConfig;
 import org.onetwo.dbm.spring.EnableDbmAttributes;
+
+import com.google.common.collect.Lists;
 
 import lombok.Data;
 
@@ -33,6 +38,11 @@ public class DefaultDbmConfig implements DbmConfig {
 	
 	private SnowflakeIdConfig snowflakeId = new SnowflakeIdConfig();
 	private EncryptConfig encrypt = new EncryptConfig();
+	
+	/***
+	 * 简单的分表配置
+	 */
+	List<ShardingTableConfig> shardingTables = Lists.newArrayList();
 
 	public DefaultDbmConfig(){
 	}
@@ -143,6 +153,10 @@ public class DefaultDbmConfig implements DbmConfig {
 
 	public void setEnableDbmAttributes(EnableDbmAttributes enableDbmAttributes) {
 		this.enableDbmAttributes = enableDbmAttributes;
+	}
+	
+	public List<ShardingTableConfig> getShardingTables() {
+		return shardingTables;
 	}
 
 }

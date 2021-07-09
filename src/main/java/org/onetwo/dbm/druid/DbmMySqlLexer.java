@@ -12,6 +12,9 @@ import com.alibaba.druid.sql.parser.Token;
  */
 
 public class DbmMySqlLexer extends MySqlLexer {
+	
+//	private Map<String, LexerVar> vars = Maps.newHashMap();
+//	private int varIndex = 0;
 
 	public DbmMySqlLexer(String input) {
 		super(input);
@@ -97,14 +100,26 @@ public class DbmMySqlLexer extends MySqlLexer {
 
         stringVal = subString(mark, bufPos);
         token = Token.VARIANT;
+        
+//        this.putVar(stringVal);
     }
 
     public boolean isValidVarChar(char c) {
         return !Character.isWhitespace(c) // 空白符包含：空格、tab 键、换行符
-        		&& c!=EOI 
-        		&& c!=',' 
-        		&& c!=';'
+        		&& c != EOI 
+        		&& c != ',' 
+        		&& c != ';'
         		&& c != '　' && c != '，'; // 中文空格和逗号
     }
-
+    
+//    private void putVar(String varName) {
+//    	LexerVar lexer = new LexerVar(varName, varIndex);
+//    	this.vars.put(varName, lexer);
+//    	varIndex++;
+//    }
+//
+//	public Map<String, LexerVar> getVars() {
+//		return vars;
+//	}
+    
 }

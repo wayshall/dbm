@@ -10,6 +10,7 @@ import org.onetwo.dbm.exception.EntityNotFoundException;
 import org.onetwo.dbm.exception.EntityVersionException;
 import org.onetwo.dbm.mapping.DbmMappedEntry;
 import org.onetwo.dbm.mapping.JdbcStatementContext;
+import org.springframework.jdbc.core.SqlParameterValue;
 
 /*****
  * 
@@ -48,7 +49,7 @@ public class DbmUpdateEventListener extends UpdateEventListener {
 					count += updateSingleEntity(false, es, entry, e);
 				}*/
 				// 当传入多个实体的时候，根据配置决定是否启用批量操作
-				JdbcStatementContext<List<Object[]>> updates = entry.makeUpdate(entity);
+				JdbcStatementContext<List<SqlParameterValue[]>> updates = entry.makeUpdate(entity);
 				count = this.executeJdbcUpdate(es, updates);
 			}else{
 				count = this.updateSingleEntity(false, es, entry, entity);
@@ -70,7 +71,7 @@ public class DbmUpdateEventListener extends UpdateEventListener {
 	 */
 	private int updateSingleEntity(boolean dymanic, DbmSessionEventSource es, DbmMappedEntry entry, Object singleEntity){
 		checkEntityLastVersion(es, entry, singleEntity);
-		JdbcStatementContext<List<Object[]>> update = dymanic?entry.makeDymanicUpdate(singleEntity):entry.makeUpdate(singleEntity);
+		JdbcStatementContext<List<SqlParameterValue[]>> update = dymanic?entry.makeDymanicUpdate(singleEntity):entry.makeUpdate(singleEntity);
 		int count = this.executeJdbcUpdate(false, update.getSql(), update.getValue(), es);
 		
 		if(count<1){

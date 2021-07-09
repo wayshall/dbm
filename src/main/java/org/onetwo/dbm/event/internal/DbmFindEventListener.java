@@ -8,6 +8,7 @@ import org.onetwo.dbm.event.spi.DbmSessionEvent;
 import org.onetwo.dbm.mapping.DbmMappedEntry;
 import org.onetwo.dbm.mapping.JdbcStatementContext;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.SqlParameterValue;
 
 public class DbmFindEventListener extends AbstractDbmEventListener {
 
@@ -22,12 +23,12 @@ public class DbmFindEventListener extends AbstractDbmEventListener {
 
 		RowMapper rowMapper = es.getSessionFactory().getRowMapper(event.getEntityClass());
 		if(findEvent.isFindAll()){
-			JdbcStatementContext<Object[]> fetch = entry.makeFetchAll();
+			JdbcStatementContext<SqlParameterValue[]> fetch = entry.makeFetchAll();
 			List list = (List) es.getDbmJdbcOperations().query(fetch.getSql(), fetch.getValue(), rowMapper);
 			findEvent.setResultObject(list);
 		}else{
 //			JdbcStatementContext<List<Object[]>> fetch = entry.makeFetch(entity, !findEvent.isJoined());
-			JdbcStatementContext<List<Object[]>> fetch = entry.makeFetch(entity, true);
+			JdbcStatementContext<List<SqlParameterValue[]>> fetch = entry.makeFetch(entity, true);
 			for(Object[] args : fetch.getValue()){
 				List list = (List) es.getDbmJdbcOperations().query(fetch.getSql(), args, rowMapper);
 				if(LangUtils.isNotEmpty(list))

@@ -27,6 +27,7 @@ import org.onetwo.dbm.mapping.JdbcStatementContext;
 import org.onetwo.dbm.utils.DbmUtils;
 import org.slf4j.Logger;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.SqlParameterValue;
 
 @SuppressWarnings("unchecked")
 abstract public class AbstractDbmEventListener implements DbmEventListener<DbmSessionEventSource, DbmSessionEvent> {
@@ -83,7 +84,7 @@ abstract public class AbstractDbmEventListener implements DbmEventListener<DbmSe
 	}
 	
 
-	protected int executeJdbcUpdate(DbmSessionEventSource es, JdbcStatementContext<List<Object[]>> update){
+	protected int executeJdbcUpdate(DbmSessionEventSource es, JdbcStatementContext<List<SqlParameterValue[]>> update){
 		return executeJdbcUpdate(update.getSql(), update.getValue(), es);
 	}
 	
@@ -95,7 +96,7 @@ abstract public class AbstractDbmEventListener implements DbmEventListener<DbmSe
 	 * @param es
 	 * @return
 	 */
-	protected int executeJdbcUpdate(String sql, List<Object[]> args, DbmSessionEventSource es){
+	protected int executeJdbcUpdate(String sql, List<SqlParameterValue[]> args, DbmSessionEventSource es){
 		return executeJdbcUpdate(isUseBatchUpdate(args, es), sql, args, es);
 	}
 	
@@ -107,7 +108,7 @@ abstract public class AbstractDbmEventListener implements DbmEventListener<DbmSe
 	 * @param es
 	 * @return
 	 */
-	protected int executeJdbcUpdate(boolean userBatch, String sql, List<Object[]> args, DbmSessionEventSource es){
+	protected int executeJdbcUpdate(boolean userBatch, String sql, List<SqlParameterValue[]> args, DbmSessionEventSource es){
 		return executeJdbcUpdate(userBatch, sql, args, es, es.getDataBaseConfig().getProcessSizePerBatch());
 	}
 	/***
@@ -120,7 +121,7 @@ abstract public class AbstractDbmEventListener implements DbmEventListener<DbmSe
 	 * @param configBatchSize 批量处理时，每次提交的数据量
 	 * @return
 	 */
-	protected int executeJdbcUpdate(boolean userBatch, String sql, List<Object[]> args, DbmSessionEventSource es, Integer configBatchSize){
+	protected int executeJdbcUpdate(boolean userBatch, String sql, List<SqlParameterValue[]> args, DbmSessionEventSource es, Integer configBatchSize){
 		int count = 0;
 		if(userBatch){
 //			int[] ups = es.getJFishJdbcTemplate().batchUpdate(sql, args);
@@ -241,7 +242,7 @@ abstract public class AbstractDbmEventListener implements DbmEventListener<DbmSe
 	 */
 	private Object getLastVersion(DbmSessionEventSource es, DbmMappedEntry entry, Object singleEntity) {
 		DbmMappedField versionField = entry.getVersionField();
-		JdbcStatementContext<Object[]> versionContext = entry.makeSelectVersion(singleEntity);
+		JdbcStatementContext<SqlParameterValue[]> versionContext = entry.makeSelectVersion(singleEntity);
 		
 		Object[] id = entry.getIds(singleEntity);
 		try {

@@ -1,5 +1,8 @@
 package org.onetwo.dbm.mapping;
 
+import java.util.List;
+
+import org.onetwo.dbm.sharding.ShardingTableConfig;
 import org.onetwo.dbm.spring.EnableDbmAttributes;
 
 import lombok.Data;
@@ -57,6 +60,13 @@ public interface DbmConfig {
 	 */
 	SnowflakeIdConfig getSnowflakeId();
 	EncryptConfig getEncrypt();
+	
+	/***
+	 * 简单的分表配置
+	 * @author weishao zeng
+	 * @return
+	 */
+	List<ShardingTableConfig> getShardingTables();
 	
 	@Data
 	public class SnowflakeIdConfig {

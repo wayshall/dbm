@@ -9,6 +9,7 @@ import org.onetwo.dbm.exception.EntityInsertException;
 import org.onetwo.dbm.jdbc.internal.SimpleArgsPreparedStatementCreator;
 import org.onetwo.dbm.mapping.DbmMappedEntry;
 import org.onetwo.dbm.mapping.JdbcStatementContext;
+import org.springframework.jdbc.core.SqlParameterValue;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 
@@ -65,11 +66,11 @@ public class DbmInsertEventListener extends InsertEventListener{
 		
 		Object entity = event.getObject();
 		
-		JdbcStatementContext<List<Object[]>> insert = entry.makeInsert(entity);
+		JdbcStatementContext<List<SqlParameterValue[]>> insert = entry.makeInsert(entity);
 		if(insert==null)
 			return ;
 		String sql = insert.getSql();
-		List<Object[]> args = insert.getValue();
+		List<SqlParameterValue[]> args = insert.getValue();
 		List<Object> objects = LangUtils.asList(entity);
 		
 		int updateCount = 0;

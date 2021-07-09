@@ -37,6 +37,7 @@ import org.onetwo.dbm.mapping.SQLBuilderFactory.SqlBuilderType;
 import org.onetwo.dbm.utils.DbmUtils;
 import org.slf4j.Logger;
 import org.springframework.beans.ConfigurablePropertyAccessor;
+import org.springframework.jdbc.core.SqlParameterValue;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -571,32 +572,35 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 	}
 
 	@Override
-	public JdbcStatementContext<Object[]> makeFetchAll(){
+	public JdbcStatementContext<SqlParameterValue[]> makeFetchAll(){
 		EntrySQLBuilder sqlb = getStaticFetchAllSqlBuilder();
 		sqlb.build();
 //		KVEntry<String, Object[]> kv = new KVEntry<String, Object[]>(sql, (Object[])null);
-		JdbcStatementContext<Object[]> kv = SimpleJdbcStatementContext.create(sqlb, (Object[])null);
+		JdbcStatementContext<SqlParameterValue[]> kv = SimpleJdbcStatementContext.create(sqlb, (SqlParameterValue[])null);
 		return kv;
 	}
 
 	@Override
-	public JdbcStatementContext<Object[]> makeDeleteAll(){
+	public JdbcStatementContext<SqlParameterValue[]> makeDeleteAll(){
 		EntrySQLBuilder sqlb = getStaticDeleteAllSqlBuilder();
 		sqlb.build();
 //		KVEntry<String, Object[]> kv = new KVEntry<String, Object[]>(sql, (Object[])null);
-		JdbcStatementContext<Object[]> kv = SimpleJdbcStatementContext.create(sqlb, (Object[])null);
+		JdbcStatementContext<SqlParameterValue[]> kv = SimpleJdbcStatementContext.create(sqlb, (SqlParameterValue[])null);
 		return kv;
 	}
 	
 
 	@Override
-	public JdbcStatementContext<Object[]> makeSelectVersion(Object object){
+	public JdbcStatementContext<SqlParameterValue[]> makeSelectVersion(Object object){
 		if(LangUtils.isMultiple(object)){
 			throw new DbmException("not a entity: " + object);
 		}
 		EntrySQLBuilder sqlb = getStaticSelectVersionSqlBuilder();
 		sqlb.build();
-		JdbcStatementContext<Object[]> kv = SimpleJdbcStatementContext.create(sqlb, new Object[]{getId(object), getVersionField().getValue(object)});
+		
+		SqlParameterValue id = DbmUtils.convert2SqlParameterValue(getIdentifyFields().get(0), getId(object));
+		SqlParameterValue version = DbmUtils.convert2SqlParameterValue(getVersionField(), getVersionField().getValue(object));
+		JdbcStatementContext<SqlParameterValue[]> kv = SimpleJdbcStatementContext.create(sqlb, new SqlParameterValue[]{id, version});
 		return kv;
 	}
 	
@@ -605,7 +609,7 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 	 * @param isIdentify 传入的objects是否是实体id
 	 */
 	@Override
-	public JdbcStatementContext<List<Object[]>> makeFetch(Object objects, boolean isIdentify){
+	public JdbcStatementContext<List<SqlParameterValue[]>> makeFetch(Object objects, boolean isIdentify){
 		JdbcStatementContextBuilder dsb = JdbcStatementContextBuilder.create(DbmEventAction.find, this, getStaticFetchSqlBuilder());
 		
 		if(LangUtils.isMultiple(objects)){
@@ -630,20 +634,20 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 		
 		dsb.build();
 //		KVEntry<String, List<Object[]>> kv = new KVEntry<String, List<Object[]>>(dsb.getSql(), dsb.getValues());
-		JdbcStatementContext<List<Object[]>> kv = SimpleJdbcStatementContext.create(dsb.getSqlBuilder(), dsb.getValue());
+		JdbcStatementContext<List<SqlParameterValue[]>> kv = SimpleJdbcStatementContext.create(dsb.getSqlBuilder(), dsb.getValue());
 		return kv;
 	}
 	
 	private void addIdCauseValue(JdbcStatementContextBuilder dsb, Object idObject) {
 		if (!isCompositePK()) {
-			dsb.addCauseValue(idObject);
+			dsb.addCauseValue(getIdentifyFields().get(0), idObject);
 			return ;
 		}
 		// 复合主键存在多个id的情况
 		EntrySQLBuilder sqlBuilder = dsb.getSqlBuilder();
 		for (DbmMappedField idField : sqlBuilder.getWhereCauseFields()) {
 			Object idValue = idField.getValue(idObject);
-			dsb.addCauseValue(idValue);
+			dsb.addCauseValue(idField, idValue);
 		}
 	}
 	
@@ -663,7 +667,7 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 	}*/
 	
 	@Override
-	public JdbcStatementContext<List<Object[]>> makeInsert(Object entity){
+	public JdbcStatementContext<List<SqlParameterValue[]>> makeInsert(Object entity){
 		this.throwIfQueryableOnly();
 		EntrySQLBuilderImpl insertSqlBuilder = getStaticInsertSqlBuilder();
 		JdbcStatementContextBuilder dsb = JdbcStatementContextBuilder.create(DbmEventAction.insert, this, insertSqlBuilder);
@@ -697,7 +701,7 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 	 * @return
 	 */
 	@Override
-	public JdbcStatementContext<List<Object[]>> makeMysqlInsertOrIgnore(Object entity) {
+	public JdbcStatementContext<List<SqlParameterValue[]>> makeMysqlInsertOrIgnore(Object entity) {
 		this.throwIfQueryableOnly();
 		EntrySQLBuilderImpl insertOrUpdateSqlBuilder = getStaticInsertOrIgnoreSqlBuilder();
 		JdbcStatementContextBuilder dsb = JdbcStatementContextBuilder.create(DbmEventAction.insert, this, insertOrUpdateSqlBuilder);
@@ -713,7 +717,7 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 	 * @return
 	 */
 	@Override
-	public JdbcStatementContext<List<Object[]>> makeMysqlInsertOrUpdate(Object entity) {
+	public JdbcStatementContext<List<SqlParameterValue[]>> makeMysqlInsertOrUpdate(Object entity) {
 		this.throwIfQueryableOnly();
 		EntrySQLBuilderImpl insertOrUpdateSqlBuilder = getStaticInsertOrUpdateSqlBuilder();
 		JdbcStatementContextBuilder dsb = JdbcStatementContextBuilder.create(DbmEventAction.insert, this, insertOrUpdateSqlBuilder);
@@ -722,7 +726,7 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 		return dsb;
 	}
 
-	protected JdbcStatementContext<List<Object[]>> makeJdbcStatementContext(JdbcStatementContextBuilder dsb, Object entity) {
+	protected JdbcStatementContext<List<SqlParameterValue[]>> makeJdbcStatementContext(JdbcStatementContextBuilder dsb, Object entity) {
 		if(LangUtils.isMultiple(entity)){
 			List<Object> list = LangUtils.asList(entity);
 			if(LangUtils.isEmpty(list)) {
@@ -763,7 +767,7 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 	}
 	
 	@Override
-	public JdbcStatementContext<List<Object[]>> makeDelete(Object objects){
+	public JdbcStatementContext<List<SqlParameterValue[]>> makeDelete(Object objects){
 		this.throwIfQueryableOnly();
 		
 		JdbcStatementContextBuilder dsb = JdbcStatementContextBuilder.create(DbmEventAction.delete, this, getStaticDeleteSqlBuilder());
@@ -799,26 +803,26 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 		dsb.addCauseValue(idValue);*/
 		if (!isCompositePK()) {
 			Object idValue = getId(entityObject);
-			dsb.addCauseValue(idValue);
+			dsb.addCauseValue(getIdentifyFields().get(0), idValue);
 		} else {
 			// 复合主键存在多个id的情况
 			EntrySQLBuilder sqlBuilder = dsb.getSqlBuilder();
 			for (DbmMappedField idField : sqlBuilder.getWhereCauseFields()) {
 				if (idField.isIdentify()) {
 					Object idValue = idField.getValue(entityObject);
-					dsb.addCauseValue(idValue);
+					dsb.addCauseValue(idField, idValue);
 				}
 			}
 		}
 		
 		if (isVersionControll()) {
 			Object version = getVersionValue(entityObject);
-			dsb.addCauseValue(version);
+			dsb.addCauseValue(getVersionField(), version);
 		}
 	}
 	
 	@Override
-	public JdbcStatementContext<List<Object[]>> makeUpdate(Object entity){
+	public JdbcStatementContext<List<SqlParameterValue[]>> makeUpdate(Object entity){
 		this.throwIfQueryableOnly();
 		
 		JdbcStatementContextBuilder dsb = JdbcStatementContextBuilder.create(DbmEventAction.update, this, getStaticUpdateSqlBuilder());
@@ -864,7 +868,7 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 	}
 	
 	@Override
-	public JdbcStatementContext<List<Object[]>> makeDymanicUpdate(Object entity) {//single entity
+	public JdbcStatementContext<List<SqlParameterValue[]>> makeDymanicUpdate(Object entity) {//single entity
 		this.throwIfQueryableOnly();
 
 		this.checkIdValue(entity);

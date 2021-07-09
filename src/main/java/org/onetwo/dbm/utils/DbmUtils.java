@@ -411,7 +411,7 @@ final public class DbmUtils {
 	}
 	
 	public static SqlParameterValue convert2SqlParameterValue(DbmMappedField field, Object value){
-		return new DbmSqlParameterValue(field.getColumn().getSqlType(), value);
+		return new DbmSqlParameterValue(field, value);
 	}
 	
 	public static Object convertFromSqlParameterValue(DbmMappedField field, Object sqlParametableValue){
@@ -425,8 +425,8 @@ final public class DbmUtils {
 	
 	public static class DbmSqlParameterValue extends SqlParameterValue {
 
-		public DbmSqlParameterValue(int sqlType, Object value) {
-			super(sqlType, value);
+		public DbmSqlParameterValue(DbmMappedField field, Object value) {
+			super(new SqlParameter(field.getName(), field.getColumn().getSqlType()), value);
 		}
 		
 		public String toString() {
