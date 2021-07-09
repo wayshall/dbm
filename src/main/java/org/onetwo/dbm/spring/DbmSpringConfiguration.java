@@ -13,6 +13,7 @@ import org.onetwo.common.spring.condition.OnMissingBean;
 import org.onetwo.common.utils.LangUtils;
 import org.onetwo.dbm.core.internal.DbmEntityManagerImpl;
 import org.onetwo.dbm.core.internal.DbmSessionFactoryImpl;
+import org.onetwo.dbm.core.internal.JdbcMethodCacheService;
 import org.onetwo.dbm.core.spi.DbmEntityManager;
 import org.onetwo.dbm.core.spi.DbmSessionFactory;
 import org.onetwo.dbm.event.internal.EdgeEventBus;
@@ -208,6 +209,11 @@ public class DbmSpringConfiguration implements ApplicationContextAware, Initiali
 	@Bean
 	public SqlExecutedStatis sqlExecutedStatis(){
 		return new SqlExecutedStatis();
+	}
+	
+	@Bean
+	public JdbcMethodCacheService jdbcMethodCacheService() {
+		return new JdbcMethodCacheService();
 	}
 	
 //	@Configuration

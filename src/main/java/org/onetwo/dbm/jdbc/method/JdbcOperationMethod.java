@@ -6,7 +6,9 @@ import java.lang.reflect.Parameter;
 import org.onetwo.common.proxy.AbstractMethodResolver;
 import org.onetwo.common.proxy.BaseMethodParameter;
 import org.onetwo.dbm.jdbc.annotation.DbmJdbcArgsMark;
+import org.onetwo.dbm.jdbc.annotation.DbmJdbcOperationMark;
 import org.onetwo.dbm.jdbc.annotation.DbmJdbcSqlMark;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.jdbc.core.SqlProvider;
 
 /**
@@ -18,9 +20,11 @@ public class JdbcOperationMethod extends AbstractMethodResolver<BaseMethodParame
 	private BaseMethodParameter sqlParameter;
 	private BaseMethodParameter sqlArgsParameter;
 	private BaseMethodParameter sqlProviderParameter;
+	private DbmJdbcOperationMark jdbcOperationMark;
 
 	public JdbcOperationMethod(Method method) {
 		super(method);
+		this.jdbcOperationMark = AnnotationUtils.findAnnotation(method, DbmJdbcOperationMark.class);
 		for (BaseMethodParameter p : this.parameters) {
 			if (p.hasParameterAnnotation(DbmJdbcSqlMark.class)) {
 				this.sqlParameter = p;
@@ -47,6 +51,10 @@ public class JdbcOperationMethod extends AbstractMethodResolver<BaseMethodParame
 
 	public BaseMethodParameter getSqlProviderParameter() {
 		return sqlProviderParameter;
+	}
+
+	public DbmJdbcOperationMark getJdbcOperationMark() {
+		return jdbcOperationMark;
 	}
 
 }

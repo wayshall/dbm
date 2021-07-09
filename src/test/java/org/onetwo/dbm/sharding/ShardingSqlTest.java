@@ -10,8 +10,6 @@ import java.util.List;
 import org.junit.Test;
 import org.onetwo.common.db.DruidUtils;
 import org.onetwo.common.db.sqlext.ExtQueryUtils;
-import org.onetwo.dbm.utils.DbmUtils;
-import org.springframework.jdbc.core.namedparam.EmptySqlParameterSource;
 
 import com.alibaba.druid.sql.SQLUtils;
 import com.alibaba.druid.sql.ast.SQLStatement;
@@ -23,7 +21,7 @@ public class ShardingSqlTest {
 	
 	@Test
 	public void testSelect() {
-		String sql = "select * from user u where u.depart_id = :departId and u.name= :request.userName?likeString and u.age = ?";
+		String sql = "select * from user u where u.depart_id = :departId and u.name like :request.userName?likeString and u.age = ?";
 		
 		String countSql = ExtQueryUtils.buildCountSql(sql, "1");
 		System.out.println("countsql: " + countSql);
@@ -36,7 +34,7 @@ public class ShardingSqlTest {
 	
 	private void printSql(String sql) {
 		
-		DbmUtils.parseNamedSql(sql, new EmptySqlParameterSource());
+//		DbmUtils.parseNamedSql(sql, new EmptySqlParameterSource());
 		
 		String dbType = JdbcConstants.MYSQL;
 //		List<SQLStatement> stmtList = SQLUtils.parseStatements(sql, dbType);
@@ -44,9 +42,11 @@ public class ShardingSqlTest {
  
 		ExportTableAliasVisitor visitor = new ExportTableAliasVisitor();
 		MySqlSchemaStatVisitor mySqlStatVisitor = new MySqlSchemaStatVisitor();
+//		MySqlExportParameterVisitor paramterVisitor = new MySqlExportParameterVisitor(Lists.newArrayList(), new StringBuilder(), true);
 		for (SQLStatement stmt : stmtList) {
 			stmt.accept(visitor);
 			stmt.accept(mySqlStatVisitor);
+//			stmt.accept(paramterVisitor);
 		}
  
 		String sqlString = SQLUtils.toSQLString(stmtList, dbType);
@@ -58,6 +58,10 @@ public class ShardingSqlTest {
 					", table: " + condition.getColumn().getTable() + 
 					", values: " + condition.getValues());
 		}
+		
+//		paramterVisitor.getParameters().forEach(p -> {
+//			System.out.println("parameter: " + p);
+//		});
 		System.out.println("================================================");
 	}
 

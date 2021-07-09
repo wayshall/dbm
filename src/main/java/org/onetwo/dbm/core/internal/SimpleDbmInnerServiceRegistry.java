@@ -225,8 +225,12 @@ public class SimpleDbmInnerServiceRegistry implements DbmInnerServiceRegistry {
 				interceptors.add(new DebugContextInterceptor(context.getSessionFactory()));
 			}
 			interceptors.add(new SessionCacheInterceptor(context.getSessionFactory()));
-			interceptors.add(new LogSqlInterceptor(dataBaseConfig, context.getSessionFactory()));
-//			interceptors.add(new LogSqlByAnnotationInterceptor(dataBaseConfig, context.getSessionFactory()));
+			
+//			interceptors.add(new LogSqlInterceptor(dataBaseConfig, context.getSessionFactory()));
+			
+			JdbcMethodCacheService jdbcMethodCacheService = SpringUtils.getBean(applicationContext, JdbcMethodCacheService.class);
+			interceptors.add(new LogSqlByAnnotationInterceptor(jdbcMethodCacheService, dataBaseConfig, context.getSessionFactory()));
+			
 			interceptors.add(new JdbcEventInterceptor(edgeEventBus));
 			/*if(this.interceptors!=null){
 				interceptors.addAll(this.interceptors);
