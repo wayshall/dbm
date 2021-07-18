@@ -6,8 +6,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.onetwo.dbm.druid.DbmMySqlLexer;
 import org.onetwo.dbm.exception.DbmException;
 
+import com.alibaba.druid.DbType;
 import com.alibaba.druid.DruidRuntimeException;
-import com.alibaba.druid.sql.SQLUtils;
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.expr.SQLAggregateExpr;
 import com.alibaba.druid.sql.ast.expr.SQLIdentifierExpr;
@@ -52,7 +52,7 @@ abstract public class DruidUtils {
 	}
 	
 
-    public static List<SQLStatement> parseStatements(String sql, String dbType) {
+    public static List<SQLStatement> parseStatements(String sql, DbType dbType) {
     	DbmMySqlLexer lexer = new DbmMySqlLexer(sql);
     	lexer.nextToken();
     	MySqlStatementParser parser = new MySqlStatementParser(lexer);
@@ -67,7 +67,7 @@ abstract public class DruidUtils {
 		return changeAsCountStatement(JdbcUtils.MYSQL, sql);
 	}
 	
-	public static SQLSelectStatement changeAsCountStatement(String dbType, String sql){
+	public static SQLSelectStatement changeAsCountStatement(DbType dbType, String sql){
 //		List<SQLStatement> statements = SQLUtils.parseStatements(sql, dbType);
 		List<SQLStatement> statements = parseStatements(sql, dbType);
 		
