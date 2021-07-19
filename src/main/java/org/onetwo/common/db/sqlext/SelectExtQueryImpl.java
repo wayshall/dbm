@@ -43,7 +43,7 @@ public class SelectExtQueryImpl extends AbstractExtQuery implements SelectExtQue
 	private boolean cacheable;
 
 //	protected StringBuilder couontSelect;
-	protected StringBuilder couontJoin;
+	protected StringBuilder countJoin;
 	
 	private LockInfo lockInfo;
 	protected Map<String, String> joinMapped = new HashMap<>();
@@ -281,7 +281,7 @@ public class SelectExtQueryImpl extends AbstractExtQuery implements SelectExtQue
 	protected SelectExtQueryImpl buildJoin() {
 		join = new StringBuilder();
 		//for count
-		couontJoin = new StringBuilder();
+		countJoin = new StringBuilder();
 		/*buildJoin(join, K.JOIN_FETCH, false);//inner
 		buildJoin(join, K.FETCH, false);
 		buildJoin(join, K.JOIN, false);
@@ -297,7 +297,7 @@ public class SelectExtQueryImpl extends AbstractExtQuery implements SelectExtQue
 				buildJoin(join, key, value, true);
 				
 				//for count
-				buildJoin(couontJoin, key, value, true);
+				buildJoin(countJoin, key, value, true);
 				
 			}else if(K.SQL_JOIN.equals(key)){
 				Object rawSqlObj = this.getParams().get(key);
@@ -310,7 +310,7 @@ public class SelectExtQueryImpl extends AbstractExtQuery implements SelectExtQue
 					join.append(wrap.getRawSql()).append(" ");
 
 					//for count
-					couontJoin.append(wrap.getRawSql()).append(" ");
+					countJoin.append(wrap.getRawSql()).append(" ");
 				}
 				getParams().remove(K.SQL_JOIN);
 			}else{
@@ -318,11 +318,11 @@ public class SelectExtQueryImpl extends AbstractExtQuery implements SelectExtQue
 
 				//for count
 				if(K.FETCH.equals(key) || K.LEFT_JOIN_FETCH.equals(key)){
-					buildJoin(couontJoin, K.LEFT_JOIN, value, false);
+					buildJoin(countJoin, K.LEFT_JOIN, value, false);
 				}else if(K.JOIN_FETCH.equals(key)){
-					buildJoin(couontJoin, K.JOIN, value, false);
+					buildJoin(countJoin, K.JOIN, value, false);
 				}else{
-					buildJoin(couontJoin, key, value, false);
+					buildJoin(countJoin, key, value, false);
 				}
 			}
 			
@@ -548,8 +548,8 @@ public class SelectExtQueryImpl extends AbstractExtQuery implements SelectExtQue
 		
 		StringBuilder sql = new StringBuilder();
 		sql.append(select);
-		if (couontJoin != null)
-			sql.append(couontJoin);
+		if (countJoin != null)
+			sql.append(countJoin);
 		
 		if (!params.isEmpty()) {
 			if(where!=null)

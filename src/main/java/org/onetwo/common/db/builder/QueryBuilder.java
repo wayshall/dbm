@@ -36,6 +36,7 @@ public interface QueryBuilder<E> {
 
 	public QueryBuilder<E> select(String... fields);
 	public QueryBuilder<E> unselect(String...fields);
+	public QueryBuilder<E> count(String field);
 
 	/***
 	 * 

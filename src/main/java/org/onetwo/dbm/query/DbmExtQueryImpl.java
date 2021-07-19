@@ -55,7 +55,7 @@ public class DbmExtQueryImpl extends SelectExtQueryImpl {
 		if(entry!=null && !entry.getIdentifyFields().isEmpty()){
 			return entry.getIdentifyFields().get(0).getColumn().getName();
 		}
-		return "*";
+		return "1";
 	}
 	
 	@Override
