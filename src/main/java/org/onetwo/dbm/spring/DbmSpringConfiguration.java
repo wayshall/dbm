@@ -188,6 +188,9 @@ public class DbmSpringConfiguration implements ApplicationContextAware, Initiali
 			dataSource = dataSources.size()==1?dataSources.values().iterator().next():dataSources.get("dataSource");
 		}else{
 			dataSource = dataSources.get(dataSourceName);
+			if (dataSource==null) {
+				throw new DbmException("dataSource not found: " + dataSourceName);
+			}
 		}
 		DbmSessionFactoryImpl sf = new DbmSessionFactoryImpl(applicationContext, transactionManager, dataSource);
 		sf.setPackagesToScan(getAllDbmPackageNames().toArray(new String[0]));

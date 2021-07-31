@@ -13,6 +13,7 @@ import org.onetwo.common.db.sqlext.ExtQueryUtils;
 import org.onetwo.dbm.utils.DbmUtils;
 import org.springframework.jdbc.core.namedparam.EmptySqlParameterSource;
 
+import com.alibaba.druid.DbType;
 import com.alibaba.druid.sql.SQLUtils;
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.dialect.mysql.visitor.MySqlSchemaStatVisitor;
@@ -38,7 +39,7 @@ public class ShardingSqlTest {
 		
 		DbmUtils.parseNamedSql(sql, new EmptySqlParameterSource());
 		
-		String dbType = JdbcConstants.MYSQL;
+		DbType dbType = JdbcConstants.MYSQL;
 //		List<SQLStatement> stmtList = SQLUtils.parseStatements(sql, dbType);
 		List<SQLStatement> stmtList = DruidUtils.parseStatements(sql, dbType);
  
