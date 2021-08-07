@@ -2,7 +2,9 @@ package org.onetwo.common.db.dquery;
 
 import java.lang.reflect.Method;
 import java.util.Map;
+import java.util.Optional;
 
+import org.onetwo.common.db.dquery.DynamicQueryHandlerProxyCreator.DbmRepositoryAttrs;
 import org.onetwo.common.db.filequery.SpringBasedSqlFileScanner;
 import org.onetwo.common.db.spi.NamedSqlFileManager;
 import org.onetwo.common.db.spi.SqlFileScanner;
@@ -64,16 +66,29 @@ public class FileScanBasicDynamicQueryObjectRegister implements DynamicQueryObje
 			if(registry.containsBeanDefinition(className)){
 				return;
 			}
-			final Class<?> interfaceClass = ReflectUtils.loadClass(className);
+			final Class<?> repositoryClass = ReflectUtils.loadClass(className);
+			
+			Optional<DbmRepositoryAttrs> dbmRepAttrsOpt = DynamicQueryHandlerProxyCreator.findDbmRepositoryAttrs(repositoryClass);
+			if (!dbmRepAttrsOpt.isPresent()) {
+				logger.info("ignore registered DbmRepository bean: {} ", className);
+				return ;
+			}
+			
+			DbmRepositoryAttrs dbmRepAttrs = dbmRepAttrsOpt.get();
+			if (DynamicQueryHandlerProxyCreator.isIgnoreRegisterDbmRepository(registry, dbmRepAttrs)) {
+				logger.info("ignore registered DbmRepository bean: {} ", className);
+				return ;
+			}
+			
 			BeanDefinition beandef = BeanDefinitionBuilder.rootBeanDefinition(DynamicQueryHandlerProxyCreator.class)
-								.addConstructorArgValue(interfaceClass)
+								.addConstructorArgValue(repositoryClass)
 								.addConstructorArgValue(methodCache)
 								.addPropertyValue(DynamicQueryHandlerProxyCreator.ATTR_SQL_FILE, f.getValue())
 								.setScope(BeanDefinition.SCOPE_SINGLETON)
 //								.setRole(BeanDefinition.ROLE_APPLICATION)
 								.getBeanDefinition();
 			registry.registerBeanDefinition(className, beandef);
-			logger.info("register dao bean: {} -> {}", className, f.getValue().getFile());
+			logger.info("registered DbmRepository bean: {} -> {}", className, f.getValue().getFile());
 		});
 		return true;
 		
