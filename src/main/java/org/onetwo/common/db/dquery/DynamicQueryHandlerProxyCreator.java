@@ -114,7 +114,7 @@ public class DynamicQueryHandlerProxyCreator implements InitializingBean, Applic
 			}else if(StringUtils.isNotBlank(attrs.dataSource())){
 				DataSource dataSource = SpringUtils.getBean(applicationContext, attrs.dataSource());
 				if(dataSource==null){
-					throw new DbmException("no DataSource found: " + attrs.dataSource());
+					throw new DbmException("DataSource not found: " + attrs.dataSource());
 				}
 				queryProvideManager = (QueryProvideManager)Dbms.obtainBaseEntityManager(dataSource);
 			}else{

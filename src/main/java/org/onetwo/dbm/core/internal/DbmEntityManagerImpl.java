@@ -68,6 +68,10 @@ public class DbmEntityManagerImpl extends BaseEntityManagerAdapter implements Qu
 		this.sessionFactory = sessionFactory;
 	}
 
+	public void setNamedQueryInfoParsers(List<NamedQueryInfoParser> namedQueryInfoParsers) {
+		this.namedQueryInfoParsers = namedQueryInfoParsers;
+	}
+
 	@Override
 	public DataSource getDataSource() {
 		return this.sessionFactory.getDataSource();

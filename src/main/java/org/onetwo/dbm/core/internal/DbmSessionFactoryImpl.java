@@ -77,8 +77,8 @@ public class DbmSessionFactoryImpl implements InitializingBean, DbmSessionFactor
 	public DbmSessionFactoryImpl(ApplicationContext applicationContext, PlatformTransactionManager transactionManager,
 			DataSource dataSource) {
 		super();
-		this.transactionManager = transactionManager;
 		this.dataSource = dataSource;
+		this.transactionManager = transactionManager;
 	}
 
 	public DbmInterceptorManager getInterceptorManager() {
