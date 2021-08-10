@@ -23,11 +23,13 @@ public class DelegateDatabaseMetaDialet implements DatabaseMetaDialet {
 	public DelegateDatabaseMetaDialet(DataSource dataSource) {
 		DataBase db = JdbcUtils.getDataBase(dataSource);
 		if (db==DataBase.MySQL) {
-			delegate = new MysqlMetaDialet(dataSource);
+			delegate = new MySQLDBMetaDialet(dataSource);
 		} else if(db==DataBase.Oracle) {
 			delegate =  new OracleMetaDialet(dataSource);
-		}  else if(db==DataBase.H2) {
+		} else if(db==DataBase.H2) {
 			delegate =  new H2MetaDialet(dataSource);
+		} else if(db==DataBase.PostgreSQL) {
+			delegate =  new PostgreSQLMetaDialet(dataSource);
 		} else{
 			throw new DbmException("unsupported database : " + db);
 		}

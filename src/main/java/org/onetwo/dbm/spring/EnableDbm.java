@@ -19,7 +19,7 @@ public @interface EnableDbm {
 	 * dataSource bean name
 	 * @return
 	 */
-	String value() default "";
+	String value() default "dataSource";
 	/****
 	 * package to scan model and repository
 	 * @return

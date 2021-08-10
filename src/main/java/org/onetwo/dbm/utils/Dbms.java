@@ -10,6 +10,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.onetwo.common.db.BaseCrudEntityManager;
 import org.onetwo.common.db.spi.BaseEntityManager;
 import org.onetwo.common.db.spi.CrudEntityManager;
+import org.onetwo.common.ds.TransactionManagerAwareDataSource;
 import org.onetwo.common.exception.BaseException;
 import org.onetwo.common.spring.SpringUtils;
 import org.onetwo.common.spring.Springs;
@@ -105,7 +106,8 @@ final public class Dbms {
 		DbmSessionFactory sf = newSessionFactory(dataSource);
 		DbmEntityManagerImpl entityManager = new DbmEntityManagerImpl(sf);
 		try {
-			entityManager.afterPropertiesSet();
+//			entityManager.afterPropertiesSet();
+			SpringUtils.injectAndInitialize(Springs.getInstance().getAppContext(), entityManager);
 			DbmEntityManagerCreateEvent.publish(Springs.getInstance().getAppContext(), entityManager);
 		} catch (Exception e) {
 			throw new DbmException("init CrudEntityManager error: " +e.getMessage());
@@ -161,7 +163,13 @@ final public class Dbms {
 	
 	public static DbmSessionFactory newSessionFactory(DataSource dataSource){
 		ApplicationContext appContext = Springs.getInstance().getAppContext();
-		DbmSessionFactoryImpl sf = new DbmSessionFactoryImpl(appContext, null, dataSource);
+		DbmSessionFactoryImpl sf = null;
+		if (dataSource instanceof TransactionManagerAwareDataSource) {
+			TransactionManagerAwareDataSource ds = (TransactionManagerAwareDataSource) dataSource;
+			sf = new DbmSessionFactoryImpl(appContext, ds.getTransactionManager(), dataSource);
+		} else {
+			sf = new DbmSessionFactoryImpl(appContext, null, dataSource);
+		}
 		sf.setServiceRegistry(SimpleDbmInnerServiceRegistry.obtainServiceRegistry(new DbmServiceRegistryCreateContext(appContext, sf)));
 		sf.afterPropertiesSet();
 		return sf;

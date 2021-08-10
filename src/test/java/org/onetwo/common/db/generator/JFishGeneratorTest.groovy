@@ -5,7 +5,7 @@ import javax.sql.DataSource
 import org.junit.Assert
 import org.junit.Test
 import org.onetwo.common.db.generator.dialet.DatabaseMetaDialet
-import org.onetwo.common.db.generator.dialet.MysqlMetaDialet
+import org.onetwo.common.db.generator.dialet.MySQLDBMetaDialet
 import org.onetwo.common.db.generator.ftl.FtlDbGenerator
 import org.onetwo.common.db.generator.meta.TableMeta
 import org.onetwo.common.file.FileUtils

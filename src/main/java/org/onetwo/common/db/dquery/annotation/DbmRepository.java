@@ -47,6 +47,14 @@ public @interface DbmRepository {
 	Class<? extends QueryProvideManager> queryProviderClass() default QueryProvideManager.class;
 	String dataSource() default "";
 	
+	/***
+	 * 若指定了dataSource属性，没有找到对应的dataSource Bean时，是否忽略注册此 DbmRepository Bean。
+	 * 默认为false，不忽略，抛错
+	 * @author weishao zeng
+	 * @return
+	 */
+	boolean ignoreRegisterIfDataSourceNotFound() default false;
+	
 	Class<? extends SqlTemplateParser> sqlTemplateParser() default SqlTemplateParser.class;
 	
 	

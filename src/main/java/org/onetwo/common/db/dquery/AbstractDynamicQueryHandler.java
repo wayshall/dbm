@@ -265,6 +265,10 @@ abstract public class AbstractDynamicQueryHandler implements DynamicQueryHandler
 			return Optional.ofNullable(result);
 		}
 		
+		if (dmethod.getMethodReturnType().isPrimitive() && result==null) {
+			throw new FileNamedQueryException("Null return value from sql query, does not match primitive return type for: " + dmethod.getMethod().toGenericString());
+		}
+		
 		return result;
 	}
 	

@@ -298,7 +298,7 @@ public class DbGenerator {
 		} */
 		
 		public DbTableGenerator serviceImplTemplate(String templatePath){
-			return javaClassTemplate("service.impl", templatePath);
+			return javaClassTemplate("service", templatePath);
 		}
 		
 		public DbTableGenerator javaClassTemplate(String javaClassPackage, String templatePath){

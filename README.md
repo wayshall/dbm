@@ -1194,11 +1194,17 @@ DbmRepository 查询接口还可以通过注解支持绑定不同的数据源，
 public interface Datasource1Dao {
 }
 
-@DbmRepository(dataSource="dataSourceName2")
+@DbmRepository(dataSource="dataSourceName2", ignoreRegisterIfDataSourceNotFound=true)
 public interface Datasource2Dao {
 }
 ```
 
+- dataSource
+通过指定DataSource的Bean名称，让Dao使用所需数据源执行sql
+
+- ignoreRegisterIfDataSourceNotFound
+若指定了dataSource属性，却没有找到对应的dataSource Bean时，是否忽略注册此 DbmRepository Bean。
+此属性适用于某些特殊场景，比如某些共用的服务引用了此Dao，但在应用中并不会使用到此Dao查询数据，从而避免程序启动失败。
 
 
 ## DbmRepository接口对其它orm框架的兼容

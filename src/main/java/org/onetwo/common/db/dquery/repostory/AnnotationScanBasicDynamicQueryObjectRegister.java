@@ -2,9 +2,12 @@ package org.onetwo.common.db.dquery.repostory;
 
 import java.lang.reflect.Method;
 import java.util.Collection;
+import java.util.Optional;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.onetwo.common.db.dquery.DynamicMethod;
+import org.onetwo.common.db.dquery.DynamicQueryHandlerProxyCreator;
+import org.onetwo.common.db.dquery.DynamicQueryHandlerProxyCreator.DbmRepositoryAttrs;
 import org.onetwo.common.db.dquery.DynamicQueryObjectRegister;
 import org.onetwo.common.db.dquery.annotation.DbmRepository;
 import org.onetwo.common.log.JFishLoggerFactory;
@@ -77,6 +80,7 @@ public class AnnotationScanBasicDynamicQueryObjectRegister implements DynamicQue
 			logger.info("no packages config to scan for DbmRepository ....");
 			return false;
 		}
+		
 		logger.info("start to register dao bean ....");
 		Collection<Class<?>> dbmRepositoryClasses = resourcesScanner.scan((metadataReader, res, index)->{
 			if( metadataReader.getAnnotationMetadata().hasAnnotation(DbmRepository.class.getName()) ){
@@ -91,8 +95,22 @@ public class AnnotationScanBasicDynamicQueryObjectRegister implements DynamicQue
 			if(registry.containsBeanDefinition(className)){
 				continue;
 			}
+			
+			Optional<DbmRepositoryAttrs> dbmRepAttrsOpt = DynamicQueryHandlerProxyCreator.findDbmRepositoryAttrs(repositoryClass);
+			if (!dbmRepAttrsOpt.isPresent()) {
+				logger.info("ignore registered DbmRepository bean: {} ", className);
+				continue;
+			}
+			
+			DbmRepositoryAttrs dbmRepAttrs = dbmRepAttrsOpt.get();
+			if (DynamicQueryHandlerProxyCreator.isIgnoreRegisterDbmRepository(registry, dbmRepAttrs)) {
+				logger.info("ignore registered DbmRepository bean: {} ", className);
+				continue;
+			}
+			
 			BeanDefinitionBuilder beandefBuilder = BeanDefinitionBuilder.rootBeanDefinition(AnnotationDynamicQueryHandlerProxyCreator.class)
 					.addConstructorArgValue(repositoryClass)
+					.addConstructorArgValue(dbmRepAttrs)
 					.addConstructorArgValue(methodCache)
 					.setScope(BeanDefinition.SCOPE_SINGLETON)
 //					.setRole(BeanDefinition.ROLE_APPLICATION)
@@ -103,7 +121,7 @@ public class AnnotationScanBasicDynamicQueryObjectRegister implements DynamicQue
 				beandefBuilder.addPropertyValue(DbmRepositoryRegistarOfEnableDbm.ATTR_DEFAULT_QUERY_PROVIDE_MANAGER_CLASS, defaultQueryProvideManagerClass);
 			}
 			registry.registerBeanDefinition(className, beandefBuilder.getBeanDefinition());
-			logger.info("register dao bean: {} ", className);
+			logger.info("registered DbmRepository bean: {} ", className);
 		}
 		boolean scaned = !dbmRepositoryClasses.isEmpty();
 		return scaned;

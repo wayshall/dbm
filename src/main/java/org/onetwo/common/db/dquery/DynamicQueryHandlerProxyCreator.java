@@ -22,6 +22,7 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.util.Assert;
@@ -43,15 +44,21 @@ public class DynamicQueryHandlerProxyCreator implements InitializingBean, Applic
 	private String beanName;
 	
 	private Class<?> defaultQueryProvideManagerClass = DbmEntityManager.class;
+	private DbmRepositoryAttrs dbmRepositoryAttrs;
 	
-	public DynamicQueryHandlerProxyCreator(Class<?> interfaceClass, LoadingCache<Method, DynamicMethod> methodCache) {
+	public DynamicQueryHandlerProxyCreator(Class<?> interfaceClass, DbmRepositoryAttrs dbmRepositoryAttrs, LoadingCache<Method, DynamicMethod> methodCache) {
 		super();
 		this.interfaceClass = interfaceClass;
 		this.methodCache = methodCache;
+		this.dbmRepositoryAttrs = dbmRepositoryAttrs;
 	}
 	
-	private Optional<DbmRepositoryAttrs> findDbmRepositoryAttrs(){
-		DbmRepository dbmRepository = this.interfaceClass.getAnnotation(DbmRepository.class);
+//	protected Optional<DbmRepositoryAttrs> findDbmRepositoryAttrs(){
+//		return findDbmRepositoryAttrs(interfaceClass);
+//	}
+	
+	public static Optional<DbmRepositoryAttrs> findDbmRepositoryAttrs(Class<?> interfaceClass){
+		DbmRepository dbmRepository = interfaceClass.getAnnotation(DbmRepository.class);
 		if(dbmRepository==null){
 			/*QueryRepository queryRepository = this.interfaceClass.getAnnotation(QueryRepository.class);
 			if(queryRepository==null){
@@ -61,8 +68,22 @@ public class DynamicQueryHandlerProxyCreator implements InitializingBean, Applic
 			return Optional.of(attrs);*/
 			return Optional.empty();
 		}
-		DbmRepositoryAttrs attrs = new DbmRepositoryAttrs(dbmRepository.queryProviderName(), dbmRepository.queryProviderClass(), dbmRepository.dataSource());
+		DbmRepositoryAttrs attrs = new DbmRepositoryAttrs(dbmRepository);
 		return Optional.of(attrs);
+	}
+	
+	public static boolean isIgnoreRegisterDbmRepository(BeanDefinitionRegistry registry, DbmRepositoryAttrs dbmRepAttrs) {
+		String datasource = dbmRepAttrs.dataSource();
+		if (StringUtils.isNotBlank(datasource)) {
+			if (!registry.containsBeanDefinition(datasource)) {
+				if (!dbmRepAttrs.isIgnoreRegisterIfDataSourceNotFound()) {
+					throw new DbmException("DataSource not found: " + dbmRepAttrs.dataSource());
+				} else {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	@Override
@@ -102,28 +123,39 @@ public class DynamicQueryHandlerProxyCreator implements InitializingBean, Applic
 	
 	private QueryProvideManager findQueryProvideManager(){
 		QueryProvideManager queryProvideManager;
-		Optional<DbmRepositoryAttrs> dbmRepositoryAttrs = findDbmRepositoryAttrs();
-		if(!dbmRepositoryAttrs.isPresent()){
-			queryProvideManager = findQueryProvideManagerByClass(defaultQueryProvideManagerClass);
+//		Optional<DbmRepositoryAttrs> dbmRepositoryAttrs = findDbmRepositoryAttrs();
+//		if(!dbmRepositoryAttrs.isPresent()){
+//			queryProvideManager = findQueryProvideManagerByClass(defaultQueryProvideManagerClass);
+//		}else{
+//			DbmRepositoryAttrs attrs = dbmRepositoryAttrs.get();
+//			if(StringUtils.isNotBlank(attrs.provideManager())){
+//				queryProvideManager = SpringUtils.getBean(applicationContext, attrs.provideManager());
+//			}else if(attrs.hasProvideManagerClass()){
+//				queryProvideManager = findQueryProvideManagerByClass(attrs.getProvideManagerClass());
+//			}else if(StringUtils.isNotBlank(attrs.dataSource())){
+//				DataSource dataSource = SpringUtils.getBean(applicationContext, attrs.dataSource());
+//				queryProvideManager = (QueryProvideManager)Dbms.obtainBaseEntityManager(dataSource);
+//			}else{
+//				queryProvideManager = findQueryProvideManagerByClass(defaultQueryProvideManagerClass);
+//			}
+//		}
+		
+		DbmRepositoryAttrs attrs = dbmRepositoryAttrs;
+		if(StringUtils.isNotBlank(attrs.provideManager())){
+			queryProvideManager = SpringUtils.getBean(applicationContext, attrs.provideManager());
+		}else if(attrs.hasProvideManagerClass()){
+			queryProvideManager = findQueryProvideManagerByClass(attrs.getProvideManagerClass());
+		}else if(StringUtils.isNotBlank(attrs.dataSource())){
+			DataSource dataSource = SpringUtils.getBean(applicationContext, attrs.dataSource());
+			queryProvideManager = (QueryProvideManager)Dbms.obtainBaseEntityManager(dataSource);
 		}else{
-			DbmRepositoryAttrs attrs = dbmRepositoryAttrs.get();
-			if(StringUtils.isNotBlank(attrs.provideManager())){
-				queryProvideManager = SpringUtils.getBean(applicationContext, attrs.provideManager());
-			}else if(attrs.hasProvideManagerClass()){
-				queryProvideManager = findQueryProvideManagerByClass(attrs.getProvideManagerClass());
-			}else if(StringUtils.isNotBlank(attrs.dataSource())){
-				DataSource dataSource = SpringUtils.getBean(applicationContext, attrs.dataSource());
-				if(dataSource==null){
-					throw new DbmException("no DataSource found: " + attrs.dataSource());
-				}
-				queryProvideManager = (QueryProvideManager)Dbms.obtainBaseEntityManager(dataSource);
-			}else{
-				queryProvideManager = findQueryProvideManagerByClass(defaultQueryProvideManagerClass);
-			}
+			queryProvideManager = findQueryProvideManagerByClass(defaultQueryProvideManagerClass);
 		}
+		
 		if(queryProvideManager==null){
 			throw new FileNamedQueryException("no QueryProvideManager found!");
 		}
+		
 		return queryProvideManager;
 	}
 
@@ -154,6 +186,8 @@ public class DynamicQueryHandlerProxyCreator implements InitializingBean, Applic
 	public void setBeanName(String name) {
 		this.beanName = name;
 	}
+	
+	
 
 	/*public void setQueryProvideManager(QueryProvideManager queryProvideManager) {
 		this.queryProvideManager = queryProvideManager;
@@ -163,11 +197,16 @@ public class DynamicQueryHandlerProxyCreator implements InitializingBean, Applic
 		this.defaultQueryProvideManagerClass = defaultQueryProvideManagerClass;
 	}
 
-	static class DbmRepositoryAttrs {
+	public static class DbmRepositoryAttrs {
 		final private String provideManager;
 		final private Class<?> provideManagerClass;
 		final private String dataSource;
+		private boolean ignoreRegisterIfDataSourceNotFound;
 		
+		public DbmRepositoryAttrs(DbmRepository dbmRepository) {
+			this(dbmRepository.queryProviderName(), dbmRepository.queryProviderClass(), dbmRepository.dataSource());
+			this.ignoreRegisterIfDataSourceNotFound = dbmRepository.ignoreRegisterIfDataSourceNotFound();
+		}
 		public DbmRepositoryAttrs(String provideManager, Class<?> provideManagerClass, String dataSource) {
 			super();
 			this.provideManager = provideManager;
@@ -192,6 +231,9 @@ public class DynamicQueryHandlerProxyCreator implements InitializingBean, Applic
 		@SuppressWarnings("unchecked")
 		public <T> Class<T> getProvideManagerClass() {
 			return (Class<T>)provideManagerClass;
+		}
+		public boolean isIgnoreRegisterIfDataSourceNotFound() {
+			return ignoreRegisterIfDataSourceNotFound;
 		}
 	}
 	

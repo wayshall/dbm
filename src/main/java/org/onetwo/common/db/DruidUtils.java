@@ -3,9 +3,11 @@ package org.onetwo.common.db;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.onetwo.dbm.druid.DbmMySqlLexer;
 import org.onetwo.dbm.exception.DbmException;
 
-import com.alibaba.druid.sql.SQLUtils;
+import com.alibaba.druid.DbType;
+import com.alibaba.druid.DruidRuntimeException;
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.expr.SQLAggregateExpr;
 import com.alibaba.druid.sql.ast.expr.SQLIdentifierExpr;
@@ -17,7 +19,9 @@ import com.alibaba.druid.sql.ast.statement.SQLSelectQueryBlock;
 import com.alibaba.druid.sql.ast.statement.SQLSelectStatement;
 import com.alibaba.druid.sql.ast.statement.SQLSubqueryTableSource;
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlSelectQueryBlock;
+import com.alibaba.druid.sql.dialect.mysql.parser.MySqlStatementParser;
 import com.alibaba.druid.sql.dialect.mysql.visitor.MySqlASTVisitorAdapter;
+import com.alibaba.druid.sql.parser.Token;
 import com.alibaba.druid.util.JdbcUtils;
 
 abstract public class DruidUtils {
@@ -47,12 +51,26 @@ abstract public class DruidUtils {
 		return selectStatement;
 	}
 	
+
+    public static List<SQLStatement> parseStatements(String sql, DbType dbType) {
+    	DbmMySqlLexer lexer = new DbmMySqlLexer(sql);
+    	lexer.nextToken();
+    	MySqlStatementParser parser = new MySqlStatementParser(lexer);
+		List<SQLStatement> stmtList = parser.parseStatementList();
+        if (parser.getLexer().token() != Token.EOF) {
+            throw new DruidRuntimeException("syntax error : " + sql);
+        }
+        return stmtList;
+    }
+	
 	public static SQLSelectStatement changeAsCountStatement(String sql){
 		return changeAsCountStatement(JdbcUtils.MYSQL, sql);
 	}
 	
-	public static SQLSelectStatement changeAsCountStatement(String dbType, String sql){
-		List<SQLStatement> statements = SQLUtils.parseStatements(sql, dbType);
+	public static SQLSelectStatement changeAsCountStatement(DbType dbType, String sql){
+//		List<SQLStatement> statements = SQLUtils.parseStatements(sql, dbType);
+		List<SQLStatement> statements = parseStatements(sql, dbType);
+		
 		SQLSelectStatement selectStatement = getSQLSelectStatement(statements, 0);
 		if(selectStatement==null){
 			throw new DbmException("it must be a select query, sql: " + sql);

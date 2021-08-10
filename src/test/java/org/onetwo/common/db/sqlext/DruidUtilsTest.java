@@ -51,7 +51,7 @@ public class DruidUtilsTest {
             stmt.accept(visitor);
             
             //获取表名称
-            System.out.println("Tables : " + visitor.getCurrentTable());
+            System.out.println("Tables : " + visitor.getTables());
             //获取操作方法名称
             System.out.println("Tables : " + visitor.getTables());
             //获取字段名称

@@ -5,7 +5,7 @@ import javax.sql.DataSource
 import org.junit.Assert
 import org.junit.Test
 import org.onetwo.common.db.generator.dialet.DatabaseMetaDialet
-import org.onetwo.common.db.generator.dialet.MysqlMetaDialet
+import org.onetwo.common.db.generator.dialet.MySQLDBMetaDialet
 import org.onetwo.common.db.generator.ftl.FtlDbGenerator
 import org.onetwo.common.db.generator.ftl.TomcatDataSourceBuilder
 import org.onetwo.common.db.generator.meta.TableMeta
@@ -29,7 +29,7 @@ class DbGeneratorTest extends AbstractJUnit4SpringContextTests {
 	
 	@Test
 	def void testDatabaseMeta(){
-		DatabaseMetaDialet dialet = new MysqlMetaDialet(dataSource)
+		DatabaseMetaDialet dialet = new MySQLDBMetaDialet(dataSource)
 		List<String> tables = dialet.getTableNames()
 		println "tables:${tables}"
 		Assert.assertNotNull(tables)

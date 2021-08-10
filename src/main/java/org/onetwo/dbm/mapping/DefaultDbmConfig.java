@@ -21,7 +21,7 @@ public class DefaultDbmConfig implements DbmConfig {
 	private boolean logSql = true;
 	private boolean watchSqlFile = true;
 //	private String[] modelPackagesToScan;
-	private String dataSource;
+	private String dataSource = "dataSource";
 	
 	private EnableDbmAttributes enableDbmAttributes;
 	

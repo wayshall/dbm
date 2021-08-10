@@ -21,8 +21,8 @@ public class AnnotationDynamicQueryHandlerProxyCreator extends DynamicQueryHandl
 
 	private SqlFileScanner sqlFileScanner = new SpringBasedSqlFileScanner(ClassUtils.getDefaultClassLoader());
 	
-	public AnnotationDynamicQueryHandlerProxyCreator(Class<?> interfaceClass, LoadingCache<Method, DynamicMethod> methodCache) {
-		super(interfaceClass, methodCache);
+	public AnnotationDynamicQueryHandlerProxyCreator(Class<?> interfaceClass, DbmRepositoryAttrs dbmRepositoryAttrs, LoadingCache<Method, DynamicMethod> methodCache) {
+		super(interfaceClass, dbmRepositoryAttrs, methodCache);
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })

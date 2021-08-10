@@ -123,6 +123,11 @@ public class QueryBuilderImpl<E> implements QueryBuilder<E> {
 		return self();
 	}
 	@Override
+	public QueryBuilderImpl<E> count(String field) {
+		this.params.put(K.COUNT, field);
+		return self();
+	}
+	@Override
 	public QueryBuilderImpl<E> unselect(String...fields){
 		this.params.put(K.UNSELECT, fields);
 		return self();
