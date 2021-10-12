@@ -258,14 +258,14 @@ abstract public class AbstractMappedField implements DbmMappedField{
 	public Object fireDbmEntityFieldEvents(final Object fieldValue, DbmEventAction eventAction){
 //		boolean doListener = false;
 		Object newFieldValue = fieldValue;
-		if(DbmEventAction.insert==eventAction){
+		if(eventAction.isInserting()){
 			if(!fieldListeners.isEmpty()){
 				for(DbmEntityFieldListener fl : fieldListeners){
 					newFieldValue = fl.beforeFieldInsert(this, newFieldValue);
 //					doListener = true;
 				}
 			}
-		}else if(DbmEventAction.update==eventAction){
+		} else if(eventAction.isUpdating()){
 			if(!fieldListeners.isEmpty()){
 				for(DbmEntityFieldListener fl : fieldListeners){
 					newFieldValue = fl.beforeFieldUpdate(this, newFieldValue);
