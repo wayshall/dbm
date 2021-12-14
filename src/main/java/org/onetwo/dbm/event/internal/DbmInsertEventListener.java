@@ -2,6 +2,7 @@ package org.onetwo.dbm.event.internal;
 
 import java.util.List;
 
+import org.onetwo.common.convert.Types;
 import org.onetwo.common.utils.LangUtils;
 import org.onetwo.dbm.event.spi.DbmInsertEvent;
 import org.onetwo.dbm.exception.DbmException;
@@ -82,7 +83,10 @@ public class DbmInsertEventListener extends InsertEventListener{
 					updateCount += es.getDbmJdbcOperations().updateWith(new SimpleArgsPreparedStatementCreator(sql, arg), keyHolder);
 					if (keyHolder.getKey()!=null) {
 						//TODO 如果有多个自动生成字段，这里还需要处理
-						entry.setId(objects.get(index++), keyHolder.getKey());
+						// 不同版本的jdbc（spring？没细究……）驱动获取到的key对象不同，有的是bigint类型，这里需要转换为对象的实际类型
+						Class<?> idType = entry.getIdentifyFields().get(0).getPropertyInfo().getType();
+						Object generatedId = Types.convertValue(keyHolder.getKey(), idType);
+						entry.setId(objects.get(index++), generatedId);
 					}
 				}
 			}else{
