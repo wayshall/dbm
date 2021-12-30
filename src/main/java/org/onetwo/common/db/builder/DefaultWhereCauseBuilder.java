@@ -198,6 +198,7 @@ public class DefaultWhereCauseBuilder<E> implements WhereCauseBuilder<E> {
 
 	@Override
 	public QueryAction<E> toQuery(){
+		end();
 		return queryBuilder.toQuery();
 	}
 
