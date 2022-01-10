@@ -207,23 +207,27 @@ abstract public class AbstractExtQuery implements ExtQueryInner{
 				continue;
 			}*/
 
-			if (K.OR.equals(fields)) {
-				if (!Map.class.isAssignableFrom(values.getClass())) {
-					throw new ServiceException("sub query's vaue must be map!");
+			if (fields instanceof KeyObject) {
+				KeyObject keyObject = (KeyObject) fields;
+				if (K.OR.key().equals(keyObject.key())) {
+					if (!Map.class.isAssignableFrom(values.getClass())) {
+						throw new ServiceException("sub query's vaue must be map!");
+					}
+					Map<?, ?> subParams = (Map<?, ?>) values;
+					h = this.buildWhere(subParams, true);
+					where.append("or ");
+				} else if(K.AND.key().equals(keyObject.key())){
+					if (!Map.class.isAssignableFrom(values.getClass())) {
+						throw new ServiceException("sub query's vaue must be map!");
+					}
+					Map<?, ?> subParams = (Map<?, ?>) values;
+					h = this.buildWhere(subParams, true);
+					
+					if(!first) {
+						where.append("and ");
+					}
 				}
-				Map<?, ?> subParams = (Map<?, ?>) values;
-				h = this.buildWhere(subParams, true);
-				where.append("or ");
-			} else if(K.AND.equals(fields)){
-				if (!Map.class.isAssignableFrom(values.getClass())) {
-					throw new ServiceException("sub query's vaue must be map!");
-				}
-				Map<?, ?> subParams = (Map<?, ?>) values;
-				h = this.buildWhere(subParams, true);
 				
-				if(!first) {
-					where.append("and ");
-				}
 			} /*else if(K.RAW_QL.equals(fields)){
 				if (!values.getClass().isArray() && !List.class.isAssignableFrom(values.getClass()) && !String.class.isAssignableFrom(values.getClass()))
 					throw new ServiceException("raw-ql args error: " + values);

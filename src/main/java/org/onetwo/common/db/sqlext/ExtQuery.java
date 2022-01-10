@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import org.onetwo.common.db.sqlext.ExtQuery.K.IfNull;
 
@@ -17,11 +18,23 @@ public interface ExtQuery {
 	}
 	@Data
 	static public class KeyObject {
+		public static KeyObject or() {
+			KeyObject or = KeyObject.builder().key(":or").id(System.currentTimeMillis()).build();
+			return or;
+		};
+		public static KeyObject and() {
+			KeyObject or = KeyObject.builder().key(":or").id(System.currentTimeMillis()).build();
+			return or;
+		};
+		
 		final private String key;
+		final private Long id;
+		
 		@Builder
-		private KeyObject(String key) {
+		private KeyObject(String key, Long id) {
 			super();
 			this.key = key;
+			this.id = id;
 		}
 		
 		public String key() {
@@ -35,7 +48,7 @@ public interface ExtQuery {
 		public String keyFunc(String arg) {
 			return key + "(" + arg + ")";
 		}
-		
+
 		@Override
 		public boolean equals(Object obj) {
 			if (this == obj)
@@ -45,20 +58,14 @@ public interface ExtQuery {
 			if (getClass() != obj.getClass())
 				return false;
 			KeyObject other = (KeyObject) obj;
-			if (key == null) {
-				if (other.key != null)
-					return false;
-			} else if (!key.equals(other.key))
-				return false;
-			return true;
+			return Objects.equals(id, other.id) && Objects.equals(key, other.key);
 		}
+
 		@Override
 		public int hashCode() {
-			final int prime = 31;
-			int result = 1;
-			result = prime * result + ((key == null) ? 0 : key.hashCode());
-			return result;
+			return Objects.hash(id, key);
 		}
+		
 	}
 	
 	/****
@@ -91,10 +98,10 @@ public interface ExtQuery {
 		public static final Object FIRST_RESULT = KeyObject.builder().key(":firstResult").build(); // ":firstResult";
 		public static final Object MAX_RESULTS = KeyObject.builder().key(":maxResults").build(); // ":maxResults";
 		public static final KeyObject RAND = KeyObject.builder().key("rand").build(); // ":or";
-		public static final Object OR = KeyObject.builder().key(":or").build(); // ":or";
-		public static final Object AND = KeyObject.builder().key(":and").build(); //":and";
-		public static final Object ASC = KeyObject.builder().key(":asc").build(); // ":asc";
-		public static final Object DESC = KeyObject.builder().key(":desc").build(); // ":desc";
+		public static final KeyObject OR = KeyObject.builder().key(":or").build(); // ":or";
+		public static final KeyObject AND = KeyObject.builder().key(":and").build(); //":and";
+		public static final KeyObject ASC = KeyObject.builder().key(":asc").build(); // ":asc";
+		public static final KeyObject DESC = KeyObject.builder().key(":desc").build(); // ":desc";
 //		public static final String RAW_QL = ":raw-ql";
 
 		public static final Object ORDERBY = KeyObject.builder().key(":orderBy").build();//":orderBy";

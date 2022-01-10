@@ -206,7 +206,7 @@ public class MultipCommentsSqlFileParser implements NamedQueryInfoParser {
 				config.remove(FileBaseNamedQueryInfo.FRAGMENT_KEY);
 				
 			}else{
-				throw new FileNamedQueryException("named query["+name+"]'s  must be specify a @property or @fragment."
+				throw new FileNamedQueryException("named query["+name+"]is repeated! rename it or set a @property or @fragment directive "
 						+ "near at line : " + lineLexer.getLineReader().getLineNumber());
 			}
 //			sqlPropertyName = config.getProperty(PROPERTY_KEY);
