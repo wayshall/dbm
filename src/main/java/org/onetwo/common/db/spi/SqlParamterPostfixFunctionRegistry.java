@@ -14,6 +14,8 @@ import org.onetwo.common.db.filequery.SqlParamterPostfixFunction;
 public interface SqlParamterPostfixFunctionRegistry {
 
 	String getFuncPostfixMark();
+	@Deprecated
 	SqlParamterPostfixFunction getFunc(String postfix);
+	SqlParamterPostfixFunction getFunc(Object value, String postfix);
 
 }

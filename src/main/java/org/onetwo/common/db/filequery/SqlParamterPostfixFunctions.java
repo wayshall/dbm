@@ -1,18 +1,23 @@
 package org.onetwo.common.db.filequery;
 
+import java.lang.reflect.Method;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
 import org.onetwo.common.convert.Types;
 import org.onetwo.common.db.spi.SqlParamterPostfixFunctionRegistry;
 import org.onetwo.common.db.sqlext.ExtQueryUtils;
-import org.onetwo.common.exception.BaseException;
+import org.onetwo.common.reflect.ReflectUtils;
 import org.onetwo.common.spring.Springs;
 import org.onetwo.common.utils.JodatimeUtils;
 import org.onetwo.common.utils.LangUtils;
 import org.onetwo.common.utils.StringUtils;
 import org.onetwo.dbm.exception.DbmException;
+
+import com.google.common.collect.Maps;
 
 /*****
  * 自定义sql语句里，命名参数的后缀函数
@@ -32,8 +37,9 @@ public class SqlParamterPostfixFunctions implements SqlParamterPostfixFunctionRe
 	public String getFuncPostfixMark(){
 		return SQL_POST_FIX_FUNC_MARK;
 	}
-	
+
 	private Map<String, SqlParamterPostfixFunction> funcMap = LangUtils.newHashMap();
+	private Map<Class<?>, Map<String, SqlParamterPostfixFunction>> typeFuncMap = Maps.newLinkedHashMap();
 
 	public SqlParamterPostfixFunctions(){
 		register(new String[]{"like", "likeString"}, new SqlParamterPostfixFunction(){
@@ -107,6 +113,8 @@ public class SqlParamterPostfixFunctions implements SqlParamterPostfixFunctionRe
 			StandardPBEStringEncryptor encryptor = Springs.getInstance().getBean(StandardPBEStringEncryptor.class);
 			return encryptor.encrypt(value.toString());
 		});
+		
+		bindingTypeFunc(Date.class, DateTypeFuncSet.class);
 
 		/*register("inlist", new SqlParamterPostfixFunction(){
 			@Override
@@ -128,15 +136,65 @@ public class SqlParamterPostfixFunctions implements SqlParamterPostfixFunctionRe
 		return this;
 	}
 	
+	private SqlParamterPostfixFunctionRegistry bindingTypeFunc(Class<?> type, Class<?> typeFuncClass){
+		Map<String, SqlParamterPostfixFunction> funcMap = typeFuncMap.get(type);
+		if (funcMap==null) {
+			funcMap = Maps.newConcurrentMap();
+			typeFuncMap.put(type, funcMap);
+		}
+		List<Method> staticMethods = ReflectUtils.findAllStaticMethods(typeFuncClass);
+		for (Method method : staticMethods) {
+			funcMap.put(method.getName(), new SqlParamterPostfixFunction() {
+				@Override
+				public Object toSqlParameterValue(String paramName, Object value) {
+					try {
+						return method.invoke(null);
+					} catch (Exception e) {
+						ReflectUtils.handleReflectionException(e);
+					}
+					return null;
+				}
+			});
+		}
+		return this;
+	}
+	
 	/* (non-Javadoc)
 	 * @see org.onetwo.common.spring.sql.SqlParamterPostfixFunctionRegistry#getFunc(java.lang.String)
 	 */
 	@Override
+	@Deprecated
 	public SqlParamterPostfixFunction getFunc(String postfix){
 		if(!funcMap.containsKey(postfix)){
-			throw new BaseException("no postfix func fund: " + postfix);
+			throw new DbmException("no postfix func fund: " + postfix);
 		}
 		return funcMap.get(postfix);
+	}
+	
+	@Override
+	public SqlParamterPostfixFunction getFunc(Object value, String postfix){
+		SqlParamterPostfixFunction func = funcMap.get(postfix);
+		if (func!=null) {
+			return func;
+		}
+		if (value==null) {
+			throw new DbmException("postfix func not fund for null, postfix:" + postfix);
+		}
+		for (Entry<Class<?>, Map<String, SqlParamterPostfixFunction>> entry : typeFuncMap.entrySet()) {
+			Class<?> type = entry.getKey();
+			if (type.isAssignableFrom(value.getClass())) {
+				func = entry.getValue().get(postfix);
+				if (func!=null) {
+					break;
+				}
+			}
+		}
+		
+		if(func==null){
+			throw new DbmException("postfix func not fund for type: " + value.getClass() + ", postfix:" + postfix);
+		}
+		
+		return func;
 	}
 
 }

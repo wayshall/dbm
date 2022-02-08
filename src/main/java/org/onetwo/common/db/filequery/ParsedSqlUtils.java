@@ -79,7 +79,8 @@ final public class ParsedSqlUtils {
 				if(hasFunction()){
 //					value = ReflectUtils.invokeMethod(function, SqlParamterPostfixFunctions.getInstance(), value);
 //					value = SqlParamterPostfixFunctions.getInstance().getFunc(function).toSqlString(property, value);
-					value = sqlParamterPostfixFunctions.getFunc(function).toSqlParameterValue(property, value);
+//					value = sqlParamterPostfixFunctions.getFunc(function).toSqlParameterValue(property, value);
+					value = sqlParamterPostfixFunctions.getFunc(value, function).toSqlParameterValue(property, value);
 				}
 				return value;
 			}
