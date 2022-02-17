@@ -818,6 +818,7 @@ public class UserAutoidServiceImpl {
 `
    注意：从4.7.3开始，dbm的 DbmRepository接口 支持Java8接口默认方法。
 `
+
 ### 通过@Query直接在代码里写sql
 虽然本人不喜欢不推荐在代码里写sql，但实际开发中经常遇到很多人都是喜欢简单粗暴，直接在代码里通过注解写sql，所以，新版（4.5.2-SNAPSHOT+）的dbm提供了@Query来支持在代码里写sql。
 
@@ -838,6 +839,33 @@ public interface UserDao {
 
 }
 ```
+
+## DbmRepository动态查询后缀函数支持
+DbmRepository的动态查询，命名参数支持后缀函数，以便于把一些参数值加工处理。
+比如使用like查询的时候，一般的查询片段如下：
+```sql
+where userName like :userName
+```
+若用户输入的userName参数是test，则此时是在前后添加模糊匹配符号的，实际参数应为：%test%.
+dbm提供了后缀函数支持来避免手工处理这种情况，所以在sql里，可以写成：
+```sql
+where userName like :userName?likeString
+```
+
+### 全局后缀函数
+- preLikeString
+在参数值前面加上'%'，如userName=test，则实际值为：%test
+
+- postLikeString
+在参数值后面加上'%'，如userName=test，则实际值为：test%
+
+### Date类型后缀函数(DateTypeFuncSet)
+- dateString
+按 yyyy-MM-dd 格式化Date类型参数
+- dateTimeString
+按 yyyy-MM-dd HH:mm:ss 格式化Date类型参数
+- yyyyMMdd
+按 yyyyMMdd 格式化Date类型参数
 
 ## sql片段支持
 有时候，两个查询方法的sql里，大部分是相同的（比如查询条件），只有小部分不同，如果写两份，就需要维护两份sql。这时候，你可以使用sql片段@fragment
@@ -894,7 +922,7 @@ findUserListLikeName的sql可以改写为：
  */
 select 
     usr.*
-${fragment['queryUser.fragment.subWhere']}
+${fragment['subWhere']}
 ```
 
 countUserLikeName改写为：
@@ -908,7 +936,7 @@ select
 ${fragment['queryUser.fragment.subWhere']}
 ```
 
-
+${fragment['subWhere']} 和 ${fragment['queryUser.fragment.subWhere']} 均可引用到名为subWhere的sql片段，前者表示在queryUser这个查询下查找，后者则可以跨不同的命名查询查找sql片段
 
 
 

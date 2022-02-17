@@ -148,7 +148,7 @@ public class SqlParamterPostfixFunctions implements SqlParamterPostfixFunctionRe
 				@Override
 				public Object toSqlParameterValue(String paramName, Object value) {
 					try {
-						return method.invoke(null);
+						return method.invoke(null, value);
 					} catch (Exception e) {
 						ReflectUtils.handleReflectionException(e);
 					}
