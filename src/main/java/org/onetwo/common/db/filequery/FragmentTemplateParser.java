@@ -11,7 +11,9 @@ import freemarker.template.TemplateModelException;
 
 public class FragmentTemplateParser implements TemplateHashModel {
 	public static final String DOT = ".";
-	
+	/***
+	 * FreemarkerSqlTemplateParser
+	 */
 	private final SqlTemplateParser parser;
 	private final ParserContext parserContext;
 	private final NamedQueryInfo query;
