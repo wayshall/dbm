@@ -7,14 +7,14 @@ import org.onetwo.common.db.spi.BaseEntityManager;
 import org.onetwo.common.dbm.model.entity.UserVersionEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author weishao zeng
  * <br/>
  */
-@Transactional(propagation=Propagation.REQUIRES_NEW)
+//@Transactional(propagation=Propagation.REQUIRES_NEW)
+@Transactional
 @Service
 public class UserVersionService {
 	

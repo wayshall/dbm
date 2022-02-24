@@ -29,7 +29,7 @@ import org.onetwo.dbm.core.spi.DbmEntityManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.Rollback;
 
-@Rollback(false)
+//@Rollback(false)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class DbmNestedMappingTest extends DbmBaseTest {
 
@@ -39,9 +39,9 @@ public class DbmNestedMappingTest extends DbmBaseTest {
 	private CompanyDao companyDao;
 	
 	public void clear(){
-		dbmEntityManager.removeAll(EmployeeEntity.class);
-		dbmEntityManager.removeAll(DepartmentEntity.class);
-		dbmEntityManager.removeAll(CompanyEntity.class);
+//		dbmEntityManager.removeAll(EmployeeEntity.class);
+//		dbmEntityManager.removeAll(DepartmentEntity.class);
+//		dbmEntityManager.removeAll(CompanyEntity.class);
 	}
 	
 	@Test

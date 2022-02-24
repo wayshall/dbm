@@ -14,8 +14,9 @@ import org.springframework.transaction.annotation.Transactional;
  * @author weishao zeng
  * <br/>
  */
-@Transactional(propagation=Propagation.REQUIRES_NEW)
+//@Transactional(propagation=Propagation.REQUIRES_NEW)
 @Service
+@Transactional
 public class UserLongVersionService {
 	
 	@Autowired

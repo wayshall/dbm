@@ -230,12 +230,14 @@ abstract public class AbstractDynamicQueryHandler implements DynamicQueryHandler
 			
 		} else if (dmethod.hasPageParamter()){
 			Page<?> page = dmethod.getPageParamter(args);
-			result = em.getFileNamedQueryManager().findPage(page, invokeContext);
+			Page<?> resultPage = em.getFileNamedQueryManager().findPage(page, invokeContext);
+			result = convertPageByResultType(resultPage, resultClass);
 			
 		} else if (dmethod.getPageParamter(args)!=null) {
 			// 通过是否能获取page参数再次判断是否分页查询
 			Page<?> page = dmethod.getPageParamter(args);
-			result = em.getFileNamedQueryManager().findPage(page, invokeContext);
+			Page<?> resultPage = em.getFileNamedQueryManager().findPage(page, invokeContext);
+			result = convertPageByResultType(resultPage, resultClass);
 			
 		} else if (Collection.class.isAssignableFrom(resultClass)){
 			List<?> datalist = em.getFileNamedQueryManager().findList(invokeContext);
@@ -269,6 +271,21 @@ abstract public class AbstractDynamicQueryHandler implements DynamicQueryHandler
 			throw new FileNamedQueryException("Null return value from sql query, does not match primitive return type for: " + dmethod.getMethod().toGenericString());
 		}
 		
+		return result;
+	}
+	
+	/***
+	 * 兼容使用了pageRequest类型参数，但返回结果实际上不需要分页对象的情况
+	 * @author weishao zeng
+	 * @return
+	 */
+	private Object convertPageByResultType(Page<?> resultPage, Class<?> resultClass) {
+		Object result;
+		if (List.class.isAssignableFrom(resultClass)) {
+			result = resultPage.getResult();
+		} else {
+			result = resultPage;
+		}
 		return result;
 	}
 	

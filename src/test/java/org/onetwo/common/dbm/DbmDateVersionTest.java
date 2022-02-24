@@ -23,7 +23,7 @@ import org.onetwo.common.utils.LangUtils;
 import org.onetwo.dbm.exception.EntityVersionException;
 import org.springframework.test.annotation.Rollback;
 
-@Rollback(false)
+//@Rollback(false)
 public class DbmDateVersionTest extends DbmBaseTest {
 
 	@Resource
@@ -32,7 +32,7 @@ public class DbmDateVersionTest extends DbmBaseTest {
 	
 	@Before
 	public void before() {
-		this.userVersionService.removeAll();
+//		this.userVersionService.removeAll();
 	}
 
 	@Test

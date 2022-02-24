@@ -39,7 +39,7 @@ public class JsonFieldTest extends DbmBaseTest {
 
 	@Test
 	public void testSave(){
-		baseEntityManager.removeAll(JsonCompanyEntity.class);
+//		baseEntityManager.removeAll(JsonCompanyEntity.class);
 		
 		JsonCompanyEntity company = new JsonCompanyEntity();
 		company.setName(JsonFieldTest.class.getName()+"-扩展公司1");

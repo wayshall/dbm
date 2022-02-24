@@ -19,22 +19,22 @@ public class ArticleService extends DbmCrudServiceImpl<ArticleEntity, Long> {
 	@Autowired
 	ArticleDao articleDao;
 	
-	@Transactional(propagation = Propagation.REQUIRES_NEW)
+//	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public ArticleEntity saveForBatchUpdateForeignKey(ArticleEntity entity) {
 		return super.save(entity);
 	}
 
-	@Transactional(propagation = Propagation.REQUIRES_NEW)
+//	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public int removeAll(){
 		return this.getBaseEntityManager().removeAll(ArticleEntity.class);
 	}
 
-	@Transactional(propagation = Propagation.REQUIRES_NEW)
+//	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public void dropArtilceForeignKey() {
 		articleDao.dropArtilceForeignKey();
 	}
 
-	@Transactional(propagation = Propagation.REQUIRES_NEW)
+//	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public void addArtilceForeignKey() {
 		articleDao.addArtilceForeignKey();
 	}
