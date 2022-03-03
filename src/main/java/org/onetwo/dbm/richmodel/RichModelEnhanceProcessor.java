@@ -50,7 +50,8 @@ public class RichModelEnhanceProcessor implements PackageScanedProcessor {
 				ctclass.toClass(ClassUtils.getDefaultClassLoader(), ClassUtils.class.getProtectionDomain());
 				classes.put(ctx.getClassName(), null);
 			} catch (Exception e) {
-				throw new DbmException("enchan model["+ctx.getClassName()+"] error : "+e.getMessage(), e);
+//				throw new DbmException("enchan model["+ctx.getClassName()+"] error : "+e.getMessage(), e);
+				logger.error("enchan model["+ctx.getClassName()+"] error : "+e.getMessage());
 			}
 		}
 	}

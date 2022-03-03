@@ -27,6 +27,7 @@ public class DbmNamedSqlFileManager extends BaseNamedSqlFileManager {
 	public static final String ATTRS_KEY = FileBaseNamedQueryInfo.FRAGMENT_DOT_KEY;
 	/***
 	 * @see StringTemplateLoaderFileSqlParser
+	 * FreemarkerSqlTemplateParser
 	 */
 	private SqlTemplateParser sqlStatmentParser;
 	

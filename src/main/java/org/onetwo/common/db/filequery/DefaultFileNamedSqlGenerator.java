@@ -27,6 +27,8 @@ public class DefaultFileNamedSqlGenerator implements FileNamedSqlGenerator {
 	protected NamedQueryInfo info;
 	protected boolean countQuery;
 	private SqlTemplateParser parser;
+	/***
+	 */
 	private ParserContext parserContext;
 //	private Class<?> resultClass;
 	
@@ -105,6 +107,7 @@ public class DefaultFileNamedSqlGenerator implements FileNamedSqlGenerator {
 			});
 			this.parserContext.putAll(params);
 			FragmentTemplateParser attrParser = new FragmentTemplateParser(parser, parserContext, info);
+			// 把FragmentTemplateParser放到sql的解释上下问里，key为"fragment"，可通过fragment['sql query name']引用到parserContext里的sql语句
 			this.parserContext.put(attrParser.getVarName(), attrParser);
 			
 			if(countQuery){

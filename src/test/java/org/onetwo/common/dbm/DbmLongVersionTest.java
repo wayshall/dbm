@@ -23,7 +23,7 @@ import org.onetwo.dbm.exception.EntityVersionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.Rollback;
 
-@Rollback(false)
+//@Rollback(false)
 public class DbmLongVersionTest extends DbmBaseTest {
 
 	@Autowired
@@ -34,7 +34,7 @@ public class DbmLongVersionTest extends DbmBaseTest {
 	
 	@Before
 	public void before() {
-		this.userLongVersionService.removeAll();
+//		this.userLongVersionService.removeAll();
 	}
 
 	@Test

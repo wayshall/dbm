@@ -113,7 +113,7 @@ public class DbmBatchInsertOrUpdateTest extends DbmBaseTest {
 	}
 
 	@Test
-	@Rollback(false)
+//	@Rollback(false)
 	public void testBatchInsertOrUpdateWithForeignKey(){
 		articleService.removeAll();
 		noAutoIdUserService.deleteAll();
