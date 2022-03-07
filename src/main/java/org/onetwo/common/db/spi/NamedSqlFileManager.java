@@ -17,6 +17,11 @@ public interface NamedSqlFileManager {
 	public boolean containsNamespace(String namespace);
 	public Collection<NamedQueryFile> getAllNamespaceProperties();
 	
+	/***
+	 * 默认你实现为：StringTemplateLoaderFileSqlParser
+	 * @author weishao zeng
+	 * @return
+	 */
 	public SqlTemplateParser getSqlStatmentParser();
 	
 }

@@ -15,15 +15,36 @@ import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.expr.SQLAggregateExpr;
 import com.alibaba.druid.sql.ast.expr.SQLIdentifierExpr;
 import com.alibaba.druid.sql.ast.expr.SQLIntegerExpr;
+import com.alibaba.druid.sql.ast.statement.SQLJoinTableSource;
+import com.alibaba.druid.sql.ast.statement.SQLJoinTableSource.JoinType;
 import com.alibaba.druid.sql.ast.statement.SQLSelect;
 import com.alibaba.druid.sql.ast.statement.SQLSelectItem;
 import com.alibaba.druid.sql.ast.statement.SQLSelectQueryBlock;
 import com.alibaba.druid.sql.ast.statement.SQLSelectStatement;
 import com.alibaba.druid.sql.ast.statement.SQLSubqueryTableSource;
+import com.alibaba.druid.sql.ast.statement.SQLTableSource;
+import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlSelectQueryBlock;
 import com.alibaba.druid.sql.dialect.mysql.visitor.MySqlSchemaStatVisitor;
 import com.alibaba.druid.util.JdbcUtils;
 
 public class DruidUtilsTest {
+
+	@Test
+	public void testFullJoinSql(){
+		String sql = "SELECT   * FROM  emp e FULL   JOIN dept d     ON d.deptno = e.deptno";
+		List<SQLStatement> statements = SQLUtils.parseStatements(sql, JdbcUtils.MYSQL);
+		statements.forEach(s -> {
+			SQLSelectStatement select = (SQLSelectStatement) s;
+			System.out.println("statements: " + select.getSelect().toString());
+		});
+		
+		SQLSelectStatement selectStatement = (SQLSelectStatement) statements.get(0);
+		SQLSelect select = selectStatement.getSelect();
+		MySqlSelectQueryBlock query = (MySqlSelectQueryBlock) select.getQuery();
+		SQLTableSource from = query.getFrom();
+		SQLJoinTableSource joinTable = (SQLJoinTableSource) from;
+		JoinType joinType = joinTable.getJoinType();
+	}
 
 	@Test
 	public void testParseSql(){

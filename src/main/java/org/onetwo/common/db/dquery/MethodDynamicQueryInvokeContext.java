@@ -11,6 +11,7 @@ import org.onetwo.common.db.filequery.ParserContext;
 import org.onetwo.common.db.spi.NamedQueryInfo;
 import org.onetwo.common.db.spi.QueryProvideManager;
 import org.onetwo.common.db.spi.SqlTemplateParser;
+import org.onetwo.common.db.spi.SqlTemplateParserAware;
 import org.onetwo.common.exception.BaseException;
 import org.onetwo.common.utils.LangUtils;
 
@@ -69,9 +70,17 @@ public class MethodDynamicQueryInvokeContext implements NamedQueryInvokeContext 
 	}
 	
 	public SqlTemplateParser getDynamicSqlTemplateParser() {
+		// 默认为StringTemplateLoaderFileSqlParser
+		SqlTemplateParser defaultParser = queryProvideManager.getFileNamedQueryManager().getNamedSqlFileManager().getSqlStatmentParser();
 		SqlTemplateParser parser = dynamicMethod.getDynamicSqlTemplateParser();
 		if (parser==null) {
-			parser = queryProvideManager.getFileNamedQueryManager().getNamedSqlFileManager().getSqlStatmentParser();
+			// 没有指定parser，则使用默认的  
+			parser = defaultParser;
+		} else {
+			if (parser instanceof SqlTemplateParserAware) {
+				SqlTemplateParserAware aware = (SqlTemplateParserAware) parser;
+				aware.setSqlTemplateParser(defaultParser);
+			}
 		}
 		return parser;
 	}
