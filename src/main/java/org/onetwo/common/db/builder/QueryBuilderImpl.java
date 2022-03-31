@@ -135,9 +135,13 @@ public class QueryBuilderImpl<E> implements QueryBuilder<E> {
 	
 	/***
 	 * @param first from 0
+	 * @param size 若size<=0，则不设置限制参数
 	 */
 	@Override
 	public QueryBuilderImpl<E> limit(int first, int size){
+		if (size<=0) {
+			return self();
+		}
 		this.params.put(K.FIRST_RESULT, first);
 		this.params.put(K.MAX_RESULTS, size);
 		return self();

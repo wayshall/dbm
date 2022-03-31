@@ -42,7 +42,7 @@ public interface QueryBuilder<E> {
 	 * 
 	 * @author weishao zeng
 	 * @param first  from 0
-	 * @param size
+	 * @param size 若size<=0，则不设置限制参数
 	 * @return
 	 */
 	public QueryBuilder<E> limit(int first, int size);
