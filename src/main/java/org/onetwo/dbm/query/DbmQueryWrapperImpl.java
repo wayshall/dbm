@@ -12,10 +12,22 @@ import org.springframework.jdbc.core.RowMapper;
 public class DbmQueryWrapperImpl extends AbstractQueryWrapper {
 	
 	private DbmQuery dbmQuery;
+	/***
+	 * 是否自动生成分页sql片段
+	 */
+//	private boolean useAutoLimitSqlIfPagination = true;
 	
 	public DbmQueryWrapperImpl(DbmQuery jfishQuery) {
 		super();
 		this.dbmQuery = jfishQuery;
+	}
+	
+	public boolean isUseAutoLimitSqlIfPagination() {
+		return dbmQuery.isUseAutoLimitSqlIfPagination();
+	}
+
+	public void setUseAutoLimitSqlIfPagination(boolean useAutoLimitSqlIfPagination) {
+		this.dbmQuery.setUseAutoLimitSqlIfPagination(useAutoLimitSqlIfPagination);
 	}
 
 	public QueryWrapper setLockInfo(LockInfo lockInfo){
@@ -30,6 +42,7 @@ public class DbmQueryWrapperImpl extends AbstractQueryWrapper {
 
 	@Override
 	public <T> List<T> getResultList() {
+		// DbmQueryImpl#getResultList
 		return dbmQuery.getResultList();
 	}
 
@@ -117,6 +130,10 @@ public class DbmQueryWrapperImpl extends AbstractQueryWrapper {
 	@Override
 	public Map<String, Object> getParameters() {
 		return dbmQuery.getParameters();
+	}
+
+	public String toString() {
+		return this.dbmQuery.toString();
 	}
 
 }

@@ -40,4 +40,10 @@ public interface DbmQuery {
 	void setQueryAttributes(Map<Object, Object> params);
 	
 	void setLockInfo(LockInfo lockInfo);
+	
+
+	boolean isUseAutoLimitSqlIfPagination();
+
+	void setUseAutoLimitSqlIfPagination(boolean useAutoLimitSqlIfPagination);
+	
 }

@@ -13,6 +13,11 @@ public class QueryConfigData {
 	/*final private String query;
 	final private String countQuery;*/
 	
+	/***
+	 * 在分页的查询下，是否使用自动生成分页sql(limit sql string)
+	 */
+	private boolean useAutoLimitSqlIfPagination = true;
+	
 	public QueryConfigData() {
 //		this(null, null);
 	}
@@ -45,5 +50,12 @@ public class QueryConfigData {
 		this.variables = variable;
 	}
 
+	public boolean isUseAutoLimitSqlIfPagination() {
+		return useAutoLimitSqlIfPagination;
+	}
+
+	public void setUseAutoLimitSqlIfPagination(boolean useAutoLimitSqlIfPagination) {
+		this.useAutoLimitSqlIfPagination = useAutoLimitSqlIfPagination;
+	}
 
 }

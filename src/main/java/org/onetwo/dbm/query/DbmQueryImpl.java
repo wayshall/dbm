@@ -37,6 +37,11 @@ public class DbmQueryImpl implements DbmQuery {
 	
 	private RowMapper<?> rowMapper;
 	private LockInfo lockInfo;
+	
+	/***
+	 * 是否自动生成分页sql片段
+	 */
+	private boolean useAutoLimitSqlIfPagination = true;
 //	private QType qtype;
 
 	public DbmQueryImpl(DbmSessionImplementor session, String sqlString, Class<?> resultClass) {
@@ -138,8 +143,11 @@ public class DbmQueryImpl implements DbmQuery {
 
 	public String getSqlString() {
 		String sql = sqlString;
-		if(isLimitedQuery()){
-			sql = dbDialect.getLimitStringWithNamed(sqlString, FIRST_RESULT_NAME, MAX_RESULT_NAME);
+//		if(isLimitedQuery()){
+		if (isLimitedQuery()) {
+			if(useAutoLimitSqlIfPagination){
+				sql = dbDialect.getLimitStringWithNamed(sqlString, FIRST_RESULT_NAME, MAX_RESULT_NAME);
+			}
 		}
 		if(lockInfo!=null){
 			sql += " " + dbDialect.getLockSqlString(lockInfo);
@@ -247,6 +255,18 @@ public class DbmQueryImpl implements DbmQuery {
 	@Override
 	public Map<String, Object> getParameters() {
 		return queryValue.getValues();
+	}
+
+	public boolean isUseAutoLimitSqlIfPagination() {
+		return useAutoLimitSqlIfPagination;
+	}
+
+	public void setUseAutoLimitSqlIfPagination(boolean useAutoLimitSqlIfPagination) {
+		this.useAutoLimitSqlIfPagination = useAutoLimitSqlIfPagination;
+	}
+	
+	public String toString() {
+		return this.sqlString;
 	}
 	
 }

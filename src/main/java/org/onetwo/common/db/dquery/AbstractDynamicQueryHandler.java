@@ -230,12 +230,14 @@ abstract public class AbstractDynamicQueryHandler implements DynamicQueryHandler
 			
 		} else if (dmethod.hasPageParamter()){
 			Page<?> page = dmethod.getPageParamter(args);
+			// DbmNamedFileQueryFactory#findPage
 			Page<?> resultPage = em.getFileNamedQueryManager().findPage(page, invokeContext);
 			result = convertPageByResultType(resultPage, resultClass);
 			
 		} else if (dmethod.getPageParamter(args)!=null) {
 			// 通过是否能获取page参数再次判断是否分页查询
 			Page<?> page = dmethod.getPageParamter(args);
+			// DbmNamedFileQueryFactory#findPage
 			Page<?> resultPage = em.getFileNamedQueryManager().findPage(page, invokeContext);
 			result = convertPageByResultType(resultPage, resultClass);
 			

@@ -81,6 +81,7 @@ public class AnnotationBasedQueryInfoParser implements NamedQueryInfoParser {
 			info.setQueryConfig(config);
 		}
 		config.setLikeQueryFields(Arrays.asList(query.likeQueryFields()));
+		config.setUseAutoLimitSqlIfPagination(query.useAutoLimitSqlIfPagination());
 		
 		Set<QueryContextVariable> variables = new LinkedHashSet<>();
 		

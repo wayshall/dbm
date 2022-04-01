@@ -107,4 +107,14 @@ public class HibernateDbmQueryWrapper extends AbstractQueryWrapper implements Qu
 		}
 	}
 
+	@Override
+	public boolean isUseAutoLimitSqlIfPagination() {
+		return true;
+	}
+
+	@Override
+	public void setUseAutoLimitSqlIfPagination(boolean useAutoLimitSqlIfPagination) {
+		logger.error("hibernate query not support this operation!");
+	}
+
 }

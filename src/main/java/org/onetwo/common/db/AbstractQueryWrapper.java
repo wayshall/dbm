@@ -18,7 +18,6 @@ abstract public class AbstractQueryWrapper implements QueryWrapper{
 	
 	public static final int PARAMETER_START_INDEX = 0;
 
-	
 	@SuppressWarnings("rawtypes")
 	public QueryWrapper setPageParameter(final Page page) {
 		if(!page.isPagination())

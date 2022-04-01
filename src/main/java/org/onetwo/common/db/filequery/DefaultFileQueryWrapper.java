@@ -99,7 +99,10 @@ public class DefaultFileQueryWrapper extends AbstractQueryWrapper /* implements 
 		ParsedSqlContext sqlAndValues = createParsedSqlContext();
 		
 		CreateQueryCmd createQueryCmd = new CreateQueryCmd(sqlAndValues.getParsedSql(), resultClass, info.isNativeSql());
+		// DbmQueryWrapperImpl
 		QueryWrapper dataQuery = createDataQuery(createQueryCmd);
+		boolean useAutoLimitSqlIfPagination = invokeContext.getNamedQueryInfo().isUseAutoLimitSqlIfPagination();
+		dataQuery.setUseAutoLimitSqlIfPagination(useAutoLimitSqlIfPagination);
 		
 		if(sqlAndValues.isListValue()){
 			doIndexParameters(dataQuery, sqlAndValues.asList());
@@ -317,5 +320,15 @@ public class DefaultFileQueryWrapper extends AbstractQueryWrapper /* implements 
 	@Override
 	public <T> T unwarp(Class<T> clazz) {
 		return clazz.cast(dataQuery);
+	}
+
+	@Override
+	public boolean isUseAutoLimitSqlIfPagination() {
+		return this.dataQuery.isUseAutoLimitSqlIfPagination();
+	}
+
+	@Override
+	public void setUseAutoLimitSqlIfPagination(boolean useAutoLimitSqlIfPagination) {
+		this.setUseAutoLimitSqlIfPagination(useAutoLimitSqlIfPagination);
 	}
 }

@@ -71,6 +71,7 @@ public class DbmNamedFileQueryFactory extends AbstractFileNamedQueryFactory {
 				page.setResult(datalist);
 			}
 		}else{
+			// QueryWrapper -> DbmFileQueryWrapperImpl
 			QueryWrapper jq = this.createQuery(invokeContext);
 			jq.setPageParameter(page);
 			List<T> datalist = jq.getResultList();

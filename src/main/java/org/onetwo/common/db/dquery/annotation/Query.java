@@ -40,5 +40,12 @@ public @interface Query {
 	 * @return
 	 */
 	public Class<? extends QueryContextVariable> funcClass() default ParserContextFunctionSet.class;
+	
+	/****
+	 * 在分页的查询下，是否使用自动生成分页sql(limit sql string)
+	 * @author weishao zeng
+	 * @return
+	 */
+	boolean useAutoLimitSqlIfPagination() default true;
 
 }
