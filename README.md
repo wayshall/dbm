@@ -39,6 +39,7 @@
 - [从其它地方加载DbmRepository接口的sql](#从其它地方加载DbmRepository接口的sql)
 - [直接传入要执行的sql作为参数](#直接传入要执行的sql作为参数)
 - [其它映射特性](#其它映射特性)
+- [分页查询](#分页查询)
 - [批量插入](#批量插入)
 - [充血模型支持](#充血模型支持)
 - [参数配置](#参数配置)
@@ -1399,6 +1400,18 @@ List<CompanyVO> companies = companyDao.findNestedCompanies();
 - 注意：若嵌套类型为NestedType.COLLECTION，而容器的元素为简单类型，则把@DbmNestedResult 注解的id属性设置为“value”即可。
 
 
+## 分页查询
+
+### DbmRepository分页查询接口
+DbmRepository查询接口支持自动分页功能；
+需要分页的方法必须遵守下面的约定：
+- 接口其中一个参数必须是 org.onetwo.common.utils.Page 类型 或 org.onetwo.common.utils.PageRequest 类型
+- （可选）返回为org.onetwo.common.utils.Page 类型
+若参数为Page类型时，因为Page带有List类型的result属性，所以查询的list会设置到page参数的result属性里；
+若参数为PageRequest类型时，则返回类型必须为Page 类型
+
+### 自定义分页查询
+参看 [提供自定义分页的能力](https://github.com/wayshall/dbm/issues/45)
 
 
 ## 自定义实现DbmRepository接口
