@@ -1365,7 +1365,9 @@ public class EmployeeVO  {
 ```
 解释：   
 - @DbmResultMapping 注解表明，查询返回的结果需要复杂的嵌套映射
-- @DbmNestedResult 注解告诉dbm，返回的CompanyVO对象中，哪些属性是需要复杂的嵌套映射的。property用于指明具体的属性名称，columnPrefix用于指明，需要把返回的结果集中，哪些前缀的列都映射到property指定的属性里，默认会使用property。nestedType标识该属性的嵌套类型，有三个值，ASSOCIATION表示一对一的关联对象，COLLECTION表示一对多的集合对象，MAP也是一对多，但该属性的类型是个Map类型。id属性可选，配置了可一定程度上加快映射速度。
+- @DbmNestedResult 注解告诉dbm，返回的CompanyVO对象中，哪些属性是需要复杂的嵌套映射的。
+property用于指明具体的属性名称，columnPrefix用于指明，需要把返回的结果集中，哪些前缀的列都映射到property指定的属性里，默认会使用property。nestedType标识该属性的嵌套类型，有三个值，ASSOCIATION表示一对一的关联对象，COLLECTION表示一对多的集合对象，MAP也是一对多，但该属性的类型是个Map类型。
+id属性，用于指定嵌套对象的某个属性作为识别对象的唯一标识，配置了可一定程度上加快映射速度。
 
 ### 对应的sql
 ```sql

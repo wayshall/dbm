@@ -24,6 +24,13 @@ public @interface DbmNestedResult {
 	String columnPrefix() default "";
 	NestedType nestedType();
 	
+	/****
+	 * 若嵌套属性为容器类型，是否使用容器的contains方法过滤重复数据
+	 * @author weishao zeng
+	 * @return
+	 */
+	boolean filterDuplicate() default true;
+	
 	public enum NestedType {
 		ASSOCIATION,
 		COLLECTION,

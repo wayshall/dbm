@@ -127,15 +127,21 @@ abstract public class AbstractNestedBeanMapper<T> {
 		final private String id;
 		final private String columnPrefix;
 		final private NestedType nestedType;
+		/****
+		 * 若嵌套属性为容器类型，是否使用容器的contains方法过滤重复数据
+		 */
+		final private boolean filterDuplicate;
 		public DbmNestedResultData(DbmNestedResult nested) {
-			this(nested.property(), nested.id(), nested.columnPrefix(), nested.nestedType());
+			this(nested.property(), nested.id(), nested.columnPrefix(), nested.nestedType(), nested.filterDuplicate());
 		}
-		public DbmNestedResultData(String property, String id, String columnPrefix, NestedType nestedType) {
+		
+		public DbmNestedResultData(String property, String id, String columnPrefix, NestedType nestedType, boolean filterDuplicate) {
 			super();
 			this.property = property;
 			this.id = id;
 			this.columnPrefix = columnPrefix;
 			this.nestedType = nestedType;
+			this.filterDuplicate = filterDuplicate;
 		}
 		public String getProperty() {
 			return property;
@@ -153,6 +159,11 @@ abstract public class AbstractNestedBeanMapper<T> {
 		public NestedType getNestedType() {
 			return nestedType;
 		}
+
+		public boolean isFilterDuplicate() {
+			return filterDuplicate;
+		}
+		
 		
 	}
 
@@ -207,6 +218,9 @@ abstract public class AbstractNestedBeanMapper<T> {
 		 * 则Children对应的PropertyResultClassMapper的belongToProperty为children属性
 		 */
 		final private JFishProperty belongToProperty;
+
+		private boolean filterDuplicate;
+		
 		public PropertyResultClassMapper(ResultClassMapper parentMapper, String idField, String columnPrefix, JFishProperty belongToProperty) {
 			this(parentMapper, idField, columnPrefix, belongToProperty, belongToProperty.getType());
 		}
@@ -232,6 +246,12 @@ abstract public class AbstractNestedBeanMapper<T> {
 				propertyValue = ((SimpleValueNestedMappingHoder)propertyValue).value;
 			}
 			return propertyValue;
+		}
+		public boolean isFilterDuplicate() {
+			return filterDuplicate;
+		}
+		public void setFilterDuplicate(boolean filterDuplicate) {
+			this.filterDuplicate = filterDuplicate;
 		}
 	}
 
@@ -264,7 +284,11 @@ abstract public class AbstractNestedBeanMapper<T> {
 				values = collectionClassIntro.newInstance();
 				parent.setPropertyValue(propName, values);
 			}
-			if(!values.contains(propertyValue)){
+			if(this.isFilterDuplicate()){
+				if (!values.contains(propertyValue)) {
+					values.add(propertyValue);
+				}
+			} else {
 				values.add(propertyValue);
 			}
 		}
@@ -457,6 +481,7 @@ abstract public class AbstractNestedBeanMapper<T> {
 					}else{
 						propertyMapper = new PropertyResultClassMapper(this, result.getId(), appendPrefix(result.getColumnPrefix(accessPath)), jproperty);
 					}
+					propertyMapper.setFilterDuplicate(result.isFilterDuplicate());
 					propertyMapper.initialize();
 					complexFields.put(jproperty.getName(), propertyMapper);
 				}else{
@@ -508,7 +533,7 @@ abstract public class AbstractNestedBeanMapper<T> {
 				//根据id属性作为区分一条记录的标志
 				String actualColumnName = getActualColumnName(names, idProperty);
 				if(actualColumnName==null){
-					throw new DbmException("no id column found on resultSet for specified id: " + idPropertyName+", columnPrefix:"+columnPrefix);
+					throw new DbmException("id column not found on resultSet for specified id: " + idPropertyName+", columnPrefix:"+columnPrefix);
 				}
 				int index = names.get(actualColumnName);
 				Object idValue = columnValueGetter.getColumnValue(index, idProperty.getType());
