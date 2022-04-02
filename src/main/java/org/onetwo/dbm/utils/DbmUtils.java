@@ -76,6 +76,23 @@ final public class DbmUtils {
 	public final static ConversionService CONVERSION_SERVICE = new DefaultConversionService();
 	
 	private static final String CHAINED_TRANSACTION_MANAGER = "org.springframework.data.transaction.ChainedTransactionManager";
+
+	public static final int INVALID_VALUE_FIRST_RECORD = -1;
+	public static final int INVALID_VALUE_MAX_RESULTS = 0;
+
+	public static final String FIRST_RESULT_NAME = "DbmQueryFirstResult";
+	public static final String MAX_RESULT_NAME = "DbmQueryMaxResult";
+
+	/****
+	 * 是否分页
+	 * @author weishao zeng
+	 * @param first
+	 * @param maxResults
+	 * @return
+	 */
+	public static boolean isLimitedQuery(Integer first, Integer maxResults){
+		return first>INVALID_VALUE_FIRST_RECORD && maxResults>INVALID_VALUE_MAX_RESULTS;
+	}
 	
 	public static boolean isChanedTransactionManagerPresent(){
 		return ClassUtils.isPresent(CHAINED_TRANSACTION_MANAGER, ClassUtils.getDefaultClassLoader());
