@@ -8,9 +8,9 @@ import org.onetwo.common.db.dquery.DynamicQueryHandlerProxyCreator.DbmRepository
 import org.onetwo.common.db.filequery.SpringBasedSqlFileScanner;
 import org.onetwo.common.db.spi.NamedSqlFileManager;
 import org.onetwo.common.db.spi.SqlFileScanner;
+import org.onetwo.common.exception.BaseException;
 import org.onetwo.common.log.JFishLoggerFactory;
 import org.onetwo.common.propconf.ResourceAdapter;
-import org.onetwo.common.reflect.ReflectUtils;
 import org.onetwo.common.spring.SpringUtils;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -66,7 +66,13 @@ public class FileScanBasicDynamicQueryObjectRegister implements DynamicQueryObje
 			if(registry.containsBeanDefinition(className)){
 				return;
 			}
-			final Class<?> repositoryClass = ReflectUtils.loadClass(className);
+//			final Class<?> repositoryClass = ReflectUtils.loadClass(className);
+			Class<?> repositoryClass = null;
+			try {
+				repositoryClass = ClassUtils.getDefaultClassLoader().loadClass(className);
+			} catch (ClassNotFoundException e) {
+				throw new BaseException("repository class not found: " + className);
+			}
 			
 			Optional<DbmRepositoryAttrs> dbmRepAttrsOpt = DynamicQueryHandlerProxyCreator.findDbmRepositoryAttrs(repositoryClass);
 			if (!dbmRepAttrsOpt.isPresent()) {
