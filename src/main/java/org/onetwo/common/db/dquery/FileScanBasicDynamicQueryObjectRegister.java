@@ -58,7 +58,7 @@ public class FileScanBasicDynamicQueryObjectRegister implements DynamicQueryObje
 	public boolean registerQueryBeans() {
 		logger.info("start to register dao bean ....");
 		Map<String, ResourceAdapter<?>> sqlfiles = sqlFileScanner.scanMatchSqlFiles(null);
-		sqlfiles.entrySet().parallelStream().forEach(f -> {
+		sqlfiles.entrySet().stream().forEach(f -> {
 			String className = f.getKey();
 			if(NamedSqlFileManager.GLOBAL_NS_KEY.equalsIgnoreCase(className)){
 				return;
