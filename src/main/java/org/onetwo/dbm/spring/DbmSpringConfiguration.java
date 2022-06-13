@@ -19,6 +19,7 @@ import org.onetwo.dbm.event.internal.EdgeEventBus;
 import org.onetwo.dbm.exception.DbmException;
 import org.onetwo.dbm.id.DbmIds;
 import org.onetwo.dbm.id.SnowflakeIdGenerator;
+import org.onetwo.dbm.id.TableIdGeneratorManager;
 import org.onetwo.dbm.mapping.DbmConfig;
 import org.onetwo.dbm.mapping.DbmConfig.SnowflakeIdConfig;
 import org.onetwo.dbm.mapping.DefaultDbmConfig;
@@ -138,6 +139,13 @@ public class DbmSpringConfiguration implements ApplicationContextAware, Initiali
 			sid = DbmIds.createIdGenerator(config.getDatacenterId(), config.getMachineId());
 		}
 		return sid;
+	}
+	
+	@Bean
+	@Autowired
+	public TableIdGeneratorManager tableIdGeneratorManager(DbmSessionFactory sessionFactory) {
+		TableIdGeneratorManager tidManager = new TableIdGeneratorManager(dbmEntityManager(sessionFactory));
+		return tidManager;
 	}
 	
 	/*@Bean
