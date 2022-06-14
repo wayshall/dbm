@@ -287,6 +287,7 @@ abstract public class AbstractExtQuery implements ExtQueryInner{
 		int index = 0;
 		String h = null;
 		StringBuilder causeScript = new StringBuilder();
+		Object firstValue = LangUtils.isEmpty(valueList)?null:valueList.get(0);
  
 		for (int i = 0; i < fieldList.size(); i++) {
 			Object p = fieldList.get(i);
@@ -303,7 +304,7 @@ abstract public class AbstractExtQuery implements ExtQueryInner{
 					v = valueList.get(i);
 				}
 			} catch (IndexOutOfBoundsException e) {
-				v = valueList.get(0);//if can't find the corresponding value, get the first one.
+				v = firstValue;//if can't find the corresponding value, get the first one.
 			}
 
 			QueryField qf = QueryFieldImpl.create(p);
