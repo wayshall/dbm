@@ -13,7 +13,7 @@ public @interface DbmNestedResult {
 	 */
 	String property();
 	/***
-	 * 指定类的某个属性作为唯一键
+	 * 指定嵌套子类的某个属性作为唯一属性
 	 * @return
 	 */
 	String id() default "";

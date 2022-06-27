@@ -431,6 +431,9 @@ abstract public class AbstractNestedBeanMapper<T> {
 			this.classIntro = ClassIntroManager.getInstance().getIntro(resultClass);
 			if(idProperty==null && StringUtils.isNotBlank(idPropertyName)){
 				JFishProperty idJProperty = this.classIntro.getJFishProperty(idPropertyName, false);
+				if (idJProperty==null) {
+					throw new DbmException("idPropertyName[" + idPropertyName + "] cannot be found on class: " + this.classIntro.getClazz().getName());
+				}
 				try {
 					this.idProperty = new PropertyMeta(idPropertyName, idJProperty.getPropertyDescriptor().getPropertyType(), false);
 				} catch (Exception e) {
@@ -508,7 +511,7 @@ abstract public class AbstractNestedBeanMapper<T> {
 				//根据id属性作为区分一条记录的标志
 				String actualColumnName = getActualColumnName(names, idProperty);
 				if(actualColumnName==null){
-					throw new DbmException("no id column found on resultSet for specified id: " + idPropertyName+", columnPrefix:"+columnPrefix);
+					throw new DbmException("id column not found on resultSet, id: " + idPropertyName+", columnPrefix:"+columnPrefix);
 				}
 				int index = names.get(actualColumnName);
 				Object idValue = columnValueGetter.getColumnValue(index, idProperty.getType());
