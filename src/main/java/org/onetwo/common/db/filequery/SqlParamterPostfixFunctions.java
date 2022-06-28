@@ -42,6 +42,7 @@ public class SqlParamterPostfixFunctions implements SqlParamterPostfixFunctionRe
 	private Map<Class<?>, Map<String, SqlParamterPostfixFunction>> typeFuncMap = Maps.newLinkedHashMap();
 
 	public SqlParamterPostfixFunctions(){
+		// %value%
 		register(new String[]{"like", "likeString"}, new SqlParamterPostfixFunction(){
 			@Override
 			public Object toSqlParameterValue(String paramName, Object value) {
@@ -52,7 +53,7 @@ public class SqlParamterPostfixFunctions implements SqlParamterPostfixFunctionRe
 			}
 		});
 
-
+		// %value
 		register(new String[]{"prelike", "preLikeString"}, new SqlParamterPostfixFunction(){
 			@Override
 			public Object toSqlParameterValue(String paramName, Object value) {
@@ -63,6 +64,7 @@ public class SqlParamterPostfixFunctions implements SqlParamterPostfixFunctionRe
 			}
 		});
 
+		// value%
 		register(new String[]{"postlike", "postLikeString"}, new SqlParamterPostfixFunction(){
 			@Override
 			public Object toSqlParameterValue(String paramName, Object value) {

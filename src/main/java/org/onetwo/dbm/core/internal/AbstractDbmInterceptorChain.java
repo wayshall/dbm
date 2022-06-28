@@ -140,22 +140,14 @@ abstract public class AbstractDbmInterceptorChain implements DbmInterceptorChain
 		return result;
 	}
 	
-	private void invokeTarget() {
+	private void invokeTarget() throws Exception {
 		if(actualInvoker!=null){
 			result = actualInvoker.get();
-			state = STATE_FINISH;
 		}else{
 			if (!targetMethod.isAccessible()){
 				targetMethod.setAccessible(true);
 			}
-			try {
-				result = targetMethod.invoke(targetObject, targetArgs);
-				state = STATE_FINISH;
-			} catch (Exception e) {
-				state = STATE_EXCEPTION;
-				throwable = e;
-				throw convertRuntimeException(e);
-			}
+			result = targetMethod.invoke(targetObject, targetArgs);
 		}
 	}
 	

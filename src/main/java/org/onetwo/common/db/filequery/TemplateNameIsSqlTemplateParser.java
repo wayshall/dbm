@@ -24,7 +24,7 @@ public class TemplateNameIsSqlTemplateParser extends DynamicStringFreemarkerTemp
 	}
 	
 	public static class NameIsContentTemplateProvider implements StringTemplateProvider {
-
+		// 直接把名称返回，作为模版。即把使用@sql注解标记的参数作为模版
 		@Override
 		public String getTemplateContent(String name) {
 			return name;

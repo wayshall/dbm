@@ -457,6 +457,17 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 	}
 
 	public Class<?> getComponentClass(Object[] args) {
+		// 优先处理分页类型
+		if (hasPageParamter()) {
+			if (this.resultTypeParameter!=null) {
+				Object types = args[resultTypeParameter.getParameterIndex()];
+				return (Class<?>)types;
+			} else if (this.dynamicQuerySettingsParameter!=null) {
+				DynamicQuerySettings settings = getDynamicQuerySettings(args);
+				return settings.getRowType();
+			}
+		}
+		
 		if (this.resultTypeParameter!=null) {
 			Object types = args[resultTypeParameter.getParameterIndex()];
 			if (types.getClass().isArray()) {

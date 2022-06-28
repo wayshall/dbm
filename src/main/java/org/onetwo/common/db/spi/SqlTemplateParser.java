@@ -5,6 +5,7 @@ import org.onetwo.common.spring.ftl.TemplateParser;
 /**
  * sql模板适配接口
  * @author weishao zeng
+ * @see StringTemplateLoaderFileSqlParser(FreemarkerSqlTemplateParser), TemplateNameIsSqlTemplateParser
  * <br/>
  */
 public interface SqlTemplateParser extends TemplateParser {
