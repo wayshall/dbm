@@ -502,7 +502,8 @@ abstract public class AbstractNestedBeanMapper<T> {
 		}
 		
 //		public Object mapResult(Map<String, Integer> names, ResultSetWrappingSqlRowSet resutSetWrapper){
-		public Object mapResult(ResultSetWrappingSqlRowSet resutSetWrapper, Map<String, Integer> names, ColumnValueGetter columnValueGetter, int rowNum){
+		public Object mapResult(RowResultContext parentContext, Map<String, Integer> names, ColumnValueGetter columnValueGetter, int rowNum){
+			ResultSetWrappingSqlRowSet resutSetWrapper = parentContext.getRowSet();
 			Integer hash = null;
 			Object entity = null;
 			BeanWrapper bw = null;
@@ -540,9 +541,12 @@ abstract public class AbstractNestedBeanMapper<T> {
 					datas.put(hash, bw);
 				}
 			}
+			
 			entity = bw.getWrappedInstance();
+			// 增加RowResultContext，便于子类控制
+			RowResultContext rowContext = new RowResultContext(resutSetWrapper, bw, hash);
 			for(PropertyResultClassMapper pm : this.complexFields.values()){
-				Object propertyValue = pm.mapResult(resutSetWrapper, names, columnValueGetter, rowNum);
+				Object propertyValue = pm.mapResult(rowContext, names, columnValueGetter, rowNum);
 				boolean linkParent = false;
 				if (propertyValue instanceof DbmChildrenRowNestedMapping) {
 					DbmChildrenRowNestedMapping linkToPrent = (DbmChildrenRowNestedMapping) propertyValue;
