@@ -1,5 +1,6 @@
 package org.onetwo.dbm.core.internal;
 
+import org.onetwo.dbm.core.internal.DbmThreadLocal.DbmThreadContext;
 import org.onetwo.dbm.core.spi.DbmInterceptor;
 import org.onetwo.dbm.core.spi.DbmInterceptorChain;
 import org.onetwo.dbm.core.spi.DbmSessionFactory;
@@ -18,11 +19,13 @@ public class DbmThreadLocalInterceptor implements DbmInterceptor, Ordered {
 
 	@Override
 	public Object intercept(DbmInterceptorChain chain) {
+		DbmThreadContext ctx = DbmThreadLocal.getOrInitContext(true);
 		try {
-			DbmThreadLocal.getOrInitContext(true);
 			return chain.invoke();
 		} finally {
-			DbmThreadLocal.reset();
+			if (ctx.isAutoClean()) {
+				DbmThreadLocal.reset();
+			}
 		}
 	}
 	

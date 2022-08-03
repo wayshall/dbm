@@ -14,24 +14,22 @@ public class DbmThreadLocal {
 	}
 
 	
-	public static DbmThreadContext initContext(boolean logSql){
-		DbmThreadContext ctx = new DbmThreadContext();
-		ctx.setLogSql(logSql);
+	public static DbmThreadContext initContext(boolean autoClean){
+		DbmThreadContext ctx = new DbmThreadContext(autoClean);
+		ctx.setLogSql(true);
 		THREAD_CONTEXT_HOLDER.set(ctx);
 		return ctx;
 	}
 	
 
-	public static DbmThreadContext getOrInitContext(boolean logSql){
+	public static DbmThreadContext getOrInitContext(boolean autoClean){
 		return get().orElseGet(() -> {
-			return initContext(logSql);
+			return initContext(autoClean);
 		});
 	}
 	
-
-
-	public static DbmThreadContext logSql(boolean logSql){
-		DbmThreadContext ctx = getOrInitContext(logSql);
+	public static DbmThreadContext logSql(boolean autoClean, boolean logSql){
+		DbmThreadContext ctx = getOrInitContext(autoClean);
 		ctx.setLogSql(logSql);
 		return ctx;
 	}
@@ -42,13 +40,24 @@ public class DbmThreadLocal {
 
 	
 	public static  class DbmThreadContext {
+		/***
+		 * 是否自动清除，避免内存泄漏
+		 */
+		final private boolean autoClean;
 		private boolean logSql;
 
+		public DbmThreadContext(boolean autoClean) {
+			super();
+			this.autoClean = autoClean;
+		}
 		public boolean isLogSql() {
 			return logSql;
 		}
 		public void setLogSql(boolean logSql) {
 			this.logSql = logSql;
+		}
+		public boolean isAutoClean() {
+			return autoClean;
 		}
 	}
 	
