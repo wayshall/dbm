@@ -1,11 +1,14 @@
 package org.onetwo.dbm.core.internal;
 
+import java.util.Optional;
+
 import org.apache.commons.lang3.tuple.Pair;
 import org.onetwo.common.log.JFishLoggerFactory;
 import org.onetwo.common.profiling.TimeCounter;
 import org.onetwo.common.utils.LangUtils;
 import org.onetwo.dbm.annotation.DbmInterceptorFilter;
 import org.onetwo.dbm.annotation.DbmInterceptorFilter.InterceptorType;
+import org.onetwo.dbm.core.internal.DbmThreadLocal.DbmThreadContext;
 import org.onetwo.dbm.core.spi.DbmInterceptor;
 import org.onetwo.dbm.core.spi.DbmInterceptorChain;
 import org.onetwo.dbm.core.spi.DbmSessionFactory;
@@ -42,6 +45,7 @@ public class LogSqlInterceptor implements DbmInterceptor, Ordered {
 		if(!dbmConfig.isLogSql()){
 			return chain.invoke();
 		}
+		
 		Object[] args = chain.getTargetArgs();
 		Pair<String, Object> sqlParams = DbmUtils.findSqlAndParams(args);
 		if(sqlParams==null){
@@ -56,6 +60,12 @@ public class LogSqlInterceptor implements DbmInterceptor, Ordered {
 			DebugContextInterceptor.getCurrentDebugContextData().ifPresent(data->{
 				data.addSqlAndParams(sqlParams);
 			});
+		}
+
+		// 检查线程变量是否设置了打印sql
+		Optional<DbmThreadContext> ctxOpt = DbmThreadLocal.get();
+		if (ctxOpt.isPresent() && !ctxOpt.get().isLogSql()) {
+			return chain.invoke();
 		}
 
 		if(logger.isTraceEnabled()){
