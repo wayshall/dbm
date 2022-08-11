@@ -29,7 +29,9 @@ public class DbmNestedBeanRowMapper<T> extends AbstractNestedBeanMapper<T> imple
 		Map<String, Integer> names = DbmUtils.lookupColumnNames(rsmd);
 		
 		ColumnValueGetter columnValueGetter = new ResultSetColumnValueGetter(resutSetWrapper, getRowMapperFactory().getJdbcResultSetGetter());
-		T mappedObject = (T)this.resultClassMapper.mapResult(resutSetWrapper, names, columnValueGetter, rowNum);
+
+		RowResultContext rowContext = new RowResultContext(resutSetWrapper, null, null);
+		T mappedObject = (T)this.resultClassMapper.mapResult(rowContext, names, columnValueGetter, rowNum);
 		return mappedObject;
 	}
 

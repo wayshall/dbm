@@ -174,7 +174,7 @@ abstract public class AbstractDynamicQueryHandler implements DynamicQueryHandler
 		}catch (Throwable e) {
 			String qname = invokeContext.getNamedQueryInfo().getFullName();
 //			throw new FileNamedQueryException("invoke query["+invokeContext.getQueryName()+"] error : " + e.getMessage(), e);
-			throw new FileNamedQueryException("invoke query["+qname+"] error : ", e).put("queryName", qname);
+			throw new FileNamedQueryException("invoke query["+qname+"] error : ", e);//.put("queryName", qname);
 		}
 		
 	}
