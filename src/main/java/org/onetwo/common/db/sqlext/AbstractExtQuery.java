@@ -14,6 +14,7 @@ import org.onetwo.common.log.JFishLoggerFactory;
 import org.onetwo.common.utils.CUtils;
 import org.onetwo.common.utils.LangUtils;
 import org.onetwo.common.utils.StringUtils;
+import org.onetwo.dbm.exception.DbmException;
 import org.slf4j.Logger;
 
 import com.google.common.collect.Maps;
@@ -279,8 +280,18 @@ abstract public class AbstractExtQuery implements ExtQueryInner{
 			return null;*/
 		//actually, never can not be null
 		//Fix: 去掉 valueList.isEmpty()条件, null没有被忽略，但empty却被忽略了，行为应该交给IfNull控制
-		if (valueList == null)
+		if (valueList == null) {
 			return null;
+		}
+		
+		if (valueList.isEmpty()) {
+			if(ifNull==IfNull.Ignore){
+				return null;
+			}else if(ifNull==IfNull.Throw){
+				throw new DbmException("the fields["+LangUtils.toString(fields)+"] 's value can not be empty.");
+			}
+		}
+		
 
 //		List<?> fieldList =  MyUtils.asList(fields);
 		List<?> fieldList =  CUtils.trimAndexcludeTheClassElement(true, fields);
