@@ -211,7 +211,7 @@ public abstract class ExtQueryUtils {
 		List<?> keylist = JFishList.newList().flatAddObject(params.keySet());
 		Set<String> fields = LangUtils.newHashSet();
 		for(Object key : keylist){
-			QueryField qf = QueryFieldImpl.create(key);
+			QueryField qf = QueryFieldImpl.create(key, null);
 			fields.add(qf.getFieldName());
 		}
 		return fields;

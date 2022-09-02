@@ -16,6 +16,10 @@ import org.onetwo.dbm.query.DbmQueryNameStrategy;
 public class QueryFieldImpl implements QueryField {
 	
 	
+	public static QueryField create(Object p){
+		return create(p, null);
+	}
+	
 	public static QueryField create(Object p, QueryNameStrategy queryNameStrategy){
 		QueryField qf = null;
 		if(p instanceof String){
