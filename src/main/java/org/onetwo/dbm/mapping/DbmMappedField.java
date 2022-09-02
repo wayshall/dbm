@@ -111,6 +111,8 @@ public interface DbmMappedField {
 	void setVersionableType(VersionableType<?> versionableType);
 	
 	boolean isEnumerated();
+	boolean isEnumeratedOrdinal();
+	
 	DbmEnumType getEnumType();
 //	GeneratedValueIAttrs getGeneratedValueIAttrs();
 	

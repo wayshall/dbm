@@ -317,7 +317,7 @@ abstract public class AbstractExtQuery implements ExtQueryInner{
 				v = valueList.get(0);//if can't find the corresponding value, get the first one.
 			}
 
-			QueryField qf = QueryFieldImpl.create(p);
+			QueryField qf = QueryFieldImpl.create(p, queryNameStrategy);
 			qf.init(this, v);
 			
 //			SQLSymbolParserContext context = SQLSymbolParserContext.create(qf.getFieldName(), v, paramsValue, ifNull);

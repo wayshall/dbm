@@ -6,6 +6,7 @@ import org.onetwo.common.db.sqlext.ExtQuery.K;
 import org.onetwo.common.db.sqlext.SelectQueryNameStrategy;
 import org.onetwo.common.utils.StringUtils;
 import org.onetwo.dbm.mapping.DbmMappedEntry;
+import org.onetwo.dbm.mapping.DbmMappedField;
 
 /**
  * @author wayshall
@@ -37,6 +38,16 @@ public class DbmQueryNameStrategy extends SelectQueryNameStrategy {
 			fieldName = entry.getColumnName(f);
 		}
 		return super.getFieldName(fieldName);
+	}
+	
+
+	public DbmMappedField getDbmMappedField(String f) {
+		DbmMappedField field = entry.getMappedFields().get(f);
+		return field;
+	}
+	
+	public DbmMappedEntry getDbmMappedEntry() {
+		return entry;
 	}
 	
 	public String appendAlias(String f){

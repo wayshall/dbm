@@ -1,18 +1,25 @@
 package org.onetwo.common.db.builder;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.onetwo.common.db.sqlext.ExtQuery.K;
 import org.onetwo.common.db.sqlext.ExtQueryInner;
 import org.onetwo.common.db.sqlext.QueryDSLOps;
+import org.onetwo.common.db.sqlext.QueryNameStrategy;
+import org.onetwo.common.utils.LangUtils;
 import org.onetwo.common.utils.StringUtils;
 import org.onetwo.dbm.exception.DbmException;
+import org.onetwo.dbm.mapping.DbmMappedField;
+import org.onetwo.dbm.query.DbmQueryNameStrategy;
 
 public class QueryFieldImpl implements QueryField {
 	
 	
-	public static QueryField create(Object p){
+	public static QueryField create(Object p, QueryNameStrategy queryNameStrategy){
 		QueryField qf = null;
 		if(p instanceof String){
-			qf = new QueryFieldImpl(p.toString());
+			qf = new QueryFieldImpl(p.toString(), queryNameStrategy);
 		}else if(p instanceof QueryField){
 			qf = (QueryField) p;
 		}else{
@@ -27,17 +34,20 @@ public class QueryFieldImpl implements QueryField {
 	
 	private String fieldName;
 	private String operator;
+	private QueryNameStrategy queryNameStrategy;
 	
-	QueryFieldImpl(String fieldExpr) {
+	QueryFieldImpl(String fieldExpr, QueryNameStrategy queryNameStrategy) {
 		super();
 		this.fieldExpr = fieldExpr;
 
 		String[] sp = StringUtils.split(fieldExpr, QueryField.SPLIT_SYMBOL);
 		this.fieldName = sp[0];
-		if(sp.length==2)
+		if(sp.length==2) {
 			this.operator = sp[1];
-		else
+		} else {
 			this.operator = QueryDSLOps.EQ.getActualOperator();
+		}
+		this.queryNameStrategy = queryNameStrategy;
 	}
 	
 	public void init(ExtQueryInner extQuery, Object value){
@@ -51,9 +61,39 @@ public class QueryFieldImpl implements QueryField {
 		if(newf.startsWith(K.FUNC)){
 			newf = processFunction(newf);
 		}else{
-			newf = extQuery.getFieldName(newf);
+//			newf = extQuery.getFieldName(newf);
+			newf = this.queryNameStrategy.getFieldName(newf);
 		}
 		return newf;
+	}
+
+	public Object getValue() {
+		if (isDbmQueryField()) {
+			DbmQueryNameStrategy dbmStrategy = (DbmQueryNameStrategy)this.queryNameStrategy;
+			DbmMappedField field = dbmStrategy.getDbmMappedField(this.fieldName);
+			if (field.isEnumeratedOrdinal()) {
+				if (LangUtils.isMultiple(field)) {
+					List<Object> values = LangUtils.asList(value).stream().map(e -> ordinalIfPossible(e)).collect(Collectors.toList());
+					return values;
+				} else {
+					Object val = ordinalIfPossible(value);
+					return val;
+				}
+			}
+		}
+		return value;
+	}
+	
+	private Object ordinalIfPossible(Object value) {
+		if (value instanceof Enum) {
+			Object val = ((Enum<?>)value).ordinal();
+			return val;
+		}
+		return value;
+	}
+	
+	private boolean isDbmQueryField() {
+		return this.queryNameStrategy instanceof DbmQueryNameStrategy;
 	}
 
 	public String processFunction(String f) {
@@ -70,7 +110,8 @@ public class QueryFieldImpl implements QueryField {
 			throw new DbmException("the function's parameter can not be emtpy : " + paramString);
 		
 		String[] args = StringUtils.split(paramString, ",");
-		args[0] = extQuery.getFieldName(args[0]);
+//		args[0] = extQuery.getFieldName(args[0]);
+		args[0] = this.queryNameStrategy.getFieldName(args[0]);
 		result = extQuery.getSqlFunctionManager().exec(fname, (Object[])args);
 		
 		return result;
@@ -124,10 +165,6 @@ public class QueryFieldImpl implements QueryField {
 
 	public ExtQueryInner getExtQuery() {
 		return extQuery;
-	}
-
-	public Object getValue() {
-		return value;
 	}
 
 	public String getFieldName() {
