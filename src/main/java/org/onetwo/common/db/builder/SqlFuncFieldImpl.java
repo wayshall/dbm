@@ -10,7 +10,7 @@ public class SqlFuncFieldImpl extends QueryFieldImpl {
 	}
 	
 	SqlFuncFieldImpl(String fieldExpr) {
-		super(fieldExpr);
+		super(fieldExpr, null);
 	}
 
 	@Override

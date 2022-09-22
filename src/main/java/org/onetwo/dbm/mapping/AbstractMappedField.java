@@ -176,6 +176,10 @@ abstract public class AbstractMappedField implements DbmMappedField{
 		return enumType!=null;
 	}
 	
+	public boolean isEnumeratedOrdinal() {
+		return enumType==DbmEnumType.ORDINAL;
+	}
+	
 	/****
 	 * 和 {@link #getValue(Object)}对应
 	 * 把value（一般从数据库获取）设置为实体的实际值（经过转换器转换的值，如转为java枚举量）
