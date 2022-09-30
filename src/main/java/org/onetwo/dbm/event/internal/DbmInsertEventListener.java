@@ -84,11 +84,10 @@ public class DbmInsertEventListener extends InsertEventListener{
 					updateCount += es.getDbmJdbcOperations().updateWith(new SimpleArgsPreparedStatementCreator(sql, arg), keyHolder);
 					if (keyHolder.getKey()!=null) {
 						//TODO 如果有多个自动生成字段，这里还需要处理
-						DbmMappedField idField = LangUtils.getFirst(entry.getIdentifyFields());
-						Class<?> idType = idField.getColumnType();
-//						BigInteger val = new BigInteger(keyHolder.getKey().toString());
-						Object idValue = Types.convertValue(keyHolder.getKey(), idType);
-						entry.setId(objects.get(index++), idValue);
+						// 不同版本的jdbc（spring？没细究……）驱动获取到的key对象不同，有的是bigint类型，这里需要转换为对象的实际类型
+						Class<?> idType = entry.getIdentifyFields().get(0).getPropertyInfo().getType();
+						Object generatedId = Types.convertValue(keyHolder.getKey(), idType);
+						entry.setId(objects.get(index++), generatedId);
 					}
 				}
 			}else{
