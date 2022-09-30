@@ -2,12 +2,14 @@ package org.onetwo.dbm.event.internal;
 
 import java.util.List;
 
+import org.onetwo.common.convert.Types;
 import org.onetwo.common.utils.LangUtils;
 import org.onetwo.dbm.event.spi.DbmInsertEvent;
 import org.onetwo.dbm.exception.DbmException;
 import org.onetwo.dbm.exception.EntityInsertException;
 import org.onetwo.dbm.jdbc.internal.SimpleArgsPreparedStatementCreator;
 import org.onetwo.dbm.mapping.DbmMappedEntry;
+import org.onetwo.dbm.mapping.DbmMappedField;
 import org.onetwo.dbm.mapping.JdbcStatementContext;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
@@ -82,7 +84,11 @@ public class DbmInsertEventListener extends InsertEventListener{
 					updateCount += es.getDbmJdbcOperations().updateWith(new SimpleArgsPreparedStatementCreator(sql, arg), keyHolder);
 					if (keyHolder.getKey()!=null) {
 						//TODO 如果有多个自动生成字段，这里还需要处理
-						entry.setId(objects.get(index++), keyHolder.getKey());
+						DbmMappedField idField = LangUtils.getFirst(entry.getIdentifyFields());
+						Class<?> idType = idField.getColumnType();
+//						BigInteger val = new BigInteger(keyHolder.getKey().toString());
+						Object idValue = Types.convertValue(keyHolder.getKey(), idType);
+						entry.setId(objects.get(index++), idValue);
 					}
 				}
 			}else{
