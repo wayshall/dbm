@@ -12,20 +12,14 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.Table;
 
 import javax.validation.constraints.NotNull;
 import org.hibernate.validator.constraints.NotBlank;
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.SafeHtml;
-import org.hibernate.validator.constraints.Email;
-import org.hibernate.validator.constraints.URL;
 
-import org.onetwo.dbm.annotation.DbmIdGenerator;
-import org.onetwo.dbm.id.SnowflakeGenerator;
+import org.onetwo.dbm.annotation.SnowflakeId;
 import org.onetwo.dbm.jpa.BaseEntity;
 
 import lombok.Data;
@@ -39,12 +33,9 @@ import lombok.EqualsAndHashCode;
 @Table(name="${table.name}")
 @Data
 @EqualsAndHashCode(callSuper=true)
-public class ${entityClassName} extends BaseEntity  {
+public class ${entityClassName} extends BaseEntity {
 
-    @Id
-    //@GeneratedValue(strategy=GenerationType.IDENTITY)
-    @GeneratedValue(strategy = GenerationType.AUTO, generator="snowflake") 
-    @DbmIdGenerator(name="snowflake", generatorClass=SnowflakeGenerator.class)
+    @SnowflakeId
     @NotNull
     ${table.primaryKey.javaType.simpleName} ${table.primaryKey.propertyName};
     
@@ -56,8 +47,9 @@ public class ${entityClassName} extends BaseEntity  {
     <#if !column.nullable>
     @NotNull
     </#if>
-    <#if column.mapping.isStringType()>
-    @NotBlank
+    <#if column.isJsonType()>
+    @org.onetwo.dbm.annotation.DbmJsonField
+    <#elseif column.mapping.isStringType()>
     @Length(max=${column.columnSize})
     @SafeHtml
     <#elseif column.isEmailType()>
@@ -65,7 +57,7 @@ public class ${entityClassName} extends BaseEntity  {
     <#elseif column.isUrlType()>
     @URL
     </#if>
-    ${column.mappingJavaClass.simpleName} ${column.propertyName};
+    ${column.mappingJavaClassLabel} ${column.propertyName};
     
 </#if>
 </#list>

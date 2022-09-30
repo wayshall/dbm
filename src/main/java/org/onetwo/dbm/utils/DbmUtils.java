@@ -15,16 +15,21 @@ import java.util.function.Supplier;
 import javax.sql.DataSource;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.onetwo.common.log.JFishLoggerFactory;
 import org.onetwo.common.reflect.ReflectUtils;
 import org.onetwo.common.spring.SpringUtils;
+import org.onetwo.common.spring.Springs;
+import org.onetwo.common.utils.CUtils;
 import org.onetwo.common.utils.LangUtils;
 import org.onetwo.dbm.annotation.DbmFieldListeners;
 import org.onetwo.dbm.core.spi.DbmTransaction;
 import org.onetwo.dbm.exception.DbmException;
 import org.onetwo.dbm.exception.UpdateCountException;
 import org.onetwo.dbm.jdbc.JdbcUtils;
+import org.onetwo.dbm.jdbc.spi.SqlParametersProvider;
 import org.onetwo.dbm.mapping.DbmEntityFieldListener;
+import org.onetwo.dbm.mapping.DbmMappedField;
 import org.onetwo.dbm.spring.EnableDbm;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.ListableBeanFactory;
@@ -32,6 +37,11 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.data.transaction.ChainedTransactionManager;
+import org.springframework.jdbc.core.SqlParameterValue;
+import org.springframework.jdbc.core.SqlProvider;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
+import org.springframework.jdbc.core.namedparam.SqlParameterSourceUtils;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.support.rowset.SqlRowSetMetaData;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -59,11 +69,11 @@ final public class DbmUtils {
 	}
 	
 	public static List<DbmEntityFieldListener> initDbmEntityFieldListeners(DbmFieldListeners listenersAnntation){
-		Assert.notNull(listenersAnntation);
+		Assert.notNull(listenersAnntation, "listenersAnntationn can not be null");
 		Class<? extends DbmEntityFieldListener>[] flClasses = listenersAnntation.value();
 		List<DbmEntityFieldListener> fieldListeners = Lists.newArrayList();
 		for(Class<? extends DbmEntityFieldListener> flClass : flClasses){
-			DbmEntityFieldListener fl = ReflectUtils.newInstance(flClass);
+			DbmEntityFieldListener fl = DbmUtils.createDbmBean(flClass); // ReflectUtils.newInstance(flClass);
 			fieldListeners.add(fl);
 		}
 		return fieldListeners;
@@ -113,6 +123,25 @@ final public class DbmUtils {
 		ListableBeanFactory bf = (ListableBeanFactory)applicationContext.getAutowireCapableBeanFactory();
 		return scanEnableDbmPackages(bf);
 	}
+	
+	/***
+	 * 首先找到标注了 annotationCLass 注解（比如 @EnableDbm ）的bean
+	 * 然后读取注解的packagesToScan属性值，有则返回此值
+	 * 没有则返回标注了注解的bean所在包，作为返回值
+	 * 
+	 * sample:
+	 *  
+	 * @EnableDbm
+	 * class EnableDbmBean {
+	 * }
+	 * 
+	 * Set<String> packageNames = SpringAnnotationUtils.scanAnnotationPackages(applicationContext, EnableDbmBean.class)
+	 * packageNames = EnableDbmUIBean.class.getPackage().getName();
+	 * 
+	 * @author weishao zeng
+	 * @param beanFactory
+	 * @return
+	 */
 	public static List<String> scanEnableDbmPackages(ListableBeanFactory beanFactory){
 		List<String> packageNames = new ArrayList<String>();
 		SpringUtils.scanAnnotation(beanFactory, EnableDbm.class, (beanDef, beanClass)->{
@@ -134,6 +163,7 @@ final public class DbmUtils {
 		});
 		return packageNames;
 	}
+	
 	/*public static List<String> scanDbmPackages(ApplicationContext applicationContext){
 		ListableBeanFactory bf = (ListableBeanFactory)applicationContext.getAutowireCapableBeanFactory();
 		return scanDbmPackages(bf);
@@ -242,7 +272,101 @@ final public class DbmUtils {
 		}
 		return false;
 	}
+	
 
+	public static Pair<String, Object> findSqlAndParams(Object[] args){
+		String sql = null;
+		Object params = null;
+		int maxArgSize = 50;
+		for (int i = 0; i < args.length; i++) {
+			Object arg = args[i];
+			if(arg==null){
+				continue;
+			}
+			if(arg instanceof String){
+				sql = (String)arg;
+			}else if(arg instanceof Map){
+				params = arg;
+			}else if(arg.getClass().isArray()){
+				params = CUtils.tolist(arg, false);
+			}else if(arg instanceof Collection){//batch operation...
+				params = arg;
+			}else{
+				//if arg is SimpleArgsPreparedStatementCreator
+				if(arg instanceof SqlProvider){
+					sql = ((SqlProvider)arg).getSql();
+				}
+				if(arg instanceof SqlParametersProvider){
+					params = ((SqlParametersProvider)arg).getSqlParameterList();
+				}
+			}
+			if (LangUtils.size(params)>maxArgSize) {
+				params = "<<Parameter Size is more than " + maxArgSize + ">>";
+			}
+		}
+		if(sql==null){
+			return null;
+		}
+		return Pair.of(sql, params);
+	}
+	
+
+	/***
+	 * 
+	 * @see SqlParameterSourceUtils#createBatch
+	 * 
+	 * @author weishao zeng
+	 * @param valueMaps
+	 * @return
+	 */
+	public static SqlParameterSource[] createBatch(List<Map<String, ?>> valueMaps) {
+		int size = valueMaps.size();
+		MapSqlParameterSource[] batch = new MapSqlParameterSource[size];
+		for (int i = 0; i < size; i++) {
+			batch[i] = new MapSqlParameterSource(valueMaps.get(i));
+		}
+		return batch;
+	}
+	
+	public static <T> T createDbmBean(Class<T> clazz) {
+		T bean;
+		if (Springs.getInstance().isInitialized()) {
+			bean = Springs.getInstance().getBean(clazz);
+			// 如果找不到则自动创建，并注入
+			if (bean==null) {
+				bean = ReflectUtils.newInstance(clazz);
+				Springs.getInstance().autoInject(bean);
+			}
+		} else {
+			bean = ReflectUtils.newInstance(clazz);
+		}
+		return bean;
+	}
+	
+	public static SqlParameterValue convert2SqlParameterValue(DbmMappedField field, Object value){
+		return new DbmSqlParameterValue(field.getColumn().getSqlType(), value);
+	}
+	
+	public static Object convertFromSqlParameterValue(DbmMappedField field, Object sqlParametableValue){
+		Object val = sqlParametableValue;
+		if (sqlParametableValue instanceof SqlParameterValue) {
+			SqlParameterValue spv = (SqlParameterValue) sqlParametableValue;
+			val = spv.getValue();
+		}
+		return val;
+	}
+	
+	public static class DbmSqlParameterValue extends SqlParameterValue {
+
+		public DbmSqlParameterValue(int sqlType, Object value) {
+			super(sqlType, value);
+		}
+		
+		public String toString() {
+			return getValue()==null?"NULL":getValue().toString();
+		}
+	}
+	
 	private DbmUtils(){
 	}
 }

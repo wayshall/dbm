@@ -3,13 +3,14 @@ package org.onetwo.dbm.core.internal;
 import java.util.Optional;
 
 import org.onetwo.dbm.core.spi.CachableSession;
+import org.onetwo.dbm.core.spi.DbmInterceptor;
+import org.onetwo.dbm.core.spi.DbmInterceptorChain;
 import org.onetwo.dbm.core.spi.DbmSession;
 import org.onetwo.dbm.core.spi.DbmSessionFactory;
-import org.onetwo.dbm.jdbc.spi.DbmInterceptor;
-import org.onetwo.dbm.jdbc.spi.DbmInterceptorChain;
 import org.onetwo.dbm.jdbc.spi.DbmJdbcOperationType.DatabaseOperationType;
+import org.springframework.core.Ordered;
 
-public class SessionCacheInterceptor implements DbmInterceptor {
+public class SessionCacheInterceptor implements DbmInterceptor, Ordered {
 	
 	private DbmSessionFactory sessionFactory;
 
@@ -37,7 +38,10 @@ public class SessionCacheInterceptor implements DbmInterceptor {
 		}
 		return chain.invoke();
 	}
-	
-	
+
+	@Override
+	public int getOrder() {
+		return DbmInterceptorOrder.SESSION_CACHE;
+	}
 
 }

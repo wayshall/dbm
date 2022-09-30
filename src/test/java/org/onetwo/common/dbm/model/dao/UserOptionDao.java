@@ -5,7 +5,7 @@ import java.util.Optional;
 
 import org.onetwo.common.db.dquery.annotation.DbmRepository;
 import org.onetwo.common.db.dquery.annotation.Query;
-import org.onetwo.common.dbm.model.entity.UserEntity;
+import org.onetwo.common.dbm.model.hib.entity.UserEntity;
 
 /**
  * @author wayshall

@@ -4,9 +4,9 @@ import java.util.Collection;
 import java.util.Map;
 
 import javax.sql.DataSource;
-import javax.validation.Validator;
 
 import org.apache.commons.lang3.StringUtils;
+import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
 import org.onetwo.common.db.dquery.DynamicQueryObjectRegisterListener;
 import org.onetwo.common.spring.Springs;
 import org.onetwo.common.spring.condition.OnMissingBean;
@@ -15,9 +15,16 @@ import org.onetwo.dbm.core.internal.DbmEntityManagerImpl;
 import org.onetwo.dbm.core.internal.DbmSessionFactoryImpl;
 import org.onetwo.dbm.core.spi.DbmEntityManager;
 import org.onetwo.dbm.core.spi.DbmSessionFactory;
+import org.onetwo.dbm.event.internal.EdgeEventBus;
 import org.onetwo.dbm.exception.DbmException;
+import org.onetwo.dbm.id.DbmIds;
+import org.onetwo.dbm.id.SnowflakeIdGenerator;
 import org.onetwo.dbm.mapping.DbmConfig;
+import org.onetwo.dbm.mapping.DbmConfig.SnowflakeIdConfig;
 import org.onetwo.dbm.mapping.DefaultDbmConfig;
+import org.onetwo.dbm.mapping.converter.EncryptFieldValueConverter;
+import org.onetwo.dbm.mapping.converter.JsonFieldValueConverter;
+import org.onetwo.dbm.stat.SqlExecutedStatis;
 import org.onetwo.dbm.utils.DbmUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InitializingBean;
@@ -40,8 +47,8 @@ public class DbmSpringConfiguration implements ApplicationContextAware, Initiali
 	@Autowired(required=false)
 	private DbmConfig dbmConfig;
 
-	@Autowired(required=false)
-	private Validator validator;
+//	@Autowired(required=false)
+//	private Validator validator;
 	
 //	private String[] packagesToScan;
 //	private List<String> packageNames = new ArrayList<String>();
@@ -120,6 +127,19 @@ public class DbmSpringConfiguration implements ApplicationContextAware, Initiali
 		return dbmEntityManager;
 	}
 	
+	@Bean(name=DbmIds.SNOWFLAKE_BEAN_NAME)
+	public SnowflakeIdGenerator dbmSnowflakeIdGenerator() {
+		DbmConfig dbmConfig = dbmConfig();
+		SnowflakeIdGenerator sid = null;
+		SnowflakeIdConfig config = dbmConfig.getSnowflakeId();
+		if (config.isAuto()) {
+			sid = DbmIds.createIdGeneratorByAddress();
+		} else {
+			sid = DbmIds.createIdGenerator(config.getDatacenterId(), config.getMachineId());
+		}
+		return sid;
+	}
+	
 	/*@Bean
 	public DataQueryFilterListener dataQueryFilterListener(){
 		return new DataQueryFilterListener();
@@ -177,6 +197,38 @@ public class DbmSpringConfiguration implements ApplicationContextAware, Initiali
 //		cbf.registerResolvableDependency(DbmSession.class, new DbmSessionObjectFactory(sf));
 		
 		return sf;
+	}
+	
+	@Bean
+	public EdgeEventBus edgeEventBus(){
+		EdgeEventBus eventBus = new EdgeEventBus();
+		return eventBus;
+	}
+	
+	@Bean
+	public SqlExecutedStatis sqlExecutedStatis(){
+		return new SqlExecutedStatis();
+	}
+	
+//	@Configuration
+	class DbmFieldConverterConfiguration {
+		@Bean
+		public EncryptFieldValueConverter encryptFieldValueConverter(StandardPBEStringEncryptor encryptor) {
+			EncryptFieldValueConverter converter = new EncryptFieldValueConverter();
+			converter.setEncryptor(encryptor);
+			return converter;
+		}
+		@Bean
+		public StandardPBEStringEncryptor standardPBEStringEncryptor() {
+			StandardPBEStringEncryptor encryptor = new StandardPBEStringEncryptor();
+			encryptor.setAlgorithm(dbmConfig().getEncrypt().getAlgorithm());
+			encryptor.setPassword(dbmConfig().getEncrypt().getPassword());
+			return encryptor;
+		}
+		@Bean
+		public JsonFieldValueConverter jsonFieldValueConverter() {
+			return new JsonFieldValueConverter();
+		}
 	}
 	
 	

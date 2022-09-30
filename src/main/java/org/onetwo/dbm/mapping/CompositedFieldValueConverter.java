@@ -3,9 +3,7 @@ package org.onetwo.dbm.mapping;
 import java.util.Arrays;
 import java.util.List;
 
-import org.onetwo.common.convert.Types;
 import org.onetwo.common.utils.LangUtils;
-import org.onetwo.dbm.exception.DbmException;
 
 import com.google.common.collect.Lists;
 
@@ -15,7 +13,15 @@ import com.google.common.collect.Lists;
  */
 public class CompositedFieldValueConverter implements DbmFieldValueConverter {
 	
-	public static DbmFieldValueConverter ENUM_CONVERTER = new DbmFieldValueConverter() {
+	final public static DbmFieldValueConverter ENUM_CONVERTER = new DbmFieldValueConverter() {
+		public Object forJava(DbmMappedField field, Object value) {
+			return field.getEnumType().forJava(field, value);
+		}
+		public Object forStore(DbmMappedField field, Object value) {
+			return field.getEnumType().forStore(field, value);
+		}
+	};
+	/*final public static DbmFieldValueConverter ENUM_CONVERTER = new DbmFieldValueConverter() {
 		
 		@Override
 		public Object forJava(DbmMappedField field, Object value) {
@@ -29,6 +35,16 @@ public class CompositedFieldValueConverter implements DbmFieldValueConverter {
 				actualValue = Types.convertValue((Integer)value, field.getPropertyInfo().getType());
 			}else if(etype==DbmEnumType.STRING){
 				actualValue = Types.convertValue(value.toString(), field.getPropertyInfo().getType());
+			}else if(etype == DbmEnumType.MAPPING) {
+				DbmEnumValueMapping<?>[] values = (DbmEnumValueMapping[]) field.getPropertyInfo().getType().getEnumConstants();
+				DbmEnumValueMapping<?> valueMapping = Stream.of(values)
+//														.filter(dvm->Integer.valueOf(dvm.getMappingValue()).equals(value))
+														.filter(dvm->dvm.getEnumMappingValue().equals(value))
+														.findFirst()
+														.orElseThrow(()-> {
+															return new DbmException("error enum mapping value: " + value);
+														});
+				actualValue = valueMapping;
 			}else{
 				throw new DbmException("error enum type: " + etype);
 			}
@@ -47,12 +63,15 @@ public class CompositedFieldValueConverter implements DbmFieldValueConverter {
 				actualValue = enumValue.ordinal();
 			}else if(etype==DbmEnumType.STRING){
 				actualValue = enumValue.name();
+			}else if(etype == DbmEnumType.MAPPING) {
+				DbmEnumIntMapping mapping = (DbmEnumIntMapping)value;
+				actualValue = mapping.getMappingValue();
 			}else{
 				throw new DbmException("error enum type: " + etype);
 			}
 			return actualValue;
 		}
-	};
+	};*/
 
 	public static CompositedFieldValueConverter composited(DbmFieldValueConverter... converters) {
 		List<DbmFieldValueConverter> list = Lists.newArrayList();

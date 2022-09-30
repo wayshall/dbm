@@ -3,7 +3,9 @@ package org.onetwo.common.db.filequery;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.onetwo.common.db.dquery.DbmSqlFileResource;
 import org.onetwo.common.db.dquery.annotation.Query;
@@ -13,8 +15,9 @@ import org.onetwo.common.db.spi.NamedQueryInfoParser;
 import org.onetwo.common.db.spi.QueryConfigData;
 import org.onetwo.common.db.spi.QueryContextVariable;
 import org.onetwo.common.propconf.ResourceAdapter;
-import org.onetwo.common.reflect.ReflectUtils;
+import org.onetwo.common.utils.LangUtils;
 import org.onetwo.common.utils.StringUtils;
+import org.onetwo.dbm.utils.DbmUtils;
 import org.springframework.core.MethodIntrospector;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.ReflectionUtils.MethodFilter;
@@ -73,15 +76,28 @@ public class AnnotationBasedQueryInfoParser implements NamedQueryInfoParser {
 		}
 		info.setParserType(query.parser());
 		
-		QueryConfigData config = new QueryConfigData();
-		config.setLikeQueryFields(Arrays.asList(query.likeQueryFields()));
-		if(query.funcClass()==ParserContextFunctionSet.class){
-			config.setVariables(ParserContextFunctionSet.getInstance());
-		}else{
-			QueryContextVariable func = (QueryContextVariable)ReflectUtils.newInstance(query.funcClass());
-			config.setVariables(ParserContextFunctionSet.getInstance(), func);
+		QueryConfigData config = info.getQueryConfig();
+		if (config==null) {
+			config = new QueryConfigData();
+			info.setQueryConfig(config);
 		}
-		info.setQueryConfig(config);
+		config.setLikeQueryFields(Arrays.asList(query.likeQueryFields()));
+		
+		Set<QueryContextVariable> variables = new LinkedHashSet<>();
+		
+		if (!LangUtils.isEmpty(config.getVariables())) {
+			Stream.of(config.getVariables()).forEach(v -> variables.add(v));
+		}
+		
+		if(query.funcClass()==ParserContextFunctionSet.class){
+			variables.add(ParserContextFunctionSet.getInstance());
+		}else{
+//			QueryContextVariable func = (QueryContextVariable)ReflectUtils.newInstance(query.funcClass());
+			variables.add(ParserContextFunctionSet.getInstance());
+			QueryContextVariable func = DbmUtils.createDbmBean(query.funcClass());
+			variables.add(func);
+		}
+		config.setVariables(variables.toArray(new QueryContextVariable[0]));
 	}
 	
 

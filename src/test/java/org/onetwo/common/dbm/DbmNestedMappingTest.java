@@ -16,18 +16,20 @@ import org.junit.Test;
 import org.junit.runners.MethodSorters;
 import org.onetwo.common.base.DbmBaseTest;
 import org.onetwo.common.dbm.model.dao.CompanyDao;
-import org.onetwo.common.dbm.model.entity.CompanyEntity;
-import org.onetwo.common.dbm.model.entity.DepartmentEntity;
-import org.onetwo.common.dbm.model.entity.EmployeeEntity;
-import org.onetwo.common.dbm.model.entity.EmployeeEntity.EmployeeGenders;
+import org.onetwo.common.dbm.model.hib.entity.CompanyEntity;
+import org.onetwo.common.dbm.model.hib.entity.DepartmentEntity;
+import org.onetwo.common.dbm.model.hib.entity.DepartmentEntity.DepartStatus;
+import org.onetwo.common.dbm.model.hib.entity.EmployeeEntity;
+import org.onetwo.common.dbm.model.hib.entity.EmployeeEntity.EmployeeGenders;
 import org.onetwo.common.dbm.model.vo.CompanyVO;
 import org.onetwo.common.dbm.model.vo.DepartmentVO;
 import org.onetwo.common.reflect.ReflectUtils;
 import org.onetwo.common.utils.LangOps;
 import org.onetwo.dbm.core.spi.DbmEntityManager;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.annotation.Rollback;
 
-//@Rollback(false)
+@Rollback(false)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class DbmNestedMappingTest extends DbmBaseTest {
 
@@ -102,6 +104,7 @@ public class DbmNestedMappingTest extends DbmBaseTest {
 		departments.stream().forEach(depart->{
 			assertThat(depart.getCompany()).isNotNull();
 			assertThat(depart.getCompany().getId()).isEqualTo(depart.getCompanyId());
+			assertThat(depart.getStatus()).isEqualTo(DepartStatus.ENABLED);
 
 			assertThat(depart.getEmployees()).isNotNull();
 			depart.getEmployees().stream().forEach(employee->{
@@ -209,6 +212,7 @@ public class DbmNestedMappingTest extends DbmBaseTest {
 		department.setName("部门-"+index);
 		department.setEmployeeNumber(10);
 		department.setCompanyId(companyId);
+		department.setStatus(DepartStatus.ENABLED);
 		dbmEntityManager.save(department);
 		List<EmployeeEntity> employees = LangOps.ntimesMap(10, i->{
 			return createEmployee(department.getId(), i);

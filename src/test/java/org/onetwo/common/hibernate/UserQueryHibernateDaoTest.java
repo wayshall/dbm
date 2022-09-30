@@ -5,7 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.List;
 
 import org.junit.Test;
-import org.onetwo.common.dbm.model.entity.UserEntity;
+import org.onetwo.common.dbm.model.hib.entity.UserEntity;
 import org.onetwo.common.hibernate.dao.UserQueryHibernateDao;
 import org.onetwo.common.utils.LangOps;
 import org.onetwo.common.utils.Page;

@@ -50,7 +50,7 @@ public class JFishSQLSymbolManagerImpl extends DefaultSQLSymbolManagerImpl {
 	@Override
 	public ExtQueryInner createDeleteQuery(Class<?> entityClass, Map<Object, Object> properties) {
 		DbmMappedEntry entry = getDbmMappedEntry(entityClass);
-		ExtQueryInner q = new DbmDeleteExtQueryImpl(entry, entityClass, null, properties, this, this.listeners);
+		ExtQueryInner q = new DbmDeleteExtQueryImpl(entry, entityClass, null, properties, this, this.getListeners());
 		q.initQuery();
 		return q;
 	}
@@ -91,7 +91,7 @@ public class JFishSQLSymbolManagerImpl extends DefaultSQLSymbolManagerImpl {
 		public DbmDeleteExtQueryImpl(DbmMappedEntry entry, Class<?> entityClass, String alias, Map<Object, Object> params, 
 				SQLSymbolManager symbolManager, List<ExtQueryListener> listeners) {
 			super(entityClass, alias, params, symbolManager, listeners);
-			this.queryNameStrategy = new DbmQueryNameStrategy(entry, alias, Collections.emptyMap(), true);
+			this.setQueryNameStrategy(new DbmQueryNameStrategy(entry, alias, Collections.emptyMap(), true));
 		}
 	}
 

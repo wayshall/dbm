@@ -1,9 +1,9 @@
 package org.onetwo.dbm.jpa;
 
 import java.lang.reflect.Field;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
-import java.util.Map;
 import java.util.Optional;
 
 import javax.persistence.Basic;
@@ -27,7 +27,9 @@ import org.onetwo.common.utils.JFishProperty;
 import org.onetwo.common.utils.LangUtils;
 import org.onetwo.common.utils.StringUtils;
 import org.onetwo.dbm.annotation.DbmEntity;
+import org.onetwo.dbm.annotation.DbmId;
 import org.onetwo.dbm.core.spi.DbmInnerServiceRegistry;
+import org.onetwo.dbm.dialet.DBDialect;
 import org.onetwo.dbm.exception.DbmException;
 import org.onetwo.dbm.id.StrategyType;
 import org.onetwo.dbm.mapping.AbstractMappedField;
@@ -42,7 +44,9 @@ import org.onetwo.dbm.mapping.TableInfo;
 import org.onetwo.dbm.mapping.version.DateVersionableType;
 import org.onetwo.dbm.mapping.version.IntegerVersionableType;
 import org.onetwo.dbm.mapping.version.LongVersionableType;
+import org.onetwo.dbm.mapping.version.MySqlDateVersionableType;
 import org.onetwo.dbm.mapping.version.VersionableType;
+import org.onetwo.dbm.utils.SpringAnnotationFinder;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.classreading.MetadataReader;
 
@@ -52,21 +56,33 @@ import org.springframework.core.type.classreading.MetadataReader;
  *
  */
 public class JPAMappedEntryBuilder extends DbmMappedEntryBuilder {
-	
-	private static final Map<Class<?>, VersionableType<? extends Object>> versionTypes;
+
+//	private static final Map<Class<?>, VersionableType<? extends Object>> versionTypes;
+	private static final Collection<VersionableType<?>> VersionableTypes;
 	static {
-		Map<Class<?>, VersionableType<? extends Object>> tem = LangUtils.newHashMap(5);
+		/*Map<Class<?>, VersionableType<? extends Object>> tem = LangUtils.newHashMap(5);
 		tem.put(int.class, new IntegerVersionableType());
 		tem.put(Integer.class, new IntegerVersionableType());
 		tem.put(long.class, new LongVersionableType());
 		tem.put(Long.class, new LongVersionableType());
-		tem.put(Date.class, new DateVersionableType());
+		tem.put(Date.class, new DateVersionableType());*/
 		
-		versionTypes = Collections.unmodifiableMap(tem);
+//		versionTypes = Collections.unmodifiableMap(tem);
+		VersionableTypes = Collections.unmodifiableCollection(Arrays.asList(
+																		new IntegerVersionableType(),
+																		new LongVersionableType(),
+																		new DateVersionableType(),
+																		new MySqlDateVersionableType()
+															));
 	}
 	
 	public JPAMappedEntryBuilder(DbmInnerServiceRegistry serviceRegistry) {
 		super(serviceRegistry);
+	}
+	
+	private Optional<VersionableType<?>> findSupportedVersionableType(DbmMappedField mfield) {
+		DBDialect dbDialect = mfield.getEntry().getDbDialect();
+		return VersionableTypes.stream().filter(vt->vt.isSupport(dbDialect, mfield.getPropertyInfo().getType())).findFirst();
 	}
 
 	@Override
@@ -121,7 +137,8 @@ public class JPAMappedEntryBuilder extends DbmMappedEntryBuilder {
 		Class<?> entityClass = ReflectUtils.getObjectClass(entity);
 		Optional<Field> idField = Intro.wrap(entityClass).getAllFields()
 								.stream()
-								.filter(f->f.getAnnotation(Id.class)!=null)
+								.filter(f->f.getAnnotation(Id.class)!=null || 
+										SpringAnnotationFinder.INSTANCE.getAnnotation(f, DbmId.class)!=null)
 								.findAny();
 							
 		return buildMappedEntry(entityClass, !idField.isPresent());
@@ -134,7 +151,7 @@ public class JPAMappedEntryBuilder extends DbmMappedEntryBuilder {
 			return super.createDbmMappedEntry(annotationInfo);
 		}
 		TableInfo tableInfo = newTableInfo(annotationInfo);
-		DbmMappedEntryImpl entry = new DbmMappedEntryImpl(annotationInfo, tableInfo, serviceRegistry);
+		DbmMappedEntryImpl entry = new DbmMappedEntryImpl(entity.name(), annotationInfo, tableInfo, serviceRegistry);
 		entry.setSqlBuilderFactory(this.getDialect().getSqlBuilderFactory());
 		return entry;
 	}
@@ -171,15 +188,18 @@ public class JPAMappedEntryBuilder extends DbmMappedEntryBuilder {
 
 	@Override
 	protected void buildMappedField(DbmMappedField mfield){
-		if(mfield.getPropertyInfo().hasAnnotation(Id.class)){
+		if (mfield.getPropertyInfo().hasAnnotation(Id.class) || mfield.getPropertyInfo().hasAnnotation(DbmId.class)) {
 			mfield.setIdentify(true);
 			this.buildIdGeneratorsOnField(mfield);
+		} else if (mfield.isMappingGenerated()) {
+			this.buildIdGeneratorsOnField(mfield);
 		}
-		if(mfield.getPropertyInfo().hasAnnotation(Version.class)){
-			if(!versionTypes.containsKey(mfield.getPropertyInfo().getType())){
-				throw new DbmException("the type of field["+mfield.getName()+"] is not a supported version type. supported types: " + versionTypes.keySet());
+		if (mfield.getPropertyInfo().hasAnnotation(Version.class)) {
+			Optional<VersionableType<?>> opt = findSupportedVersionableType(mfield);
+			if(!opt.isPresent()){
+				throw new DbmException("the type of field["+mfield.getName()+"] is not a supported version type. supported types: " + VersionableTypes);
 			}
-			mfield.setVersionableType(versionTypes.get(mfield.getPropertyInfo().getType()));
+			mfield.setVersionableType(opt.get());
 		}
 	}
 	
@@ -251,7 +271,8 @@ public class JPAMappedEntryBuilder extends DbmMappedEntryBuilder {
 		
 		if(field.isIdentify()){
 			col.setInsertable(!field.isIdentityStrategy());
-			col.setUpdatable(!field.isIdentityStrategy());
+//			col.setUpdatable(!field.isIdentityStrategy());
+			col.setUpdatable(!field.isIdentify());
 		}
 		
 		return col;

@@ -12,6 +12,7 @@ import org.onetwo.common.db.builder.QueryBuilder;
 import org.onetwo.common.db.sqlext.SQLSymbolManager;
 import org.onetwo.common.utils.Page;
 import org.onetwo.dbm.core.spi.DbmSessionFactory;
+import org.onetwo.dbm.dialet.DBDialect.LockInfo;
 import org.onetwo.dbm.utils.DbmLock;
 
 /****
@@ -27,15 +28,23 @@ public interface BaseEntityManager {
 	public <T> T findById(Class<T> entityClass, Serializable id);
 	
 	/***
-	 * 
+	 * @see org.onetwo.dbm.dialet.DBDialect$LockInfo
 	 * @author wayshall
 	 * @param entityClass
 	 * @param id
 	 * @param lock
-	 * @param timeoutInMillis lock forevaer if null
-	 * @return
+	 * @param timeoutInMillis lock forevaer if null, support: oracle, not support: mysql
+	 * @return return the target or null if not found
 	 */
 	public <T> T lock(Class<T> entityClass, Serializable id, DbmLock lock, Integer timeoutInMillis);
+	
+	default <T> T lockWrite(Class<T> entityClass, Serializable id) {
+		return lock(entityClass, id, DbmLock.PESSIMISTIC_WRITE, LockInfo.WAIT_FOREVER);
+	}
+	
+	default <T> T lockRead(Class<T> entityClass, Serializable id) {
+		return lock(entityClass, id, DbmLock.PESSIMISTIC_READ, LockInfo.WAIT_FOREVER);
+	}
 
 	public <T> T save(T entity);
 	public <T> Collection<T> saves(Collection<T> entities);
@@ -55,6 +64,7 @@ public interface BaseEntityManager {
 	public void dymanicUpdate(Object entity);
 
 	/****
+	 * 执行此方法时，若实体实现了逻辑删除接口ILogicDeleteEntity，则只是更新状态
 	 * @param entity
 	 */
 	public int remove(Object entity);
@@ -98,7 +108,7 @@ public interface BaseEntityManager {
 	 * @author wayshall
 	 * @param entity
 	 */
-	public void delete(ILogicDeleteEntity entity);
+//	public void delete(ILogicDeleteEntity entity);
 
 	/***
 	 * 逻辑删除
@@ -107,7 +117,7 @@ public interface BaseEntityManager {
 	 * @param id
 	 * @return
 	 */
-	public <T extends ILogicDeleteEntity> T deleteById(Class<T> entityClass, Serializable id);
+//	public <T extends ILogicDeleteEntity> T deleteById(Class<T> entityClass, Serializable id);
 
 	public <T> List<T> findAll(Class<T> entityClass);
 
@@ -136,7 +146,14 @@ public interface BaseEntityManager {
 	 */
 	public <T> List<T> findList(Class<T> entityClass, Object... properties);
 	public <T> List<T> findListByProperties(Class<T> entityClass, Map<Object, Object> properties);
-	public <T> List<T> findList(QueryBuilder squery);
+	
+	/***
+	 * @deprecated 不建议使用此方法，直接用Querys dsl api
+	 * @author weishao zeng
+	 * @param squery
+	 * @return
+	 */
+	public <T> List<T> findList(QueryBuilder<T> squery);
 
 	public <T> List<T> selectFields(Class<?> entityClass, Object[] selectFields, Object... properties);
 	public <T> List<T> selectFieldsToEntity(Class<?> entityClass, Object[] selectFields, Object... properties);
@@ -144,9 +161,19 @@ public interface BaseEntityManager {
 
 	public <T> Page<T> findPage(final Class<T> entityClass, final Page<T> page, Object... properties);
 
-	public <T> Page<T> findPageByProperties(final Class<T>  entityClass, final Page<T> page, Map<Object, Object> properties);
+	public <T> Page<T> findPageByProperties(final Class<T> entityClass, final Page<T> page, Map<Object, Object> properties);
 	
-	public <T> Page<T> findPage(final Page<T> page, QueryBuilder query);
+	/***
+	 * 此方法是提供给一些把QueryBuilder作为固化为实例的查询参数所用
+	 * 
+	 * @deprecated 不建议使用此方法，直接用Querys dsl api
+	 * @author weishao zeng
+	 * @param page
+	 * @param query
+	 * @return
+	 */
+	@Deprecated
+	public <T> Page<T> findPage(final Page<T> page, QueryBuilder<T> query);
 	
 	public <T> Page<T> findPage(Page<T> page, DbmQueryValue squery);
 	
@@ -180,5 +207,7 @@ public interface BaseEntityManager {
 	public <T> T narrowAs(Class<T> entityManagerClass);
 	
 	public DbmSessionFactory getSessionFactory();
+	
+	<T> QueryBuilder<T> from(Class<T> entityClass);
 
 }

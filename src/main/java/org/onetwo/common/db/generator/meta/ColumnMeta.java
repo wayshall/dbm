@@ -6,11 +6,16 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.onetwo.common.db.generator.mapping.ColumnMapping;
 import org.onetwo.common.db.generator.utils.DbGeneratorUtills;
+import org.onetwo.common.db.generator.utils.UITypes;
+import org.onetwo.common.jackson.JsonMapper;
 import org.onetwo.common.utils.GuavaUtils;
 import org.onetwo.common.utils.StringUtils;
+
+import com.google.common.collect.Lists;
 
 public class ColumnMeta {
 
@@ -66,29 +71,88 @@ public class ColumnMeta {
 		return mappingClass;
 	}
 	
-	public String getCommentName() {
+	public String getMappingJavaClassLabel(){
+		Class<?> mappingClass = getMappingJavaClass();
+		String label = mappingClass.getSimpleName();
+		if (isJsonType()) {
+			label = Map.class.getName() + "<String, String>";
+		}
+		return label;
+	}
+	
+	public String getCommentName(){
 		return commentName;
 	}
 
+	public String getUiType(){
+		String type = this.commentsInfo.get(UITypes.KEY_TYPE);
+		return type==null?"":type;
+	}
+	
+	public boolean isUiType(String key){
+		return this.commentsInfo.containsKey(key) || getUiType().equals(key);
+	}
+	
 	public boolean isDictType(){
 		//<#elseif column.commentsInfo['字典类型']??>
-		return this.commentsInfo.containsKey("字典类型");
+		return isUiType(UITypes.KEY_DICT);
+	}
+	public boolean isDbDictType(){
+		//<#elseif column.commentsInfo['数据库字典']??> key: 字典代码
+		return isUiType(UITypes.KEY_DB_DICT);
+	}
+
+	public List<OptionData> getDictData(){
+		List<OptionData> datas = Lists.newArrayList();
+		boolean optionStart = false;
+		for(Entry<String, String> entry : this.commentsInfo.entrySet()){
+			if(optionStart){
+				datas.add(new OptionData(entry.getKey(), entry.getValue()));
+			}else if(entry.getKey().contains(UITypes.KEY_DICT) || entry.getKey().equals(UITypes.KEY_TYPE)){
+				optionStart = true;
+			}
+		}
+		return datas;
+	}
+	
+	public String getDictDataJson(){
+		return JsonMapper.ignoreNull()
+						.singleQuotes()
+						.unquotedFieldNames()
+						.toJson(getDictData())
+						//TODO: jackson不支持单引号输出，只能这样先fixed……
+						.replace("\"", "'");
 	}
 	
 	public boolean isFileType(){
-		return this.commentsInfo.containsKey("文件类型");
+		return isUiType(UITypes.KEY_FILE);
+	}
+	
+	public boolean isTextAreaType(){
+		return this.isUiType(UITypes.KEY_LONG_TEXT);
+	}
+	
+	public boolean isRichTextType(){
+		return this.isUiType(UITypes.KEY_RICH_TEXT);
 	}
 	
 	public boolean isEmailType(){
-		return this.commentsInfo.containsKey("email类型");
+//		return this.commentsInfo.containsKey("email类型");
+		return this.isUiType(UITypes.KEY_EMAIL);
+	}
+	
+	public boolean isJsonType(){
+		return this.isUiType(UITypes.KEY_JSON);
 	}
 	
 	public boolean isUrlType(){
-		return this.commentsInfo.containsKey("url类型");
+//		return this.commentsInfo.containsKey("url类型");
+		return this.isUiType(UITypes.KEY_URL);
 	}
 	
 	public boolean isAssociationType(){
-		return this.commentsInfo.containsKey("关联类型");
+//		return this.commentsInfo.containsKey("关联类型");
+		return this.isUiType(UITypes.KEY_ASSOCIATION);
 	}
 
 	public String getName() {
@@ -98,6 +162,10 @@ public class ColumnMeta {
 	public void setName(String name) {
 		this.name = name;
 		this.javaName = StringUtils.toPropertyName(name);
+	}
+
+	public String getCapitalizeName() {
+		return StringUtils.capitalize(getJavaName());
 	}
 	
 	public String getComment() {
@@ -228,4 +296,19 @@ public class ColumnMeta {
 		this.columnSize = columnSize;
 	}
 
+	public static class OptionData {
+		private final String label;
+		private final String value;
+		public OptionData(String value, String text) {
+			super();
+			this.label = text;
+			this.value = value;
+		}
+		public String getValue() {
+			return value;
+		}
+		public String getLabel() {
+			return label;
+		}
+	}
 }

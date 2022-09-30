@@ -6,10 +6,9 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.JdbcUtils;
 
-public class ListRowMapper implements RowMapper<List<?>> {
+public class ListRowMapper implements DataRowMapper<List<?>> {
 
 	@Override
 	public List<?> mapRow(ResultSet rs, int rowNum) throws SQLException {

@@ -50,12 +50,27 @@ public class TableMeta {
 		return getName();
 	}
 	
+	@Deprecated
 	public String getTableClassName(){
+		return getClassName();
+	}
+	
+	public String getClassName(){
 		return StringUtils.toClassName(getShortName());
 	}
 	
 	public String getPropertyName(){
-		return StringUtils.toPropertyName(getShortName());
+		String shortName = getShortName();
+		return StringUtils.toPropertyName(shortName);
+	}
+	
+	/***
+	 * 横杠分割的名称
+	 * @author weishao zeng
+	 * @return
+	 */
+	public String getHorizontalBarName(){
+		return StringUtils.convertWithSeperator(getPropertyName(), "-");
 	}
 
 	
@@ -71,7 +86,8 @@ public class TableMeta {
 	public String tableNameStripStart(String stripChars){
 		if(StringUtils.isBlank(stripChars))
 			return name;
-		return StringUtils.stripStart(name.toLowerCase(), stripChars.toLowerCase());
+//		return StringUtils.stripStart(name.toLowerCase(), stripChars.toLowerCase());
+		return name.toLowerCase().substring(stripChars.length());
 	}
 
 	public Map<String, ColumnMeta> getColumnMap() {

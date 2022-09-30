@@ -3,8 +3,11 @@ package org.onetwo.common.db.generator.utils;
 import java.util.List;
 import java.util.Map;
 
+import java.util.regex.Pattern;
+
 import org.apache.commons.lang3.StringUtils;
 import org.onetwo.common.utils.CUtils;
+
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
@@ -15,9 +18,12 @@ public class DbGeneratorUtills {
 	/****
 	 * sample:
 	 * 列名称
-	 * 字典类型: SEX
-	 * 男: SEX_MALE
-	 * 女: SEX_FEMALE
+	 * 类型：字典类型
+	 * SEX_MALE：男
+	 * SEX_FEMALE：女
+	 * 
+	 * 类型：数据库字典
+	 * 字典代码：SEX
 	 * 
 	 * 文件类型
 	 * 
@@ -30,12 +36,12 @@ public class DbGeneratorUtills {
 	 * @return
 	 */
 	public static Map<String, String> parse(String comment){
-		Map<String, String> commentInfo = Maps.newHashMap();
+		Map<String, String> commentInfo = Maps.newLinkedHashMap();
 		if(StringUtils.isBlank(comment))
 			return commentInfo;
 		List<String> contents = CUtils.iterableToList(Splitter.on('\n').trimResults().omitEmptyStrings().split(comment));
 		contents.stream().forEach(line->{
-			List<String> datas = CUtils.iterableToList(Splitter.on(':').trimResults().omitEmptyStrings().split(line));
+			List<String> datas = CUtils.iterableToList(Splitter.on(Pattern.compile(":|：")).trimResults().omitEmptyStrings().split(line));
 			if(datas.isEmpty())
 				return;
 			if(datas.size()==1){

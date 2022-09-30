@@ -1,5 +1,6 @@
 package org.onetwo.common.db.dquery;
 
+import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -20,22 +21,22 @@ import org.onetwo.common.db.spi.NamedQueryInfo;
 import org.onetwo.common.db.spi.QueryProvideManager;
 import org.onetwo.common.db.spi.QueryWrapper;
 import org.onetwo.common.db.spi.SqlParamterPostfixFunctionRegistry;
-import org.onetwo.common.exception.BaseException;
 import org.onetwo.common.log.JFishLoggerFactory;
 import org.onetwo.common.profiling.TimeCounter;
+import org.onetwo.common.reflect.ReflectUtils;
 import org.onetwo.common.spring.SpringUtils;
 import org.onetwo.common.utils.CUtils;
 import org.onetwo.common.utils.LangUtils;
 import org.onetwo.common.utils.MathUtils;
 import org.onetwo.common.utils.Page;
 import org.onetwo.dbm.core.internal.AbstractDbmInterceptorChain.RepositoryDbmInterceptorChain;
+import org.onetwo.dbm.core.spi.DbmInterceptor;
+import org.onetwo.dbm.core.spi.DbmInterceptorChain;
 import org.onetwo.dbm.exception.DbmException;
 import org.onetwo.dbm.exception.FileNamedQueryException;
-import org.onetwo.dbm.jdbc.spi.DbmInterceptor;
-import org.onetwo.dbm.jdbc.spi.DbmInterceptorChain;
+import org.onetwo.dbm.jdbc.spi.DbmJdbcOperations;
 import org.slf4j.Logger;
 import org.springframework.beans.BeanWrapper;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
 import org.springframework.util.Assert;
 
 import com.google.common.cache.LoadingCache;
@@ -47,8 +48,10 @@ abstract public class AbstractDynamicQueryHandler implements DynamicQueryHandler
 	private LoadingCache<Method, DynamicMethod> methodCache;
 	private QueryProvideManager em;
 //	private Object proxyObject;
-	private NamedParameterJdbcOperations jdbcOperations;
+	private DbmJdbcOperations jdbcOperations;
 	final protected List<Class<?>> proxyInterfaces = new ArrayList<Class<?>>();
+	
+	private MethodHandles.Lookup instanceForDefaultMethods;
 	
 	public AbstractDynamicQueryHandler(QueryProvideManager em, LoadingCache<Method, DynamicMethod> methodCache, Class<?>... proxiedInterfaces){
 		this.em = em;
@@ -57,7 +60,7 @@ abstract public class AbstractDynamicQueryHandler implements DynamicQueryHandler
 //		this.dbmJdbcOperations = em.getSessionFactory().getServiceRegistry().getDbmJdbcOperations();
 		this.jdbcOperations = em.getJdbcOperations();
 		this.proxyInterfaces.addAll(Arrays.asList(proxiedInterfaces));
-		Assert.notNull(jdbcOperations);
+		Assert.notNull(jdbcOperations, "jdbcOperations can not be null");
 	}
 
 	/*private Optional<DbmEntityManager> getDbmEntityManager(){
@@ -75,7 +78,8 @@ abstract public class AbstractDynamicQueryHandler implements DynamicQueryHandler
 
 //	@Override
 	@Override
-	public Object invoke(Object proxy, Method method, Object[] args) {
+	public Object invoke(Object proxyObj, Method method, Object[] args) {
+		Object proxy = getQueryObject();
 		if(Object.class  == method.getDeclaringClass()) {
 			String name = method.getName();
 			if("equals".equals(name)) {
@@ -88,6 +92,14 @@ abstract public class AbstractDynamicQueryHandler implements DynamicQueryHandler
 			} else {
 				throw new IllegalStateException(String.valueOf(method));
 			}
+		} else if(method.isDefault()) {
+			MethodHandles.Lookup lookup = this.instanceForDefaultMethods;
+			if (lookup==null) {
+	            lookup = ReflectUtils.createMethodHandlesLookup(method.getDeclaringClass());
+	            this.instanceForDefaultMethods = lookup;
+			}
+            Object result = ReflectUtils.invokeDefaultMethod(lookup, method, proxy, args);
+            return result;
 		}
 
 		DynamicMethod dmethod = getDynamicMethod(method);
@@ -231,7 +243,7 @@ abstract public class AbstractDynamicQueryHandler implements DynamicQueryHandler
 		t.start();
 		
 		BeanWrapper paramsContextBean = SpringUtils.newBeanMapWrapper(invokeContext.getParsedParams());
-		List<Map<String, Object>> batchValues = LangUtils.newArrayList(batchParameter.size());
+		List<Map<String, ?>> batchValues = LangUtils.newArrayList(batchParameter.size());
 //		SqlParamterPostfixFunctionRegistry sqlFunc = em.getSessionFactory().getServiceRegistry().getSqlParamterPostfixFunctionRegistry();
 		SqlParamterPostfixFunctionRegistry sqlFunc = em.getSqlParamterPostfixFunctionRegistry();
 		ParsedSqlWrapper sqlWrapper = ParsedSqlUtils.parseSql(sv.getParsedSql(), sqlFunc);
@@ -246,7 +258,7 @@ abstract public class AbstractDynamicQueryHandler implements DynamicQueryHandler
 //					value = DbmUtils.convertSqlParameterValue(paramBean.getPropertyDescriptor(parameter.getProperty()), value, em.getSqlTypeMapping());
 				}else{
 					if(!paramsContextBean.isReadableProperty(parameter.getProperty()))
-						throw new BaseException("batch execute parameter["+parameter.getProperty()+"] not found in bean["+val+"]'s properties or params");
+						throw new DbmException("batch execute parameter["+parameter.getProperty()+"] not found in bean["+val+"]'s properties or params");
 				}
 				
 				if(value==null && paramsContextBean.isReadableProperty(parameter.getProperty()))
@@ -264,9 +276,9 @@ abstract public class AbstractDynamicQueryHandler implements DynamicQueryHandler
 		t.stop();
 		t.restart("insert to db");
 
-		@SuppressWarnings("unchecked")
+//		@SuppressWarnings("unchecked")
 //		int[] counts = jdao.getNamedParameterJdbcTemplate().batchUpdate(sv.getParsedSql(), batchValues.toArray(new HashMap[0]));
-		int[] counts = jdbcOperations.batchUpdate(sv.getParsedSql(), batchValues.toArray(new HashMap[0]));
+		int[] counts = jdbcOperations.batchUpdate(sv.getParsedSql(), batchValues, invokeContext.getDynamicMethod().getBatchSize());
 
 		t.stop();
 		

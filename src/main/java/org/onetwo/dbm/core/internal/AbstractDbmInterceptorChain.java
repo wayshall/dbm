@@ -15,9 +15,9 @@ import org.onetwo.common.db.dquery.MethodDynamicQueryInvokeContext;
 import org.onetwo.common.utils.LangUtils;
 import org.onetwo.dbm.annotation.DbmInterceptorFilter.InterceptorType;
 import org.onetwo.dbm.annotation.DbmJdbcOperationMark;
+import org.onetwo.dbm.core.spi.DbmInterceptor;
+import org.onetwo.dbm.core.spi.DbmInterceptorChain;
 import org.onetwo.dbm.exception.DbmException;
-import org.onetwo.dbm.jdbc.spi.DbmInterceptor;
-import org.onetwo.dbm.jdbc.spi.DbmInterceptorChain;
 import org.onetwo.dbm.jdbc.spi.DbmJdbcOperationType;
 import org.onetwo.dbm.jdbc.spi.DbmJdbcOperationType.DatabaseOperationType;
 import org.springframework.core.NestedRuntimeException;
@@ -127,33 +127,54 @@ abstract public class AbstractDbmInterceptorChain implements DbmInterceptorChain
 			DbmInterceptor interceptor = iterator.next();
 			result = interceptor.intercept(this);
 		}else{
-			if(actualInvoker!=null){
-				result = actualInvoker.get();
-			}else{
-				if (!targetMethod.isAccessible()){
-					targetMethod.setAccessible(true);
-				}
-				try {
-					result = targetMethod.invoke(targetObject, targetArgs);
-					state = STATE_FINISH;
-				} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-					state = STATE_EXCEPTION;
-					throwable = e;
-					throw convertRuntimeException(e);
-				}
+			try {
+				invokeTarget();
+				state = STATE_FINISH;
+			} catch (Exception e) {
+				state = STATE_EXCEPTION;
+				throwable = e;
+				throw convertRuntimeException(e);
 			}
 		}
 		return result;
 	}
 	
-	private RuntimeException convertRuntimeException(Exception e){
-		if(e instanceof InvocationTargetException){
-			InvocationTargetException ite = (InvocationTargetException)e;
-			if(ite.getTargetException() instanceof NestedRuntimeException){
-				return (NestedRuntimeException)ite.getTargetException();
+	private void invokeTarget() {
+		if(actualInvoker!=null){
+			result = actualInvoker.get();
+			state = STATE_FINISH;
+		}else{
+			if (!targetMethod.isAccessible()){
+				targetMethod.setAccessible(true);
+			}
+			try {
+				result = targetMethod.invoke(targetObject, targetArgs);
+				state = STATE_FINISH;
+			} catch (Exception e) {
+				state = STATE_EXCEPTION;
+				throwable = e;
+				throw convertRuntimeException(e);
 			}
 		}
-		return new DbmException("invoke method error: " + targetMethod, e);
+	}
+	
+	private RuntimeException convertRuntimeException(Exception e){
+		if (e instanceof InvocationTargetException) {
+			InvocationTargetException ite = (InvocationTargetException)e;
+			Throwable target = ite.getTargetException();
+			if(target instanceof NestedRuntimeException){
+				throw (NestedRuntimeException)ite.getTargetException();
+			}else if (target instanceof DbmException) {
+				throw (DbmException) target;
+			}
+		} else if ( e instanceof RuntimeException) {
+			throw (RuntimeException) e;
+		}
+		
+		/*if (e instanceof DbmException) {
+			throw (DbmException) e;
+		}*/
+		return new DbmException("invoke method error, targetMethod: " + targetMethod, e);
 	}
 
 	@Override

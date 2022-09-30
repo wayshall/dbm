@@ -1,12 +1,13 @@
 package org.onetwo.common.db.sqlext;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
-import junit.framework.TestCase;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -14,12 +15,17 @@ import org.junit.Test;
 import org.onetwo.common.date.DateUtils;
 import org.onetwo.common.db.EntityManagerProvider;
 import org.onetwo.common.db.Magazine;
+import org.onetwo.common.db.Magazine.EntityWithDataFilter;
 import org.onetwo.common.db.Magazine.MagazineWithTable;
+import org.onetwo.common.db.filter.annotation.DataQueryFilterListener;
 import org.onetwo.common.db.sqlext.ExtQuery.K;
 import org.onetwo.common.db.sqlext.ExtQuery.K.IfNull;
+import org.onetwo.common.db.sqlext.ExtQuery.KeyObject;
 import org.onetwo.common.db.sqlext.ExtQueryUtils.F;
-import org.onetwo.common.dbm.model.entity.UserEntity;
+import org.onetwo.common.dbm.model.hib.entity.UserEntity;
 import org.onetwo.common.utils.CUtils;
+
+import junit.framework.TestCase;
 
 
 @SuppressWarnings({"unchecked", "rawtypes"})
@@ -28,6 +34,12 @@ public class ExtQueryImplTest {
 	Map<Object, Object> properties;
 	
 	private SQLSymbolManagerFactory sqlSymbolManagerFactory;
+
+	@Test
+	public void testEquals() {
+		assertThat(KeyObject.builder().key(":sql-join").build()).isEqualTo(KeyObject.builder().key(":sql-join").build());
+		assertThat(KeyObject.builder().key(":sql-join").build()).isNotEqualTo(KeyObject.builder().key(":select").build());
+	}
 	
 	@Before
 	public void setup(){
@@ -36,9 +48,29 @@ public class ExtQueryImplTest {
 		sqlSymbolManagerFactory = SQLSymbolManagerFactory.getInstance();
 //		sqlSymbolManagerFactory.register(EntityManagerProvider.JPA, JPASQLSymbolManager.create());
 //		sqlSymbolManagerFactory.register(EntityManagerProvider.Hibernate, HibernateSQLSymbolManagerImpl.create());
-		sqlSymbolManagerFactory.register(EntityManagerProvider.JPA, new JPASQLSymbolManagerImpl());
+		JPASQLSymbolManagerImpl jpa = new JPASQLSymbolManagerImpl();
+		jpa.setListeners(Arrays.asList(new DataQueryFilterListener()));
+		sqlSymbolManagerFactory.register(EntityManagerProvider.JPA, jpa);
 	}
+	
+	
 
+	@Test
+	public void testFunctionRef(){
+		Map<Object, Object> properties = new LinkedHashMap<Object, Object>();
+
+		properties.put("&LOWER(name)", "way");
+		properties.put("&substring(name, 5, 1)", "w");
+		properties.put(K.DEBUG, true);
+
+		ExtQueryInner q = SQLSymbolManagerFactory.getInstance().getJPA().createSelectQuery(Object.class, "mag", properties);
+		q.build();
+		
+		String sql = "select mag from Object mag where lower(mag.name) = :lower_mag_name_0 and substring(mag.name, 5, 1) = :substring_mag_name_5_1_1";
+		Assert.assertEquals(sql.trim(), q.getSql().trim());
+		Assert.assertEquals("{lower_mag_name_0=way, substring_mag_name_5_1_1=w}", q.getParamsValue().getValues().toString());
+	}
+	
 	@Test
 	public void testFindAll(){
 
@@ -104,6 +136,22 @@ public class ExtQueryImplTest {
 	}
 	
 	@Test
+	public void testLikeWithoutPersent(){
+
+		this.properties.put("name:like", "way");
+		this.properties.put(K.DEBUG, true);
+		ExtQueryInner q = sqlSymbolManagerFactory.getJPA().createSelectQuery(Magazine.class, "mag", properties);
+		q.build();
+		
+		String sql = "select mag from Magazine mag where mag.name like :mag_name0 order by mag.id desc";
+		String paramsting = "{mag_name0=%way%}";
+//		System.out.println("testNull2: " + q.getSql().trim());
+//		System.out.println("testNull2: " + q.getParamsValue().getValues().toString());
+		Assert.assertEquals(sql.trim(), q.getSql().trim());
+		Assert.assertEquals(paramsting, q.getParamsValue().getValues().toString());
+	}
+	
+	@Test
 	public void testLike2(){
 
 		this.properties.put("name:=~", "way%");
@@ -153,11 +201,11 @@ public class ExtQueryImplTest {
 	public void testCommon(){
 		Map params = new LinkedHashMap();
 		params.put(new String[]{"id", "name"}, new Object[]{11, 2l});
-		params.put(":maxResults", 222333);
+		params.put(K.MAX_RESULTS, 222333);
 		params.put("column.id:in", new Object[]{222, 111});
 		params.put("userName", null);
 		params.put("id:!=", new Object[] { Long.class, "id", "aa", 1, "bb", "cc" });
-		params.put(":fetch", "bid");
+		params.put(K.FETCH, "bid");
 		params.put(K.DESC, "name, text");
 		params.put(K.ORDERBY, "object.nameid desc, object.textid asc");
 		params.put(K.IF_NULL, IfNull.Ignore);
@@ -178,7 +226,7 @@ public class ExtQueryImplTest {
 		properties.put(new String[]{"id", "name"}, new Object[]{11, 2l});
 		properties.put("column.id:in", new Object[]{222, 111});
 		properties.put("userName", "");
-		properties.put(":fetch", "bid");
+		properties.put(K.FETCH, "bid");
 		properties.put(K.IF_NULL, IfNull.Calm);
 		ExtQueryInner q = sqlSymbolManagerFactory.getJPA().createSelectQuery(Object.class, properties);
 		q.build();
@@ -252,7 +300,7 @@ public class ExtQueryImplTest {
 		q = sqlSymbolManagerFactory.getJPA().createSelectQuery(Object.class, properties);
 		q.build();
 		
-		sql = "select new org.onetwo.common.dbm.model.entity.UserEntity(object.aa, object.bb) from Object object where object.aa = :object_aa0";
+		sql = "select new org.onetwo.common.dbm.model.hib.entity.UserEntity(object.aa, object.bb) from Object object where object.aa = :object_aa0";
 		paramsting = "{object_aa0=bb}";
 		Assert.assertEquals(sql.trim(), q.getSql().trim());
 		Assert.assertEquals(paramsting, q.getParamsValue().getValues().toString());
@@ -402,9 +450,10 @@ public class ExtQueryImplTest {
 		q.build();
 		
 		String sql = "select distinct mag from Magazine mag join user u join role r left join articles art left join art.author auth where auth.lastName = :auth_lastName0 order by mag.id desc";
+//		String sql = "select distinct mag from Magazine mag left join articles art left join art.author auth join user u join role r where auth.lastName = :auth_lastName0 order by mag.id desc";
 		String paramsting = "{auth_lastName0=Grisham}";
 
-//		System.out.println("testLeftJoin: " + q.getSql().trim());
+		System.out.println("testLeftJoin: " + q.getSql().trim());
 //		System.out.println("testLeftJoin: " + q.getParamsValue().getValues().toString());
 		
 		Assert.assertEquals(sql.trim(), q.getSql().trim());
@@ -564,7 +613,7 @@ public class ExtQueryImplTest {
 	@Test
 	public void testAnd(){
 		properties.put("name:like", "way");
-		properties.put(":and", CUtils.asMap(new String[]{"age"}, new Object[]{17, 18}));
+		properties.put(K.AND, CUtils.asMap(new String[]{"age"}, new Object[]{17, 18}));
 
 		ExtQueryInner q = sqlSymbolManagerFactory.getJPA().createSelectQuery(Magazine.class, "mag", properties);
 		q.build();
@@ -610,12 +659,12 @@ public class ExtQueryImplTest {
 		and1.put("columns.id", 1);
 		
 		or1.put("columnId", 111);
-		or1.put(":or", and1);
+		or1.put(K.OR, and1);
 		
 		properties.put("siteId", 1);
 		properties.put("title:like", "sdsd");
 		
-		properties.put(":and", or1);
+		properties.put(K.AND, or1);
 		
 		ExtQueryInner q = sqlSymbolManagerFactory.getJPA().createSelectQuery(Object.class, properties);
 		q.build();
@@ -686,15 +735,40 @@ public class ExtQueryImplTest {
 		this.properties.put(K.DEBUG, true);
 		this.properties.put(K.IF_NULL, IfNull.Ignore);
 		
-		ExtQueryInner q = sqlSymbolManagerFactory.getJdbc().createDeleteQuery(MagazineWithTable.class, properties);
+		ExtQueryInner q = sqlSymbolManagerFactory.getJPA().createDeleteQuery(MagazineWithTable.class, properties);
 		q.build();
 		
-		String sql = "delete from magazine_with_table where nickname not in ( :nickname0)";
+		String sql = "delete from org.onetwo.common.db.Magazine$MagazineWithTable where nickname not in ( :nickname0)";
 		String paramsting = "{nickname0=way}";
 		System.out.println("testHas: " + q.getSql().trim());
 //		System.out.println("testHas: " + q.getParamsValue().getValues().toString());
 		Assert.assertEquals(sql.trim(), q.getSql().trim());
 		Assert.assertEquals(paramsting, q.getParamsValue().getValues().toString());
+	}
+
+	@Test
+	public void testDataFilter(){
+		this.properties.put(K.DEBUG, true);
+		this.properties.put(K.DATA_FILTER, true);
+		
+		ExtQueryInner q = sqlSymbolManagerFactory.getJPA().createSelectQuery(EntityWithDataFilter.class, "t", properties);
+		q.build();
+		
+		String sql = "select t from EntityWithDataFilter t where t.status != :t_status0 and (t.testField = :t_testField1  or t.testField = :t_testField2 ) order by t.id desc";
+		String paramsting = "{t_status0=DISABLED, t_testField1=1, t_testField2=2}";
+		Assert.assertEquals(sql.trim(), q.getSql().trim());
+		Assert.assertEquals(paramsting, q.getParamsValue().getValues().toString());
+		
+
+		this.properties.put(K.DATA_FILTER, false);
+		
+		q = sqlSymbolManagerFactory.getJPA().createSelectQuery(EntityWithDataFilter.class, "t", properties);
+		q.build();
+
+		sql = "select t from EntityWithDataFilter t order by t.id desc";
+		System.out.println("generated sql: " + q.getSql().trim());
+		Assert.assertEquals(sql.trim(), q.getSql().trim());
+		Assert.assertEquals(q.getParamsValue().getValues().toString(), "{}");
 	}
 	
 }

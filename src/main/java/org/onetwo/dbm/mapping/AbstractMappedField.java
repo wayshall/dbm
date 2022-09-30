@@ -1,21 +1,28 @@
 package org.onetwo.dbm.mapping;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
 import javax.persistence.Enumerated;
 
+import org.onetwo.common.spring.SpringUtils;
+import org.onetwo.common.utils.Assert;
 import org.onetwo.common.utils.JFishProperty;
 import org.onetwo.common.utils.LangUtils;
 import org.onetwo.common.utils.StringUtils;
+import org.onetwo.dbm.annotation.DbmField;
 import org.onetwo.dbm.annotation.DbmFieldListeners;
+import org.onetwo.dbm.annotation.DbmGenerated;
 import org.onetwo.dbm.annotation.DbmJsonField;
-import org.onetwo.dbm.event.DbmEventAction;
+import org.onetwo.dbm.event.spi.DbmEventAction;
 import org.onetwo.dbm.id.StrategyType;
 import org.onetwo.dbm.jpa.GeneratedValueIAttrs;
 import org.onetwo.dbm.mapping.version.VersionableType;
 import org.onetwo.dbm.utils.DbmUtils;
+import org.onetwo.dbm.utils.SpringAnnotationFinder;
+import org.springframework.beans.ConfigurablePropertyAccessor;
 
 
 @SuppressWarnings("unchecked")
@@ -49,10 +56,18 @@ abstract public class AbstractMappedField implements DbmMappedField{
 	 */
 	private Class<?> actualMappingColumnType;
 	final private DbmJsonField jsonFieldAnnotation;
+	final private DbmField dbmFieldAnnotation;
 	
 	private DbmEnumType enumType;
 	
 	private DbmFieldValueConverter fieldValueConverter;
+	final private boolean mappingGenerated;
+	
+	private Collection<DbmMappedField> bindedFields;
+	/***
+	 * 绑定到了哪个字段
+	 */
+	private DbmMappedField bindToField;
 	
 	public AbstractMappedField(DbmMappedEntry entry, JFishProperty propertyInfo) {
 		super();
@@ -60,11 +75,19 @@ abstract public class AbstractMappedField implements DbmMappedField{
 		this.propertyInfo = propertyInfo;
 		this.name = propertyInfo.getName();
 		
+		this.mappingGenerated = propertyInfo.hasAnnotation(DbmGenerated.class);
+		
+		this.propertyInfo.getAnnotationInfo().setAnnotationFinder(SpringAnnotationFinder.INSTANCE);
+		
 		if(propertyInfo.hasAnnotation(Enumerated.class)){
 			Enumerated enumerated = propertyInfo.getAnnotation(Enumerated.class);
 			this.enumType = DbmEnumType.valueOf(enumerated.value().name());
 		}else if(Enum.class.isAssignableFrom(propertyInfo.getType())){
 			this.enumType = DbmEnumType.STRING;
+		}
+		// 如果配置了ORDINAL，并且实现了DbmEnumValueMapping接口，则设置为MAPPING
+		if(enumType==DbmEnumType.ORDINAL && DbmEnumValueMapping.class.isAssignableFrom(this.propertyInfo.getType())) {
+			this.enumType = DbmEnumType.MAPPING;
 		}
 		
 		DbmFieldListeners listenersAnntation = propertyInfo.getAnnotation(DbmFieldListeners.class);
@@ -80,9 +103,23 @@ abstract public class AbstractMappedField implements DbmMappedField{
 		if(enumType!=null){
 			compositedConverter.addFieldValueConverter(CompositedFieldValueConverter.ENUM_CONVERTER);
 		}
+		/*if (getName().equals("appCode") && getEntry().getEntityName().equals("org.onetwo.common.dbm.model.hib.entity.UserEntity")) {
+			System.out.println("test");
+		}*/
+		this.dbmFieldAnnotation = propertyInfo.getAnnotation(DbmField.class);
 		this.jsonFieldAnnotation = propertyInfo.getAnnotation(DbmJsonField.class);
-		if(jsonFieldAnnotation != null){
-			compositedConverter.addFieldValueConverter(JsonFieldValueConverter.INSTANCE);
+		/*if(jsonFieldAnnotation != null){
+			compositedConverter.addFieldValueConverter(JsonFieldValueConverter.getInstance());
+		}*/
+		if(this.dbmFieldAnnotation!=null){
+			Class<? extends DbmFieldValueConverter> converterClass = this.dbmFieldAnnotation.converterClass();
+			DbmFieldValueConverter converter = DbmUtils.createDbmBean(converterClass);
+			compositedConverter.addFieldValueConverter(converter);
+			/*this.dbmFieldAnnotation.forEach(f -> {
+				Class<? extends DbmFieldValueConverter> converterClass = f.converterClass();
+				DbmFieldValueConverter converter = DbmUtils.createDbmBean(converterClass);
+				compositedConverter.addFieldValueConverter(converter);
+			});*/
 		}
 		this.fieldValueConverter = compositedConverter;
 		
@@ -94,9 +131,14 @@ abstract public class AbstractMappedField implements DbmMappedField{
 		if(enumType!=null){
 			actualType = this.enumType.getJavaType();
 		}else if(this.jsonFieldAnnotation !=null ){
-			actualType = String.class;
+//			actualType = String.class;
+			actualType = this.jsonFieldAnnotation.convertibleJavaType().getJavaType();
 		}
 		this.actualMappingColumnType = actualType;
+	}
+
+	public boolean isMappingGenerated() {
+		return mappingGenerated;
 	}
 
 	public DbmFieldValueConverter getFieldValueConverter() {
@@ -109,14 +151,51 @@ abstract public class AbstractMappedField implements DbmMappedField{
 	
 	@Override
 	public void setValue(Object entity, Object value){
+		value = DbmUtils.convertFromSqlParameterValue(this, value);
 		Object actaulValue = this.fieldValueConverter.forJava(this, value);;
 		propertyInfo.setValue(entity, actaulValue);
+		
+		// 同时设置此字段绑定的字段的值
+		processBindedFieldOnSetValue(entity, actaulValue);
+	}
+	
+	/***
+	 * 设置通过@DbmBindValueToField 注解绑定到此字段的其它字段的值
+	 * 
+	 * @author weishao zeng
+	 * @param entity
+	 * @param value
+	 */
+	protected void processBindedFieldOnSetValue(Object entity, Object value) {
+		Collection<DbmMappedField> bindedFields = this.getBindedFields();
+		if (LangUtils.isEmpty(bindedFields)) {
+			return ;
+		}
+		for(DbmMappedField field : bindedFields) {
+			field.setValue(entity, value);
+		}
 	}
 	
 	
 	@Override
 	public Object getValue(Object entity){
-		Object value = propertyInfo.getValue(entity);
+		Assert.notNull(entity);
+		Object value = null;
+		
+		// 如果绑定到了某个字段，则从这个字段里获取值
+		if (this.bindToField!=null) {
+			value = this.bindToField.getValue(entity);
+			return value;
+		}
+		
+		// 处理复合主键的情况
+//		if (!propertyInfo.getType().equals(entity.getClass())) {
+		if (this.getEntry().isCompositePK()) {
+			ConfigurablePropertyAccessor accessor = SpringUtils.newPropertyAccessor(entity, !propertyInfo.isBeanProperty());
+			value = accessor.getPropertyValue(this.propertyInfo.getName());
+		} else {
+			value = propertyInfo.getValue(entity);
+		}
 		value = this.fieldValueConverter.forStore(this, value);
 		return value;
 	}
@@ -295,4 +374,25 @@ abstract public class AbstractMappedField implements DbmMappedField{
 	public DbmEnumType getEnumType() {
 		return enumType;
 	}
+
+	public DbmJsonField getJsonFieldAnnotation() {
+		return jsonFieldAnnotation;
+	}
+
+	public Collection<DbmMappedField> getBindedFields() {
+		return bindedFields;
+	}
+
+	public void setBindedFields(Collection<DbmMappedField> bindedFields) {
+		this.bindedFields = bindedFields;
+	}
+
+	public DbmMappedField getBindToField() {
+		return bindToField;
+	}
+
+	public void setBindToField(DbmMappedField bindToField) {
+		this.bindToField = bindToField;
+	}
+	
 }

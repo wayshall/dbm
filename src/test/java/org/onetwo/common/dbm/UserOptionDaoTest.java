@@ -11,7 +11,7 @@ import org.junit.Test;
 import org.onetwo.common.base.DbmBaseTest;
 import org.onetwo.common.db.spi.BaseEntityManager;
 import org.onetwo.common.dbm.model.dao.UserOptionDao;
-import org.onetwo.common.dbm.model.entity.UserEntity;
+import org.onetwo.common.dbm.model.hib.entity.UserEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**

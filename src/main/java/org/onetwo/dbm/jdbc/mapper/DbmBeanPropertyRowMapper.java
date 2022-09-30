@@ -8,11 +8,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.onetwo.common.log.JFishLoggerFactory;
 import org.onetwo.dbm.jdbc.JdbcUtils;
 import org.onetwo.dbm.jdbc.spi.JdbcResultSetGetter;
 import org.onetwo.dbm.utils.DbmUtils;
-import org.slf4j.Logger;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.NotWritablePropertyException;
@@ -20,18 +18,17 @@ import org.springframework.beans.PropertyAccessorFactory;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.dao.DataRetrievalFailureException;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.rowset.ResultSetWrappingSqlRowSet;
 import org.springframework.jdbc.support.rowset.SqlRowSetMetaData;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
-public class DbmBeanPropertyRowMapper<T> implements RowMapper<T> {
-	final protected Logger logger = JFishLoggerFactory.getLogger(this.getClass());
+public class DbmBeanPropertyRowMapper<T> extends DbmDataRowMapper<T> implements DataRowMapper<T>, DataColumnMapper {
+//	final protected Logger logger = JFishLoggerFactory.getLogger(this.getClass());
 	
 	protected ConversionService conversionService = DbmUtils.CONVERSION_SERVICE;
 //	private DbmTypeMapping sqlTypeMapping;
-	protected JdbcResultSetGetter jdbcResultSetGetter;
+//	protected JdbcResultSetGetter jdbcResultSetGetter;
 	
 	
 	protected boolean primitivesDefaultedForNullValue = true;
@@ -44,8 +41,9 @@ public class DbmBeanPropertyRowMapper<T> implements RowMapper<T> {
 	}*/
 
 	public DbmBeanPropertyRowMapper(JdbcResultSetGetter jdbcResultSetGetter, Class<T> mappedClass) {
+		super(jdbcResultSetGetter);
 		this.mappedClass = mappedClass;
-		this.jdbcResultSetGetter = jdbcResultSetGetter;
+//		this.jdbcResultSetGetter = jdbcResultSetGetter;
 		this.initialize(mappedClass);
 	}
 
@@ -58,6 +56,11 @@ public class DbmBeanPropertyRowMapper<T> implements RowMapper<T> {
 		this.conversionService = conversionService;
 	}
 
+	/****
+	 * 通过反射获取bean所有属性，并把驼峰格式的属性名称转成小写和下划线，做成映射
+	 * @author wayshall
+	 * @param mappedClass
+	 */
 	protected void initialize(Class<T> mappedClass) {
 		this.mappedClass = mappedClass;
 		this.mappedFields = new HashMap<String, PropertyDescriptor>();
@@ -94,12 +97,12 @@ public class DbmBeanPropertyRowMapper<T> implements RowMapper<T> {
 		}
 	}
 	
+
 	@Override
 	public T mapRow(ResultSet rs, int rowNumber) throws SQLException {
 		Assert.state(this.mappedClass != null, "Mapped class was not specified");
 		T mappedObject = BeanUtils.instantiate(this.mappedClass);
-		BeanWrapper bw = PropertyAccessorFactory.forBeanPropertyAccess(mappedObject);
-		initBeanWrapper(bw);
+		BeanWrapper bw = this.createBeanWrapper(mappedObject);
 
 		ResultSetWrappingSqlRowSet resutSetWrapper = new ResultSetWrappingSqlRowSet(rs);
 		SqlRowSetMetaData rsmd = resutSetWrapper.getMetaData();
@@ -108,50 +111,58 @@ public class DbmBeanPropertyRowMapper<T> implements RowMapper<T> {
 		for (int index = 1; index <= columnCount; index++) {
 			String column = DbmUtils.lookupColumnName(rsmd, index);
 //			String field = lowerCaseName(column.replaceAll(" ", ""));
-			String field = JdbcUtils.lowerCaseName(column);
-			PropertyDescriptor pd = this.mappedFields.get(field);
-			if (pd != null) {
-				try {
-					Object value = getColumnValue(resutSetWrapper, index, pd);
-					if (rowNumber == 0 && logger.isDebugEnabled()) {
-						logger.debug("Mapping column '" + column + "' to property '" + pd.getName() +
-								"' of type [" + ClassUtils.getQualifiedName(pd.getPropertyType()) + "]");
-					}
-					try {
-						bw.setPropertyValue(pd.getName(), value);
-					}
-					catch (TypeMismatchException ex) {
-						if (value == null && this.primitivesDefaultedForNullValue) {
-							if (logger.isDebugEnabled()) {
-								logger.debug("Intercepted TypeMismatchException for row " + rowNumber +
-										" and column '" + column + "' with null value when setting property '" +
-										pd.getName() + "' of type [" +
-										ClassUtils.getQualifiedName(pd.getPropertyType()) +
-										"] on object: " + mappedObject, ex);
-							}
-						}
-						else {
-							throw ex;
-						}
-					}
-				}
-				catch (NotWritablePropertyException ex) {
-					throw new DataRetrievalFailureException(
-							"Unable to map column '" + column + "' to property '" + pd.getName() + "'", ex);
-				}
-			}
-			else {
-				// No PropertyDescriptor found
-				if (rowNumber == 0 && logger.isDebugEnabled()) {
-					logger.debug("No property found for column '" + column + "' mapped to field '" + field + "'");
-				}
-			}
+			this.setColumnValue(resutSetWrapper, bw, rowNumber, index, column);
 		}
 
 		return mappedObject;
 	}
 	
-	protected Object getColumnValue(ResultSetWrappingSqlRowSet rs, int index, PropertyDescriptor pd) throws SQLException {
+	public void setColumnValue(ResultSetWrappingSqlRowSet resutSetWrapper, 
+							BeanWrapper bw, 
+							int rowNumber, 
+							int columnIndex, 
+							String column) {
+		String field = JdbcUtils.lowerCaseName(column);
+		PropertyDescriptor pd = this.mappedFields.get(field);
+		if (pd != null) {
+			try {
+				Object value = getColumnValue(resutSetWrapper, columnIndex, pd);
+				if (rowNumber == 0 && logger.isDebugEnabled()) {
+					logger.debug("Mapping column '" + column + "' to property '" + pd.getName() +
+							"' of type [" + ClassUtils.getQualifiedName(pd.getPropertyType()) + "]");
+				}
+				try {
+					bw.setPropertyValue(pd.getName(), value);
+				}
+				catch (TypeMismatchException ex) {
+					if (value == null && this.primitivesDefaultedForNullValue) {
+						if (logger.isDebugEnabled()) {
+							logger.debug("Intercepted TypeMismatchException for row " + rowNumber +
+									" and column '" + column + "' with null value when setting property '" +
+									pd.getName() + "' of type [" +
+									ClassUtils.getQualifiedName(pd.getPropertyType()) +
+									"] on object: " + bw.getWrappedInstance(), ex);
+						}
+					}
+					else {
+						throw ex;
+					}
+				}
+			}
+			catch (NotWritablePropertyException ex) {
+				throw new DataRetrievalFailureException(
+						"Unable to map column '" + column + "' to property '" + pd.getName() + "'", ex);
+			}
+		}
+		else {
+			// No PropertyDescriptor found
+			if (rowNumber == 0 && logger.isDebugEnabled()) {
+				logger.debug("No property found for column '" + column + "' mapped to field '" + field + "'");
+			}
+		}
+	}
+	
+	protected Object getColumnValue(ResultSetWrappingSqlRowSet rs, int index, PropertyDescriptor pd) {
 //		return jdbcResultSetGetter.getColumnValue(rs, index, pd);
 		return jdbcResultSetGetter.getColumnValue(rs, index, pd.getPropertyType());
 		/*JFishProperty jproperty = Intro.wrap(pd.getWriteMethod().getDeclaringClass()).getJFishProperty(pd.getName(), false);
@@ -160,7 +171,13 @@ public class DbmBeanPropertyRowMapper<T> implements RowMapper<T> {
 		return value;*/
 	}
 
-
+	protected BeanWrapper createBeanWrapper(T entity) {
+		BeanWrapper bw = PropertyAccessorFactory.forBeanPropertyAccess(entity);
+		bw.setAutoGrowNestedPaths(true);
+		initBeanWrapper(bw);
+		return bw;
+	}
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;

@@ -32,7 +32,7 @@ public class EntrySQLBuilderImpl implements EntrySQLBuilder {
 	protected String alias = "this_";
 	protected DbmMappedEntryMeta entry;
 	protected String tableName;
-	protected DbmMappedField identifyField;
+//	protected DbmMappedField identifyField;
 	protected List<DbmMappedField> fields = LangUtils.newArrayList();
 	protected List<DbmMappedField> whereCauseFields = LangUtils.newArrayList();
 	
@@ -51,7 +51,7 @@ public class EntrySQLBuilderImpl implements EntrySQLBuilder {
 		this.alias = alias;
 		this.namedPlaceHoder = namedPlaceHoder;
 		this.type = type;
-		this.identifyField = entry.getIdentifyField();
+//		this.identifyField = entry.getIdentifyField();
 		this.tableName = entry.getTableInfo().getName();
 		this.dialet = dialect;
 	}
@@ -78,6 +78,13 @@ public class EntrySQLBuilderImpl implements EntrySQLBuilder {
 		return this;
 	}
 	
+	public EntrySQLBuilder appendWhere(Collection<? extends DbmMappedField> columns){
+		columns.forEach(column -> {
+			appendWhere(column);
+		});
+		return this;
+	}
+	
 	public EntrySQLBuilder appendWhere(DbmMappedField column){
 		if(column!=null)
 			this.whereCauseFields.add(column);
@@ -90,11 +97,6 @@ public class EntrySQLBuilderImpl implements EntrySQLBuilder {
 		return this;
 	}
 	
-	public EntrySQLBuilder appendWhere(Collection<? extends DbmMappedField> columns){
-		if(columns!=null)
-			this.whereCauseFields.addAll(columns);
-		return this;
-	}
 	
 	protected String getSeqName(){
 		return entry.getTableInfo().getSeqName();
@@ -125,9 +127,11 @@ public class EntrySQLBuilderImpl implements EntrySQLBuilder {
 			this.sql = this.buildDelete();
 		}else if(SqlBuilderType.query==type){
 			this.sql = this.buildQuery();
-		}else if(SqlBuilderType.primaryKey==type){
-			this.sql = this.buildPrimaryKey();
-		}else if(SqlBuilderType.seq==type){
+		}
+//		else if(SqlBuilderType.primaryKey==type){
+//			this.sql = this.buildPrimaryKey();
+//		}
+		else if(SqlBuilderType.seq==type){
 			this.sql = this.buildSeq();
 		}else if(SqlBuilderType.createSeq==type){
 			this.sql = this.buildCreateSeq();
@@ -154,9 +158,9 @@ public class EntrySQLBuilderImpl implements EntrySQLBuilder {
 	}
 	
 	private String buildUpdate(){
-		if(LangUtils.isEmpty(fields)){
+		/*if(LangUtils.isEmpty(fields)){
 			throw new DbmException("no update field found!");
-		}
+		}*/
 		if(LangUtils.isEmpty(whereCauseFields)){
 			throw new DbmException("no where field found for update!");
 		}
@@ -173,12 +177,12 @@ public class EntrySQLBuilderImpl implements EntrySQLBuilder {
 		return update;
 	}
 	
-	private String buildPrimaryKey(){
-		String pkSql = PARSER.parse(SQL_MYSQL_PK, "id", this.identifyField.getColumn().getJavaName(), "tableName", this.tableName);
-		if(isDebug())
-			LangUtils.println("build Primary sql : ${0}", pkSql);
-		return pkSql;
-	}
+//	private String buildPrimaryKey(){
+//		String pkSql = PARSER.parse(SQL_MYSQL_PK, "id", this.identifyField.getColumn().getJavaName(), "tableName", this.tableName);
+//		if(isDebug())
+//			LangUtils.println("build Primary sql : ${0}", pkSql);
+//		return pkSql;
+//	}
 
 	private String buildDelete(){
 //		Assert.notEmpty(whereCauseColumns);
@@ -248,6 +252,7 @@ public class EntrySQLBuilderImpl implements EntrySQLBuilder {
 		String fstr = null;
 		for(DbmMappedField field : columns){
 			fstr = alias?field.getColumn().getNameWithAlias():field.getColumn().getName();
+			fstr = dialet.wrapKeywordColumnName(fstr);
 			if(namedPlaceHoder){
 				namedStr = alias?field.getColumn().getNamedPlaceHolderWithAlias():field.getColumn().getNamedPlaceHolder();
 				strs.add(fstr+" = " + namedStr);
@@ -292,9 +297,9 @@ public class EntrySQLBuilderImpl implements EntrySQLBuilder {
 		return strs;
 	}
 
-	public DbmMappedField getIdentifyField() {
+	/*public DbmMappedField getIdentifyField() {
 		return identifyField;
-	}
+	}*/
 	/* (non-Javadoc)
 	 * @see org.onetwo.common.jfishdbm.mapping.EntrySQLBuilder#getSql()
 	 */

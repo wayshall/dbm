@@ -9,9 +9,8 @@ import org.onetwo.common.annotation.AnnotationUtils;
 import org.onetwo.common.utils.map.CollectionMap;
 import org.onetwo.dbm.annotation.DbmInterceptorFilter;
 import org.onetwo.dbm.annotation.DbmInterceptorFilter.InterceptorType;
-import org.onetwo.dbm.jdbc.spi.DbmInterceptor;
+import org.onetwo.dbm.core.spi.DbmInterceptor;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.annotation.Order;
@@ -21,7 +20,7 @@ import com.google.common.collect.ImmutableList;
 @Order(value=Ordered.HIGHEST_PRECEDENCE)
 public class DbmInterceptorManager implements InitializingBean {
 	
-	@Autowired
+//	@Autowired(required=false)
 	private List<DbmInterceptor> interceptors;
 	private CollectionMap<InterceptorType, DbmInterceptor> typeInterceptors = CollectionMap.newLinkedListMap();
 

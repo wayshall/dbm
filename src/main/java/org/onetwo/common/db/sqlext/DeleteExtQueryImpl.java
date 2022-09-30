@@ -8,7 +8,7 @@ public class DeleteExtQueryImpl extends AbstractExtQuery {
 	public DeleteExtQueryImpl(Class<?> entityClass, String alias, Map<Object, Object> params,
 			SQLSymbolManager symbolManager, List<ExtQueryListener> listeners) {
 		super(entityClass, alias, params, symbolManager, listeners);
-		this.queryNameStrategy.setAliasMainTableName(false);
+		this.getQueryNameStrategy().setAliasMainTableName(false);
 	}
 
 	@Override

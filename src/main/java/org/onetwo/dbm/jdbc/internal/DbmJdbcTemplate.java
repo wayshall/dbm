@@ -10,12 +10,14 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.onetwo.common.log.JFishLoggerFactory;
 import org.onetwo.dbm.jdbc.AroundPreparedStatementExecute;
 import org.onetwo.dbm.jdbc.DbmListRowMapperResultSetExtractor;
 import org.onetwo.dbm.jdbc.DbmNamedJdbcTemplate;
 import org.onetwo.dbm.jdbc.spi.DbmJdbcOperations;
 import org.onetwo.dbm.jdbc.spi.JdbcStatementParameterSetter;
+import org.onetwo.dbm.utils.DbmUtils;
 import org.slf4j.Logger;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.ArgumentTypePreparedStatementSetter;
@@ -290,6 +292,31 @@ public class DbmJdbcTemplate extends JdbcTemplate implements DbmJdbcOperations {
 	public int[] batchUpdate(String sql, Map<String, ?>[] batchValues) {
 		return this.dbmNamedJdbcOperations.batchUpdate(sql, batchValues);
 	}
+	
+	private int[] batchUpdateList(String sql, List<Map<String, ?>> batchValues) {
+		return this.dbmNamedJdbcOperations.batchUpdate(sql, DbmUtils.createBatch(batchValues));
+	}
+	
+	public int[] batchUpdate(String sql, List<Map<String, ?>> batchValues, int processSizePerBatch) {
+		int insertSize = batchValues.size();
+		if (processSizePerBatch==-1 || insertSize<=processSizePerBatch) {
+			return batchUpdateList(sql, batchValues);
+		}
+		int startIndexInclusive = 0;
+		int endIndex = 0;
+		int[] res = null;
+		while(endIndex<insertSize) {
+			endIndex = startIndexInclusive + processSizePerBatch;
+			if (endIndex>insertSize) {
+				endIndex = insertSize;
+			}
+			List<Map<String, ?>> values = batchValues.subList(startIndexInclusive, endIndex);
+			int[] inserted = this.batchUpdateList(sql, values);
+			res = ArrayUtils.addAll(res, inserted);
+			startIndexInclusive = endIndex;
+		}
+		return res;
+	}
 
 	@Override
 	public int update(String sql, Map<String, ?> paramMap) throws DataAccessException {
@@ -306,6 +333,9 @@ public class DbmJdbcTemplate extends JdbcTemplate implements DbmJdbcOperations {
 		return this.dbmNamedJdbcOperations.query(sql, paramMap, rowMapper);
 	}
 
+	/****
+	 * 返回结果会调用  DataAccessUtils.requiredSingleResult 过滤
+	 */
 	@Override
 	public <T> T queryForObject(String sql, Map<String, ?> paramMap, RowMapper<T> rowMapper) throws DataAccessException {
 		return this.dbmNamedJdbcOperations.queryForObject(sql, paramMap, rowMapper);

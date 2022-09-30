@@ -26,8 +26,12 @@ import org.slf4j.Logger;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.PropertyAccessorFactory;
 import org.springframework.core.convert.ConversionService;
+import org.springframework.jdbc.support.rowset.ResultSetWrappingSqlRowSet;
 
 import com.google.common.collect.Maps;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
 
 abstract public class AbstractNestedBeanMapper<T> {
 	final protected Logger logger = JFishLoggerFactory.getLogger(this.getClass());
@@ -44,6 +48,7 @@ abstract public class AbstractNestedBeanMapper<T> {
 	
 	protected ResultClassMapper resultClassMapper;
 //	protected JdbcResultSetGetter jdbcResultSetGetter;
+	private DbmRowMapperFactory rowMapperFactory;
 
 	/*public AbstractNestedBeanMapper(JdbcResultSetGetter jdbcResultSetGetter, Class<T> mappedClass, DbmResultMapping dbmResultMapping) {
 		this.mappedClass = mappedClass;
@@ -56,16 +61,21 @@ abstract public class AbstractNestedBeanMapper<T> {
 		}
 	}*/
 
-	public AbstractNestedBeanMapper(Class<T> mappedClass, DbmResultMapping dbmResultMapping) {
+	public AbstractNestedBeanMapper(DbmRowMapperFactory rowMapperFactory, Class<T> mappedClass, DbmResultMapping dbmResultMapping) {
 		this.mappedClass = mappedClass;
 		this.dbmResultMapping = dbmResultMapping;
+		this.rowMapperFactory = rowMapperFactory;
 
-		ClassMapperContext context = new ClassMapperContext(dbmResultMapping);
+		ClassMapperContext context = new ClassMapperContext(rowMapperFactory, dbmResultMapping);
 		ResultClassMapper resultClassMapper = new RootResultClassMapper(context, dbmResultMapping.idField(), dbmResultMapping.columnPrefix(), mappedClass);
 		resultClassMapper.initialize();
 		this.resultClassMapper = resultClassMapper;
 	}
 	
+	public DbmRowMapperFactory getRowMapperFactory() {
+		return rowMapperFactory;
+	}
+
 	protected static BeanWrapper createBeanWrapper(Object mappedObject) {
 		BeanWrapper bw = PropertyAccessorFactory.forBeanPropertyAccess(mappedObject);
 		return bw;
@@ -149,9 +159,12 @@ abstract public class AbstractNestedBeanMapper<T> {
 	protected static class ClassMapperContext {
 //		protected JdbcResultSetGetter jdbcResultSetGetter;
 		protected Map<String, DbmNestedResultData> accessPathResultClassMapperMap = Maps.newHashMap();
-		public ClassMapperContext(DbmResultMapping dbmResultMapping) {
+		private DbmRowMapperFactory rowMapperFactory;
+		
+		public ClassMapperContext(DbmRowMapperFactory rowMapperFactory, DbmResultMapping dbmResultMapping) {
 			super();
 //			this.jdbcResultSetGetter = jdbcResultSetGetter;
+			this.rowMapperFactory = rowMapperFactory;
 			for(DbmNestedResult nested : dbmResultMapping.value()){
 				this.accessPathResultClassMapperMap.put(nested.property(), new DbmNestedResultData(nested));
 			}
@@ -159,6 +172,10 @@ abstract public class AbstractNestedBeanMapper<T> {
 		
 		public DbmNestedResultData getDbmNestedResult(String accessPath){
 			return this.accessPathResultClassMapperMap.get(accessPath);
+		}
+
+		public Optional<DbmRowMapperFactory> getRowMapperFactory() {
+			return Optional.ofNullable(rowMapperFactory);
 		}
 		
 	}
@@ -181,6 +198,9 @@ abstract public class AbstractNestedBeanMapper<T> {
 	}
 	static class PropertyResultClassMapper extends ResultClassMapper {
 		final private ResultClassMapper parentMapper;
+		/***
+		 * 映射对象所属的父对象的属性
+		 */
 		final private JFishProperty belongToProperty;
 		public PropertyResultClassMapper(ResultClassMapper parentMapper, String idField, String columnPrefix, JFishProperty belongToProperty) {
 			this(parentMapper, idField, columnPrefix, belongToProperty, belongToProperty.getType());
@@ -324,17 +344,31 @@ abstract public class AbstractNestedBeanMapper<T> {
 		}
 		
 	}
-	protected static class ResultClassMapper {
+	@Data
+	@AllArgsConstructor
+	protected static class ColumnProperty {
+		private String columnName;
+		private JFishProperty property;
+	}
+	protected static class ResultClassMapper /*implements DataColumnMapper */{
+		/****
+		 * 用来决定某一个对象（一行数据）是否是相同的属性，如果此属性的值相同，则无论其它属性是否相同，均视为同一条数据
+		 */
 		private String idPropertyName = "";
+		/***
+		 * 用来决定某一个对象（一行数据）是否是相同的属性，如果此属性的值相同，则无论其它属性是否相同，均视为同一条数据
+		 */
+		private PropertyMeta idProperty;
+		
 		private String columnPrefix = "";
 		private Intro<?> classIntro;
-		private PropertyMeta idProperty;
-		private Map<String, JFishProperty> simpleFields = Maps.newHashMap();
+		private Map<String, ColumnProperty> simpleFields = Maps.newHashMap();
 		private Map<String, PropertyResultClassMapper> complexFields = Maps.newHashMap();
 		protected Map<Integer, BeanWrapper> datas = Maps.newHashMap();
 		private Class<?> resultClass;
 		protected String accessPathPrefix;
 		protected final ClassMapperContext context;
+		private DataColumnMapper dataColumnMapper;
 		
 		public ResultClassMapper(ClassMapperContext context, String idField, String columnPrefix, Class<?> mappedClass) {
 			super();
@@ -345,18 +379,28 @@ abstract public class AbstractNestedBeanMapper<T> {
 			this.resultClass = mappedClass;
 			this.context = context;
 			
+			this.dataColumnMapper = this.context.getRowMapperFactory().map(f -> {
+				DataRowMapper<?> drm = f.createRowMapper(resultClass);
+				if (drm instanceof DataColumnMapper) {
+					return (DataColumnMapper)drm;
+				} else {
+					return null;
+				}
+			})
+			.orElse(null);
+			
 			if(LangUtils.isSimpleType(mappedClass)){
 				this.resultClass = SimpleValueNestedMappingHoder.class;
 				if(StringUtils.isBlank(idPropertyName)){
 					idPropertyName = "value";
 				}
 				if(!"value".equals(idPropertyName)){
-					throw new DbmException("the idPropertyName must be 'value' if nested mapped type is a simple type!");
+					throw new DbmException("the value of id property (in @DbmNestedResult) must be 'value' if nested mapped type is a simple type!");
 				}
 				this.idProperty = new PropertyMeta(idPropertyName, mappedClass, true);
 			}
 		}
-
+		
 		public String getIdPropertyName() {
 			return idPropertyName;
 		}
@@ -411,13 +455,12 @@ abstract public class AbstractNestedBeanMapper<T> {
 					propertyMapper.initialize();
 					complexFields.put(jproperty.getName(), propertyMapper);
 				}else{
-//					this.simpleFields.put(JdbcUtils.lowerCaseName(pd.getName()), jproperty);
-					/*String fullName = getFullName(pd.getName());
-					this.simpleFields.put(toClumnName1(fullName), jproperty);
-					this.simpleFields.put(toClumnName2(fullName), jproperty);*/
-//					String fullName = getFullName(pd.getName());
-					this.simpleFields.put(getFullName(toClumnName1(pd.getName())), jproperty);
-					this.simpleFields.put(getFullName(toClumnName2(pd.getName())), jproperty);
+					/*this.simpleFields.put(getFullName(toClumnName1(pd.getName())), jproperty);
+					this.simpleFields.put(getFullName(toClumnName2(pd.getName())), jproperty);*/
+					ColumnProperty prop1 = new ColumnProperty(toClumnName1(pd.getName()), jproperty);
+					ColumnProperty prop2 = new ColumnProperty(toClumnName2(pd.getName()), jproperty);
+					this.simpleFields.put(getFullName(prop1.getColumnName()), prop1);
+					this.simpleFields.put(getFullName(prop2.getColumnName()), prop2);
 				}
 			}
 		}
@@ -451,7 +494,7 @@ abstract public class AbstractNestedBeanMapper<T> {
 		}
 		
 //		public Object mapResult(Map<String, Integer> names, ResultSetWrappingSqlRowSet resutSetWrapper){
-		public Object mapResult(Map<String, Integer> names, ColumnValueGetter columnValueGetter){
+		public Object mapResult(ResultSetWrappingSqlRowSet resutSetWrapper, Map<String, Integer> names, ColumnValueGetter columnValueGetter, int rowNum){
 			Integer hash = null;
 			Object entity = null;
 			BeanWrapper bw = null;
@@ -473,11 +516,11 @@ abstract public class AbstractNestedBeanMapper<T> {
 					bw = datas.get(hash);
 					isNew = false;
 				}else{
-					bw = mapResultClassObject(names, columnValueGetter);
+					bw = mapResultClassObject(resutSetWrapper, names, columnValueGetter, rowNum);
 					datas.put(hash, bw);
 				}
 			}else{
-				bw = mapResultClassObject(names, columnValueGetter);
+				bw = mapResultClassObject(resutSetWrapper, names, columnValueGetter, rowNum);
 				if(bw==null){
 					return null;
 				}
@@ -491,16 +534,32 @@ abstract public class AbstractNestedBeanMapper<T> {
 			}
 			entity = bw.getWrappedInstance();
 			for(PropertyResultClassMapper pm : this.complexFields.values()){
-				Object propertyValue = pm.mapResult(names, columnValueGetter);
+				Object propertyValue = pm.mapResult(resutSetWrapper, names, columnValueGetter, rowNum);
 				pm.linkToParent(bw, propertyValue);
 			}
 			return afterMapResult(entity, hash, isNew);
 		}
-		protected BeanWrapper mapResultClassObject(Map<String, Integer> names, ColumnValueGetter columnValueGetter){
+		protected BeanWrapper mapResultClassObject(ResultSetWrappingSqlRowSet resutSetWrapper, Map<String, Integer> names, ColumnValueGetter columnValueGetter, int rowNum){
+			if (resutSetWrapper==null || dataColumnMapper==null) {
+				return mapResultClassObjectWithoutResultSet(names, columnValueGetter);
+			}
+			Object mappedObject = classIntro.newInstance();
+			BeanWrapper bw = createBeanWrapper(mappedObject);
+			for(Entry<String, ColumnProperty> entry : simpleFields.entrySet()){
+				Integer index = getIndexForColumnName(names, entry.getKey());
+				if(index==null){
+					continue;
+				}
+				this.dataColumnMapper.setColumnValue(resutSetWrapper, bw, rowNum, index, entry.getValue().getColumnName());
+			}
+			return bw;
+		}
+
+		protected BeanWrapper mapResultClassObjectWithoutResultSet(Map<String, Integer> names, ColumnValueGetter columnValueGetter){
 			BeanWrapper bw = null;
 //			boolean hasColumn = false;
-			for(Entry<String, JFishProperty> entry : simpleFields.entrySet()){
-				JFishProperty jproperty = entry.getValue();
+			for(Entry<String, ColumnProperty> entry : simpleFields.entrySet()){
+				JFishProperty jproperty = entry.getValue().getProperty();
 				/*String actualColumnName = getActualColumnName(names, jproperty);
 				if(actualColumnName==null){
 					continue;

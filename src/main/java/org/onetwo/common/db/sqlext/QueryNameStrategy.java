@@ -3,7 +3,7 @@ package org.onetwo.common.db.sqlext;
 import org.apache.commons.lang3.StringUtils;
 import org.onetwo.common.db.sqlext.ExtQuery.K;
 import org.onetwo.common.utils.Assert;
-import org.onetwo.common.utils.LangUtils;
+import org.onetwo.dbm.exception.DbmException;
 
 /**
  * @author wayshall
@@ -13,7 +13,7 @@ public class QueryNameStrategy {
 	public static final String[] SQL_KEY_WORKDS = new String[]{" ", ";", ",", "(", ")", "'", "\"\"", "/", "+", "-"};
 
 	protected String alias;
-	protected boolean aliasMainTableName=true;
+	protected boolean aliasMainTableName = true;
 	
 	public QueryNameStrategy(String alias) {
 		this(alias, true);
@@ -82,11 +82,11 @@ public class QueryNameStrategy {
 		return newf;
 	}
 
-	protected String checkFieldNameValid(String field){
+	public static String checkFieldNameValid(String field){
 		Assert.hasText(field);
 		for(String str : SQL_KEY_WORKDS){
 			if(field.indexOf(str)!=-1)
-				LangUtils.throwBaseException("the field is inValid : " + field);
+				throw new DbmException("the field is inValid : " + field);
 		}
 		return field;
 	}

@@ -17,6 +17,8 @@ import org.onetwo.dbm.id.CustomIdGenerator;
 public @interface DbmIdGenerator {
 	
 	String name();
+	
+	Class<?> valueType() default Object.class;
 	/****
 	 * try to find in spring context, otherwise new instance
 	 * @author wayshall
@@ -25,5 +27,18 @@ public @interface DbmIdGenerator {
 	Class<? extends CustomIdGenerator> generatorClass();
 	
 	String attributes() default "";
-
+	
+	/***
+	 * 如果creator为spring，则直接在spring 容器中查找generatorClass类型的生成器
+	 * 
+	 * @author weishao zeng
+	 * @return
+	 */
+	GeneratorCreator creator() default GeneratorCreator.DEFAULT;
+	
+	public enum GeneratorCreator {
+		DEFAULT,
+		SPRING
+	}
+	
 }

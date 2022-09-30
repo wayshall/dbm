@@ -8,6 +8,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import javax.annotation.Resource;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.onetwo.common.base.DbmBaseTest;
 import org.onetwo.common.date.NiceDate;
@@ -22,11 +23,16 @@ public class OneBatchInsertTest extends DbmBaseTest {
 	@Resource
 	private UserAutoidServiceImpl userAutoidServiceImpl;
 	
+	@Before
+	public void setup() {
+		userAutoidServiceImpl.deleteAll();
+	}
+	
 	@Test
 	public void testBatchInsert(){
 		int insertCount = 10000;
 		//精确到秒，否则会有误差，比如2015-05-06 13:49:09.783存储到mysql后会变成2015-05-06 13:49:10，mysql的datetime只能精确到秒
-		NiceDate niceNowSeconde = NiceDate.New().thisSec();
+		NiceDate niceNowSeconde = NiceDate.New().preciseAtSec();
 		TimeCounter t = new TimeCounter("OneBatchInsertTest");
 		t.start();
 		int count = this.userAutoidServiceImpl.daoBatchInsert("testBatchInsert", UserStatus.NORMAL, niceNowSeconde.getTime(), insertCount);
@@ -39,7 +45,6 @@ public class OneBatchInsertTest extends DbmBaseTest {
 		Assert.assertEquals(insertCount, count);
 		t.stop();
 		
-		userAutoidServiceImpl.deleteAll();
 	}
 	
 	@Test

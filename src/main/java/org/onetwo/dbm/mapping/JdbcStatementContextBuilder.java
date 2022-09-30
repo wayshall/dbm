@@ -8,8 +8,10 @@ import org.onetwo.common.utils.ArrayUtils;
 import org.onetwo.common.utils.Assert;
 import org.onetwo.common.utils.CUtils;
 import org.onetwo.common.utils.LangUtils;
-import org.onetwo.dbm.event.DbmEventAction;
+import org.onetwo.dbm.event.spi.DbmEventAction;
 import org.onetwo.dbm.mapping.SQLBuilderFactory.SqlBuilderType;
+import org.onetwo.dbm.utils.DbmUtils;
+import org.springframework.jdbc.core.SqlParameterValue;
 
 public class JdbcStatementContextBuilder implements JdbcStatementContext<List<Object[]>> {
 /*
@@ -72,10 +74,11 @@ public class JdbcStatementContextBuilder implements JdbcStatementContext<List<Ob
 				}else if(DbmEventAction.update==getEventAction()){
 					Assert.notNull(val, "version field["+field.getName()+"] can't be null on update: " + entry.getEntityName());
 					val = field.getVersionableType().getVersionValule(val);
-//					field.setValue(entity, val);
+					field.setValue(entity, val);
 				}
 			}
-			this.columnValues.put(field, val);
+//			this.columnValues.put(field, val);
+			this.columnValues.put(field, convertSqlParameterValue(field, val));
 		}
 		return this;
 	}
@@ -113,8 +116,8 @@ public class JdbcStatementContextBuilder implements JdbcStatementContext<List<Ob
 		Assert.notNull(entity);
 		for(DbmMappedField field : this.sqlBuilder.getWhereCauseFields()){
 			Object val = field.getValue(entity);
-//			SqlParameterValue pvalue = convertSqlParameterValue(field, val);
-			this.causeValues.add(val);
+			SqlParameterValue pvalue = convertSqlParameterValue(field, val);
+			this.causeValues.add(pvalue);
 		}
 		return this;
 	}
@@ -129,12 +132,13 @@ public class JdbcStatementContextBuilder implements JdbcStatementContext<List<Ob
 	}*/
 	/***
 	 * 转成spring jdbc sql parameter 参数
+	 * @see AbstractMappedField#setValue
 	 * @param value
 	 * @return
 	 */
-	/*protected SqlParameterValue convertSqlParameterValue(DbmMappedField field, Object value){
-		return DbmUtils.convertSqlParameterValue(field.getPropertyInfo(), value, entry.getSqlTypeMapping());
-	}*/
+	protected SqlParameterValue convertSqlParameterValue(DbmMappedField field, Object value){
+		return DbmUtils.convert2SqlParameterValue(field, value);
+	}
 	
 	public JdbcStatementContextBuilder addCauseValue(Object value){
 		causeValues.add(value);

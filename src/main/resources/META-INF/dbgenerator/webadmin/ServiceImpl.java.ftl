@@ -17,11 +17,9 @@
 
 package ${_globalConfig.getJavaLocalPackage(_tableContext.localPackage)};
 
-import java.util.Collection;
-
 import org.onetwo.common.db.spi.BaseEntityManager;
-import org.onetwo.common.db.builder.Querys;
 import org.onetwo.common.utils.Page;
+import org.onetwo.dbm.core.internal.DbmCrudServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,34 +28,21 @@ import ${entityPackage}.${entityClassName};
 
 @Service
 @Transactional
-public class ${serviceImplClassName} {
-
-    @Autowired
-    private BaseEntityManager baseEntityManager;
+public class ${serviceImplClassName} extends DbmCrudServiceImpl<${entityClassName}, ${idType}> {
     
-    public Page<${entityClassName}> findPage(Page<${entityClassName}> page, ${entityClassName} ${_tableContext.propertyName}){
-        return Querys.from(baseEntityManager, ${entityClassName}.class)
-                	.where()
-            		  .addFields(${_tableContext.propertyName})
-            		  .ignoreIfNull()
-            		.end()
-            		.toQuery()
-            		.page(page);
+    @Autowired
+    public ${serviceImplClassName}(BaseEntityManager baseEntityManager) {
+        super(baseEntityManager);
     }
     
-    public void save(${entityClassName} entity) {
-		baseEntityManager.persist(entity);
-	}
-
-	public void update(${entityClassName} entity) {
-		baseEntityManager.update(entity);
-	}
-    
-    public ${entityClassName} findById(${idType} id) {
-		return baseEntityManager.findById(${entityClassName}.class, id);
-	}
-
-	public Collection<${entityClassName}> removeByIds(${idType}... id) {
-		return baseEntityManager.removeByIds(${entityClassName}.class, id);
-	}
+    @Transactional(readOnly=true)
+    public Page<${entityClassName}> findPage(Page<${entityClassName}> page, ${entityClassName} example) {
+        return baseEntityManager.from(entityClass)
+                                .where()
+                                    .addFields(example)
+                                    .ignoreIfNull()
+                                .end()
+                                .toQuery()
+                                .page(page);
+    }
 }

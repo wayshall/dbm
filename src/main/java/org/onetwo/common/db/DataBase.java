@@ -4,6 +4,7 @@ package org.onetwo.common.db;
 public enum DataBase {
 	MySQL("mysql"),
 	Oracle("oracle"),
+	PostgreSQL("postgresql"),
 	Sqlserver("sqlserver"),
 	H2("h2"),
 	Access("access");

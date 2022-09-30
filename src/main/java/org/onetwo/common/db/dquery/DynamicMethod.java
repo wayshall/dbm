@@ -27,8 +27,10 @@ import org.onetwo.common.proxy.BaseMethodParameter;
 import org.onetwo.common.reflect.ReflectUtils;
 import org.onetwo.common.utils.LangUtils;
 import org.onetwo.common.utils.Page;
+import org.onetwo.common.utils.PageRequest;
 import org.onetwo.common.utils.StringUtils;
 import org.onetwo.dbm.exception.FileNamedQueryException;
+import org.onetwo.dbm.mapping.DbmEnumValueMapping;
 import org.springframework.core.MethodParameter;
 
 
@@ -39,7 +41,7 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 	}
 
 	public static final List<String> EXECUTE_UPDATE_PREFIX = LangUtils.newArrayList("save", "update", "remove", "delete", "insert", "create");
-	public static final List<String> BATCH_PREFIX = LangUtils.newArrayList("batch");
+	public static final List<String> BATCH_PREFIX = LangUtils.newArrayList("batch", "batchUpdate", "batchInsert", "batchSave");
 //	public static final String FIELD_NAME_SPERATOR = "By";
 	
 //	private final Method method;
@@ -51,10 +53,12 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 //	private final ExecuteUpdate executeUpdate;
 	private boolean update;
 	private boolean batchUpdate;
+	private int batchSize = -1;
 	private AsCountQuery asCountQuery;
 //	private List<String> parameterNames;
-	
+
 	private DynamicMethodParameter pageParamter;
+	private DynamicMethodParameter pageRequestParamter;
 	private DynamicMethodParameter dispatcherParamter;
 	
 	private QueryConfigData queryConfig;
@@ -71,13 +75,11 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 		Class<?> returnClass = getActualReturnType();
 //		Class<?> compClass = ReflectUtils.getGenricType(method.getGenericReturnType(), 0);
 		Class<?> compClass = getActualComponentType();
-		Optional<DynamicMethodParameter> pageParameterOpt = this.findPagePrarameter();
 		if(returnClass==void.class){
 //			DynamicMethodParameter firstParamter = parameters.get(0);
 //			pageParamter = dispatcherParamter!=null?parameters.get(1):parameters.get(0);
 //			this.pageParamter = this.findPagePrarameter();
-			if(pageParameterOpt.isPresent()){
-				this.pageParamter = pageParameterOpt.get();
+			if(findPagePrarameter()){
 				returnClass = pageParamter.getParameterType();
 				//获取page泛型类
 				Type ptype = pageParamter.getGenericParameterType();
@@ -86,9 +88,12 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 				}
 			}
 		}else if(Page.class==returnClass){
-			this.pageParamter = pageParameterOpt.orElseThrow(()->{
-				return new FileNamedQueryException("no Page type parameter found for paginaton method: " + method.toGenericString());
-			});
+			/*this.pageParamter = pageParameterOpt.orElseThrow(()->{
+				return new FileNamedQueryException("Page type parameter not found for paginaton method: " + method.toGenericString());
+			});*/
+			if (!findPagePrarameter() && !findPageRequestPrarameter()) {
+				throw new FileNamedQueryException("Page type parameter not found for paginaton method: " + method.toGenericString());
+			}
 			/*if(Page.class==rClass){
 //				throw new FileNamedQueryException("define Page Type at the first parameter and return void if you want to pagination: " + method.toGenericString());
 				this.pageParamter = pageParameterOpt.orElseThrow(()->{
@@ -121,7 +126,7 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 		return returnClass;
 	}
 	
-	@SuppressWarnings("rawtypes")
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	final public Class<?> getActualComponentType(){
 		Class compClass = ReflectUtils.getGenricType(method.getGenericReturnType(), 0);
 		if(isReturnOptional()){
@@ -135,19 +140,33 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 	}
 	
 	public boolean hasPageParamter() {
-		return pageParamter!=null;
+		return pageParamter!=null || pageRequestParamter!=null;
 	}
 
 	public final boolean isAnnotationPresent(Class<? extends Annotation> annoClass){
 		return this.method.getAnnotation(annoClass)!=null;
 	}
-	private Optional<DynamicMethodParameter> findPagePrarameter(){
-		return parameters.stream()
+	
+	private boolean findPagePrarameter(){
+		this.pageParamter = parameters.stream()
 				.filter(p->p.getParameterType()==Page.class)
 				.findAny()
+				.orElse(null);
+		return this.pageParamter!=null;
 				/*.orElseThrow(()->{
 					return new FileNamedQueryException("no Page type parameter found for paginaton method: " + method.toGenericString());
-				})*/;
+				})*/
+	}
+	
+	private boolean findPageRequestPrarameter(){
+		this.pageRequestParamter = parameters.stream()
+				.filter(p->PageRequest.class.isAssignableFrom(p.getParameterType()))
+				.findAny()
+				.orElse(null);
+		return this.pageRequestParamter!=null;
+				/*.orElseThrow(()->{
+					return new FileNamedQueryException("no Page type parameter found for paginaton method: " + method.toGenericString());
+				})*/
 	}
 	
 	/***
@@ -204,7 +223,12 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 	}
 	
 	public Page<?> getPageParamter(Object[] args) {
-		return (Page<?>)args[pageParamter.getParameterIndex()];
+		if (this.pageParamter!=null) {
+			return (Page<?>)args[pageParamter.getParameterIndex()];
+		} else {
+			PageRequest pageRequest = (PageRequest)args[pageRequestParamter.getParameterIndex()];
+			return pageRequest.toPageObject();
+		}
 	}
 
 	protected boolean judgeBatchUpdateFromParameterObjects(List<DynamicMethodParameter> mparameters){
@@ -221,6 +245,7 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 		if(executeUpdate!=null){
 			this.update = true;
 			this.batchUpdate = executeUpdate.isBatch();
+			this.batchSize = executeUpdate.batchSize();
 		}else{
 			this.update = EXECUTE_UPDATE_PREFIX.contains(StringUtils.getFirstWord(this.method.getName()));
 			this.batchUpdate = BATCH_PREFIX.contains(StringUtils.getFirstWord(this.method.getName()));
@@ -230,6 +255,10 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 		}
 	}
 	
+	public int getBatchSize() {
+		return batchSize;
+	}
+
 	public MethodParameter remove(int index){
 		return this.parameters.remove(index);
 	}
@@ -237,19 +266,27 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 	private Pair<String, Object> addAndCheckParamValue(Param name, String pname, final Object pvalue){
 //		Object val = convertEnumValue(name, pvalue);
 		Object val = pvalue;
-		if(String.class.isInstance(val) && name.isLikeQuery()){
+		if (String.class.isInstance(val) && name.isLikeQuery()) {
 //			values.add(ExtQueryUtils.getLikeString(pvalue.toString()));
 			val = ExtQueryUtils.getLikeString(val.toString());
-		}else{
+		} /*else if (pvalue.getClass().isArray()) {
+			val = LangUtils.asList(pvalue);
+		}*/ else {
 			val = pvalue;
 		}
 		return Pair.of(pname, val);
 	}
 	
-	private Object convertEnumValue(Param name, Object val){
-		if(name!=null && val instanceof Enum){
-			Enum<?> enumValue = (Enum<?>)val;
-			val = name.enumType()==EnumType.ORDINAL?enumValue.ordinal():enumValue.name();
+	private Object convertQueryValue(Param name, Object val){
+		if (name!=null && val instanceof Enum) {
+			if (val instanceof DbmEnumValueMapping) {
+				val = ((DbmEnumValueMapping<?>)val).getEnumMappingValue();
+			} else {
+				Enum<?> enumValue = (Enum<?>)val;
+				val = name.enumType()==EnumType.ORDINAL?enumValue.ordinal():enumValue.name();
+			}
+		} if (val!=null && val.getClass().isArray()) {
+			val = LangUtils.asList(val);
 		}
 		return val;
 	}
@@ -304,7 +341,7 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 		}else{
 			values.put(key, value);
 		}*/
-		value = convertEnumValue(paramMeta, value);
+		value = convertQueryValue(paramMeta, value);
 		values.put(key, value);
 	}
 	

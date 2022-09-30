@@ -20,6 +20,14 @@ public interface MappedEntryBuilder extends Initializable {
 
 	public DbmMappedEntry buildMappedEntry(Object entity);
 	
+	/***
+	 * 只构建相关字段映射结构，用于非实体查询时映射值
+	 * @author wayshall
+	 * @param entry
+	 * @return
+	 */
+	public DbmMappedEntry buildMappedFields(DbmMappedEntry entry);
+	
 //	public void afterAllBuildMappedEntry(JFishMappedEntry entry);
 	
 

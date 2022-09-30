@@ -6,7 +6,7 @@ import javax.persistence.Id;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.onetwo.common.dbm.model.entity.UserEntity;
+import org.onetwo.common.dbm.model.hib.entity.UserEntity;
 import org.onetwo.common.reflect.ReflectUtils;
 
 

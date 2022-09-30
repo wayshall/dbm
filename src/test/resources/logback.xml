@@ -25,6 +25,11 @@
        <appender-ref ref="mail" />   
    </logger>   -->
    
+    <!-- print dbm sql-->
+    <logger name="org.onetwo.dbm.core.internal.LogSqlInterceptor" level="TRACE">
+        <appender-ref ref="console" />
+    </logger>
+    
   <root level="INFO">   
         <appender-ref ref="console" />
   </root>   

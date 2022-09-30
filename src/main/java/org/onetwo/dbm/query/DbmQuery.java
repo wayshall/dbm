@@ -16,6 +16,12 @@ public interface DbmQuery {
 
 	<T> List<T> getResultList();
 
+	/***
+	 * 
+	 * @author weishao zeng
+	 * @param firstResult from 0
+	 * @return
+	 */
 	DbmQuery setFirstResult(int firstResult);
 
 	DbmQuery setMaxResults(int maxResults);

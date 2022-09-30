@@ -2,6 +2,7 @@ package org.onetwo.dbm.utils;
 
 import java.io.Serializable;
 import java.util.concurrent.ExecutionException;
+import java.util.function.Function;
 
 import javax.sql.DataSource;
 
@@ -17,12 +18,17 @@ import org.onetwo.dbm.core.internal.DbmSessionFactoryImpl;
 import org.onetwo.dbm.core.internal.SimpleDbmInnerServiceRegistry;
 import org.onetwo.dbm.core.internal.SimpleDbmInnerServiceRegistry.DbmServiceRegistryCreateContext;
 import org.onetwo.dbm.core.spi.DbmSessionFactory;
+import org.onetwo.dbm.core.spi.DbmSessionImplementor;
+import org.onetwo.dbm.core.spi.DbmTransaction;
 import org.onetwo.dbm.exception.DbmException;
 import org.onetwo.dbm.spring.DbmEntityManagerCreateEvent;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.context.ApplicationContext;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.TransactionTimedOutException;
+import org.springframework.transaction.support.DefaultTransactionDefinition;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -160,7 +166,51 @@ final public class Dbms {
 		sf.afterPropertiesSet();
 		return sf;
 	}
+	
 
+	public static <R> R doInRequiresNewPropagation(BaseEntityManager baseEntityManager, Function<DbmTransaction, R> func) {
+		return doInPropagation(baseEntityManager.getSessionFactory(), TransactionDefinition.PROPAGATION_REQUIRES_NEW, func);
+	}
+	
+	public static <R> R doInPropagation(DbmSessionFactory sf, int propagationBehavior, Function<DbmTransaction, R> func) {
+		return doInPropagation(sf, propagationBehavior, TransactionDefinition.TIMEOUT_DEFAULT, func);
+	}
+	
+	/****
+	 * 
+	 * @author weishao zeng
+	 * @param sf
+	 * @param propagationBehavior
+	 * @param timeoutInSeconds 事务超时时间，这个超时是非中断式触发的，只是每次执行的时候由 ResourceHolderSupport#checkTransactionTimeout 触发检查
+	 * @param func
+	 * @return
+	 */
+	public static <R> R doInPropagation(DbmSessionFactory sf, int propagationBehavior, int timeoutInSeconds, Function<DbmTransaction, R> func) {
+		DefaultTransactionDefinition definition = new DefaultTransactionDefinition();
+		definition.setPropagationBehavior(propagationBehavior);
+		definition.setTimeout(timeoutInSeconds);
+		return doInPropagation(sf, definition, func);
+	}
+	
+	public static <R> R doInPropagation(DbmSessionFactory sf, TransactionDefinition definition, Function<DbmTransaction, R> func) {
+		DbmSessionImplementor session = (DbmSessionImplementor)sf.openSession();
+		DbmTransaction transaction = session.beginTransaction(definition);
+		try {
+			R result = func.apply(transaction);
+			transaction.commit();
+			return result;
+		} catch (TransactionTimedOutException e) {
+			transaction.rollback();
+			throw e;
+		}  catch (DbmException e) {
+			transaction.rollback();
+			throw e;
+		} catch (Exception e) {
+			transaction.rollback();
+			throw new DbmException("doInRequiresNewPropagation error", e);
+		} 
+	}
+	
 	private Dbms(){
 	}
 }

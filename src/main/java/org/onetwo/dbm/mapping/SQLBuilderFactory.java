@@ -8,7 +8,7 @@ public interface SQLBuilderFactory {
 		update,
 		query,
 		delete,
-		primaryKey,
+//		primaryKey,
 //		createTable,
 //		dropTable,
 		seq,

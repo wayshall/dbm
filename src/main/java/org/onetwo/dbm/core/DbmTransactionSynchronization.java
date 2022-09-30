@@ -1,5 +1,6 @@
 package org.onetwo.dbm.core;
 
+import org.onetwo.common.spring.SpringUtils;
 import org.onetwo.dbm.core.internal.DbmSessionResourceHolder;
 import org.onetwo.dbm.core.internal.DebugContextInterceptor;
 import org.slf4j.Logger;
@@ -20,14 +21,20 @@ public class DbmTransactionSynchronization extends TransactionSynchronizationAda
 	
 	@Override
 	public int getOrder() {
-		return DataSourceUtils.CONNECTION_SYNCHRONIZATION_ORDER - 100;
+		return SpringUtils.higherThan(DataSourceUtils.CONNECTION_SYNCHRONIZATION_ORDER);
 	}
 
+	/***
+	 * 挂起事务
+	 */
 	@Override
 	public void suspend() {
 		TransactionSynchronizationManager.unbindResource(sessionHolder.getSessionFactory());
 	}
 
+	/***
+	 * 恢复事务
+	 */
 	@Override
 	public void resume() {
 		TransactionSynchronizationManager.bindResource(sessionHolder.getSessionFactory(), sessionHolder);
@@ -47,12 +54,17 @@ public class DbmTransactionSynchronization extends TransactionSynchronizationAda
 //		this.sessionHolder.getSession().flush();
 	}
 
+	/***
+	 * 提交之后
+	 */
 	@Override
 	public void afterCompletion(int status) {
 		if(logger.isDebugEnabled()){
 			logger.debug("spring transaction synchronization closing for dbm session: {}, and dbm session flush.", this.sessionHolder.getSession());
 		}
-		TransactionSynchronizationManager.unbindResource(this.sessionHolder.getSessionFactory());
+		if(TransactionSynchronizationManager.getResource(this.sessionHolder.getSessionFactory())!=null) {
+			TransactionSynchronizationManager.unbindResource(this.sessionHolder.getSessionFactory());
+		}
 		this.sessionHolder.getSession().close();
 		this.sessionHolder.reset();
 		DebugContextInterceptor.getDebugContext().remove();

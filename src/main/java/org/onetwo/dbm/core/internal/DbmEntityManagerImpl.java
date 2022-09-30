@@ -14,12 +14,14 @@ import org.onetwo.common.db.BaseEntityManagerAdapter;
 import org.onetwo.common.db.DataBase;
 import org.onetwo.common.db.DbmQueryValue;
 import org.onetwo.common.db.EntityManagerProvider;
+import org.onetwo.common.db.ILogicDeleteEntity;
 import org.onetwo.common.db.builder.QueryBuilder;
 import org.onetwo.common.db.builder.Querys;
 import org.onetwo.common.db.filequery.DbmNamedSqlFileManager;
 import org.onetwo.common.db.filequery.func.SqlFunctionDialet;
 import org.onetwo.common.db.spi.CreateQueryCmd;
 import org.onetwo.common.db.spi.FileNamedQueryFactory;
+import org.onetwo.common.db.spi.NamedQueryInfoParser;
 import org.onetwo.common.db.spi.QueryProvideManager;
 import org.onetwo.common.db.spi.QueryWrapper;
 import org.onetwo.common.db.spi.SqlParamterPostfixFunctionRegistry;
@@ -32,19 +34,19 @@ import org.onetwo.common.utils.CUtils;
 import org.onetwo.common.utils.Page;
 import org.onetwo.dbm.annotation.DbmInterceptorFilter.InterceptorType;
 import org.onetwo.dbm.core.spi.DbmEntityManager;
+import org.onetwo.dbm.core.spi.DbmInterceptor;
 import org.onetwo.dbm.core.spi.DbmSessionFactory;
 import org.onetwo.dbm.core.spi.DbmSessionImplementor;
 import org.onetwo.dbm.exception.EntityNotFoundException;
 import org.onetwo.dbm.jdbc.mapper.RowMapperFactory;
-import org.onetwo.dbm.jdbc.spi.DbmInterceptor;
+import org.onetwo.dbm.jdbc.spi.DbmJdbcOperations;
 import org.onetwo.dbm.query.DbmNamedFileQueryFactory;
 import org.onetwo.dbm.query.DbmQuery;
 import org.onetwo.dbm.query.DbmQueryWrapperImpl;
 import org.onetwo.dbm.utils.DbmLock;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcOperations;
-import org.springframework.util.Assert;
+import org.springframework.beans.factory.annotation.Autowired;
 
 //@SuppressWarnings({"rawtypes", "unchecked"})
 public class DbmEntityManagerImpl extends BaseEntityManagerAdapter implements QueryProvideManager, DbmEntityManager, InitializingBean , DisposableBean {
@@ -57,6 +59,9 @@ public class DbmEntityManagerImpl extends BaseEntityManagerAdapter implements Qu
 	private FileNamedQueryFactory fileNamedQueryFactory;
 //	private boolean watchSqlFile = false;
 //	private SqlParamterPostfixFunctionRegistry sqlParamterPostfixFunctionRegistry;
+	
+	@Autowired
+	private List<NamedQueryInfoParser> namedQueryInfoParsers;
 	
 	public DbmEntityManagerImpl(DbmSessionFactory sessionFactory){
 		this.sessionFactory = sessionFactory;
@@ -104,6 +109,7 @@ public class DbmEntityManagerImpl extends BaseEntityManagerAdapter implements Qu
 //		this.fileNamedQueryFactory = SpringUtils.getBean(applicationContext, FileNamedQueryFactory.class);
 		//每个sessionFatory对应一个DbmNamedSqlFileManager，避免多sf时查找到别的sf的namedQuery
 		DbmNamedSqlFileManager sqlFileManager = DbmNamedSqlFileManager.createNamedSqlFileManager(sessionFactory.getDataBaseConfig().isWatchSqlFile());
+		sqlFileManager.setQueryInfoParsers(namedQueryInfoParsers);
 		DbmNamedFileQueryFactory fq = new DbmNamedFileQueryFactory(sqlFileManager);
 		this.fileNamedQueryFactory = fq;
 			
@@ -156,9 +162,20 @@ public class DbmEntityManagerImpl extends BaseEntityManagerAdapter implements Qu
 		throwIfEffectiveCountError("persist", expectsize, rs);*/
 	}
 
+	/****
+	 * 执行此方法时，若实体实现了逻辑删除接口ILogicDeleteEntity，则只是更新状态
+	 */
 	@Override
 	public int remove(Object entity) {
-		return getCurrentSession().delete(entity);
+		int updateCount = 0;
+		if (entity instanceof ILogicDeleteEntity) {
+			((ILogicDeleteEntity)entity).deleted();
+			updateCount = getCurrentSession().update(entity);
+		} else {
+			updateCount = getCurrentSession().delete(entity);
+		}
+		return updateCount;
+//		return getCurrentSession().delete(entity);
 		/*int rs = getDbmDao().delete(entity);
 		int expectsize = LangUtils.size(entity);
 		throwIfEffectiveCountError("remove", expectsize, rs);*/
@@ -171,9 +188,11 @@ public class DbmEntityManagerImpl extends BaseEntityManagerAdapter implements Qu
 
 	@Override
 	public <T> T removeById(Class<T> entityClass, Serializable id) {
-		Assert.notNull(id);
+		if (id==null) {
+			throw new IllegalArgumentException("id can not be null");
+		}
 		T entity = getCurrentSession().findById(entityClass, id);
-		if(entity==null)
+		if (entity==null)
 			return null;
 //		T entity = load(entityClass, id);
 		int updateCount = getCurrentSession().delete(entity);
@@ -185,7 +204,7 @@ public class DbmEntityManagerImpl extends BaseEntityManagerAdapter implements Qu
 
 	@Override
 	public void flush() {
-		throw new UnsupportedOperationException();
+		this.getCurrentSession().flush();
 	}
 
 	@Override
@@ -229,8 +248,8 @@ public class DbmEntityManagerImpl extends BaseEntityManagerAdapter implements Qu
 	
 
 	@Override
-	public QueryBuilder createQueryBuilder(Class<?> entityClass) {
-		QueryBuilder query = Querys.from(this, entityClass);
+	public <T> QueryBuilder<T> from(Class<T> entityClass) {
+		QueryBuilder<T> query = Querys.<T>from(this, entityClass);
 		return query;
 	}
 	
@@ -275,7 +294,7 @@ public class DbmEntityManagerImpl extends BaseEntityManagerAdapter implements Qu
 			
 			SQLException se = (SQLException) e.getCause();
 			if ("42000".equals(se.getSQLState())) {
-				this.createSequence(sequenceName);
+				id = createSequence(sequenceName);
 				/*try {
 					DataQuery dq = this.createSQLQuery(getSequenceNameManager().getCreateSequence(sequenceName), null);
 					dq.executeUpdate();
@@ -407,8 +426,8 @@ public class DbmEntityManagerImpl extends BaseEntityManagerAdapter implements Qu
 	}
 
 	@Override
-	public NamedParameterJdbcOperations getJdbcOperations() {
-		return getSessionFactory().getServiceRegistry().getDbmJdbcOperations().getDbmNamedJdbcOperations();
+	public DbmJdbcOperations getJdbcOperations() {
+		return getSessionFactory().getServiceRegistry().getDbmJdbcOperations();
 	}
 
 	@Override

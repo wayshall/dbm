@@ -1,9 +1,11 @@
 package org.onetwo.dbm.mapping;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.onetwo.common.utils.JFishProperty;
-import org.onetwo.dbm.event.DbmEventAction;
+import org.onetwo.dbm.annotation.DbmJsonField;
+import org.onetwo.dbm.event.spi.DbmEventAction;
 import org.onetwo.dbm.id.IdentifierGenerator;
 import org.onetwo.dbm.id.StrategyType;
 import org.onetwo.dbm.jpa.GeneratedValueIAttrs;
@@ -11,91 +13,113 @@ import org.onetwo.dbm.mapping.version.VersionableType;
 
 public interface DbmMappedField {
 
-	public IdentifierGenerator<?> getIdGenerator();
-	public GeneratedValueIAttrs getGeneratedValueIAttrs();
-	public void addIdGenerator(IdentifierGenerator<?> idGenerator);
-	public void setGeneratedValueIAttrs(GeneratedValueIAttrs generatedValueIAttrs);
+	IdentifierGenerator<?> getIdGenerator();
+	GeneratedValueIAttrs getGeneratedValueIAttrs();
+	void addIdGenerator(IdentifierGenerator<?> idGenerator);
+	void setGeneratedValueIAttrs(GeneratedValueIAttrs generatedValueIAttrs);
 	
-	public void setValue(Object entity, Object value);
+	void setValue(Object entity, Object value);
 
-	public Object getValue(Object entity);
+	Object getValue(Object entity);
 
-//	public void setValueFromJdbc(Object entity, Object value);
+//	void setValueFromJdbc(Object entity, Object value);
 
-//	public Object getValueForJdbc(Object entity);
+//	Object getValueForJdbc(Object entity);
 	
-	public List<DbmEntityFieldListener> getFieldListeners();
+	List<DbmEntityFieldListener> getFieldListeners();
 
-	public boolean isIdentify();
+	boolean isIdentify();
 
-	public void setIdentify(boolean identify);
+	void setIdentify(boolean identify);
 
-	public BaseColumnInfo getColumn();
+	BaseColumnInfo getColumn();
 
-	public void setColumn(BaseColumnInfo column);
+	void setColumn(BaseColumnInfo column);
 
-	public String getName();
+	String getName();
 
-	public DbmMappedEntry getEntry();
+	DbmMappedEntry getEntry();
 
-	public String getLabel();
+	String getLabel();
 
-	public void setLabel(String label);
+	void setLabel(String label);
 
 	/********
 	 * 自动生成值是否需要在插入之前fetch数据，一般就是oracle序列
 	 * @return
 	 */
-//	public boolean isGeneratedValueFetchBeforeInsert();
+//	boolean isGeneratedValueFetchBeforeInsert();
 
-	public boolean isGeneratedValue();
+	boolean isGeneratedValue();
 
-	public boolean isSeqStrategy();
+	boolean isSeqStrategy();
 
-	public boolean isIdentityStrategy();
+	boolean isIdentityStrategy();
 
-	public StrategyType getStrategyType();
+	StrategyType getStrategyType();
 
-	public void setStrategyType(StrategyType strategyType);
+	void setStrategyType(StrategyType strategyType);
 
-	public JFishProperty getPropertyInfo();
+	JFishProperty getPropertyInfo();
 	
 	/***
 	 * 获取实际映射到类型
 	 * @return
 	 */
-	public Class<?> getColumnType();
+	Class<?> getColumnType();
 
-	public void freezing();
+	void freezing();
 
-	public void checkFreezing(String name);
+	void checkFreezing(String name);
 
-	public boolean isFreezing();
+	boolean isFreezing();
 
-	public DbmMappedFieldType getMappedFieldType();
+	DbmMappedFieldType getMappedFieldType();
 
-	public void setMappedFieldType(DbmMappedFieldType mappedFieldType);
+	void setMappedFieldType(DbmMappedFieldType mappedFieldType);
 
-	public boolean isJoinTableField();
+	boolean isJoinTableField();
 
-//	public DataHolder<String, Object> getDataHolder();
+//	DataHolder<String, Object> getDataHolder();
 	
-//	public SqlParameterValue getValueForJdbcAndFireDbmEventAction(Object entity, JFishEventAction eventAction);
+//	SqlParameterValue getValueForJdbcAndFireDbmEventAction(Object entity, JFishEventAction eventAction);
 	/***
 	 * 
 	 * @param fieldValue
 	 * @param eventAction
 	 * @return newFieldValue
 	 */
-	public Object fireDbmEntityFieldEvents(Object fieldValue, DbmEventAction eventAction);
+	Object fireDbmEntityFieldEvents(Object fieldValue, DbmEventAction eventAction);
 
-	public boolean isVersionControll();
-	public <T> VersionableType<T> getVersionableType();
-	public void setVersionableType(VersionableType<?> versionableType);
+	boolean isVersionControll();
+	<T> VersionableType<T> getVersionableType();
+	void setVersionableType(VersionableType<?> versionableType);
 	
-	public boolean isEnumerated();
-	public DbmEnumType getEnumType();
-//	public GeneratedValueIAttrs getGeneratedValueIAttrs();
+	boolean isEnumerated();
+	DbmEnumType getEnumType();
+//	GeneratedValueIAttrs getGeneratedValueIAttrs();
 	
-	public DbmFieldValueConverter getFieldValueConverter();
+	DbmFieldValueConverter getFieldValueConverter();
+	
+	DbmJsonField getJsonFieldAnnotation();
+	
+	boolean isMappingGenerated();
+	
+	/***
+	 * 获取绑定到此字段的所有字段
+	 * @author weishao zeng
+	 * @return
+	 */
+	Collection<DbmMappedField> getBindedFields();
+
+	/***
+	 * 获取此字段绑定的字段
+	 * @author weishao zeng
+	 * @return
+	 */
+	DbmMappedField getBindToField();
+	
+	void setBindToField(DbmMappedField field);
+	void setBindedFields(Collection<DbmMappedField> fields);
+	
 }

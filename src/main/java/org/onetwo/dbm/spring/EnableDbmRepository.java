@@ -6,6 +6,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.onetwo.common.db.filequery.NamedQueryInfoParserConfiguration;
 import org.onetwo.dbm.core.spi.DbmEntityManager;
 import org.springframework.context.annotation.Import;
 
@@ -17,7 +18,7 @@ import org.springframework.context.annotation.Import;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 @Documented
-@Import({DbmRepositoryRegistarOfEnableDbmRepository.class})
+@Import({NamedQueryInfoParserConfiguration.class, DbmRepositoryRegistarOfEnableDbmRepository.class})
 public @interface EnableDbmRepository {
 	
 	Class<?> defaultQueryProviderClass() default DbmEntityManager.class;

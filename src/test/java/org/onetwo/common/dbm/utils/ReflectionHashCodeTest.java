@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.junit.Test;
-import org.onetwo.common.dbm.model.entity.DepartmentEntity;
+import org.onetwo.common.dbm.model.hib.entity.DepartmentEntity;
 
 public class ReflectionHashCodeTest {
 

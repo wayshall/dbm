@@ -88,8 +88,8 @@ public class DbmQueryImpl implements DbmQuery {
 		return this;
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.onetwo.common.fish.JFishQuery#getSingleResult()
+	/***
+	 * 查找唯一结果，如果找不到则返回null，找到多个则抛异常 IncorrectResultSizeDataAccessException，详见：DataAccessUtils.requiredSingleResult
 	 */
 	@Override
 	public <T> T getSingleResult(){

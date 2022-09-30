@@ -1,19 +1,23 @@
 package org.onetwo.dbm.mapping;
 
+import java.util.List;
+
 import org.onetwo.dbm.mapping.SQLBuilderFactory.SqlBuilderType;
 
 public interface EntrySQLBuilder {
 
-	public String build();
+	String build();
 
-	public String getSql();
+	String getSql();
 
-	public SqlBuilderType getType();
+	SqlBuilderType getType();
 	
-	public DbmMappedEntryMeta getEntry();
+	DbmMappedEntryMeta getEntry();
 	
-	public Object getVersionValue(Object[] updateValues);
+	Object getVersionValue(Object[] updateValues);
 	
-//	public void setLock(LockInfo lock);
+	List<DbmMappedField> getWhereCauseFields();
+	
+//	void setLock(LockInfo lock);
 
 }

@@ -1,29 +1,41 @@
 package org.onetwo.common.dbm;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
 import org.junit.Test;
 import org.onetwo.common.base.DbmBaseTest;
+import org.onetwo.common.convert.Types;
 import org.onetwo.common.db.spi.BaseEntityManager;
-import org.onetwo.common.dbm.model.entity.CompanyEntity;
+import org.onetwo.common.dbm.model.dao.JsonCompanyDao;
+import org.onetwo.common.dbm.model.hib.entity.CompanyEntity;
+import org.onetwo.common.utils.CUtils;
 import org.onetwo.dbm.annotation.DbmJsonField;
+import org.onetwo.dbm.annotation.DbmRowMapper;
+import org.onetwo.dbm.exception.FileNamedQueryException;
+import org.springframework.beans.ConversionNotSupportedException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.annotation.Rollback;
 
 /**
  * @author wayshall
  * <br/>
  */
+@Rollback(false)
 public class JsonFieldTest extends DbmBaseTest {
 	
 	@Autowired
 	private BaseEntityManager baseEntityManager;
+	@Autowired
+	private JsonCompanyDao jsonCompanyDao;
 
 	@Test
 	public void testSave(){
@@ -39,6 +51,15 @@ public class JsonFieldTest extends DbmBaseTest {
 		company.setExtInfo(extInfo);
 		company.setBuildAt(LocalDateTime.of(2017, 10, 10, 15, 57));
 		
+		DbmModuleConfigTestVO config = new DbmModuleConfigTestVO();
+		config.setValue("1000");
+		config.setRemark("测试");
+		DbmModuleConfigTestVO config2= new DbmModuleConfigTestVO();
+		config2.setValue("test2");
+		config2.setRemark("测试2");
+		
+		company.setConfigData(CUtils.asMap("config1", config, "config2", config2));
+		
 		baseEntityManager.save(company);
 		
 		JsonCompanyEntity dbCompany = baseEntityManager.findOne(JsonCompanyEntity.class, "name", company.getName());
@@ -46,6 +67,8 @@ public class JsonFieldTest extends DbmBaseTest {
 		assertThat(dbCompany.getName()).isEqualTo(company.getName());
 		assertThat(dbCompany.getBuildAt()).isEqualTo(company.getBuildAt());
 		assertThat(dbCompany.getExtInfo()).isEqualTo(company.getExtInfo());
+		assertThat(dbCompany.getConfigData().get("config2")).isEqualTo(config2);
+		assertThat(dbCompany.getConfigData().get("config1").getTypeValue(Integer.class)).isEqualTo(1000);
 		
 		company = dbCompany;
 		extInfo = new ExtInfo();
@@ -59,6 +82,22 @@ public class JsonFieldTest extends DbmBaseTest {
 		assertThat(dbCompany).isNotNull();
 		assertThat(dbCompany.getName()).isEqualTo(company.getName());
 		assertThat(dbCompany.getExtInfo()).isEqualTo(company.getExtInfo());
+		
+		
+		dbCompany = jsonCompanyDao.findOne(company.getName());
+		assertThat(dbCompany).isNotNull();
+		assertThat(dbCompany.getName()).isEqualTo(company.getName());
+		assertThat(dbCompany.getExtInfo()).isEqualTo(company.getExtInfo());
+		
+
+		JsonCompanyEntity finalCampany = company;
+		assertThatExceptionOfType(FileNamedQueryException.class).isThrownBy(()->{
+			jsonCompanyDao.findOneNoJdbcMapper(finalCampany.getName());
+		})
+		//<org.springframework.beans.ConversionNotSupportedException: 
+		//Failed to convert property value of type 'java.lang.String' to required type 'org.onetwo.common.dbm.JsonFieldTest$ExtInfo' for property 'extInfo'; nested exception is java.lang.IllegalStateException: Cannot convert value of type 'java.lang.String' to required type 'org.onetwo.common.dbm.JsonFieldTest$ExtInfo' 
+		//for property 'extInfo': no matching editors or conversion strategy found>
+		.withCauseInstanceOf(ConversionNotSupportedException.class);
 	}
 
 	@Entity
@@ -67,6 +106,8 @@ public class JsonFieldTest extends DbmBaseTest {
 		@DbmJsonField
 		protected ExtInfo extInfo;
 		protected LocalDateTime buildAt;
+		@DbmJsonField(storeTyping=true)
+		private Map<String, DbmModuleConfigTestVO> configData;
 
 		public ExtInfo getExtInfo() {
 			return extInfo;
@@ -83,7 +124,22 @@ public class JsonFieldTest extends DbmBaseTest {
 		public void setBuildAt(LocalDateTime buildAt) {
 			this.buildAt = buildAt;
 		}
+
+		public Map<String, DbmModuleConfigTestVO> getConfigData() {
+			return configData;
+		}
+
+		public void setConfigData(Map<String, DbmModuleConfigTestVO> configData) {
+			this.configData = configData;
+		}
 		
+		
+	}
+	
+	@DbmRowMapper
+	public static class JdbcMapperJsonCompanyVO extends JsonCompanyEntity {
+	}
+	public static class NoJdbcMapperJsonCompanyVO extends JsonCompanyEntity {
 	}
 	
 	public static class ExtInfo {
@@ -147,5 +203,66 @@ public class JsonFieldTest extends DbmBaseTest {
 			return true;
 		}
 		
+	}
+	
+
+	static public class DbmModuleConfigTestVO {
+	    private String value;
+	    private String remark;
+
+	    public <T> T getTypeValue(Class<T> type) {
+	        if (value == null) {
+	            return null;
+	        }
+	        return Types.asValue(value, type);
+	    }
+
+		public String getValue() {
+			return value;
+		}
+
+		public void setValue(String value) {
+			this.value = value;
+		}
+
+		public String getRemark() {
+			return remark;
+		}
+
+		public void setRemark(String remark) {
+			this.remark = remark;
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((remark == null) ? 0 : remark.hashCode());
+			result = prime * result + ((value == null) ? 0 : value.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			DbmModuleConfigTestVO other = (DbmModuleConfigTestVO) obj;
+			if (remark == null) {
+				if (other.remark != null)
+					return false;
+			} else if (!remark.equals(other.remark))
+				return false;
+			if (value == null) {
+				if (other.value != null)
+					return false;
+			} else if (!value.equals(other.value))
+				return false;
+			return true;
+		}
+
 	}
 }

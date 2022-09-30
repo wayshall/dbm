@@ -3,14 +3,17 @@ package org.onetwo.common.db.filequery;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.onetwo.common.db.filequery.directive.SetDirective;
+import org.onetwo.common.db.filequery.directive.WhereDirective;
 import org.onetwo.common.db.spi.NamedQueryFile;
-import org.onetwo.common.db.spi.NamedQueryInfo;
 import org.onetwo.common.db.spi.NamedQueryFileListener;
+import org.onetwo.common.db.spi.NamedQueryInfo;
 import org.onetwo.common.propconf.ResourceAdapter;
 import org.onetwo.common.spring.ftl.AbstractFreemarkerTemplateConfigurer;
 import org.onetwo.common.spring.ftl.DateRangeDirective;
 import org.onetwo.common.spring.ftl.DefaultTemplateParser;
 import org.onetwo.common.spring.ftl.ForeachDirective;
+import org.onetwo.common.spring.ftl.StrDirective;
 import org.onetwo.common.spring.ftl.TemplateParser;
 
 import freemarker.cache.StringTemplateLoader;
@@ -32,6 +35,9 @@ public class StringTemplateLoaderFileSqlParser extends AbstractFreemarkerTemplat
 
 		addDirective(new ForeachDirective());
 		addDirective(new DateRangeDirective());
+		addDirective(new StrDirective());
+		addDirective(new WhereDirective());
+		addDirective(new SetDirective());
 		this.templateLoader = new StringTemplateLoader();
 		
 		DefaultTemplateParser p = new DefaultTemplateParser(this);

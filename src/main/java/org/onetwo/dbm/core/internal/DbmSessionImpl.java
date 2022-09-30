@@ -21,18 +21,18 @@ import org.onetwo.dbm.core.spi.DbmSession;
 import org.onetwo.dbm.core.spi.DbmSessionFactory;
 import org.onetwo.dbm.core.spi.DbmTransaction;
 import org.onetwo.dbm.dialet.DBDialect;
-import org.onetwo.dbm.event.DbmDeleteEvent;
-import org.onetwo.dbm.event.DbmDeleteEvent.DeleteType;
-import org.onetwo.dbm.event.DbmEventAction;
-import org.onetwo.dbm.event.DbmExtQueryEvent;
-import org.onetwo.dbm.event.DbmExtQueryEvent.ExtQueryType;
-import org.onetwo.dbm.event.DbmFindEvent;
-import org.onetwo.dbm.event.DbmInsertEvent;
-import org.onetwo.dbm.event.DbmInsertOrUpdateEvent;
-import org.onetwo.dbm.event.DbmLockEvent;
-import org.onetwo.dbm.event.DbmSessionEvent;
-import org.onetwo.dbm.event.DbmSessionEventSource;
-import org.onetwo.dbm.event.DbmUpdateEvent;
+import org.onetwo.dbm.event.internal.DbmSessionEventSource;
+import org.onetwo.dbm.event.spi.DbmDeleteEvent;
+import org.onetwo.dbm.event.spi.DbmDeleteEvent.DeleteType;
+import org.onetwo.dbm.event.spi.DbmEventAction;
+import org.onetwo.dbm.event.spi.DbmExtQueryEvent;
+import org.onetwo.dbm.event.spi.DbmExtQueryEvent.ExtQueryType;
+import org.onetwo.dbm.event.spi.DbmFindEvent;
+import org.onetwo.dbm.event.spi.DbmInsertEvent;
+import org.onetwo.dbm.event.spi.DbmInsertOrUpdateEvent;
+import org.onetwo.dbm.event.spi.DbmLockEvent;
+import org.onetwo.dbm.event.spi.DbmSessionEvent;
+import org.onetwo.dbm.event.spi.DbmUpdateEvent;
 import org.onetwo.dbm.exception.DbmException;
 import org.onetwo.dbm.jdbc.AbstractDbmSession;
 import org.onetwo.dbm.jdbc.spi.DbmJdbcOperations;
@@ -41,6 +41,7 @@ import org.onetwo.dbm.mapping.MappedEntryManager;
 import org.onetwo.dbm.query.DbmQuery;
 import org.onetwo.dbm.query.DbmQueryImpl;
 import org.onetwo.dbm.query.DbmQueryWrapperImpl;
+import org.onetwo.dbm.utils.DbmErrors;
 import org.onetwo.dbm.utils.DbmLock;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.ColumnMapRowMapper;
@@ -63,6 +64,7 @@ public class DbmSessionImpl extends AbstractDbmSession implements DbmSessionEven
 	final private long id;
 	final private Date timestamp = new Date();
 	private SessionTransactionType transactionType;
+	private boolean closed = false;
 
 	public DbmSessionImpl(DbmSessionFactory sessionFactory, long id, DbmTransaction transaction){
 		Assert.notNull(sessionFactory);
@@ -76,9 +78,20 @@ public class DbmSessionImpl extends AbstractDbmSession implements DbmSessionEven
 		return id;
 	}
 
+	protected void errorIfClosed() {
+		if (isClosed()) {
+			throw new DbmException(DbmErrors.ERR_SESSION_IS_CLOSED);
+		}
+	}
+	
+	public boolean isClosed() {
+		return closed;
+	}
+
 	@Override
 	public void close() {
-		
+		this.transaction = null;
+		this.closed = true;
 	}
 
 	public boolean useContextTransactional() {
@@ -102,6 +115,7 @@ public class DbmSessionImpl extends AbstractDbmSession implements DbmSessionEven
 	}
 
 	public DbmTransaction getTransaction() {
+		this.errorIfClosed();
 		return transaction;
 	}
 
@@ -110,7 +124,9 @@ public class DbmSessionImpl extends AbstractDbmSession implements DbmSessionEven
 		return beginTransaction(null);
 	}
 	
-	public DbmTransaction beginTransaction(TransactionDefinition definition) {
+	public synchronized DbmTransaction beginTransaction(TransactionDefinition definition) {
+		this.errorIfClosed();
+		
 		if(this.transactionType==SessionTransactionType.CONTEXT_MANAGED 
 //				|| this.transactionType==SessionTransactionType.PROXY
 			){
@@ -247,6 +263,7 @@ public class DbmSessionImpl extends AbstractDbmSession implements DbmSessionEven
 	}*/
 	
 	protected void fireEvents(DbmSessionEvent event){
+		this.errorIfClosed();
 		getDialect().getDbmEventListenerManager().fireEvents(event);
 		/*DbmEventListener[] listeners = getDialect().getDbmEventListenerManager().getListeners(event.getAction());
 		for(DbmEventListener listern : listeners){
@@ -286,7 +303,7 @@ public class DbmSessionImpl extends AbstractDbmSession implements DbmSessionEven
 		Assert.notNull(id);
 		DbmDeleteEvent deleteEvent = new DbmDeleteEvent(id, this);
 		deleteEvent.setEntityClass(entityClass);
-		deleteEvent.setDeleteType(DeleteType.byIdentify);
+		deleteEvent.setDeleteType(DeleteType.BY_IDENTIFY);
 		this.fireEvents(deleteEvent);
 		return deleteEvent.getUpdateCount();
 	}
@@ -294,7 +311,7 @@ public class DbmSessionImpl extends AbstractDbmSession implements DbmSessionEven
 	public int deleteAll(Class<?> entityClass){
 		DbmDeleteEvent deleteEvent = new DbmDeleteEvent(null, this);
 		deleteEvent.setEntityClass(entityClass);
-		deleteEvent.setDeleteType(DeleteType.deleteAll);
+		deleteEvent.setDeleteType(DeleteType.DELETE_ALL);
 		this.fireEvents(deleteEvent);
 		return deleteEvent.getUpdateCount();
 	}
@@ -360,11 +377,15 @@ public class DbmSessionImpl extends AbstractDbmSession implements DbmSessionEven
 		return findUnique(sql, params, getDefaultRowMapper(type, true));
 	}
 	
+	/****
+	 * 查找唯一结果，如果找不到则返回null，找到多个则抛异常 IncorrectResultSizeDataAccessException，详见：DataAccessUtils.requiredSingleResult
+	 */
 	public <T> T findUnique(String sql, Map<String, ?> params, RowMapper<T> rowMapper){
 		T result = null;
 		try{
 			result = this.dbmJdbcOperations.queryForObject(sql, params, rowMapper);
 		}catch(EmptyResultDataAccessException e){
+			// 返回空集的时候，屏蔽错误，返回null
 			logger.error("findUnique error: "+e.getMessage());
 		}
 		return result;
@@ -404,6 +425,7 @@ public class DbmSessionImpl extends AbstractDbmSession implements DbmSessionEven
 	}
 	
 	public <T> T findUnique(String sql, Object[] args, RowMapper<T> row){
+		this.errorIfClosed();
 		T result = null;
 		try{
 			result = this.getDbmJdbcOperations().queryForObject(sql, args, row);
@@ -503,6 +525,7 @@ public class DbmSessionImpl extends AbstractDbmSession implements DbmSessionEven
 	}
 	
 	public DbmQuery createDbmQuery(String sql, Class<?> entityClass){
+		this.errorIfClosed();
 		return new DbmQueryImpl(this, sql, entityClass);
 	}
 	

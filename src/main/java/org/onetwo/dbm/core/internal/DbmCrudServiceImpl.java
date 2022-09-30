@@ -8,7 +8,6 @@ import java.util.Map;
 import javax.validation.ValidationException;
 
 import org.onetwo.common.db.BaseCrudEntityManager;
-import org.onetwo.common.db.builder.QueryBuilder;
 import org.onetwo.common.db.spi.BaseEntityManager;
 import org.onetwo.common.exception.BusinessException;
 import org.onetwo.common.spring.Springs;
@@ -20,19 +19,16 @@ import org.springframework.transaction.annotation.Transactional;
 
 abstract public class DbmCrudServiceImpl<T, PK extends Serializable> extends BaseCrudEntityManager<T, PK> {
 
-	public DbmCrudServiceImpl() {
-		this((Class<T>)null);
-	}
 	public DbmCrudServiceImpl(Class<T> entityClass) {
 		super(entityClass, null);
 	}
 
+	protected DbmCrudServiceImpl() {
+		this((Class<T>)null);
+	}
+	
 	protected DbmCrudServiceImpl(BaseEntityManager baseEntityManager) {
 		super(baseEntityManager);
-	}
-
-	protected String serviceQName(String methodName){
-		return this.getClass().getSimpleName() + "." + methodName;
 	}
 
 	@Override
@@ -153,8 +149,4 @@ abstract public class DbmCrudServiceImpl<T, PK extends Serializable> extends Bas
 		return dem.getCurrentSession().getMappedEntryManager().getEntry(entityClass);
 	}
 	
-	protected QueryBuilder createQueryBuilder(){
-		DbmEntityManager dem = (DbmEntityManager)this.getBaseEntityManager();
-		return dem.createQueryBuilder(entityClass);
-	}
 }

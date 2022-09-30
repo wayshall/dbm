@@ -1,6 +1,5 @@
 package org.onetwo.dbm.core.spi;
 
-import org.onetwo.dbm.jdbc.spi.DbmInterceptorChain;
 
 
 

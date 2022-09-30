@@ -11,5 +11,14 @@ public interface MappedEntryManager {
 	public void setMappedEntryManagerListener(MappedEntryManagerListener mappedEntryManagerListener);
 //	public JFishMappedEntry buildMappedEntry(Class<?> entityClass, boolean byProperty);
 	
+	/***
+	 * 只构建相关字段映射结构，用于非实体查询时映射值；不能用于插入、修改和删除
+	 * @see JdbcRowEntryImpl
+	 * @author wayshall
+	 * @param clazz
+	 * @return
+	 */
+	public DbmMappedEntry getReadOnlyEntry(Class<?> clazz);
+	
 
 }

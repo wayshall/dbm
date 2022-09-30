@@ -12,7 +12,7 @@ import org.onetwo.common.db.sqlext.ExtQuery.K.IfNull;
 import org.onetwo.common.exception.ServiceException;
 import org.onetwo.common.log.JFishLoggerFactory;
 import org.onetwo.common.utils.CUtils;
-import org.onetwo.common.utils.MyUtils;
+import org.onetwo.common.utils.LangUtils;
 import org.onetwo.common.utils.StringUtils;
 import org.slf4j.Logger;
 
@@ -26,7 +26,7 @@ abstract public class AbstractExtQuery implements ExtQueryInner{
 	protected String alias;
 //	protected boolean aliasMainTableName=true;
 	
-	protected QueryNameStrategy queryNameStrategy;
+	private QueryNameStrategy queryNameStrategy;
 	
 	protected Map<Object, Object> params;
 	protected ParamValues paramsValue;
@@ -62,10 +62,10 @@ abstract public class AbstractExtQuery implements ExtQueryInner{
 		this.listeners = (listeners==null?Collections.emptyList():listeners);
 		
 //		this.init(entityClass, this.alias);
-		this.queryNameStrategy = new QueryNameStrategy(alias);
+		this.setQueryNameStrategy(new QueryNameStrategy(alias));
 	}
 	
-	public QueryNameStrategy getQueryNameStrategy() {
+	final public QueryNameStrategy getQueryNameStrategy() {
 		return queryNameStrategy;
 	}
 	public Map<?, ?> getSourceParams() {
@@ -129,7 +129,8 @@ abstract public class AbstractExtQuery implements ExtQueryInner{
 		return DefaultSQLFunctionManager.get();
 	}
 
-	protected <T> T getValueAndRemoveKeyFromParams(String key, T def){
+	@SuppressWarnings("unchecked")
+	protected <T> T getValueAndRemoveKeyFromParams(Object key, T def){
 		if(!this.params.containsKey(key))
 			return def;
 		T value = (T)this.params.get(key);
@@ -137,7 +138,7 @@ abstract public class AbstractExtQuery implements ExtQueryInner{
 		return value==null?def:value;
 	}
 	
-	public void setEntityClass(Class entityClass) {
+	public void setEntityClass(Class<?> entityClass) {
 		this.entityClass = entityClass;
 		this.alias = StringUtils.uncapitalize(entityClass.getSimpleName());
 	}
@@ -147,7 +148,7 @@ abstract public class AbstractExtQuery implements ExtQueryInner{
 	}
 
 
-	protected boolean hasParams(String key) {
+	protected boolean hasParams(Object key) {
 		return this.params != null && !this.params.isEmpty() && this.params.containsKey(key);
 	}
 
@@ -160,6 +161,7 @@ abstract public class AbstractExtQuery implements ExtQueryInner{
 	}
 	
 
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	String buildWhere(Map params, boolean isSubQuery) {
 		/*String fname = "buildWhere";
 		if(isDebug())
@@ -179,27 +181,31 @@ abstract public class AbstractExtQuery implements ExtQueryInner{
 			Object fields = entry.getKey();
 			Object values = entry.getValue();
 
-			if (K.ASC.equals(fields) || K.DESC.equals(fields) || MyUtils.isEmpty(fields))
+			if (K.ASC.equals(fields) || K.DESC.equals(fields) || LangUtils.isEmpty(fields)) {
 				continue;
+			}
 			
 			/*if(ExtQueryUtils.isContinueByCauseValue(values, ifNull)){
 				continue;
 			}*/
 
 			if (K.OR.equals(fields)) {
-				if (!Map.class.isAssignableFrom(values.getClass()))
+				if (!Map.class.isAssignableFrom(values.getClass())) {
 					throw new ServiceException("sub query's vaue must be map!");
+				}
 				Map<?, ?> subParams = (Map<?, ?>) values;
 				h = this.buildWhere(subParams, true);
 				where.append("or ");
 			} else if(K.AND.equals(fields)){
-				if (!Map.class.isAssignableFrom(values.getClass()))
+				if (!Map.class.isAssignableFrom(values.getClass())) {
 					throw new ServiceException("sub query's vaue must be map!");
+				}
 				Map<?, ?> subParams = (Map<?, ?>) values;
 				h = this.buildWhere(subParams, true);
 				
-				if(!first)
+				if(!first) {
 					where.append("and ");
+				}
 			} /*else if(K.RAW_QL.equals(fields)){
 				if (!values.getClass().isArray() && !List.class.isAssignableFrom(values.getClass()) && !String.class.isAssignableFrom(values.getClass()))
 					throw new ServiceException("raw-ql args error: " + values);
@@ -254,7 +260,8 @@ abstract public class AbstractExtQuery implements ExtQueryInner{
 		if (valueList == null)
 			return null;
 
-		List<?> fieldList =  MyUtils.asList(fields);
+//		List<?> fieldList =  MyUtils.asList(fields);
+		List<?> fieldList =  CUtils.trimAndexcludeTheClassElement(true, fields);
 		int index = 0;
 		String h = null;
 		StringBuilder causeScript = new StringBuilder();
@@ -264,11 +271,12 @@ abstract public class AbstractExtQuery implements ExtQueryInner{
 
 			Object v = null;
 			try {
-				if (fieldList.size() == 1){
-					if(valueList.size()==1)
+				if (fieldList.size() == 1) {
+					if(valueList.size()==1) {
 						v = valueList.get(0);
-					else
+					} else {
 						v = values;
+					}
 				}else{
 					v = valueList.get(i);
 				}
@@ -373,6 +381,10 @@ abstract public class AbstractExtQuery implements ExtQueryInner{
 	public Set<String> getAllParameterFieldNames() {
 		Set<String> fields = ExtQueryUtils.getAllParameterFieldNames(getParams());
 		return fields;
+	}
+	
+	final public void setQueryNameStrategy(QueryNameStrategy queryNameStrategy) {
+		this.queryNameStrategy = queryNameStrategy;
 	}
 	
 }

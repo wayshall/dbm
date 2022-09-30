@@ -9,32 +9,30 @@ import java.util.function.Supplier;
 import javax.sql.DataSource;
 import javax.validation.Validator;
 
-import org.onetwo.common.db.DataBase;
 import org.onetwo.common.db.filequery.SqlParamterPostfixFunctions;
 import org.onetwo.common.db.filter.annotation.DataQueryFilterListener;
 import org.onetwo.common.db.spi.SqlParamterPostfixFunctionRegistry;
 import org.onetwo.common.db.sql.SequenceNameManager;
 import org.onetwo.common.db.sqlext.SQLSymbolManager;
-import org.onetwo.common.exception.BaseException;
 import org.onetwo.common.spring.SpringUtils;
 import org.onetwo.common.utils.LangUtils;
 import org.onetwo.dbm.core.Jsr303EntityValidator;
 import org.onetwo.dbm.core.spi.DbmInnerServiceRegistry;
+import org.onetwo.dbm.core.spi.DbmInterceptor;
 import org.onetwo.dbm.core.spi.DbmSessionFactory;
 import org.onetwo.dbm.dialet.AbstractDBDialect.DBMeta;
 import org.onetwo.dbm.dialet.DBDialect;
 import org.onetwo.dbm.dialet.DbmetaFetcher;
 import org.onetwo.dbm.dialet.DefaultDatabaseDialetManager;
-import org.onetwo.dbm.dialet.MySQLDialect;
-import org.onetwo.dbm.dialet.OracleDialect;
+import org.onetwo.dbm.event.internal.EdgeEventBus;
 import org.onetwo.dbm.exception.DbmException;
 import org.onetwo.dbm.jdbc.DbmJdbcOperationsProxy;
 import org.onetwo.dbm.jdbc.internal.DbmJdbcTemplate;
+import org.onetwo.dbm.jdbc.internal.JdbcEventInterceptor;
 import org.onetwo.dbm.jdbc.internal.SpringJdbcResultSetGetter;
 import org.onetwo.dbm.jdbc.internal.SpringStatementParameterSetter;
 import org.onetwo.dbm.jdbc.mapper.DbmRowMapperFactory;
 import org.onetwo.dbm.jdbc.mapper.RowMapperFactory;
-import org.onetwo.dbm.jdbc.spi.DbmInterceptor;
 import org.onetwo.dbm.jdbc.spi.DbmJdbcOperations;
 import org.onetwo.dbm.jdbc.spi.JdbcResultSetGetter;
 import org.onetwo.dbm.jdbc.spi.JdbcStatementParameterSetter;
@@ -50,7 +48,6 @@ import org.onetwo.dbm.mapping.MultiMappedEntryListener;
 import org.onetwo.dbm.mapping.MutilMappedEntryManager;
 import org.onetwo.dbm.query.JFishSQLSymbolManagerImpl;
 import org.springframework.aop.aspectj.annotation.AspectJProxyFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.util.Assert;
 
@@ -79,7 +76,7 @@ public class SimpleDbmInnerServiceRegistry implements DbmInnerServiceRegistry {
 		try {
 			return SERVICE_REGISTRY_MAPPER.get(context);
 		} catch (ExecutionException e) {
-			throw new BaseException("obtain SimpleDbmInnerServiceRegistry error: " + e.getMessage(), e);
+			throw new DbmException("obtain SimpleDbmInnerServiceRegistry error: " + e.getMessage(), e);
 		}
 	}
 	private static SimpleDbmInnerServiceRegistry createServiceRegistry(DbmServiceRegistryCreateContext context){
@@ -105,12 +102,14 @@ public class SimpleDbmInnerServiceRegistry implements DbmInnerServiceRegistry {
 	
 	
 
-	@Autowired(required=false)
-	private List<DbmInterceptor> interceptors;
+	/*@Autowired(required=false)
+	private List<DbmInterceptor> interceptors;*/
 	private DbmInterceptorManager interceptorManager;
 	private DbmJdbcOperations dbmJdbcOperations;
 	
 	private SqlParamterPostfixFunctionRegistry sqlParamterPostfixFunctionRegistry;
+	
+	private EdgeEventBus edgeEventBus;
 	
 	private ApplicationContext applicationContext;
 	
@@ -123,7 +122,12 @@ public class SimpleDbmInnerServiceRegistry implements DbmInnerServiceRegistry {
 		}
 		T componentBean = SpringUtils.getBean(applicationContext, componentClass);
 		if(componentBean==null){
-			componentBean = initializer.get();
+			if(initializer!=null){
+				componentBean = initializer.get();
+			}
+			if(componentBean!=null){
+				SpringUtils.initializeBean(applicationContext, componentBean);
+			}
 		}
 		return componentBean;
 	}
@@ -151,8 +155,6 @@ public class SimpleDbmInnerServiceRegistry implements DbmInnerServiceRegistry {
 		
 		databaseDialetManager = initializeComponent(databaseDialetManager, DefaultDatabaseDialetManager.class, ()->{
 			DefaultDatabaseDialetManager databaseDialetManager = new DefaultDatabaseDialetManager();
-			databaseDialetManager.register(DataBase.MySQL.getName(), new MySQLDialect());
-			databaseDialetManager.register(DataBase.Oracle.getName(), new OracleDialect());
 			return databaseDialetManager;
 		});
 
@@ -177,7 +179,7 @@ public class SimpleDbmInnerServiceRegistry implements DbmInnerServiceRegistry {
 		}
 
 		mappedEntryManager = initializeComponent(mappedEntryManager, MappedEntryManager.class, ()->{
-			MutilMappedEntryManager entryManager = new MutilMappedEntryManager();
+			MutilMappedEntryManager entryManager = new MutilMappedEntryManager(this);
 //			this.mappedEntryManager.initialize();
 			
 			List<MappedEntryBuilder> builders = LangUtils.newArrayList();
@@ -210,23 +212,27 @@ public class SimpleDbmInnerServiceRegistry implements DbmInnerServiceRegistry {
 		rowMapperFactory = initializeComponent(rowMapperFactory, RowMapperFactory.class, ()->new DbmRowMapperFactory(mappedEntryManager, jdbcResultSetGetter));
 		sequenceNameManager = initializeComponent(sequenceNameManager, SequenceNameManager.class, ()->new JPASequenceNameManager());
 
-		if(interceptors==null){
-			interceptors = Lists.newArrayList();
-		}
+		
+		//edgeEventBus init
+		edgeEventBus = initializeComponent(this.edgeEventBus, EdgeEventBus.class, null);
+		Assert.notNull(edgeEventBus, "Dbm Edge EventBus can not be null");
+		
 		//add
 		this.interceptorManager = initializeComponent(interceptorManager, DbmInterceptorManager.class, ()->{
 			List<DbmInterceptor> interceptors = Lists.newArrayList();
+			interceptors.addAll(SpringUtils.getBeans(applicationContext, DbmInterceptor.class));
 			if(dataBaseConfig.isEnabledDebugContext()){
 				interceptors.add(new DebugContextInterceptor(context.getSessionFactory()));
 			}
 			interceptors.add(new SessionCacheInterceptor(context.getSessionFactory()));
-			interceptors.add(new LogSqlInterceptor(dataBaseConfig));
-			if(this.interceptors!=null){
+			interceptors.add(new LogSqlInterceptor(dataBaseConfig, context.getSessionFactory()));
+			interceptors.add(new JdbcEventInterceptor(edgeEventBus));
+			/*if(this.interceptors!=null){
 				interceptors.addAll(this.interceptors);
-			}
+			}*/
 			DbmInterceptorManager interceptorManager = new DbmInterceptorManager();
 			interceptorManager.setInterceptors(interceptors);
-			interceptorManager.afterPropertiesSet();
+//			interceptorManager.afterPropertiesSet();
 			return interceptorManager;
 		});
 		
@@ -301,14 +307,14 @@ public class SimpleDbmInnerServiceRegistry implements DbmInnerServiceRegistry {
 
 	@Override
 	public <T> T getService(Class<T> clazz) {
-		Assert.notNull(clazz);
+		Assert.notNull(clazz, "class can not be null");
 		return clazz.cast(getService(clazz.getName()));
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
 	public <T> T getService(String name) {
-		Assert.hasText(name);
+		Assert.hasText(name, "name must have text");
 		return (T) services.get(name);
 	}
 
@@ -319,8 +325,8 @@ public class SimpleDbmInnerServiceRegistry implements DbmInnerServiceRegistry {
 
 	@Override
 	public <T> DbmInnerServiceRegistry register(String name, T service) {
-		Assert.hasText(name);
-		Assert.notNull(service);
+		Assert.hasText(name, "name must have text");
+		Assert.notNull(service, "service can not be null");
 		services.put(name, service);
 		return this;
 	}
@@ -354,6 +360,11 @@ public class SimpleDbmInnerServiceRegistry implements DbmInnerServiceRegistry {
 	public void setSqlParamterPostfixFunctionRegistry(
 			SqlParamterPostfixFunctionRegistry sqlParamterPostfixFunctionRegistry) {
 		this.sqlParamterPostfixFunctionRegistry = sqlParamterPostfixFunctionRegistry;
+	}
+
+
+	public EdgeEventBus getEdgeEventBus() {
+		return edgeEventBus;
 	}
 
 

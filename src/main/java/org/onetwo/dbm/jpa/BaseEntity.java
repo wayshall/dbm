@@ -8,9 +8,10 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
 import org.onetwo.common.db.TimeRecordableEntity;
+import org.onetwo.common.spring.copier.BeanCloneable;
 
 @MappedSuperclass
-abstract public class BaseEntity implements TimeRecordableEntity{
+abstract public class BaseEntity implements TimeRecordableEntity, BeanCloneable {
  
 	private static final long serialVersionUID = 122579169646461421L;
 

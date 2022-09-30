@@ -1,6 +1,6 @@
 package org.onetwo.common.hibernate.dao;
 
-import org.onetwo.common.dbm.model.entity.DepartmentEntity;
+import org.onetwo.common.dbm.model.hib.entity.DepartmentEntity;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.repository.CrudRepository;
 

@@ -9,6 +9,7 @@ import org.onetwo.common.db.builder.QueryBuilder;
 import org.onetwo.common.db.spi.QueryWrapper;
 import org.onetwo.common.db.spi.SqlParamterPostfixFunctionRegistry;
 import org.onetwo.common.db.sql.SequenceNameManager;
+import org.onetwo.common.db.sqlext.ExtQuery.K;
 import org.onetwo.common.db.sqlext.SelectExtQuery;
 import org.onetwo.common.exception.BaseException;
 import org.onetwo.common.exception.ServiceException;
@@ -34,9 +35,9 @@ public abstract class BaseEntityManagerAdapter implements InnerBaseEntityManager
 
 	abstract public SequenceNameManager getSequenceNameManager();
 		
-	protected void createSequence(Class<?> entityClass){
+	protected Long createSequence(Class<?> entityClass){
 		String seqName = getSequenceNameManager().getSequenceName(entityClass);
-		this.createSequence(seqName);
+		return createSequence(seqName);
 	}
 	
 
@@ -44,21 +45,19 @@ public abstract class BaseEntityManagerAdapter implements InnerBaseEntityManager
 	 * 创建序列，for oracle
 	 * @param sequenceName
 	 */
-	protected void createSequence(String sequenceName){
+	protected Long createSequence(String sequenceName){
 		String sql = getSequenceNameManager().getSequenceSql(sequenceName, null);
 		Long id = null;
-			try {
-				QueryWrapper dq = this.createQuery(getSequenceNameManager().getCreateSequence(sequenceName), null);
-				dq.executeUpdate();
-				
-				dq = this.createQuery(sql, null);
-				id = ((Number)dq.getSingleResult()).longValue();
-			} catch (Exception ne) {
-				ne.printStackTrace();
-				throw new ServiceException("createSequences error: " + ne.getMessage(), ne);
-			}
-			if (id == null)
-				throw new ServiceException("createSequences error. ");
+		try {
+			QueryWrapper dq = this.createQuery(getSequenceNameManager().getCreateSequence(sequenceName), null);
+			dq.executeUpdate();
+			
+			dq = this.createQuery(sql, null);
+			id = ((Number)dq.getSingleResult()).longValue();
+		} catch (Exception ne) {
+			throw new ServiceException("createSequences error: " + ne.getMessage(), ne);
+		}
+		return id;
 	}
 	
 	
@@ -66,30 +65,13 @@ public abstract class BaseEntityManagerAdapter implements InnerBaseEntityManager
 	public Number countRecord(Class<?> entityClass, Object... params) {
 		return countRecordByProperties(entityClass, CUtils.asLinkedMap(params));
 	}
-	public void delete(ILogicDeleteEntity entity){
-		entity.deleted();
-		this.save(entity);
-	}
-
-	public <T extends ILogicDeleteEntity> T deleteById(Class<T> entityClass, Serializable id){
-		Object entity = this.findById(entityClass, id);
-		if(entity==null)
-			return null;
-		if(!ILogicDeleteEntity.class.isAssignableFrom(entity.getClass())){
-			throw new ServiceException("实体不支持逻辑删除，请实现相关接口！");
-		}
-		T logicDeleteEntity = (T) entity;
-		logicDeleteEntity.deleted();
-		this.save(logicDeleteEntity);
-		return logicDeleteEntity;
-	}
 	
-	public <T> List<T> findList(QueryBuilder squery) {
+	public <T> List<T> findList(QueryBuilder<T> squery) {
 		return findListByProperties((Class<T>)squery.getEntityClass(), squery.getParams());
 	}
 
 	@Override
-	public <T> Page<T> findPage(final Page<T> page, QueryBuilder squery){
+	public <T> Page<T> findPage(final Page<T> page, QueryBuilder<T> squery){
 		findPageByProperties((Class<T>)squery.getEntityClass(), page, squery.getParams());
 		return page;
 	}
@@ -102,6 +84,12 @@ public abstract class BaseEntityManagerAdapter implements InnerBaseEntityManager
 	@Override
 	public <T> List<T> selectFieldsToEntity(Class<?> entityClass, Object[] selectFields, Object... properties){
 		throw new UnsupportedOperationException();
+	}
+	
+	public Number count(SelectExtQuery extQuery) {
+		extQuery.build();
+		Number countNumber = (Number)this.findUnique(extQuery.getCountSql(), extQuery.getParamsValue().asMap());
+		return countNumber;
 	}
 
 	@Override
@@ -119,6 +107,9 @@ public abstract class BaseEntityManagerAdapter implements InnerBaseEntityManager
 		return entity;
 	}
 
+	/****
+	 * 查找唯一结果，如果找不到则返回null，找到多个则抛异常 IncorrectResultSizeDataAccessException，详见：DataAccessUtils.requiredSingleResult
+	 */
 	@Override
 	public <T> T selectUnique(SelectExtQuery extQuery) {
 		extQuery.build();
@@ -174,7 +165,7 @@ public abstract class BaseEntityManagerAdapter implements InnerBaseEntityManager
 	}*/
 
 
-	public <T> T findUnique(QueryBuilder squery) {
+	public <T> T findUnique(QueryBuilder<T> squery) {
 		return findUniqueByProperties((Class<T>)squery.getEntityClass(), squery.getParams());
 	}
 
@@ -195,6 +186,10 @@ public abstract class BaseEntityManagerAdapter implements InnerBaseEntityManager
 		} catch (NotUniqueResultException e) {
 			return null;//return null if error
 		}*/
+		// 添加max_result，防止返回数据过大
+		if (!properties.containsKey(K.MAX_RESULTS)) {
+			properties.put(K.MAX_RESULTS, 1);
+		}
 		List<T> list = findListByProperties(entityClass, properties);
 		return list.isEmpty()?null:list.get(0);
 	}

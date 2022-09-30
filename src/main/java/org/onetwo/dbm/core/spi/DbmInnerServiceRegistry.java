@@ -7,6 +7,7 @@ import org.onetwo.dbm.core.internal.DbmInterceptorManager;
 import org.onetwo.dbm.core.internal.SimpleDbmInnerServiceRegistry.DbmServiceRegistryCreateContext;
 import org.onetwo.dbm.dialet.DBDialect;
 import org.onetwo.dbm.dialet.DefaultDatabaseDialetManager;
+import org.onetwo.dbm.event.internal.EdgeEventBus;
 import org.onetwo.dbm.jdbc.mapper.RowMapperFactory;
 import org.onetwo.dbm.jdbc.spi.DbmJdbcOperations;
 import org.onetwo.dbm.jdbc.spi.JdbcStatementParameterSetter;
@@ -52,5 +53,7 @@ public interface DbmInnerServiceRegistry {
 	DbmTypeMapping getTypeMapping();
 
 	SqlParamterPostfixFunctionRegistry getSqlParamterPostfixFunctionRegistry();
+	
+	EdgeEventBus getEdgeEventBus();
 
 }

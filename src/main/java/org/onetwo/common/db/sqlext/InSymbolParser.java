@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.onetwo.common.db.builder.QueryField;
 import org.onetwo.common.db.sqlext.ExtQuery.K.IfNull;
+import org.onetwo.common.utils.LangUtils;
 
 /****
  * 对in操作符的解释
@@ -23,7 +24,7 @@ public class InSymbolParser extends CommonSQLSymbolParser implements HqlSymbolPa
 		String field = context.getActualFieldName();
 		Object value = context.getValue();
 		ParamValues paramValues = context.getExtQuery().getParamsValue();
-		IfNull ifNull = context.getExtQuery().getIfNull();
+		IfNull ifNull = getIfNull(context);
 		
 		/*if(value==null || (value instanceof String && StringUtils.isBlank(value.toString())))
 			return null;
@@ -34,6 +35,9 @@ public class InSymbolParser extends CommonSQLSymbolParser implements HqlSymbolPa
 		}*/
 
 		List paramlist = convertValues(field, value, ifNull);
+		if (LangUtils.isEmpty(paramlist)) {
+			return null;
+		}
 
 		field = this.getFieldName(field);
 		StringBuilder hql = new StringBuilder();

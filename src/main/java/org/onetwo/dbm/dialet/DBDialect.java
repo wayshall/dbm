@@ -5,7 +5,7 @@ import java.util.List;
 import org.onetwo.common.db.DbmQueryValue;
 import org.onetwo.common.db.filequery.func.SqlFunctionDialet;
 import org.onetwo.dbm.dialet.AbstractDBDialect.DBMeta;
-import org.onetwo.dbm.event.DbmEventListenerManager;
+import org.onetwo.dbm.event.spi.DbmCoreEventListenerManager;
 import org.onetwo.dbm.id.StrategyType;
 import org.onetwo.dbm.mapping.DbmTypeMapping;
 import org.onetwo.dbm.mapping.SQLBuilderFactory;
@@ -31,7 +31,7 @@ public interface DBDialect extends Initializable {
 	public boolean isAutoDetectIdStrategy();
 
 	public List<StrategyType> getIdStrategy();
-	public DbmEventListenerManager getDbmEventListenerManager();
+	public DbmCoreEventListenerManager getDbmEventListenerManager();
 //	public JFishEventListener[] getQueryableEventListeners();
 	
 //	public int getMaxResults(int first, int size);

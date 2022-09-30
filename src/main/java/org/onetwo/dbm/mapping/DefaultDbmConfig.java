@@ -2,7 +2,9 @@ package org.onetwo.dbm.mapping;
 
 import org.onetwo.dbm.spring.EnableDbmAttributes;
 
+import lombok.Data;
 
+@Data
 public class DefaultDbmConfig implements DbmConfig {
 	/*public static final String JFISH_BASE_PACKAGES = "jfish.base.packages";
 	public static final String JFISH_DBM_SQL_LOG = "jfish.dbm.sql.log";
@@ -28,6 +30,9 @@ public class DefaultDbmConfig implements DbmConfig {
 	private boolean enabledDebugContext;
 	
 	private boolean autoProxySessionTransaction = false;
+	
+	private SnowflakeIdConfig snowflakeId = new SnowflakeIdConfig();
+	private EncryptConfig encrypt = new EncryptConfig();
 
 	public DefaultDbmConfig(){
 	}

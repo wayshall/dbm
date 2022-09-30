@@ -3,7 +3,6 @@ package org.onetwo.common.db.sqlext;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -51,18 +50,21 @@ public class SelectExtQueryImpl extends AbstractExtQuery implements SelectExtQue
 
 	public SelectExtQueryImpl(Class<?> entityClass, String alias, Map<?, ?> params, SQLSymbolManager symbolManager) {
 		super(entityClass, alias, params, symbolManager);
-		this.queryNameStrategy = new SelectQueryNameStrategy(alias, joinMapped, true);
+//		this.queryNameStrategy = new SelectQueryNameStrategy(this.alias, joinMapped, true);
+		this.setQueryNameStrategy(new SelectQueryNameStrategy(this.alias, joinMapped, true));
 	}
 	
 	public SelectExtQueryImpl(Class<?> entityClass, String alias, Map<?, ?> params, SQLSymbolManager symbolManager, List<ExtQueryListener> listeners) {
 		super(entityClass, alias, params, symbolManager, listeners);
-		this.queryNameStrategy = new SelectQueryNameStrategy(alias, joinMapped, true);
+//		this.queryNameStrategy = new SelectQueryNameStrategy(this.alias, joinMapped, true);
+		this.setQueryNameStrategy(new SelectQueryNameStrategy(this.alias, joinMapped, true));
 	}
 
 
 	public void initParams(){
 //		this.hasBuilt = false;
 		super.initParams();
+//		this.queryNameStrategy = new SelectQueryNameStrategy(this.alias, joinMapped, true);
 		
 		this.firstResult = getValueAndRemoveKeyFromParams(K.FIRST_RESULT, firstResult);
 		this.maxResults = getValueAndRemoveKeyFromParams(K.MAX_RESULTS, maxResults);
@@ -86,6 +88,9 @@ public class SelectExtQueryImpl extends AbstractExtQuery implements SelectExtQue
 		return this.firstResult>=MIN_RESULT_INDEX && this.maxResults>=AT_LEAST_RESULTS_SIZE;
 	}
 
+	/***
+	 *  from 0
+	 */
 	public Integer getFirstResult() {
 		return firstResult;
 	}
@@ -178,7 +183,7 @@ public class SelectExtQueryImpl extends AbstractExtQuery implements SelectExtQue
 			select.append("distinct ");
 		}
 
-		String selectKey = K.SELECT;
+		Object selectKey = K.SELECT;
 		selectValule = params.remove(selectKey);
 		if(selectValule==null){
 			selectKey = K.DISTINCT;
@@ -259,7 +264,7 @@ public class SelectExtQueryImpl extends AbstractExtQuery implements SelectExtQue
 		if(this.alias.equals(f)){
 			return f;
 		}else{
-			return this.queryNameStrategy.appendAlias(this.queryNameStrategy.translateAt(f));
+			return this.getQueryNameStrategy().appendAlias(this.getQueryNameStrategy().translateAt(f));
 		}
 	}
 	
@@ -278,7 +283,7 @@ public class SelectExtQueryImpl extends AbstractExtQuery implements SelectExtQue
 		buildJoin(join, K.LEFT_JOIN, false);//outer
 		buildJoin(join, K.JOIN_IN, true);*/
 		
-		for(String key : K.JOIN_MAP.keySet()){
+		for(Object key : K.JOIN_MAP.keySet()){
 			if (!hasParams(key))
 				continue;
 
@@ -322,7 +327,7 @@ public class SelectExtQueryImpl extends AbstractExtQuery implements SelectExtQue
 	}
 
 	
-	protected SelectExtQueryImpl buildJoin(StringBuilder joinBuf, String joinKey, Object value, boolean hasParentheses) {
+	protected SelectExtQueryImpl buildJoin(StringBuilder joinBuf, Object joinKey, Object value, boolean hasParentheses) {
 		String joinWord = K.JOIN_MAP.get(joinKey);
 		List<String> fjoin = LangUtils.asList(value);
 		if(fjoin==null)
@@ -339,10 +344,10 @@ public class SelectExtQueryImpl extends AbstractExtQuery implements SelectExtQue
 				}
 				if(jstrs.length>1){//alias
 					joinMapped.put(jstrs[1], jstrs[0]);
-					joinBuf.append(joinWord).append(hasParentheses?"(":" ").append(queryNameStrategy.getJoinFieldName(jstrs[0])).append(hasParentheses?") ":" ").append(jstrs[1]).append(" ");
+					joinBuf.append(joinWord).append(hasParentheses?"(":" ").append(getQueryNameStrategy().getJoinFieldName(jstrs[0])).append(hasParentheses?") ":" ").append(jstrs[1]).append(" ");
 				}else{
 					joinMapped.put(joinString, joinString);
-					joinBuf.append(joinWord).append(hasParentheses?"(":" ").append(queryNameStrategy.getJoinFieldName(joinString)).append(hasParentheses?") ":" ");
+					joinBuf.append(joinWord).append(hasParentheses?"(":" ").append(getQueryNameStrategy().getJoinFieldName(joinString)).append(hasParentheses?") ":" ");
 				}
 			}else if(obj.getClass().isArray()){
 				joinBuf.append("on ( ");
@@ -381,13 +386,13 @@ public class SelectExtQueryImpl extends AbstractExtQuery implements SelectExtQue
 		boolean hasDes = buildOrderby0(K.DESC);*/
 		
 		boolean hasOrderBy = false;
-		List<String> orderbys = new ArrayList<String>(3);
+		List<Object> orderbys = new ArrayList<>(3);
 		for(Map.Entry<Object, Object> entry : (Set<Map.Entry<Object, Object>>)this.params.entrySet()){
 			if(K.ORDER_BY_MAP.containsKey(entry.getKey())){
-				orderbys.add((String)entry.getKey());
+				orderbys.add(entry.getKey());
 			}
 		}
-		for(String order : orderbys){
+		for(Object order : orderbys){
 			if(buildOrderby0(order))
 				hasOrderBy = true;
 		}
@@ -412,16 +417,16 @@ public class SelectExtQueryImpl extends AbstractExtQuery implements SelectExtQue
 		return "";
 	}
 	
-	protected boolean buildOrderby0(String order){
+	protected boolean buildOrderby0(Object orderKeyword){
 		boolean hasOrderBy = false;
-		if(!params.keySet().contains(order))
+		if(!params.keySet().contains(orderKeyword))
 			return false;
 		
-		Object ascValue = params.remove(order);
+		Object ascValue = params.remove(orderKeyword);
 		if(ascValue==null)
 			return false;
 		
-		Object orderValue = K.getMappedValue(order);
+		Object orderValue = K.getMappedValue(orderKeyword);
 		Object[] orderList = null;
 		if(LangUtils.isMultiple(ascValue))
 			orderList = (Object[]) LangUtils.asList(ascValue).toArray();
@@ -443,7 +448,7 @@ public class SelectExtQueryImpl extends AbstractExtQuery implements SelectExtQue
 			}
 			int oIndex = orderField.indexOf(':');
 			if(oIndex==-1){
-				if(K.ORDERBY.equals(order))
+				if(K.ORDERBY.equals(orderKeyword))
 					orderBy.append(orderField).append(orderValue);
 				else
 					orderBy.append(getFieldName(orderField)).append(orderValue);
@@ -552,15 +557,4 @@ public class SelectExtQueryImpl extends AbstractExtQuery implements SelectExtQue
 		return lockInfo;
 	}
 
-	public static void main(String[] args) {
-
-		Map<Object, Object> properties = new LinkedHashMap<Object, Object>();
-
-		properties.put("&LOWER(name)", "way");
-		properties.put("&substring(name, 5, 1)", "w");
-
-		ExtQueryInner q = SQLSymbolManagerFactory.getInstance().getJPA().createSelectQuery(Object.class, "mag", properties);
-		q.build();
-		
-	}
 }

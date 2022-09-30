@@ -3,60 +3,61 @@ package org.onetwo.dbm.mapping;
 import java.util.List;
 import java.util.Map;
 
+import org.onetwo.dbm.dialet.DBDialect;
 import org.onetwo.dbm.id.IdentifierGenerator;
 import org.onetwo.dbm.mapping.SQLBuilderFactory.SqlBuilderType;
 
 public interface DbmMappedEntry extends DbmMappedEntryMeta {
+	DBDialect getDbDialect();
+	Map<String, IdentifierGenerator<?>> getIdGenerators();
+	void addIdGenerator(IdentifierGenerator<?> idGenerator);
 	
-	public Map<String, IdentifierGenerator<?>> getIdGenerators();
-	public void addIdGenerator(IdentifierGenerator<?> idGenerator);
 	
-	
-	public DbmTypeMapping getSqlTypeMapping();
+	DbmTypeMapping getSqlTypeMapping();
 
-	public void setId(Object entity, Object value);
+	void setId(Object entity, Object value);
 
-	public Object getId(Object entity);
+	Object getId(Object entity);
 
-	public void setFieldValue(Object entity, String fieldName, Object value);
-
-
-	public String getColumnName(String field);
+	void setFieldValue(Object entity, String fieldName, Object value);
 
 
-	public Object getFieldValue(Object entity, String fieldName);
+	String getColumnName(String field);
+
+
+	Object getFieldValue(Object entity, String fieldName);
 
 	/*******
 	 * 此方法会延迟调用，会设置各种属性和manager的事件回调后，才会调用，
 	 * 所以，如果没有实现扫描和构建所有实体，而在运行时才build，就要注意多线程的问题
 	 */
-	public void buildEntry();
+	void buildEntry();
 
 
 	
 
-	public <T> T newInstance();
+	<T> T newInstance();
 
-	public boolean isDynamic();
+	boolean isDynamic();
 
-	public void setDynamic(boolean dynamic);
+	void setDynamic(boolean dynamic);
 
 
 
-//	public String getStaticInsertSql();
+//	String getStaticInsertSql();
 
-//	public String getStaticUpdateSql();
+//	String getStaticUpdateSql();
 
-//	public String getStaticFetchSql();
+//	String getStaticFetchSql();
 
-	/*public String getStaticSeqSql();
-	public String getStaticCreateSeqSql();*/
+	/*String getStaticSeqSql();
+	String getStaticCreateSeqSql();*/
 	
-	public JdbcStatementContext<Object[]> makeSelectVersion(Object object);
+	JdbcStatementContext<Object[]> makeSelectVersion(Object object);
 	
-	public JdbcStatementContext<Object[]> makeFetchAll();
+	JdbcStatementContext<Object[]> makeFetchAll();
 	
-	public JdbcStatementContext<Object[]> makeDeleteAll();
+	JdbcStatementContext<Object[]> makeDeleteAll();
 	
 	/****
 	 * 
@@ -65,46 +66,53 @@ public interface DbmMappedEntry extends DbmMappedEntryMeta {
 	 * @param isIdentify 是否根据id查询
 	 * @return
 	 */
-	public JdbcStatementContext<List<Object[]>> makeFetch(Object objects, boolean isIdentify);
+	JdbcStatementContext<List<Object[]>> makeFetch(Object objects, boolean isIdentify);
 	
 //	JdbcStatementContext<Object[]> makeLockSelect(Object object, LockInfo lock);
 	
-	public JdbcStatementContext<List<Object[]>> makeInsert(Object entity);
+	JdbcStatementContext<List<Object[]>> makeInsert(Object entity);
 
-	public JdbcStatementContext<List<Object[]>> makeDelete(Object objects, boolean isIdentify);
+	/***
+	 * make delete by id
+	 * 
+	 * @author weishao zeng
+	 * @param objects
+	 * @return
+	 */
+	JdbcStatementContext<List<Object[]>> makeDelete(Object objects);
 
-	public JdbcStatementContext<List<Object[]>> makeUpdate(Object entity);
+	JdbcStatementContext<List<Object[]>> makeUpdate(Object entity);
 
-	public JdbcStatementContext<List<Object[]>> makeDymanicUpdate(Object entity);
+	JdbcStatementContext<List<Object[]>> makeDymanicUpdate(Object entity);
 
-	public Map<String, AbstractMappedField> getMappedFields();
-	public Map<String, AbstractMappedField> getMappedColumns();
+	Map<String, DbmMappedField> getMappedFields();
+	Map<String, DbmMappedField> getMappedColumns();
 
-	/*public boolean isQueryableOnly();
+	/*boolean isQueryableOnly();
 
-	public void setQueryableOnly(boolean queryableOnly);*/
+	void setQueryableOnly(boolean queryableOnly);*/
 	
-	/*public void addAnnotations(Annotation...annotations);
+	/*void addAnnotations(Annotation...annotations);
 	
-	public boolean hasAnnotation(Class<? extends Annotation> annoClass);
+	boolean hasAnnotation(Class<? extends Annotation> annoClass);
 	
-	public <T extends Annotation> T getAnnotation(Class<T> annoClass);*/
+	<T extends Annotation> T getAnnotation(Class<T> annoClass);*/
 	
-	public void freezing();
-	public boolean isFreezing();
+	void freezing();
+	boolean isFreezing();
 	
-	public boolean hasIdentifyValue(Object entity);
-//	public Collection<JoinableMappedField> getJoinMappedFields();
+	boolean hasIdentifyValue(Object entity);
+//	Collection<JoinableMappedField> getJoinMappedFields();
 	
-	public SQLBuilderFactory getSqlBuilderFactory();
+	SQLBuilderFactory getSqlBuilderFactory();
 	
-//	public DataHolder<String, Object> getDataHolder();
+//	DataHolder<String, Object> getDataHolder();
 	
-	public EntrySQLBuilder createSQLBuilder(SqlBuilderType type);
+	EntrySQLBuilder createSQLBuilder(SqlBuilderType type);
 	
-//	public JdbcStatementContextBuilder createJdbcStatementContextBuilder(SqlBuilderType type);
+//	JdbcStatementContextBuilder createJdbcStatementContextBuilder(SqlBuilderType type);
 	
-	public List<DbmEntityListener> getEntityListeners();
-	public List<DbmEntityFieldListener> getFieldListeners();
+	List<DbmEntityListener> getEntityListeners();
+	List<DbmEntityFieldListener> getFieldListeners();
 	
 }

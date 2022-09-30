@@ -14,6 +14,7 @@ public interface UserAutoidDao {
 	@ExecuteUpdate
 	public int removeByUserName(String userName);
 	
+	@ExecuteUpdate(isBatch=true, batchSize=10000)
 	public int batchInsert(List<UserAutoidEntity> users);
 	
 	public void batchInsert2(@BatchObject List<UserAutoidEntity> users, @Param("allBirthday")Date birthday);

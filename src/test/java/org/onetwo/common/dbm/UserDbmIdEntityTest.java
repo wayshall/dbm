@@ -1,5 +1,6 @@
 package org.onetwo.common.dbm;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
@@ -13,6 +14,7 @@ import org.junit.Test;
 import org.onetwo.common.base.DbmBaseTest;
 import org.onetwo.common.db.builder.Querys;
 import org.onetwo.common.db.spi.BaseEntityManager;
+import org.onetwo.common.dbm.model.entity.SnowflakeIdUserEntity;
 import org.onetwo.common.dbm.model.entity.UserTableDbmIdEntity;
 import org.onetwo.common.utils.LangOps;
 
@@ -27,7 +29,20 @@ public class UserDbmIdEntityTest extends DbmBaseTest {
 	
 
 	@Test
-	public void testSample(){
+	public void testSaveSnowflakeUserEntity() {
+		SnowflakeIdUserEntity user = new SnowflakeIdUserEntity();
+		user.setUserName("snowflake1");
+		
+		entityManager.save(user);
+		assertThat(user.getId()).isNotNull();
+		
+		SnowflakeIdUserEntity dbuser = entityManager.findById(SnowflakeIdUserEntity.class, user.getId());
+		assertThat(dbuser).isNotNull();
+		assertThat(dbuser.getUserName()).isEqualTo(user.getUserName());
+	}
+	
+	@Test
+	public void testSaveUserTableDbmIdEntity(){
 		UserTableDbmIdEntity user = new UserTableDbmIdEntity();
 		user.setUserName("dbm");
 		

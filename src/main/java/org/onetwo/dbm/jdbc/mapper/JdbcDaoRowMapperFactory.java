@@ -11,7 +11,6 @@ import org.onetwo.common.utils.LangUtils;
 import org.onetwo.common.utils.map.CamelMap;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.ColumnMapRowMapper;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.SingleColumnRowMapper;
 
 public class JdbcDaoRowMapperFactory implements RowMapperFactory {
@@ -40,14 +39,14 @@ public class JdbcDaoRowMapperFactory implements RowMapperFactory {
 	}
 
 	@Override
-	public RowMapper<?> createRowMapper(Class<?> type) {
-		RowMapper<?> rowMapper = null;
+	public DataRowMapper<?> createRowMapper(Class<?> type) {
+		DataRowMapper<?> rowMapper = null;
 		if(type==null || type==Object.class){
 //			rowMapper = new SingleColumnRowMapper(Object.class);
 			rowMapper = UNKNOW_TYPE_ROW_MAPPER;
 		}else if(isSingleColumnRowType(type)){
 			//唯一，而且返回类型是简单类型，则返回单列的RowMapper
-			rowMapper = new SingleColumnRowMapper<>(type);
+			rowMapper = new SingleColumnRowMapperAdapter<>(type);
 		}else if(LangUtils.isMapClass(type)){
 //			rowMapper = new ColumnMapRowMapper();
 			rowMapper = CAMEL_NAME_ROW_MAPPER;
@@ -65,20 +64,40 @@ public class JdbcDaoRowMapperFactory implements RowMapperFactory {
 	}
 
 	@Override
-	public RowMapper<?> createRowMapper(NamedQueryInvokeContext invokeContext) {
+	public DataRowMapper<?> createRowMapper(NamedQueryInvokeContext invokeContext) {
 		return createRowMapper(invokeContext.getDynamicMethod().getComponentClass());
 	}
 
-	protected RowMapper<?> getBeanPropertyRowMapper(Class<?> entityClass) {
-		return new BeanPropertyRowMapper<>(entityClass);
+	protected DataRowMapper<?> getBeanPropertyRowMapper(Class<?> entityClass) {
+//		return new BeanPropertyRowMapper<>(entityClass);
+		return new BeanPropertyRowMapperAdapter<>(entityClass);
 	}
 	
-	static class CamelNameRowMapper extends ColumnMapRowMapper {
+	static class CamelNameRowMapper extends ColumnMapRowMapper implements DataRowMapper<Map<String, Object>>{
 
 		protected Map<String, Object> createColumnMap(int columnCount) {
 			return new CamelMap<Object>(columnCount);
 		}
 	}
 	
+	static class SingleColumnRowMapperAdapter<T> extends SingleColumnRowMapper<T> implements DataRowMapper<T>{
+
+		public SingleColumnRowMapperAdapter() {
+		}
+		
+		public SingleColumnRowMapperAdapter(Class<T> requiredType) {
+			setRequiredType(requiredType);
+		}
+	}
+
+	static class BeanPropertyRowMapperAdapter<T> extends BeanPropertyRowMapper<T> implements DataRowMapper<T>{
+
+		public BeanPropertyRowMapperAdapter() {
+		}
+
+		public BeanPropertyRowMapperAdapter(Class<T> mappedClass) {
+			initialize(mappedClass);
+		}
+	}
 
 }

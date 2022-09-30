@@ -8,9 +8,12 @@ import java.util.concurrent.atomic.AtomicLong;
 import javax.sql.DataSource;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.onetwo.common.db.generator.dialet.DatabaseMetaDialet;
+import org.onetwo.common.db.generator.dialet.DelegateDatabaseMetaDialet;
 import org.onetwo.common.db.sql.SequenceNameManager;
 import org.onetwo.common.db.sqlext.SQLSymbolManager;
 import org.onetwo.common.log.JFishLoggerFactory;
+import org.onetwo.common.spring.Springs;
 import org.onetwo.common.utils.Assert;
 import org.onetwo.dbm.core.DbmTransactionSynchronization;
 import org.onetwo.dbm.core.internal.SimpleDbmInnerServiceRegistry.DbmServiceRegistryCreateContext;
@@ -63,11 +66,13 @@ public class DbmSessionFactoryImpl implements InitializingBean, DbmSessionFactor
 	private DbmInnerServiceRegistry serviceRegistry;
 	protected String[] packagesToScan;
 	
-	private AtomicLong idGenerator = new AtomicLong(0);
+	final private AtomicLong idGenerator = new AtomicLong(0);
 	
 	private DbmInterceptorManager interceptorManager;
 	
 	private boolean autoCreatedTransactionManager;
+	
+	private DatabaseMetaDialet databaseMetaDialet;
 	
 	public DbmSessionFactoryImpl(ApplicationContext applicationContext, PlatformTransactionManager transactionManager,
 			DataSource dataSource) {
@@ -90,6 +95,7 @@ public class DbmSessionFactoryImpl implements InitializingBean, DbmSessionFactor
 
 	@Override
 	public void afterPropertiesSet() {
+		Springs.initApplicationIfNotInitialized(applicationContext);
 		if(transactionManager==null && applicationContext!=null){
 			this.transactionManager = DbmUtils.getDataSourceTransactionManager(applicationContext, dataSource, ()->{
 				if(logger.isWarnEnabled()){
@@ -124,6 +130,8 @@ public class DbmSessionFactoryImpl implements InitializingBean, DbmSessionFactor
 		this.sqlSymbolManager = serviceRegistry.getSqlSymbolManager();
 		this.rowMapperFactory = serviceRegistry.getRowMapperFactory();
 		this.sequenceNameManager = serviceRegistry.getSequenceNameManager();
+		
+		this.databaseMetaDialet = new DelegateDatabaseMetaDialet(dataSource);
 		
 		if(ArrayUtils.isNotEmpty(packagesToScan)){
 			mappedEntryManager.scanPackages(packagesToScan);
@@ -259,8 +267,11 @@ public class DbmSessionFactoryImpl implements InitializingBean, DbmSessionFactor
 	DbmTransactionSynchronization registerSessionSynchronization(DbmSession session){
 		Connection connection = DataSourceUtils.getConnection(this.dataSource);
 		//sessionHolder
-		DbmSessionResourceHolder sessionHolder = new DbmSessionResourceHolder(session, connection);
-		TransactionSynchronizationManager.bindResource(this, sessionHolder);
+		DbmSessionResourceHolder sessionHolder = (DbmSessionResourceHolder)TransactionSynchronizationManager.getResource(this);
+		if(sessionHolder==null) {
+			sessionHolder = new DbmSessionResourceHolder(session, connection);
+			TransactionSynchronizationManager.bindResource(this, sessionHolder);
+		}
 		//synchronization
 		DbmTransactionSynchronization synchronization = new DbmTransactionSynchronization(sessionHolder);
 		sessionHolder.setSynchronizedWithTransaction(true);
@@ -347,6 +358,10 @@ public class DbmSessionFactoryImpl implements InitializingBean, DbmSessionFactor
 
 	public void setPackagesToScan(String[] packagesToScan) {
 		this.packagesToScan = packagesToScan;
+	}
+
+	public DatabaseMetaDialet getDatabaseMetaDialet() {
+		return databaseMetaDialet;
 	}
 
 	@Override

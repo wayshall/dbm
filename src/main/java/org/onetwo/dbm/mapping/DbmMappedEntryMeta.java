@@ -1,45 +1,71 @@
 package org.onetwo.dbm.mapping;
 
 import java.util.Collection;
+import java.util.List;
 
 import org.onetwo.common.annotation.AnnotationInfo;
 
 public interface DbmMappedEntryMeta {
 
-	public Collection<AbstractMappedField> getFields();
-	public Collection<AbstractMappedField> getFields(DbmMappedFieldType... type);
+	Collection<DbmMappedField> getFields();
+	Collection<DbmMappedField> getFields(DbmMappedFieldType... type);
 	
-	public DbmMappedField getField(String fieldName);
+	DbmMappedField getField(String fieldName);
 	
-	public AnnotationInfo getAnnotationInfo();
+	AnnotationInfo getAnnotationInfo();
 
-	public boolean contains(String field);
+	boolean contains(String field);
 
-	public boolean containsColumn(String col);
-
-
-	public DbmMappedField getFieldByColumnName(String columnName);
+	boolean containsColumn(String col);
 
 
-	public DbmMappedEntryMeta addMappedField(AbstractMappedField field);
-
-	public Class<?> getEntityClass();
+	DbmMappedField getFieldByColumnName(String columnName);
 	
-	public String getEntityName();
+	/****
+	 * 通过@DbmBindValueToField 注解绑定到此字段的其它字段
+	 * @author weishao zeng
+	 * @param fieldName
+	 * @return
+	 */
+	Collection<DbmMappedField> getBindedFieldsByFieldName(String fieldName);
 
-	public TableInfo getTableInfo();
 
-	public DbmMappedField getIdentifyField();
-	
-	public MappedType getMappedType();
+	DbmMappedEntryMeta addMappedField(AbstractMappedField field);
 
-//	public boolean isJoined();
-	public boolean isEntity();
+	Class<?> getEntityClass();
 	
-	public boolean isInstance(Object entity);
+	String getEntityName();
+
+	TableInfo getTableInfo();
+
+	List<DbmMappedField> getIdentifyFields();
 	
-	public DbmMappedField getVersionField();
+	default boolean hasIdentityStrategyField() {
+		return getIdentifyFields().stream().anyMatch(field -> field.isIdentityStrategy());
+	}
 	
-	public boolean isVersionControll();
+	default boolean hasGeneratedValueIdField() {
+		return getIdentifyFields().stream().anyMatch(field -> field.isGeneratedValue());
+	}
+	
+	MappedType getMappedType();
+
+//	boolean isJoined();
+	boolean isEntity();
+	
+	boolean isInstance(Object entity);
+
+	DbmMappedField getVersionField();
+	Object getVersionValue(Object entity);
+	
+	boolean isVersionControll();
+	
+	Class<?> getIdClass();
+	/***
+	 * 是否复合主键
+	 * @author weishao zeng
+	 * @return
+	 */
+	boolean isCompositePK();
 	
 }
