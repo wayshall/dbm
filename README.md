@@ -209,6 +209,17 @@ public class UserEntity implements Serializable {
 }
 ```
 
+也可以使用5.0新增的@DbmTableIdGenerator注解简化配置：
+```Java
+@Entity
+@Table(name="t_user")
+public class UserEntity implements Serializable {
+
+    @DbmTableIdGenerator("seq_test_user")
+    Long id;
+}
+```
+
 
 #### GenerationType.SEQUENCE
 ```Java

@@ -15,11 +15,13 @@ import org.onetwo.common.db.builder.Querys;
 import org.onetwo.common.db.spi.BaseEntityManager;
 import org.onetwo.common.dbm.model.entity.UserTableIdEntity;
 import org.onetwo.common.utils.LangOps;
+import org.springframework.test.annotation.Rollback;
 
 /**
  * @author wayshall
  * <br/>
  */
+@Rollback(false)
 public class UserTableIdEntityTest extends DbmBaseTest {
 
 	@Resource
@@ -34,6 +36,7 @@ public class UserTableIdEntityTest extends DbmBaseTest {
 		//save
 		Long userId = entityManager.save(user).getId();
 		assertThat(userId, notNullValue());
+		System.out.println("userId: " + userId);
 		
 		//user querys dsl api
 		UserTableIdEntity queryUser = Querys.from(entityManager, UserTableIdEntity.class)
@@ -57,6 +60,7 @@ public class UserTableIdEntityTest extends DbmBaseTest {
 		Collection<UserTableIdEntity> dbUsers = entityManager.saves(users);
 		dbUsers.forEach(u->{
 			assertThat(u.getId(), notNullValue());
+			System.out.println("userId: " + u.getId());
 		});
 	}
 }

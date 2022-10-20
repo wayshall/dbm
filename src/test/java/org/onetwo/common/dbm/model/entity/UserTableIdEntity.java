@@ -1,14 +1,11 @@
 package org.onetwo.common.dbm.model.entity;
 
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
-import javax.persistence.TableGenerator;
 
 import org.hibernate.validator.constraints.Length;
+import org.onetwo.dbm.annotation.DbmTableIdGenerator;
 import org.onetwo.dbm.core.BaseModel;
 
 /**
@@ -29,15 +26,16 @@ public class UserTableIdEntity extends BaseModel<UserTableIdEntity, Long> {
 		
 
 	 */
-	@Id  
-	@GeneratedValue(strategy = GenerationType.TABLE, generator="tableIdGenerator")  
-	@TableGenerator(name = "tableIdGenerator",  
-	    table="gen_ids",  
-	    pkColumnName="gen_name",  
-	    valueColumnName="gen_value",  
-	    pkColumnValue="seq_test_user",  
-	    allocationSize=50
-	)
+//	@Id  
+//	@GeneratedValue(strategy = GenerationType.TABLE, generator="tableIdGenerator")  
+//	@TableGenerator(name = "tableIdGenerator",  
+//	    table="gen_ids",  
+//	    pkColumnName="gen_name",  
+//	    valueColumnName="gen_value",  
+//	    pkColumnValue="seq_test_user",  
+//	    allocationSize=50
+//	)
+	@DbmTableIdGenerator("seq_test_user")
 	@SequenceGenerator(name="seqGenerator", sequenceName="SEQ_TEST_USER")
 	protected Long id;
 	@Length(min=1, max=50)
