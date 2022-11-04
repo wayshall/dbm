@@ -396,12 +396,14 @@ abstract public class AbstractNestedBeanMapper<T> {
 			
 			if(LangUtils.isSimpleType(mappedClass)){
 				this.resultClass = SimpleValueNestedMappingHoder.class;
-				if(StringUtils.isBlank(idPropertyName)){
-					idPropertyName = "value";
-				}
-				if(!"value".equals(idPropertyName)){
-					throw new DbmException("the value of id property (in @DbmNestedResult) must be 'value' if nested mapped type is a simple type!");
-				}
+				// 因为简单类型的集合使用了包装对象（SimpleValueNestedMappingHoder），所以这里必须强制其对应的idPropertyName为value
+				// 在mapResultClassObjectWithoutResultSet方法通过判断是否SimpleValueNestedMappingHoder对象来使用不同的设置值方法后，可以注释下面的代码
+//				if(StringUtils.isBlank(idPropertyName)){
+//					idPropertyName = "value";
+//				}
+//				if(!"value".equals(idPropertyName)){
+//					throw new DbmException("the value of id property (in @DbmNestedResult) must be 'value' if nested mapped type is a simple type!");
+//				}
 				this.idProperty = new PropertyMeta(idPropertyName, mappedClass, true);
 			}
 		}
@@ -463,10 +465,15 @@ abstract public class AbstractNestedBeanMapper<T> {
 					propertyMapper.initialize();
 					complexFields.put(jproperty.getName(), propertyMapper);
 				}else{
+					// 属性名
+					String propertyName = pd.getName();
+					if (classIntro.getClazz()==SimpleValueNestedMappingHoder.class) {
+						propertyName = idProperty.getName();
+					}
 					/*this.simpleFields.put(getFullName(toClumnName1(pd.getName())), jproperty);
 					this.simpleFields.put(getFullName(toClumnName2(pd.getName())), jproperty);*/
-					ColumnProperty prop1 = new ColumnProperty(toClumnName1(pd.getName()), jproperty);
-					ColumnProperty prop2 = new ColumnProperty(toClumnName2(pd.getName()), jproperty);
+					ColumnProperty prop1 = new ColumnProperty(toClumnName1(propertyName), jproperty);
+					ColumnProperty prop2 = new ColumnProperty(toClumnName2(propertyName), jproperty);
 					this.simpleFields.put(getFullName(prop1.getColumnName()), prop1);
 					this.simpleFields.put(getFullName(prop2.getColumnName()), prop2);
 				}
@@ -597,7 +604,12 @@ abstract public class AbstractNestedBeanMapper<T> {
 						Object mappedObject = classIntro.newInstance();
 						bw = createBeanWrapper(mappedObject);
 					}
-					bw.setPropertyValue(jproperty.getName(), value);
+					if (bw.getWrappedClass()==SimpleValueNestedMappingHoder.class) {
+						SimpleValueNestedMappingHoder holder = (SimpleValueNestedMappingHoder) bw.getWrappedInstance();
+						holder.setValue(value);
+					} else {
+						bw.setPropertyValue(jproperty.getName(), value);
+					}
 				}
 			}
 			return bw;
