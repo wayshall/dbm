@@ -83,7 +83,7 @@ public class DbmRowMapperFactory extends JdbcDaoRowMapperFactory {
 			}
 		} else if (getMappedEntryManager().isSupportedMappedEntry(type)){
 			DbmMappedEntry entry = this.getMappedEntryManager().getEntry(type);
-			rowMapper = new EntryRowMapper<>(entry, this.jdbcResultSetGetter);
+			rowMapper = new EntryRowMapper<>(entry, this.jdbcResultSetGetter, true);
 			return rowMapper;
 		} else{
 //			rowMapper = super.getBeanPropertyRowMapper(type);
