@@ -1,16 +1,16 @@
 package org.onetwo.common.db.sqlext;
 
 import org.apache.commons.lang3.StringUtils;
+import org.onetwo.common.db.SqlUtils;
 import org.onetwo.common.db.sqlext.ExtQuery.K;
 import org.onetwo.common.utils.Assert;
-import org.onetwo.dbm.exception.DbmException;
 
 /**
  * @author wayshall
  * <br/>
  */
 public class QueryNameStrategy {
-	public static final String[] SQL_KEY_WORKDS = new String[]{" ", ";", ",", "(", ")", "'", "\"\"", "/", "+", "-"};
+//	public static final String[] SQL_KEY_WORKDS = new String[]{" ", ";", ",", "(", ")", "'", "\"\"", "/", "+", "-"};
 
 	protected String alias;
 	protected boolean aliasMainTableName = true;
@@ -84,10 +84,7 @@ public class QueryNameStrategy {
 
 	public static String checkFieldNameValid(String field){
 		Assert.hasText(field);
-		for(String str : SQL_KEY_WORKDS){
-			if(field.indexOf(str)!=-1)
-				throw new DbmException("the field is inValid : " + field);
-		}
+		SqlUtils.check(field);
 		return field;
 	}
 }
