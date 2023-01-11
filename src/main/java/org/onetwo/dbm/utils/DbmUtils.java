@@ -40,6 +40,7 @@ import org.onetwo.dbm.jdbc.JdbcUtils;
 import org.onetwo.dbm.jdbc.method.JdbcOperationMethod;
 import org.onetwo.dbm.jdbc.spi.SqlParametersProvider;
 import org.onetwo.dbm.mapping.DbmEntityFieldListener;
+import org.onetwo.dbm.mapping.DbmEnumValueMapping;
 import org.onetwo.dbm.mapping.DbmMappedField;
 import org.onetwo.dbm.spring.EnableDbm;
 import org.slf4j.Logger;
@@ -48,7 +49,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.data.transaction.ChainedTransactionManager;
-import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.core.SqlParameterValue;
 import org.springframework.jdbc.core.SqlProvider;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -390,7 +390,13 @@ final public class DbmUtils {
 			Map<?, ?> temp = (Map<?, ?>) arg;
 			Map<Object, Object> newParams = Maps.newLinkedHashMap();
 			temp.forEach((k, v)->{
-				newParams.put(k, formatValueIfNeed(v));
+				if (v instanceof Collection) {
+					Collection<?> c = (Collection<?>) v;
+					List<Object> list = c.stream().map(cv -> formatValueIfNeed(cv)).collect(Collectors.toList());
+					newParams.put(k, list);
+				} else {
+					newParams.put(k, formatValueIfNeed(v));
+				}
 			});
 			return newParams;
 		} else if (arg!=null && arg.getClass().isArray()){
@@ -409,6 +415,9 @@ final public class DbmUtils {
 		}
 		if (val instanceof Date) {
 			val = DateUtils.formatDateTime((Date)val);
+		} else if (val instanceof DbmEnumValueMapping) {
+			DbmEnumValueMapping<?> dbmEnum = (DbmEnumValueMapping<?>)val;
+			val = dbmEnum.getEnumMappingValue();
 		}
 		return val;
 	}
@@ -490,9 +499,9 @@ final public class DbmUtils {
 	@Deprecated
 	public static ParsedSql parseNamedSql(String sql, SqlParameterSource paramSource) {
 		ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(sql);
-		String sqlToUse = NamedParameterUtils.substituteNamedParameters(parsedSql, paramSource);
-//		Object[] params = NamedParameterUtils.buildValueArray(parsedSql, paramSource, null);
-		List<SqlParameter> declaredParameters = NamedParameterUtils.buildSqlParameterList(parsedSql, paramSource);
+//		String sqlToUse = NamedParameterUtils.substituteNamedParameters(parsedSql, paramSource);
+//		//Object[] params = NamedParameterUtils.buildValueArray(parsedSql, paramSource, null);
+//		List<SqlParameter> declaredParameters = NamedParameterUtils.buildSqlParameterList(parsedSql, paramSource);
 		return parsedSql;
 	}
 	
