@@ -1,17 +1,21 @@
 package org.onetwo.common.db;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.onetwo.common.db.sql.SelectItemInfo;
 import org.onetwo.dbm.druid.DbmMySqlLexer;
 import org.onetwo.dbm.exception.DbmException;
 
 import com.alibaba.druid.DbType;
 import com.alibaba.druid.DruidRuntimeException;
+import com.alibaba.druid.sql.SQLUtils;
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.expr.SQLAggregateExpr;
 import com.alibaba.druid.sql.ast.expr.SQLIdentifierExpr;
 import com.alibaba.druid.sql.ast.expr.SQLIntegerExpr;
+import com.alibaba.druid.sql.ast.expr.SQLPropertyExpr;
 import com.alibaba.druid.sql.ast.statement.SQLSelect;
 import com.alibaba.druid.sql.ast.statement.SQLSelectItem;
 import com.alibaba.druid.sql.ast.statement.SQLSelectQuery;
@@ -52,6 +56,10 @@ abstract public class DruidUtils {
 	}
 	
 
+	public static List<SQLStatement> parseStatements(String sql) {
+		return parseStatements(sql, DbType.mysql);
+	}
+	
     public static List<SQLStatement> parseStatements(String sql, DbType dbType) {
     	DbmMySqlLexer lexer = new DbmMySqlLexer(sql);
     	lexer.nextToken();
@@ -127,6 +135,30 @@ abstract public class DruidUtils {
 	    	x.setOrderBy(null);
 	    }
 	}
+	
+	
+	
+	public static List<SelectItemInfo> extractSelectItems(String sql) {
+		SQLSelectQueryBlock query = parseAsSelectQuery(sql);
+		List<SQLSelectItem> selectItems = query.getSelectList();
+		List<SelectItemInfo> selectItemList = selectItems.stream().map(item -> {
+			SQLPropertyExpr expr = (SQLPropertyExpr)item.getExpr();
+			String name = expr.getName().replace("`", "");
+			SelectItemInfo sitem = new SelectItemInfo(name, item.getAlias2());
+			return sitem;
+		}).collect(Collectors.toList());
+		return selectItemList;
+	}
+	
+	public static SQLSelectQueryBlock parseAsSelectQuery(String sql) {
+		SQLSelectStatement sqlStatement = (SQLSelectStatement)SQLUtils.parseSingleMysqlStatement(sql);
+		
+		SQLSelect select = sqlStatement.getSelect();
+		SQLSelectQueryBlock query = select.getQueryBlock();
+//		List<SQLSelectItem> selectItems = query.getSelectList();
+		return query;
+	}
+	
 	private DruidUtils(){
 	}
 

@@ -1,10 +1,13 @@
 package org.onetwo.common.db.sqlext;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.io.IOException;
 import java.util.List;
 
 import org.junit.Test;
 import org.onetwo.common.db.DruidUtils;
+import org.onetwo.common.db.sql.SelectItemInfo;
 import org.onetwo.common.file.FileUtils;
 import org.springframework.core.io.ClassPathResource;
 
@@ -182,6 +185,28 @@ public class DruidUtilsTest {
 		
 		
 		return selectStatement;
+	}
+	
+	@Test
+	public void testGetSelectColumnNames() {
+		String sql = "SELECT\n"
+				+ "	dpt.`name` as '地市',\n"
+				+ "	cd.max_qty as '最大客户销量',\n"
+				+ "	cd.max_product_cnt as '最大品规数',\n"
+				+ "	cd.price_range_cnt as '全市经营价位段档位数量',\n"
+				+ "	cd.begin_date as '开始日期',\n"
+				+ "	cd.end_date as '结束日期'\n"
+				+ "FROM\n"
+				+ "	tbc2_target_city_data cd \n"
+				+ "left join \n"
+				+ "	org_department dpt on dpt.id = cd.depart_id\n"
+				+ "WHERE\n"
+				+ "	cd.depart_id = :city_depart_id";
+		
+		List<SelectItemInfo> selectItems = DruidUtils.extractSelectItems(sql);
+		System.out.println(selectItems);
+		assertThat(selectItems).size().isEqualTo(6);
+		
 	}
 	
 }

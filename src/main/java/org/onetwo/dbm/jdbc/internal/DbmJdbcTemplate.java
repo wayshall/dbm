@@ -296,9 +296,10 @@ public class DbmJdbcTemplate extends JdbcTemplate implements DbmJdbcOperations {
 	public void execute(@DbmJdbcSqlMark String sql) throws DataAccessException {
 		super.execute(sql);
 	}
-	
+
 	@Override
-	public <T> List<T> query(String sql, RowMapper<T> rowMapper, Object... args) throws DataAccessException {
+	@DbmJdbcOperationMark(type=DbmJdbcOperationType.QUERY)
+	public <T> List<T> query(@DbmJdbcSqlMark String sql, RowMapper<T> rowMapper, @DbmJdbcArgsMark Object... args) throws DataAccessException {
 		return query(sql, args, new DbmListRowMapperResultSetExtractor<T>(rowMapper));
 	}
 
