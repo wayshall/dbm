@@ -88,6 +88,7 @@ public class JdbcDaoRowMapperFactory implements RowMapperFactory {
 		private Function<Integer, Map<String, Object>> mapSupplier;
 		
 		public CustomMapRowMapper(Function<Integer, Map<String, Object>> mapSupplier) {
+			this.mapSupplier = mapSupplier;
 		}
 
 		protected Map<String, Object> createColumnMap(int columnCount) {
