@@ -7,7 +7,6 @@ import java.util.Map;
 
 import org.onetwo.common.db.DbmQueryValue;
 import org.onetwo.common.db.EntityManagerProvider;
-import org.onetwo.common.db.ILogicDeleteEntity;
 import org.onetwo.common.db.builder.QueryBuilder;
 import org.onetwo.common.db.sqlext.SQLSymbolManager;
 import org.onetwo.common.utils.Page;
