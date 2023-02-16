@@ -141,7 +141,9 @@ abstract public class DruidUtils {
 	public static List<SelectItemInfo> extractSelectItems(String sql) {
 		SQLSelectQueryBlock query = parseAsSelectQuery(sql);
 		List<SQLSelectItem> selectItems = query.getSelectList();
-		List<SelectItemInfo> selectItemList = selectItems.stream().map(item -> {
+		List<SelectItemInfo> selectItemList = selectItems.stream().filter(item -> {
+			return item.getExpr() instanceof SQLPropertyExpr;
+		}).map(item -> {
 			SQLPropertyExpr expr = (SQLPropertyExpr)item.getExpr();
 			String name = expr.getName().replace("`", "");
 			SelectItemInfo sitem = new SelectItemInfo(name, item.getAlias2());
