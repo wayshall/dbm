@@ -516,7 +516,7 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 		return this.parameters.remove(index);
 	}
 	
-	private Pair<String, Object> addAndCheckParamValue(Param name, String pname, final Object pvalue){
+	private Pair<String, Object> addAndCheckParamValue(DbmParamInfo name, String pname, final Object pvalue){
 //		Object val = convertEnumValue(name, pvalue);
 		Object val = pvalue;
 		if (String.class.isInstance(val) && name.isLikeQuery()) {
@@ -530,7 +530,8 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 		return Pair.of(pname, val);
 	}
 	
-	private Object convertQueryValue(Param name, Object val){
+//	private Object convertQueryValue(Param name, Object val){
+	private Object convertQueryValue(DbmParamInfo name, Object val){
 		if (name!=null && val instanceof Enum) {
 			if (val instanceof DbmEnumValueMapping) {
 				val = ((DbmEnumValueMapping<?>)val).getEnumMappingValue();
@@ -549,7 +550,8 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 //			parserContext.putAll((ParserContext) pvalue);
 		}else */
 		if(mp.hasParameterAnnotation(Param.class)){
-			Param paramMeta = mp.getParameterAnnotation(Param.class);
+//			Param paramMeta = mp.getParameterAnnotation(Param.class);
+			DbmParamInfo paramMeta = mp.getParamInfo();
 			if(paramMeta.renamedUseIndex()){
 				List<?> listValue = LangUtils.asList(pvalue);
 				int index = 0;
@@ -574,6 +576,7 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 			}
 				
 		}else if(mp.hasParameterAnnotation(BatchObject.class)){
+			// 若后续需要 @BatchObject 支持别名，可修改DbmParamInfo的name属性传入
 			putArg2Map(values, null, BatchObject.class, pvalue);
 			
 		}else{
@@ -584,7 +587,7 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 		
 	}
 	
-	private void putArg2Map(Map<Object, Object> values, Param paramMeta, Object key, Object value){
+	private void putArg2Map(Map<Object, Object> values, DbmParamInfo paramMeta, Object key, Object value){
 		if(values.containsKey(key)){
 			throw new IllegalArgumentException("parameter has exist: " + key);
 		}
@@ -692,8 +695,9 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 	protected static class DynamicMethodParameter extends BaseMethodParameter {
 
 		final protected String[] condidateParameterNames;
-		final protected Param nameAnnotation;
-		final protected String parameterName;
+//		final protected Param nameAnnotation;
+//		final protected String parameterName;
+		final protected DbmParamInfo paramInfo;
 		
 		public DynamicMethodParameter(Method method, int parameterIndex, Parameter parameter) {
 			this(method, parameterIndex, parameter, LangUtils.EMPTY_STRING_ARRAY);
@@ -701,12 +705,16 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 		public DynamicMethodParameter(Method method, int parameterIndex, Parameter parameter, String[] parameterNamesByMethodName) {
 			super(method, parameterIndex);
 			this.condidateParameterNames = parameterNamesByMethodName;
-			nameAnnotation = getParameterAnnotation(Param.class);
+			Param nameAnnotation = getParameterAnnotation(Param.class);
 
+			DbmParamInfo paramInfo = new DbmParamInfo();
 			//参数查找
 			String pname = null;
 			if(nameAnnotation!=null){
 				pname = nameAnnotation.value();
+				paramInfo.setEnumType(nameAnnotation.enumType());
+				paramInfo.setLikeQuery(nameAnnotation.isLikeQuery());
+				paramInfo.setRenamedUseIndex(nameAnnotation.renamedUseIndex());
 			}else if(parameter!=null && parameter.isNamePresent()){
 				pname = parameter.getName();
 			}else if(condidateParameterNames.length>getParameterIndex()){
@@ -714,7 +722,10 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 			}else{
 				pname = String.valueOf(getParameterIndex());
 			}
-			this.parameterName = pname;
+//			this.parameterName = pname;
+			
+			paramInfo.setName(pname);
+			this.paramInfo = paramInfo;
 		}
 
 		/****
@@ -724,9 +735,12 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 		 * 以上皆否，则通过参数位置作为名称
 		 */
 		public String getParameterName() {
-			return parameterName;
+//			return parameterName;
+			return this.paramInfo.getName();
 		}
-		
+		public DbmParamInfo getParamInfo() {
+			return paramInfo;
+		}
 	}
 	
 }
