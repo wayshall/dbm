@@ -258,8 +258,8 @@
     </dependency> 
     
     <dependency>
-		<groupId>com.oracle</groupId>
-		<artifactId>ojdbc6</artifactId>
+        <groupId>com.oracle.database.jdbc</groupId>
+        <artifactId>ojdbc6</artifactId>
         <scope>test</scope>
     </dependency>
     
