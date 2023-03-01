@@ -17,6 +17,7 @@ import org.onetwo.common.db.builder.QueryField;
 import org.onetwo.common.db.builder.QueryFieldImpl;
 import org.onetwo.common.db.builder.SqlFuncFieldImpl;
 import org.onetwo.common.db.sqlext.ExtQuery.K.IfNull;
+import org.onetwo.common.log.JFishLoggerFactory;
 import org.onetwo.common.reflect.ReflectUtils;
 import org.onetwo.common.utils.ArrayUtils;
 import org.onetwo.common.utils.Assert;
@@ -155,7 +156,11 @@ public abstract class ExtQueryUtils {
 	
 	public static String buildCountSql(String sql, String countValue){
 		if(SqlUtils.isDruidPresent()){
-			return DruidUtils.toCountSql(sql);
+			try {
+				return DruidUtils.toCountSql(sql);
+			} catch (Exception e) {
+				JFishLoggerFactory.getCommonLogger().error("druid parse sql error: " + e.getMessage());
+			}
 		}
 
 		//不能全部转为小写，因为会改变 命名参数，导致设置jdbc参数值时取不到对应的值而出错:No value supplied for the SQL parameter
