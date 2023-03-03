@@ -193,11 +193,12 @@ abstract public class BaseNamedSqlFileManager implements NamedSqlFileManager {
 			}
 //			np.addAll(namedinfos, throwIfExist);
 		}else{
-			if(namespaceProperties.containsKey(namespace)){
+			if(namespaceProperties.containsKey(namespace) && throwIfExist){
 				namespaceInfo = namespaceProperties.get(namespace);
-				if (throwIfExist) {
-					throw new DbmException("sql namespace has already exist : " + namespace+", file: " + f+", exists file: "+ namespaceInfo.getSource());
-				}
+				throw new DbmException("sql namespace has already exist : " + namespace+", file: " + f+", exists file: "+ namespaceInfo.getSource());
+//				if (throwIfExist) {
+//					throw new DbmException("sql namespace has already exist : " + namespace+", file: " + f+", exists file: "+ namespaceInfo.getSource());
+//				}
 			} else {
 				namespaceInfo = new CommonNamespaceProperties(namespace, f);
 				namespaceProperties.put(namespaceInfo.getKey(), namespaceInfo);
