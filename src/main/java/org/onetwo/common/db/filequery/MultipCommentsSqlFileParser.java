@@ -4,6 +4,7 @@ import java.util.Enumeration;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.onetwo.common.db.dquery.DbmSqlFileResource;
 import org.onetwo.common.db.filequery.SimpleSqlFileLineLexer.LineToken;
 import org.onetwo.common.db.spi.NamedQueryFile;
 import org.onetwo.common.db.spi.NamedQueryInfoParser;
@@ -104,7 +105,7 @@ public class MultipCommentsSqlFileParser implements NamedQueryInfoParser {
 	private List<QueryGlobalVariable> queryGlobalVariable;
 	
 	@Override
-	public void parseToNamedQueryFile(NamedQueryFile namespaceInfo, ResourceAdapter<?> sqlFile) {
+	public void parseToNamedQueryFile(NamedQueryFile namespaceInfo, DbmSqlFileResource<?> sqlFile) {
 		if(!sqlFile.exists()){
 			logger.info("sql file is not exists, ignore parse. namespace: " + namespaceInfo.getNamespace());
 			return ;
@@ -147,7 +148,7 @@ public class MultipCommentsSqlFileParser implements NamedQueryInfoParser {
 	}
 	
 	protected void parseQueryStatement(SimpleSqlFileLineLexer lineLexer,
-										NamedQueryFile namespaceInfo, ResourceAdapter<?> f){
+										NamedQueryFile namespaceInfo, DbmSqlFileResource<?> f){
 		List<String> comments = lineLexer.getLineBuf();
 		JFishProperties config = parseComments(comments);
 		//name
@@ -171,6 +172,7 @@ public class MultipCommentsSqlFileParser implements NamedQueryInfoParser {
 
 			bean.setName(name);
 			bean.setConfig(config);
+			bean.setDataBase(f.getDatabase());
 
 			namespaceInfo.put(bean.getName(), bean, true);
 

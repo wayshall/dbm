@@ -42,7 +42,7 @@ public class AnnotationBasedQueryInfoParser implements NamedQueryInfoParser {
 	}
 	
 	@Override
-	public void parseToNamedQueryFile(NamedQueryFile namedQueryFile, ResourceAdapter<?> file) {
+	public void parseToNamedQueryFile(NamedQueryFile namedQueryFile, DbmSqlFileResource<?> file) {
 		Set<Method> methods = selectMethods(namedQueryFile, file);
 		
 		if(methods.isEmpty()){

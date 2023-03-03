@@ -54,6 +54,7 @@ ${fragment['subWhere']}
 /***
  *  @name: findUserPage
  *  @property: countSql
+ *  @database: mysql
  */
 select 
     count(1)

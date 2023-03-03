@@ -16,6 +16,7 @@ import org.onetwo.common.utils.StringUtils;
  * @author way
  *
  */
+@Deprecated
 public class OneCommentBasedSqlFileParser extends DefaultSqlFileParser implements NamedQueryInfoParser {
 //	public static final String GLOBAL_NS_KEY = "global";
 //	public static final String COMMENT = "--";

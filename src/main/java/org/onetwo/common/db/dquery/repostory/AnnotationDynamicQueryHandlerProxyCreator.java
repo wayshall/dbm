@@ -38,7 +38,7 @@ public class AnnotationDynamicQueryHandlerProxyCreator extends DynamicQueryHandl
 		}
 		
 //		return sqlRes;
-		return new DbmSqlFileResource(sqlRes, interfaceClass);
+		return new DbmSqlFileResource(sqlRes, interfaceClass, database);
 	}
 	
 	/***
