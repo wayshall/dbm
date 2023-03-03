@@ -3,6 +3,7 @@ package org.onetwo.common.db.dquery;
 import java.io.File;
 import java.util.List;
 
+import org.onetwo.common.db.DataBase;
 import org.onetwo.common.propconf.ResourceAdapter;
 
 /**
@@ -13,13 +14,15 @@ public class DbmSqlFileResource<T> implements ResourceAdapter<T> {
 	
 	final private ResourceAdapter<T> source;
 	final private Class<T> mappedInterface;
+	final private DataBase database;
 
 
 	public DbmSqlFileResource(ResourceAdapter<T> source,
-			Class<T> mappedInterface) {
+			Class<T> mappedInterface, DataBase database) {
 		super();
 		this.source = source;
 		this.mappedInterface = mappedInterface;
+		this.database = database;
 	}
 
 	@Override
@@ -54,7 +57,9 @@ public class DbmSqlFileResource<T> implements ResourceAdapter<T> {
 	public String getPostfix() {
 		return source.getPostfix();
 	}
-	
-	
+
+	public DataBase getDatabase() {
+		return database;
+	}
 
 }

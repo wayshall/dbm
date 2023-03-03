@@ -6,6 +6,7 @@ import java.util.Optional;
 import javax.sql.DataSource;
 
 import org.apache.commons.lang3.StringUtils;
+import org.onetwo.common.db.DataBase;
 import org.onetwo.common.db.dquery.annotation.DbmRepository;
 import org.onetwo.common.db.filequery.DbmNamedSqlFileManager;
 import org.onetwo.common.db.spi.NamedQueryFile;
@@ -17,6 +18,7 @@ import org.onetwo.common.spring.SpringUtils;
 import org.onetwo.dbm.core.spi.DbmEntityManager;
 import org.onetwo.dbm.exception.DbmException;
 import org.onetwo.dbm.exception.FileNamedQueryException;
+import org.onetwo.dbm.jdbc.JdbcUtils;
 import org.onetwo.dbm.utils.Dbms;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.BeanNameAware;
@@ -89,7 +91,7 @@ public class DynamicQueryHandlerProxyCreator implements InitializingBean, Applic
 	@Override
 	public void afterPropertiesSet() throws Exception {
 		Assert.notNull(defaultQueryProvideManagerClass, "defaultQueryProvideManagerClass can not be null");
-		
+
 		QueryProvideManager queryProvideManager = findQueryProvideManager();
 		
 		NamedSqlFileManager namedSqlFileManager = (DbmNamedSqlFileManager)queryProvideManager.getFileNamedQueryManager().getNamedSqlFileManager();
@@ -110,7 +112,8 @@ public class DynamicQueryHandlerProxyCreator implements InitializingBean, Applic
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	protected DbmSqlFileResource<?> getSqlFile(DataSource dataSource){
-		return new DbmSqlFileResource(sqlFile, interfaceClass);
+		DataBase database = JdbcUtils.getDataBase(dataSource);
+		return new DbmSqlFileResource(sqlFile, interfaceClass, database);
 	}
 	
 	protected QueryProvideManager findQueryProvideManagerByClass(Class<?> clazz){

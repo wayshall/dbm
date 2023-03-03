@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Stream;
 
+import org.onetwo.common.db.dquery.DbmSqlFileResource;
 import org.onetwo.common.db.spi.NamedQueryFile;
 import org.onetwo.common.db.spi.NamedQueryFileListener;
 import org.onetwo.common.db.spi.NamedQueryInfo;
@@ -72,7 +73,7 @@ abstract public class BaseNamedSqlFileManager implements NamedSqlFileManager {
 	 * 解释sql文件
 	 */
 	@Override
-	public NamedQueryFile buildSqlFile(ResourceAdapter<?> sqlFile){
+	public NamedQueryFile buildSqlFile(DbmSqlFileResource<?> sqlFile){
 		Assert.notNull(sqlFile);
 		NamedQueryFile info = this.parseSqlFile(sqlFile, true);
 		this.buildSqlFileMonitor(sqlFile);
@@ -118,14 +119,14 @@ abstract public class BaseNamedSqlFileManager implements NamedSqlFileManager {
 	 * 监测sql文件变化
 	 * @param sqlfileArray
 	 */
-	protected void buildSqlFileMonitor(ResourceAdapter<?>... sqlfileArray){
+	protected void buildSqlFileMonitor(DbmSqlFileResource<?>... sqlfileArray){
 		if(watchSqlFile){
 			if(fileMonitor==null)
 				fileMonitor = FileWatcher.newWatcher(1);
 			this.watchFiles(sqlfileArray);
 		}
 	}
-	protected void watchFiles(ResourceAdapter<?>[] sqlResourceArray){
+	protected void watchFiles(DbmSqlFileResource<?>[] sqlResourceArray){
 		if(LangUtils.isEmpty(sqlResourceArray))
 			return ;
 		this.fileMonitor.watchFile(period, new FileChangeListener() {
@@ -133,7 +134,7 @@ abstract public class BaseNamedSqlFileManager implements NamedSqlFileManager {
 			@Override
 			public void fileChanged(ResourceAdapter<?> file) {
 				try {
-					reloadFile(file);
+					reloadFile((DbmSqlFileResource<?>)file);
 				} catch (Exception e) {
 					logger.error("watch sql file error: " + e.getMessage(), e);
 				}
@@ -141,7 +142,7 @@ abstract public class BaseNamedSqlFileManager implements NamedSqlFileManager {
 		}, sqlResourceArray);
 	}
 	
-	public void reloadFile(ResourceAdapter<?> file){
+	public void reloadFile(DbmSqlFileResource<?> file){
 		/*JFishProperties pf = loadSqlFile(file);
 		if(pf==null){
 			logger.warn("no file relaoded : " + file);
@@ -158,7 +159,7 @@ abstract public class BaseNamedSqlFileManager implements NamedSqlFileManager {
 		return GLOBAL_NS_KEY.equals(namespace) || !namespace.contains(".");
 	}
 	
-	protected Map<String, NamedQueryFile> parseSqlFiles(ResourceAdapter<?>[] sqlfileArray){
+	protected Map<String, NamedQueryFile> parseSqlFiles(DbmSqlFileResource<?>[] sqlfileArray){
 		if(LangUtils.isEmpty(sqlfileArray)){
 			logger.info("no named sql file found.");
 			return Collections.emptyMap();
@@ -173,7 +174,7 @@ abstract public class BaseNamedSqlFileManager implements NamedSqlFileManager {
 	}
 
 
-	protected NamedQueryFile parseSqlFile(ResourceAdapter<?> f, boolean throwIfExist){
+	protected NamedQueryFile parseSqlFile(DbmSqlFileResource<?> f, boolean throwIfExist){
 		logger.info("parse named sql file: {}", f.getName());
 		
 		String namespace = getFileNameNoJfishSqlPostfix(f);
@@ -192,12 +193,15 @@ abstract public class BaseNamedSqlFileManager implements NamedSqlFileManager {
 			}
 //			np.addAll(namedinfos, throwIfExist);
 		}else{
-			if(namespaceProperties.containsKey(namespace) && throwIfExist){
-				NamedQueryFile existNp = namespaceProperties.get(namespace);
-				throw new DbmException("sql namespace has already exist : " + namespace+", file: " + f+", exists file: "+ existNp.getSource());
+			if(namespaceProperties.containsKey(namespace)){
+				namespaceInfo = namespaceProperties.get(namespace);
+				if (throwIfExist) {
+					throw new DbmException("sql namespace has already exist : " + namespace+", file: " + f+", exists file: "+ namespaceInfo.getSource());
+				}
+			} else {
+				namespaceInfo = new CommonNamespaceProperties(namespace, f);
+				namespaceProperties.put(namespaceInfo.getKey(), namespaceInfo);
 			}
-			namespaceInfo = new CommonNamespaceProperties(namespace, f);
-			namespaceProperties.put(namespaceInfo.getKey(), namespaceInfo);
 		}
 		
 		buildNamedInfosToNamespaceFromResource(namespaceInfo, f);
@@ -235,7 +239,7 @@ abstract public class BaseNamedSqlFileManager implements NamedSqlFileManager {
 	 * @param np
 	 * @param file
 	 */
-	protected void buildNamedInfosToNamespaceFromResource(NamedQueryFile np, ResourceAdapter<?> file){
+	protected void buildNamedInfosToNamespaceFromResource(NamedQueryFile np, DbmSqlFileResource<?> file){
 //		sqlFileParser.parseToNamedQueryFile(np, file);
 		
 		this.queryInfoParsers.forEach(parser->{
