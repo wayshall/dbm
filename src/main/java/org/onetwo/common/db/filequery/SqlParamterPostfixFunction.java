@@ -1,5 +1,8 @@
 package org.onetwo.common.db.filequery;
 
+import org.onetwo.common.db.filequery.SqlParamterPostfixFunctions.SqlPostfixFunctionInfo;
+import org.onetwo.common.db.filequery.postfunc.SqlPostfixFunction;
+
 /***
  * 处理sql参数值的后缀函数
  * 
@@ -8,7 +11,11 @@ package org.onetwo.common.db.filequery;
  * @author way
  *
  */
-public interface SqlParamterPostfixFunction {
+public interface SqlParamterPostfixFunction extends SqlPostfixFunction {
+	
+	public default Object execute(SqlPostfixFunctionInfo funcInfo, String paramName, Object value) {
+		return toSqlParameterValue(paramName, value);
+	}
 	
 	public Object toSqlParameterValue(String paramName, Object value);
 

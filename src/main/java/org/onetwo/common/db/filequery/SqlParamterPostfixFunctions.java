@@ -6,8 +6,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.commons.compress.utils.Lists;
 import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
 import org.onetwo.common.convert.Types;
+import org.onetwo.common.db.filequery.postfunc.SqlPostfixFunction;
 import org.onetwo.common.db.spi.SqlParamterPostfixFunctionRegistry;
 import org.onetwo.common.db.sqlext.ExtQueryUtils;
 import org.onetwo.common.reflect.ReflectUtils;
@@ -27,6 +29,9 @@ import com.google.common.collect.Maps;
  */
 public class SqlParamterPostfixFunctions implements SqlParamterPostfixFunctionRegistry {
 
+	public static final String FUNC_START = "$";
+	public static final String FUNC_END = "_";
+	
 	public static final String SQL_POST_FIX_FUNC_MARK = "?";
 	
 	/*final private static SqlParamterPostfixFunctionRegistry instance = new SqlParamterPostfixFunctions();
@@ -38,8 +43,8 @@ public class SqlParamterPostfixFunctions implements SqlParamterPostfixFunctionRe
 		return SQL_POST_FIX_FUNC_MARK;
 	}
 
-	private Map<String, SqlParamterPostfixFunction> funcMap = LangUtils.newHashMap();
-	private Map<Class<?>, Map<String, SqlParamterPostfixFunction>> typeFuncMap = Maps.newLinkedHashMap();
+	private Map<String, SqlPostfixFunction> funcMap = LangUtils.newHashMap();
+	private Map<Class<?>, Map<String, SqlPostfixFunction>> typeFuncMap = Maps.newLinkedHashMap();
 
 	public SqlParamterPostfixFunctions(){
 		// %value%
@@ -127,7 +132,7 @@ public class SqlParamterPostfixFunctions implements SqlParamterPostfixFunctionRe
 		
 	}
 
-	private SqlParamterPostfixFunctionRegistry register(String postfix, SqlParamterPostfixFunction func){
+	public SqlParamterPostfixFunctionRegistry register(String postfix, SqlPostfixFunction func){
 		funcMap.put(postfix, func);
 		return this;
 	}
@@ -139,18 +144,22 @@ public class SqlParamterPostfixFunctions implements SqlParamterPostfixFunctionRe
 	}
 	
 	private SqlParamterPostfixFunctionRegistry bindingTypeFunc(Class<?> type, Class<?> typeFuncClass){
-		Map<String, SqlParamterPostfixFunction> funcMap = typeFuncMap.get(type);
+		Map<String, SqlPostfixFunction> funcMap = typeFuncMap.get(type);
 		if (funcMap==null) {
 			funcMap = Maps.newConcurrentMap();
 			typeFuncMap.put(type, funcMap);
 		}
 		List<Method> staticMethods = ReflectUtils.findAllStaticMethods(typeFuncClass);
 		for (Method method : staticMethods) {
-			funcMap.put(method.getName(), new SqlParamterPostfixFunction() {
+			funcMap.put(method.getName(), new SqlPostfixFunction() {
 				@Override
-				public Object toSqlParameterValue(String paramName, Object value) {
+				public Object execute(SqlPostfixFunctionInfo funcInfo, String paramName, Object value) {
 					try {
-						return method.invoke(null, value);
+						if (method.getParameterCount()==1) {
+							return method.invoke(null, value);
+						} else {
+							return method.invoke(null, value, funcInfo);
+						}
 					} catch (Exception e) {
 						ReflectUtils.handleReflectionException(e);
 					}
@@ -164,28 +173,34 @@ public class SqlParamterPostfixFunctions implements SqlParamterPostfixFunctionRe
 	/* (non-Javadoc)
 	 * @see org.onetwo.common.spring.sql.SqlParamterPostfixFunctionRegistry#getFunc(java.lang.String)
 	 */
-	@Override
-	@Deprecated
-	public SqlParamterPostfixFunction getFunc(String postfix){
-		if(!funcMap.containsKey(postfix)){
-			throw new DbmException("no postfix func fund: " + postfix);
-		}
-		return funcMap.get(postfix);
-	}
+//	@Override
+//	@Deprecated
+//	public SqlParamterPostfixFunction getFunc(String postfix){
+//		if(!funcMap.containsKey(postfix)){
+//			throw new DbmException("no postfix func fund: " + postfix);
+//		}
+//		return funcMap.get(postfix);
+//	}
 	
 	@Override
-	public SqlParamterPostfixFunction getFunc(Object value, String postfix){
-		SqlParamterPostfixFunction func = funcMap.get(postfix);
+//	public SqlParamterPostfixFunction getFunc(Object value, String postfix){
+	public Object executeFunc(String property, Object value, String postfix){
+		Object res = null;
+		SqlPostfixFunctionInfo funcInfo = parseSqlPostfixFunc(postfix);
+		
+		String funcName = funcInfo.getFunctionName();
+		SqlPostfixFunction func = funcMap.get(funcName);
 		if (func!=null) {
-			return func;
+			res = func.execute(funcInfo, property, value);
+			return res;
 		}
 		if (value==null) {
 			throw new DbmException("postfix func not fund for null, postfix:" + postfix);
 		}
-		for (Entry<Class<?>, Map<String, SqlParamterPostfixFunction>> entry : typeFuncMap.entrySet()) {
+		for (Entry<Class<?>, Map<String, SqlPostfixFunction>> entry : typeFuncMap.entrySet()) {
 			Class<?> type = entry.getKey();
 			if (type.isAssignableFrom(value.getClass())) {
-				func = entry.getValue().get(postfix);
+				func = entry.getValue().get(funcName);
 				if (func!=null) {
 					break;
 				}
@@ -194,9 +209,50 @@ public class SqlParamterPostfixFunctions implements SqlParamterPostfixFunctionRe
 		
 		if(func==null){
 			throw new DbmException("postfix func not fund for type: " + value.getClass() + ", postfix:" + postfix);
+		} else {
+			res = func.execute(funcInfo, property, value);
 		}
-		
-		return func;
+
+		return res;
 	}
 
+
+	public SqlPostfixFunctionInfo parseSqlPostfixFunc(String input) {
+		List<String> paramsList = Lists.newArrayList();
+        List<String> funcNames = Lists.newArrayList();
+        
+        String[] strs = StringUtils.split(input, FUNC_END);
+        for (String str : strs) {
+        	if (str.startsWith(FUNC_START)) {
+        		String param = str.substring(FUNC_START.length());
+        		if (StringUtils.isNotBlank(param)) {
+        			paramsList.add(param);
+        		}
+        	} else {
+        		funcNames.add(str);
+        	}
+        }
+		
+        String funcName = StringUtils.join(funcNames, FUNC_END);
+		return new SqlPostfixFunctionInfo(funcName, paramsList);
+	}
+
+	static public class SqlPostfixFunctionInfo {
+	    private String functionName;
+	    private List<String> argumentNames;
+	    
+	    public SqlPostfixFunctionInfo(String functionName, List<String> argumentNames) {
+	        this.functionName = functionName;
+	        this.argumentNames = argumentNames;
+	    }
+	    
+	    public String getFunctionName() {
+	        return functionName;
+	    }
+	    
+	    public List<String> getArgumentNames() {
+	        return argumentNames;
+	    }
+	}
+	
 }

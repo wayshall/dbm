@@ -77,10 +77,8 @@ final public class ParsedSqlUtils {
 			public Object getParamterValue(BeanWrapper paramBean){
 				Object value = JdbcParamValueConvers.getParamterValue(paramBean, property);
 				if(hasFunction()){
-//					value = ReflectUtils.invokeMethod(function, SqlParamterPostfixFunctions.getInstance(), value);
-//					value = SqlParamterPostfixFunctions.getInstance().getFunc(function).toSqlString(property, value);
-//					value = sqlParamterPostfixFunctions.getFunc(function).toSqlParameterValue(property, value);
-					value = sqlParamterPostfixFunctions.getFunc(value, function).toSqlParameterValue(property, value);
+//					value = sqlParamterPostfixFunctions.getFunc(value, function).toSqlParameterValue(property, value);
+					value = sqlParamterPostfixFunctions.executeFunc(property, value, function);
 				}
 				return value;
 			}
