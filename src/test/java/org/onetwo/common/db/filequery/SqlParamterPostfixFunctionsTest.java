@@ -3,7 +3,8 @@ package org.onetwo.common.db.filequery;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.Test;
-import org.onetwo.common.db.filequery.SqlParamterPostfixFunctions.SqlPostfixFunctionInfo;
+import org.onetwo.common.db.filequery.postfunc.SqlParamterPostfixFunctions;
+import org.onetwo.common.db.filequery.postfunc.SqlParamterPostfixFunctions.SqlPostfixFunctionInfo;
 
 public class SqlParamterPostfixFunctionsTest {
 	

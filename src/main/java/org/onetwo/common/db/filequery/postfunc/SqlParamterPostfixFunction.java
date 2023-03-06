@@ -1,7 +1,6 @@
-package org.onetwo.common.db.filequery;
+package org.onetwo.common.db.filequery.postfunc;
 
-import org.onetwo.common.db.filequery.SqlParamterPostfixFunctions.SqlPostfixFunctionInfo;
-import org.onetwo.common.db.filequery.postfunc.SqlPostfixFunction;
+import org.onetwo.common.db.filequery.postfunc.SqlParamterPostfixFunctions.SqlPostfixFunctionInfo;
 
 /***
  * 处理sql参数值的后缀函数

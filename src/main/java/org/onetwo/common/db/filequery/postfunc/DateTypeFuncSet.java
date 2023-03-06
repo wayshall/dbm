@@ -1,10 +1,10 @@
-package org.onetwo.common.db.filequery;
+package org.onetwo.common.db.filequery.postfunc;
 
 import java.util.Date;
 
 import org.onetwo.common.convert.Types;
 import org.onetwo.common.date.DateUtils;
-import org.onetwo.common.db.filequery.SqlParamterPostfixFunctions.SqlPostfixFunctionInfo;
+import org.onetwo.common.db.filequery.postfunc.SqlParamterPostfixFunctions.SqlPostfixFunctionInfo;
 import org.onetwo.common.utils.LangUtils;
 import org.onetwo.dbm.exception.DbmException;
 

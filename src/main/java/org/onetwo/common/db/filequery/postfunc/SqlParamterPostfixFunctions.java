@@ -1,4 +1,4 @@
-package org.onetwo.common.db.filequery;
+package org.onetwo.common.db.filequery.postfunc;
 
 import java.lang.reflect.Method;
 import java.util.Date;
@@ -9,7 +9,6 @@ import java.util.Map.Entry;
 import org.apache.commons.compress.utils.Lists;
 import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
 import org.onetwo.common.convert.Types;
-import org.onetwo.common.db.filequery.postfunc.SqlPostfixFunction;
 import org.onetwo.common.db.spi.SqlParamterPostfixFunctionRegistry;
 import org.onetwo.common.db.sqlext.ExtQueryUtils;
 import org.onetwo.common.reflect.ReflectUtils;
