@@ -26,7 +26,7 @@ public class DateTypeFuncSet {
 		return DateUtils.format(DateUtils.DATE_TIME, date);
 	}
 	
-	public static Date minutes_ago(Date date, SqlPostfixFunctionInfo funcInfo) {
+	public static Date minutesAgo(Date date, SqlPostfixFunctionInfo funcInfo) {
 		if (LangUtils.isEmpty(funcInfo.getArgumentNames())) {
 			throw new DbmException("sql postfix function argument not found!");
 		}
@@ -35,7 +35,7 @@ public class DateTypeFuncSet {
 	}
 
 	
-	public static Date minutes_later(Date date, SqlPostfixFunctionInfo funcInfo) {
+	public static Date minutesLater(Date date, SqlPostfixFunctionInfo funcInfo) {
 		if (LangUtils.isEmpty(funcInfo.getArgumentNames())) {
 			throw new DbmException("sql postfix function argument not found!");
 		}

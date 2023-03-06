@@ -132,7 +132,16 @@ public class SqlParamterPostfixFunctions implements SqlParamterPostfixFunctionRe
 	}
 
 	public SqlParamterPostfixFunctionRegistry register(String postfix, SqlPostfixFunction func){
-		funcMap.put(postfix, func);
+		return register(postfix, func, true);
+	}
+	
+	public SqlParamterPostfixFunctionRegistry register(String funcName, SqlPostfixFunction func, boolean registerSnakeName){
+		funcMap.put(funcName, func);
+		if (registerSnakeName) {
+			// 自动转为
+			String snakeName = StringUtils.convert2UnderLineName(funcName);
+			funcMap.put(snakeName, func);
+		}
 		return this;
 	}
 	private SqlParamterPostfixFunctionRegistry register(String[] postfixs, SqlParamterPostfixFunction func){
@@ -150,7 +159,9 @@ public class SqlParamterPostfixFunctions implements SqlParamterPostfixFunctionRe
 		}
 		List<Method> staticMethods = ReflectUtils.findAllStaticMethods(typeFuncClass);
 		for (Method method : staticMethods) {
-			funcMap.put(method.getName(), new SqlPostfixFunction() {
+			String funcName = method.getName();
+			
+			SqlPostfixFunction func = new SqlPostfixFunction() {
 				@Override
 				public Object execute(SqlPostfixFunctionInfo funcInfo, String paramName, Object value) {
 					try {
@@ -164,7 +175,8 @@ public class SqlParamterPostfixFunctions implements SqlParamterPostfixFunctionRe
 					}
 					return null;
 				}
-			});
+			};
+			register(funcName, func);
 		}
 		return this;
 	}
