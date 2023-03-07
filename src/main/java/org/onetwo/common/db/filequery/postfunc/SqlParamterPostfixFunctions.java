@@ -47,7 +47,7 @@ public class SqlParamterPostfixFunctions implements SqlParamterPostfixFunctionRe
 
 	public SqlParamterPostfixFunctions(){
 		// %value%
-		register(new String[]{"like", "likeString"}, new SqlParamterPostfixFunction(){
+		register(new String[]{"like", "likeString"}, new SimpleSqlPostfixFunction(){
 			@Override
 			public Object toSqlParameterValue(String paramName, Object value) {
 				if (value==null) {
@@ -58,7 +58,7 @@ public class SqlParamterPostfixFunctions implements SqlParamterPostfixFunctionRe
 		});
 
 		// %value
-		register(new String[]{"prelike", "preLikeString"}, new SqlParamterPostfixFunction(){
+		register(new String[]{"prelike", "preLikeString"}, new SimpleSqlPostfixFunction(){
 			@Override
 			public Object toSqlParameterValue(String paramName, Object value) {
 				if (value==null) {
@@ -69,7 +69,7 @@ public class SqlParamterPostfixFunctions implements SqlParamterPostfixFunctionRe
 		});
 
 		// value%
-		register(new String[]{"postlike", "postLikeString"}, new SqlParamterPostfixFunction(){
+		register(new String[]{"postlike", "postLikeString"}, new SimpleSqlPostfixFunction(){
 			@Override
 			public Object toSqlParameterValue(String paramName, Object value) {
 				if (value==null) {
@@ -79,7 +79,7 @@ public class SqlParamterPostfixFunctions implements SqlParamterPostfixFunctionRe
 			}
 		});
 
-		register(new String[]{"atStartOfDate"}, new SqlParamterPostfixFunction(){
+		register(new String[]{"atStartOfDate"}, new SimpleSqlPostfixFunction(){
 			@Override
 			public Object toSqlParameterValue(String paramName, Object value) {
 				if(!Date.class.isInstance(value)){
@@ -90,7 +90,7 @@ public class SqlParamterPostfixFunctions implements SqlParamterPostfixFunctionRe
 			}
 		});
 
-		register(new String[]{"atEndOfDate"}, new SqlParamterPostfixFunction(){
+		register(new String[]{"atEndOfDate"}, new SimpleSqlPostfixFunction(){
 			@Override
 			public Object toSqlParameterValue(String paramName, Object value) {
 				if(!Date.class.isInstance(value)){
@@ -136,15 +136,27 @@ public class SqlParamterPostfixFunctions implements SqlParamterPostfixFunctionRe
 	}
 	
 	public SqlParamterPostfixFunctionRegistry register(String funcName, SqlPostfixFunction func, boolean registerSnakeName){
+		checkFuncName(funcName);
 		funcMap.put(funcName, func);
-		if (registerSnakeName) {
-			// 自动转为
-			String snakeName = StringUtils.convert2UnderLineName(funcName);
+		
+		String snakeName = StringUtils.convert2UnderLineName(funcName);
+		if (!funcName.equals(snakeName) && registerSnakeName) {
+			checkFuncName(snakeName);
 			funcMap.put(snakeName, func);
 		}
 		return this;
 	}
-	private SqlParamterPostfixFunctionRegistry register(String[] postfixs, SqlParamterPostfixFunction func){
+	
+	/****
+	 * 检查函数名是否已存在
+	 * @param funcName
+	 */
+	private void checkFuncName(String funcName) {
+		if (funcMap.containsKey(funcName)) {
+			throw new DbmException("the sql postfix function already exists, name: " + funcName);
+		}
+	}
+	private SqlParamterPostfixFunctionRegistry register(String[] postfixs, SimpleSqlPostfixFunction func){
 		for(String postfix : postfixs){
 			register(postfix, func);
 		}

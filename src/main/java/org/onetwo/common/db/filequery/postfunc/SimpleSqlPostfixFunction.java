@@ -10,7 +10,7 @@ import org.onetwo.common.db.filequery.postfunc.SqlParamterPostfixFunctions.SqlPo
  * @author way
  *
  */
-public interface SqlParamterPostfixFunction extends SqlPostfixFunction {
+public interface SimpleSqlPostfixFunction extends SqlPostfixFunction {
 	
 	public default Object execute(SqlPostfixFunctionInfo funcInfo, String paramName, Object value) {
 		return toSqlParameterValue(paramName, value);
