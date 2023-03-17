@@ -48,6 +48,7 @@ public class DbmSessionCacheTest extends SpringBaseJUnitTestCase {
 		CompanyEntity company = createCompany(1);
 		companySerivceImpl.save(company);
 		
+		// 同一个事务内调用4次查询
 		CompanyEntity dbCompany = companySerivceImpl.findByNameWithInvoke4Times("测试公司-1");
 		assertThat(dbCompany).isNotNull();
 		DebugContextData debugs = DebugContextInterceptor.getCurrentDebugContextData().get();
@@ -57,6 +58,7 @@ public class DbmSessionCacheTest extends SpringBaseJUnitTestCase {
 			return p.getKey().toLowerCase().contains("select ");
 		})
 		.collect(Collectors.toList());
+		// 实际上只有一个select查询
 		assertThat(querys.size()).isEqualTo(1);
 		
 		List<InvokeData> invokes = debugs.getInvokeList().stream().filter(i->{

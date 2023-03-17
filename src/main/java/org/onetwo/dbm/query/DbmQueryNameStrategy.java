@@ -42,7 +42,15 @@ public class DbmQueryNameStrategy extends SelectQueryNameStrategy {
 	
 
 	public DbmMappedField getDbmMappedField(String f) {
-		DbmMappedField field = entry.getMappedFields().get(f);
+		String fieldName = getFieldName(f);
+		if (entry==null) {
+			return null;
+		}
+		Map<String, DbmMappedField> mappedFields = entry.getMappedFields();
+		DbmMappedField field = mappedFields.get(fieldName);
+		if (field==null && entry.containsColumn(f)) {
+			field = entry.getFieldByColumnName(f);
+		}
 		return field;
 	}
 	

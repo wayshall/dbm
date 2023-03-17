@@ -69,6 +69,9 @@ public class HibernateBaseTest extends SpringBaseJUnitTestCase {
 			props.setProperty("hibernate.cache.region.factory_class", "org.hibernate.cache.internal.NoCachingRegionFactory");
 			props.setProperty("hibernate.physical_naming_strategy", "org.onetwo.jpa.hibernate.ImprovedPhysicalNamingStrategy");
 			props.setProperty("hibernate.implicit_naming_strategy", "org.hibernate.boot.model.naming.ImplicitNamingStrategyLegacyHbmImpl");
+			// hibernate 从4.1开始弃用了jdbc style的参数声明（即使用 '?' 占位符）改而使用jpa style的方式（即更像是是命名参数的方式：?1, ?2)
+			// 设置这个属性为true，可以使用jdbc style的参数声明
+			props.setProperty("hibernate.query.sql.jdbc_style_params_base", "true");
 			em.setJpaProperties(props);
 			return em;
 		}

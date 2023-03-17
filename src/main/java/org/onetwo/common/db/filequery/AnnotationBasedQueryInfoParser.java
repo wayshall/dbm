@@ -34,6 +34,9 @@ public class AnnotationBasedQueryInfoParser implements NamedQueryInfoParser {
 		}
 		DbmSqlFileResource<?> dbmSqlFile = (DbmSqlFileResource<?>) file;
 		Class<?> interfaceClass = dbmSqlFile.getMappedInterface();
+		if (interfaceClass==null) {
+			return Collections.emptySet();
+		}
 		Set<Method> methods = MethodIntrospector.selectMethods(interfaceClass, (MethodFilter)method->{
 			return AnnotationUtils.findAnnotation(method, Query.class)!=null;
 		});

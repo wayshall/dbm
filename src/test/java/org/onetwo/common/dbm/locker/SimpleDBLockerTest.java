@@ -34,7 +34,7 @@ public class SimpleDBLockerTest extends DbmBaseTest {
 		
 //		CountDownLatch latch = new CountDownLatch(1);
 		new Thread(() -> {
-			dblocker.lock(lockId, ()-> {
+			dblocker.lock("新起线程获取数据库锁", lockId, ()-> {
 				LangUtils.await(lockTime);
 //				latch.countDown();
 				return null;
@@ -44,7 +44,7 @@ public class SimpleDBLockerTest extends DbmBaseTest {
 
 		// 休眠，让上面的线程先执行
 		LangUtils.await(1);
-		dblocker.lock(lockId, ()-> {
+		dblocker.lock("主线程获取数据库锁", lockId, ()-> {
 			t.stop();
 			return null;
 		});

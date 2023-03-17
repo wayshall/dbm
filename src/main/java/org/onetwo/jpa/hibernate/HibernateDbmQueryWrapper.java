@@ -10,6 +10,7 @@ import org.onetwo.common.db.AbstractQueryWrapper;
 import org.onetwo.common.db.spi.QueryWrapper;
 import org.onetwo.common.reflect.ReflectUtils;
 import org.onetwo.dbm.dialet.DBDialect.LockInfo;
+import org.onetwo.dbm.exception.DbmException;
 import org.onetwo.dbm.utils.DbmLock;
 import org.springframework.jdbc.core.RowMapper;
 
@@ -65,7 +66,15 @@ public class HibernateDbmQueryWrapper extends AbstractQueryWrapper implements Qu
 
 	@Override
 	public QueryWrapper setParameter(int position, Object value) {
-		sqlQuery.setParameter(position, value);
+		try {
+			sqlQuery.setParameter(position, value);
+		} catch (IllegalArgumentException e) {
+			if (e.getLocalizedMessage().contains("Could not locate ordinal parameter")) {
+				throw new DbmException(e.getMessage() + ". try to set hibernate.query.sql.jdbc_style_params_base=true", e);
+			} else {
+				throw e;
+			}
+		}
 		return this;
 	}
 

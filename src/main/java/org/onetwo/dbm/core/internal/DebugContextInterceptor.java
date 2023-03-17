@@ -3,6 +3,7 @@ package org.onetwo.dbm.core.internal;
 import java.lang.reflect.Method;
 import java.util.Optional;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.onetwo.common.log.JFishLoggerFactory;
 import org.onetwo.dbm.core.spi.DbmInterceptor;
@@ -115,6 +116,10 @@ public class DebugContextInterceptor implements DbmInterceptor, Ordered {
 		}
 		public Optional<DatabaseOperationType> getDbOperation() {
 			return dbOperation;
+		}
+		public String toString() {
+			return dbOperation.map(op -> op.name()).orElse("no db Operation") + 
+						": " + method.toGenericString() + ", args: " + StringUtils.join(args, ",");
 		}
 	}
 

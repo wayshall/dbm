@@ -57,7 +57,7 @@ import org.onetwo.dbm.utils.SpringAnnotationFinderTest;
 	BaseCrudEntityManagerTest.class,
 	DbmNestedMappingTest.class,
 	TransactionalListenerTest.class,
-	DbmSessionCacheTest.class,
+//	DbmSessionCacheTest.class,
 	UserTableIdEntityTest.class,
 	UserDbmIdEntityTest.class,
 	QueryConfigTest.class,

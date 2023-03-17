@@ -39,9 +39,9 @@ public class DbmNestedMappingTest extends DbmBaseTest {
 	private CompanyDao companyDao;
 	
 	public void clear(){
-//		dbmEntityManager.removeAll(EmployeeEntity.class);
-//		dbmEntityManager.removeAll(DepartmentEntity.class);
-//		dbmEntityManager.removeAll(CompanyEntity.class);
+		dbmEntityManager.removeAll(EmployeeEntity.class);
+		dbmEntityManager.removeAll(DepartmentEntity.class);
+		dbmEntityManager.removeAll(CompanyEntity.class);
 	}
 	
 	@Test

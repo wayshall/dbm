@@ -130,19 +130,23 @@ public class DbmSessionImpl extends AbstractDbmSession implements DbmSessionEven
 		if(this.transactionType==SessionTransactionType.CONTEXT_MANAGED 
 //				|| this.transactionType==SessionTransactionType.PROXY
 			){
+//			if (transaction!=null) {
+//				return transaction;
+//			}
 			throw new DbmException("the dbm session["+id+"] cannot start transaction manul, because it's transactional type is: " + this.transactionType);
 		}
 		if(transaction!=null){
-			throw new DbmException("the transaction has began in this dbm session: " + id);
+			throw new DbmException("the transaction has began in this dbm session: " + id + ", transactionType: " + transactionType);
 		}
 		DbmSessionFactoryImpl sf = (DbmSessionFactoryImpl) this.sessionFactory;
 		DbmTransaction transaction = sf.startNewDbmTransaction(definition);
 		sf.registerSessionSynchronization(this);
 		
 		this.transaction = transaction;
-		if(this.transactionType==null){
-			this.transactionType = SessionTransactionType.MANUAL;
-		}
+//		if(this.transactionType==null){
+//			this.transactionType = SessionTransactionType.MANUAL;
+//		}
+		this.transactionType = SessionTransactionType.MANUAL;
 		return transaction;
 	}
 
