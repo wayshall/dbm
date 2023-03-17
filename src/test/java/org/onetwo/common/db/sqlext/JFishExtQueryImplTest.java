@@ -57,7 +57,7 @@ public class JFishExtQueryImplTest {
 		properties.put(K.IF_NULL, K.IfNull.Ignore);
 		properties.put("routeName", " ");
 		properties.put("log_supplier_id", 22l);
-		properties.put(".sup.supplierCode", "supplierCodeValue");
+		properties.put(".sup.supplier_code", "supplierCodeValue");
 		properties.put(F.sqlFunc("ceil(@syn_end_time-@syn_start_time):>="), 1l);
 		ExtQueryInner q = sqlSymbolManagerFactory.getJdbc().createSelectQuery(LogRouteEntity.class, "ent",  properties);
 		q.build();
@@ -66,9 +66,10 @@ public class JFishExtQueryImplTest {
 				"left join syn_log_supplier sup on sup.id = ent.log_supplier_id where ent.log_supplier_id = :ent_log_supplier_id0 and sup.supplierCode = :sup_supplierCode1 and ceil(t.syn_end_time-t.syn_start_time) >= :ceil_t_syn_end_time_t_syn_start_time_2 order by ent.ID desc";
 		*/
 		String sql = "select ent.* from SYN_LOG_ROUTE ent left join syn_log_supplier sup on sup.id = ent.log_supplier_id "
-				+ "where ent.log_supplier_id = :ent_log_supplier_id0 and sup.supplierCode = :sup_supplierCode1 and ceil(ent.syn_end_time-ent.syn_start_time) >= :ceil_ent_syn_end_time_ent_syn_start_time_2";
-		String paramsting = "{ent_log_supplier_id0=22, sup_supplierCode1=supplierCodeValue, ceil_ent_syn_end_time_ent_syn_start_time_2=1}";
-//		System.out.println("testSqlQueryJoin: " + q.getSql().trim());
+				+ "where ent.log_supplier_id = :ent_log_supplier_id0 and sup.supplier_code = :sup_supplier_code1 and ceil(ent.syn_end_time-ent.syn_start_time) >= :ceil_ent_syn_end_time_ent_syn_start_time_2";
+		String paramsting = "{ent_log_supplier_id0=22, sup_supplier_code1=supplierCodeValue, ceil_ent_syn_end_time_ent_syn_start_time_2=1}";
+		System.out.println("testSqlQueryJoin: " + sql.trim());
+		System.out.println("testSqlQueryJoin: " + q.getSql().trim());
 //		System.out.println("testSqlQueryJoin: " + q.getParamsValue().getValues().toString());
 		Assert.assertEquals(sql.trim(), q.getSql().trim());
 		Assert.assertEquals(paramsting.trim(), q.getParamsValue().getValues().toString().trim());

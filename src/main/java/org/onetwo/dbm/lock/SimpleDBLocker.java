@@ -8,11 +8,14 @@ import java.util.Date;
 import java.util.Optional;
 import java.util.function.Supplier;
 
+import org.apache.commons.lang3.StringUtils;
 import org.onetwo.common.db.generator.meta.TableMeta;
 import org.onetwo.common.db.spi.BaseEntityManager;
+import org.onetwo.common.log.JFishLoggerFactory;
 import org.onetwo.dbm.core.spi.DbmSessionFactory;
 import org.onetwo.dbm.exception.DbmException;
 import org.onetwo.dbm.utils.DbmErrors;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
  *
  */
 public class SimpleDBLocker {
+	private static final Logger logger = JFishLoggerFactory.getLogger(SimpleDBLocker.class);
 	@Autowired
 	private BaseEntityManager baseEntityManager;
 	private String tableName = "dbm_lock";
@@ -75,13 +79,18 @@ public class SimpleDBLocker {
 	
 	@Transactional
 	public <T> T lock(String lockerId, Supplier<T> supplier) {
+		return lock(null, lockerId, supplier);
+	}
+	
+	@Transactional
+	public <T> T lock(String debugTag, String lockerId, Supplier<T> supplier) {
 		LockerEntity locker = baseEntityManager.lockWrite(LockerEntity.class, lockerId);
 		if (locker==null) {
 			throw new DbmException(DbmErrors.ERR_LOCK_ID_NOT_FOUND)
 								.put("lockerId", lockerId);
 		}
 		locker.setLockAt(new Date());
-		Locker lock = new Locker(locker);
+		Locker lock = new Locker(locker, debugTag);
 		try {
 			return supplier.get();
 		} finally {
@@ -105,16 +114,27 @@ public class SimpleDBLocker {
 	
 	
 	public class Locker {
+		private String debugTag;
 		private LockerEntity data;
 
-		public Locker(LockerEntity data) {
+		public Locker(LockerEntity data, String debugTag) {
 			super();
 			this.data = data;
+			this.debugTag = debugTag;
+			if (StringUtils.isNotBlank(debugTag)) {
+				logger.info("{} start lock...", debugTag);
+			}
 		}
 		
 		public void unlock() {
+			if (StringUtils.isNotBlank(debugTag)) {
+				logger.info("{} try to unlock...", debugTag);
+			}
 			data.setReleaseAt(new Date());
 			baseEntityManager.update(data);
+			if (StringUtils.isNotBlank(debugTag)) {
+				logger.info("{} unlocked", debugTag);
+			}
 		}
 	}
 

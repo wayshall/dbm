@@ -918,7 +918,6 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 			Object newFieldValue = mfield.fireDbmEntityFieldEvents(val, DbmEventAction.update);
 			if(newFieldValue!=val){
 				val = newFieldValue;
-				mfield.setValue(entity, val);
 			}
 			/*if(mfield.fireDbmEntityFieldEvents(val, DbmEventAction.update)!=val){
 				mfield.setValue(entity, val);
@@ -927,8 +926,20 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 				// 获取新的版本值
 				val = mfield.getVersionableType().getVersionValule(val);
 			}
-			if(val!=null)
-				sqlBuilder.append(mfield, val);
+			// 忽略null值和空字符串
+			if (val==null) {
+				continue;
+			}
+			// 映射的类型为String时
+			if (String.class.isAssignableFrom(mfield.getColumnType())) {
+				String str = val.toString();
+				// 忽略空字符串
+				if (StringUtils.isBlank(str)) {
+					continue;
+				}
+			}
+			sqlBuilder.append(mfield, val);
+			mfield.setValue(entity, val);
 			// where字段在processIBaseEntity之前另外处理，因为如果使用了类似updateAt的字段做版本，processIBaseEntity方法会修改updateAt字段的值
 			/* 
 			 * if(mfield.isIdentify()){

@@ -503,7 +503,10 @@ abstract public class AbstractNestedBeanMapper<T> {
 		
 //		public Object mapResult(Map<String, Integer> names, ResultSetWrappingSqlRowSet resutSetWrapper){
 		public Object mapResult(RowResultContext parentContext, Map<String, Integer> names, ColumnValueGetter columnValueGetter, int rowNum){
-			ResultSetWrappingSqlRowSet resutSetWrapper = parentContext.getRowSet();
+			ResultSetWrappingSqlRowSet resutSetWrapper = null;
+			if (parentContext!=null) {
+				resutSetWrapper = parentContext.getRowSet();
+			}
 			Integer hash = null;
 			Object entity = null;
 			BeanWrapper bw = null;

@@ -1,9 +1,11 @@
 package org.onetwo.common.db.filequery;
 
+import java.beans.PropertyDescriptor;
 import java.util.Enumeration;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.onetwo.common.db.DataBase;
 import org.onetwo.common.db.dquery.DbmSqlFileResource;
 import org.onetwo.common.db.filequery.SimpleSqlFileLineLexer.LineToken;
 import org.onetwo.common.db.spi.NamedQueryFile;
@@ -14,6 +16,7 @@ import org.onetwo.common.db.spi.SqlDirectiveExtractor;
 import org.onetwo.common.log.JFishLoggerFactory;
 import org.onetwo.common.propconf.JFishProperties;
 import org.onetwo.common.propconf.ResourceAdapter;
+import org.onetwo.dbm.exception.DbmException;
 import org.onetwo.dbm.exception.FileNamedQueryException;
 import org.slf4j.Logger;
 import org.springframework.beans.BeanWrapper;
@@ -288,7 +291,16 @@ public class MultipCommentsSqlFileParser implements NamedQueryInfoParser {
 		if(prop.indexOf(FileBaseNamedQueryInfo.DOT_KEY)!=-1){
 			prop = org.onetwo.common.utils.StringUtils.toCamel(prop, FileBaseNamedQueryInfo.DOT_KEY, false);
 		}
-		beanBw.setPropertyValue(prop, val);
+		PropertyDescriptor pd = beanBw.getPropertyDescriptor(prop);
+		if (pd.getPropertyType()==DataBase.class) {
+			val = DataBase.of(val.toString());
+		}
+		try {
+			beanBw.setPropertyValue(prop, val);
+		} catch (Exception e) {
+			FileBaseNamedQueryInfo bean = (FileBaseNamedQueryInfo)beanBw.getWrappedInstance();
+			throw new DbmException("NamedQuery[" + bean.getFullName() + "] set property error. perperty: " + prop + ", value: " + val);
+		}
 		/*try {
 			ReflectUtils.setExpr(bean, prop, val);
 		} catch (Exception e) {
