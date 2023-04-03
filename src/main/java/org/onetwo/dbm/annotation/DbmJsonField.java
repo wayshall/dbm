@@ -28,6 +28,12 @@ public @interface DbmJsonField {
 	 * @return
 	 */
 	boolean storeTyping() default false;
+	/***
+	 * 开启此属性后，从json转为Java时，会根据json里是否包含@class关键字判断是否需要使用Typing Mapper
+	 * 主要用于兼容类似下面的情况：开始未启用storeTyping，后来又启用了storeTyping属性，或相反。
+	 * @return
+	 */
+	boolean smartyParse() default false;
 	
 	/***
 	 * 保存到数据时，可转换的类型

@@ -1,7 +1,8 @@
 package org.onetwo.dbm.mapping.converter;
 
-import java.util.Collection;
+import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.onetwo.common.jackson.JsonMapper;
 import org.onetwo.dbm.mapping.DbmFieldValueConverter;
 import org.onetwo.dbm.mapping.DbmMappedField;
@@ -25,16 +26,44 @@ public class JsonFieldValueConverter implements DbmFieldValueConverter {
 		super();
 	}
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public Object forJava(DbmMappedField field, Object fieldValue) {
+		String json = (String)fieldValue;
+		if (StringUtils.isBlank(json)) {
+			return null;
+		}
+		
+		boolean typingJson = field.getJsonFieldAnnotation()!=null && field.getJsonFieldAnnotation().storeTyping();
+		boolean smartyParse = field.getJsonFieldAnnotation().smartyParse();
+		JsonMapper jsonMapper = null;
+		if (typingJson) {
+			jsonMapper = typingJsonMapper;
+			if (smartyParse) {
+				if (!json.contains("@class")) {
+					jsonMapper = this.jsonMapper;
+				}
+			}
+		} else {
+			jsonMapper = this.jsonMapper;
+			if (smartyParse) {
+				if (json.contains("@class")) {
+					jsonMapper = this.typingJsonMapper;
+				}
+			}
+		}
 		Class<?> propertyType = field.getPropertyInfo().getType();
-		if (Collection.class.isAssignableFrom(propertyType)) {
+		if (List.class.isAssignableFrom(propertyType)) {
 //			ReflectUtils.get
 			Class<?> valueType = field.getJsonFieldAnnotation().valueType();
 			if (!valueType.equals(void.class)) {
-				Object value = getActaulJsonMapper(field).fromJsonAsCollection((String)fieldValue, (Class<Collection>)propertyType, valueType);
+				Object value = jsonMapper.fromJsonAsList((String)fieldValue, valueType);
 				return value;
+			} else {
+				valueType = (Class<?>)field.getPropertyInfo().getParameterType(0);
+				if (valueType!=null) {
+					Object value = jsonMapper.fromJsonAsList((String)fieldValue, valueType);
+					return value;
+				}
 			}
 		}
 		return getActaulJsonMapper(field).fromJson(fieldValue, propertyType);
