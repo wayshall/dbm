@@ -347,7 +347,7 @@ public class DbmSessionImpl extends AbstractDbmSession implements DbmSessionEven
 	}
 	
 	public int delete(Class<?> entityClass, Object id){
-		Assert.notNull(id);
+		checkId(id);
 		DbmDeleteEvent deleteEvent = new DbmDeleteEvent(id, this);
 		deleteEvent.setEntityClass(entityClass);
 		deleteEvent.setDeleteType(DeleteType.BY_IDENTIFY);
@@ -365,14 +365,22 @@ public class DbmSessionImpl extends AbstractDbmSession implements DbmSessionEven
 	
 	@Override
 	public <T> T findById(Class<T> entityClass, Serializable id){
+		checkId(id);
 		DbmFindEvent event = new DbmFindEvent(id, this);
 		event.setEntityClass(entityClass);
 		this.fireEvents(event);
 		return (T)event.getResultObject();
 	}
 	
+	private void checkId(Object id) {
+		if (id==null) {
+			throw new DbmException("id can not be null");
+		}
+	}
+	
 	@Override
 	public <T> T lock(Class<T> entityClass, Serializable id, DbmLock lock, Integer timeoutInMillis) {
+		checkId(id);
 		DbmLockEvent event = new DbmLockEvent(id, lock, timeoutInMillis, this);
 		event.setEntityClass(entityClass);
 		this.fireEvents(event);
