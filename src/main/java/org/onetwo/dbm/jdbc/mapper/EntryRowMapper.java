@@ -50,6 +50,11 @@ public class EntryRowMapper<T> extends DbmBeanPropertyRowMapper<T> implements Ro
 
 	@Override
 	public T mapRow(ResultSet rs, int rowNum) throws SQLException {
+		return (T)mapRowWithBeanWrapper(rs, rowNum).getWrappedInstance();
+	}
+	
+	@Override
+	public BeanWrapper mapRowWithBeanWrapper(ResultSet rs, int rowNumber) throws SQLException {
 		Assert.state(entry!=null, "no mapping entry!");
 
 		ResultSetWrappingSqlRowSet resutSetWrapper = new ResultSetWrappingSqlRowSet(rs);
@@ -71,7 +76,7 @@ public class EntryRowMapper<T> extends DbmBeanPropertyRowMapper<T> implements Ro
 			column = DbmUtils.lookupColumnName(rsmd, index);
 			/*if(!entry.containsColumn(column))
 				continue;*/
-			this.setColumnValue(resutSetWrapper, bw, rowNum, index, column);
+			this.setColumnValue(resutSetWrapper, bw, rowNumber, index, column);
 			/*try {
 				if (entry.containsColumn(column)) {
 					field = entry.getFieldByColumnName(column);
@@ -95,7 +100,7 @@ public class EntryRowMapper<T> extends DbmBeanPropertyRowMapper<T> implements Ro
 			logger.info("===>>> mapp row cost time (milliseconds): " + costTime);
 		}
 		
-		return entity;
+		return bw;
 	}
 	
 	public void setColumnValue(ResultSetWrappingSqlRowSet resutSetWrapper, 

@@ -3,7 +3,9 @@ package org.onetwo.dbm.jdbc.mapper;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import org.onetwo.common.spring.SpringUtils;
 import org.onetwo.dbm.exception.DbmException;
+import org.springframework.beans.BeanWrapper;
 import org.springframework.jdbc.core.RowMapper;
 
 /**
@@ -11,6 +13,12 @@ import org.springframework.jdbc.core.RowMapper;
  * <br/>
  */
 public interface DataRowMapper<T> extends RowMapper<T> {
+	
+
+	default BeanWrapper mapRowWithBeanWrapper(ResultSet rs, int rowNum) throws SQLException {
+		T data = mapRow(rs, rowNum);;
+		return SpringUtils.newBeanWrapper(data);
+	}
 	
 	/*default void setColumnValue(ResultSetWrappingSqlRowSet resutSetWrapper, 
 			BeanWrapper bw, 
