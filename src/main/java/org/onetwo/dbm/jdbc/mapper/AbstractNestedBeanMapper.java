@@ -7,6 +7,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 
+import javax.persistence.Column;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.onetwo.common.convert.Types;
@@ -471,12 +473,21 @@ abstract public class AbstractNestedBeanMapper<T> {
 					if (classIntro.getClazz()==SimpleValueNestedMappingHoder.class) {
 						propertyName = idProperty.getName();
 					}
-					/*this.simpleFields.put(getFullName(toClumnName1(pd.getName())), jproperty);
-					this.simpleFields.put(getFullName(toClumnName2(pd.getName())), jproperty);*/
+					
 					ColumnProperty prop1 = new ColumnProperty(toClumnName1(propertyName), jproperty);
 					ColumnProperty prop2 = new ColumnProperty(toClumnName2(propertyName), jproperty);
 					this.simpleFields.put(getFullName(prop1.getColumnName()), prop1);
 					this.simpleFields.put(getFullName(prop2.getColumnName()), prop2);
+					
+					// 增加@Column支持
+					JFishProperty field = jproperty.getCorrespondingJFishProperty().orElse(null);
+					if (field!=null) {
+						Column fieldColumn = field.getAnnotation(Column.class);
+						if (fieldColumn!=null) {
+							ColumnProperty prop3 = new ColumnProperty(fieldColumn.name(), jproperty);
+							this.simpleFields.put(prop3.getColumnName(), prop3);
+						}
+					}
 				}
 			}
 		}
@@ -571,9 +582,9 @@ abstract public class AbstractNestedBeanMapper<T> {
 			return afterMapResult(entity, hash, isNew);
 		}
 		protected BeanWrapper mapResultClassObject(ResultSetWrappingSqlRowSet resutSetWrapper, Map<String, Integer> names, ColumnValueGetter columnValueGetter, int rowNum){
-//			if (resutSetWrapper==null || dataColumnMapper==null) {
-//				return mapResultClassObjectWithoutResultSet(names, columnValueGetter);
-//			}
+			if (resutSetWrapper==null || dataColumnMapper==null || resultClass==SimpleValueNestedMappingHoder.class) {
+				return mapResultClassObjectWithoutResultSet(names, columnValueGetter);
+			}
 //			Object mappedObject = classIntro.newInstance();
 //			BeanWrapper bw = createBeanWrapper(mappedObject);
 //			for(Entry<String, ColumnProperty> entry : simpleFields.entrySet()){
@@ -646,7 +657,7 @@ abstract public class AbstractNestedBeanMapper<T> {
 			return null;
 		}
 		/***
-		 * 第一种列名策略
+		 * 第一种列名策略: 统一转小写
 		 * @param fullName
 		 * @return
 		 */
@@ -654,7 +665,7 @@ abstract public class AbstractNestedBeanMapper<T> {
 			return JdbcUtils.lowerCaseName(fullName);
 		}
 		/***
-		 * 第二种列名策略
+		 * 第二种列名策略：大小写转下划线
 		 * @param fullName
 		 * @return
 		 */
