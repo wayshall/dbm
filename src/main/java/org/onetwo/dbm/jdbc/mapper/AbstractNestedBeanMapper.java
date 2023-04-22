@@ -1,7 +1,6 @@
 package org.onetwo.dbm.jdbc.mapper;
 
 import java.beans.PropertyDescriptor;
-import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -585,25 +584,25 @@ abstract public class AbstractNestedBeanMapper<T> {
 			if (resutSetWrapper==null || dataColumnMapper==null || resultClass==SimpleValueNestedMappingHoder.class) {
 				return mapResultClassObjectWithoutResultSet(names, columnValueGetter);
 			}
-//			Object mappedObject = classIntro.newInstance();
-//			BeanWrapper bw = createBeanWrapper(mappedObject);
-//			for(Entry<String, ColumnProperty> entry : simpleFields.entrySet()){
-//				Integer index = getIndexForColumnName(names, entry.getKey());
-//				if(index==null){
-//					continue;
-//				}
-//				this.dataColumnMapper.setColumnValue(resutSetWrapper, bw, rowNum, index, entry.getValue().getColumnName());
-//			}
-//			return bw;
-			
-			DataRowMapper<?> drm = context.rowMapperFactory.getBeanPropertyRowMapper(classIntro.getClazz());
-			BeanWrapper bw;
-			try {
-				bw = drm.mapRowWithBeanWrapper(resutSetWrapper.getResultSet(), rowNum);
-			} catch (SQLException e) {
-				throw new DbmException("dbm row mapping error: " + e.getMessage(), e);
+			Object mappedObject = classIntro.newInstance();
+			BeanWrapper bw = createBeanWrapper(mappedObject);
+			for(Entry<String, ColumnProperty> entry : simpleFields.entrySet()){
+				Integer index = getIndexForColumnName(names, entry.getKey());
+				if(index==null){
+					continue;
+				}
+				this.dataColumnMapper.setColumnValue(resutSetWrapper, bw, rowNum, index, entry.getValue().getColumnName());
 			}
 			return bw;
+			
+//			DataRowMapper<?> drm = context.rowMapperFactory.getBeanPropertyRowMapper(classIntro.getClazz());
+//			BeanWrapper bw;
+//			try {
+//				bw = drm.mapRowWithBeanWrapper(resutSetWrapper.getResultSet(), rowNum);
+//			} catch (SQLException e) {
+//				throw new DbmException("dbm row mapping error: " + e.getMessage(), e);
+//			}
+//			return bw;
 		}
 
 		protected BeanWrapper mapResultClassObjectWithoutResultSet(Map<String, Integer> names, ColumnValueGetter columnValueGetter){
