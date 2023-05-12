@@ -19,6 +19,13 @@ public @interface DbmNestedResult {
 	 * @return
 	 */
 	String id() default "";
+	
+	/****
+	 * 若id指定的列未找到，是否忽略。默认未抛错
+	 * @return
+	 */
+	boolean ignoreIfIdColumnNotFound() default false;
+	
 	/***
 	 * 默认使用"${property}_"，如果property是嵌套的，则"."会转为"_"
 	 * @return
