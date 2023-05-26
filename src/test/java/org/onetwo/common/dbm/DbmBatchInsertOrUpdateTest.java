@@ -21,7 +21,6 @@ import org.onetwo.common.profiling.TimeCounter;
 import org.onetwo.common.utils.Page;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
-import org.springframework.test.annotation.Rollback;
 
 //@Rollback(false)
 public class DbmBatchInsertOrUpdateTest extends DbmBaseTest {

@@ -2,6 +2,7 @@ package org.onetwo.common.db;
 
 import java.util.Map;
 
+import javax.persistence.Entity;
 import javax.persistence.Table;
 
 import org.onetwo.common.db.filter.DataQueryParamaterEnhancer;
@@ -11,6 +12,7 @@ import org.onetwo.common.db.sqlext.ExtQuery;
 
 import com.google.common.collect.ImmutableMap;
 
+@Entity
 public class Magazine {
 	
 	@Table(name="t_magazine")

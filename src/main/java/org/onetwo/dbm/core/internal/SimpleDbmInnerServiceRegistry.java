@@ -9,7 +9,7 @@ import java.util.function.Supplier;
 import javax.sql.DataSource;
 import javax.validation.Validator;
 
-import org.onetwo.common.db.filequery.SqlParamterPostfixFunctions;
+import org.onetwo.common.db.filequery.postfunc.SqlParamterPostfixFunctions;
 import org.onetwo.common.db.filter.annotation.DataQueryFilterListener;
 import org.onetwo.common.db.spi.SqlParamterPostfixFunctionRegistry;
 import org.onetwo.common.db.sql.SequenceNameManager;

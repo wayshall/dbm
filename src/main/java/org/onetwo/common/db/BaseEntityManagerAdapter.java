@@ -20,6 +20,8 @@ import org.onetwo.common.utils.LangUtils;
 import org.onetwo.common.utils.Page;
 import org.slf4j.Logger;
 
+import com.google.common.collect.Lists;
+
 @SuppressWarnings("unchecked")
 public abstract class BaseEntityManagerAdapter implements InnerBaseEntityManager {
 
@@ -165,6 +167,11 @@ public abstract class BaseEntityManagerAdapter implements InnerBaseEntityManager
 			if(page.getTotalCount()<1){
 				return ;
 			}
+		}
+		if (page.getPageSize()<=0) {
+			// 若设置了页数为0，则直接返回
+			page.setResult(Lists.newArrayList());
+			return ;
 		}
 		List<T> datalist = createQuery(extQuery).setPageParameter(page).getResultList();
 		if(!page.isAutoCount()){

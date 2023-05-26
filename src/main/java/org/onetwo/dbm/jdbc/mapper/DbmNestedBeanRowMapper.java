@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.onetwo.dbm.annotation.DbmResultMapping;
 import org.onetwo.dbm.jdbc.internal.ResultSetColumnValueGetter;
+import org.onetwo.dbm.jdbc.mapper.nested.AbstractNestedBeanMapper;
 import org.onetwo.dbm.jdbc.spi.ColumnValueGetter;
 import org.onetwo.dbm.utils.DbmUtils;
 import org.springframework.jdbc.support.rowset.ResultSetWrappingSqlRowSet;

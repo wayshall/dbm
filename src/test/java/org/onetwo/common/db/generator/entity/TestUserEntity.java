@@ -12,7 +12,6 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 import org.hibernate.validator.constraints.Length;
-import org.hibernate.validator.constraints.SafeHtml;
 import org.onetwo.dbm.annotation.DbmIdGenerator;
 import org.onetwo.dbm.id.SnowflakeGenerator;
 import org.onetwo.dbm.jpa.BaseEntity;
@@ -58,7 +57,6 @@ public class TestUserEntity extends BaseEntity  {
     @NotNull
     @NotBlank
     @Length(max=50)
-    @SafeHtml
     String userName;
     
     /***
@@ -66,7 +64,6 @@ public class TestUserEntity extends BaseEntity  {
      */
     @NotBlank
     @Length(max=20)
-    @SafeHtml
     String mobile;
     
     /***
@@ -74,7 +71,6 @@ public class TestUserEntity extends BaseEntity  {
      */
     @NotBlank
     @Length(max=50)
-    @SafeHtml
     String password;
     
     /***
@@ -88,7 +84,6 @@ public class TestUserEntity extends BaseEntity  {
      */
     @NotBlank
     @Length(max=50)
-    @SafeHtml
     String nickName;
     
     /***
@@ -96,7 +91,6 @@ public class TestUserEntity extends BaseEntity  {
      */
     @NotBlank
     @Length(max=255)
-    @SafeHtml
     String appcode;
     
     /***
@@ -104,7 +98,6 @@ public class TestUserEntity extends BaseEntity  {
      */
     @NotBlank
     @Length(max=50)
-    @SafeHtml
     String email;
     
     /***
@@ -117,7 +110,6 @@ public class TestUserEntity extends BaseEntity  {
      */
     @NotBlank
     @Length(max=20)
-    @SafeHtml
     String status;
     
     /***
@@ -130,7 +122,6 @@ public class TestUserEntity extends BaseEntity  {
      */
     @NotBlank
     @Length(max=20)
-    @SafeHtml
     String appCode;
     
     /***
@@ -138,7 +129,6 @@ public class TestUserEntity extends BaseEntity  {
      */
     @NotBlank
     @Length(max=255)
-    @SafeHtml
     String username;
     
 }

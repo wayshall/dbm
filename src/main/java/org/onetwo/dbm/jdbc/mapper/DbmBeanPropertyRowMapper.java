@@ -97,9 +97,8 @@ public class DbmBeanPropertyRowMapper<T> extends DbmDataRowMapper<T> implements 
 		}
 	}
 	
-
 	@Override
-	public T mapRow(ResultSet rs, int rowNumber) throws SQLException {
+	public BeanWrapper mapRowWithBeanWrapper(ResultSet rs, int rowNumber) throws SQLException {
 		Assert.state(this.mappedClass != null, "Mapped class was not specified");
 		T mappedObject = BeanUtils.instantiate(this.mappedClass);
 		BeanWrapper bw = this.createBeanWrapper(mappedObject);
@@ -114,7 +113,28 @@ public class DbmBeanPropertyRowMapper<T> extends DbmDataRowMapper<T> implements 
 			this.setColumnValue(resutSetWrapper, bw, rowNumber, index, column);
 		}
 
-		return mappedObject;
+		return bw;
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public T mapRow(ResultSet rs, int rowNumber) throws SQLException {
+//		Assert.state(this.mappedClass != null, "Mapped class was not specified");
+//		T mappedObject = BeanUtils.instantiate(this.mappedClass);
+//		BeanWrapper bw = this.createBeanWrapper(mappedObject);
+//
+//		ResultSetWrappingSqlRowSet resutSetWrapper = new ResultSetWrappingSqlRowSet(rs);
+//		SqlRowSetMetaData rsmd = resutSetWrapper.getMetaData();
+//		int columnCount = resutSetWrapper.getMetaData().getColumnCount();
+//
+//		for (int index = 1; index <= columnCount; index++) {
+//			String column = DbmUtils.lookupColumnName(rsmd, index);
+////			String field = lowerCaseName(column.replaceAll(" ", ""));
+//			this.setColumnValue(resutSetWrapper, bw, rowNumber, index, column);
+//		}
+//
+//		return mappedObject;
+		return (T)mapRowWithBeanWrapper(rs, rowNumber).getWrappedInstance();
 	}
 	
 	public void setColumnValue(ResultSetWrappingSqlRowSet resutSetWrapper, 

@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.onetwo.common.db.dquery.DbmSqlFileResource;
 import org.onetwo.common.db.filequery.BaseNamedSqlFileManager.CommonNamespaceProperties;
 import org.onetwo.common.file.FileUtils;
 import org.onetwo.common.propconf.ResourceAdapter;
@@ -18,10 +19,11 @@ public class MultipCommentsSqlFileParserTest {
 		System.out.println("line:"+lines);
 		MultipCommentsSqlFileParser parser = new MultipCommentsSqlFileParser();
 		ResourceAdapter<File> f = FileUtils.adapterResource(new File(fileName));
+		DbmSqlFileResource<?> sqlRes = new DbmSqlFileResource<>(f, null, null);
 		
 		
 		CommonNamespaceProperties np = new CommonNamespaceProperties("org.onetwo.common.jfishdbm.model.dao.UserAutoidDao");
-		parser.parseToNamedQueryFile(np, f);
+		parser.parseToNamedQueryFile(np, sqlRes);
 		Assert.assertEquals(4, np.getNamedProperties().size());
 		
 		String exceptedString = "insert into test_user_autoid (birthday, email, gender, mobile, nick_name, password, status, user_name) values (:birthday, :email, :gender, :mobile, :nickName, :password?encrypt, :status.value, :userName)\n";
@@ -55,9 +57,10 @@ public class MultipCommentsSqlFileParserTest {
 		System.out.println("line:"+lines);
 		MultipCommentsSqlFileParser parser = new MultipCommentsSqlFileParser();
 		ResourceAdapter<File> f = FileUtils.adapterResource(new File(fileName));
+		DbmSqlFileResource<?> sqlRes = new DbmSqlFileResource<>(f, null, null);
 
 		CommonNamespaceProperties np = new CommonNamespaceProperties("org.onetwo.common.jfishdbm.model.dao.UserAutoidDao");
-		parser.parseToNamedQueryFile(np, f);
+		parser.parseToNamedQueryFile(np, sqlRes);
 		
 		String exceptedString = "delete from test_user_autoid where 1=1\n"
 				+ "[#if userName?has_content] and user_name like :userName?likeString\n[/#if] "

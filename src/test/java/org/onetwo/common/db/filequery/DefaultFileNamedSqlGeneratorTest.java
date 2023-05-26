@@ -14,6 +14,7 @@ import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
 import org.onetwo.common.db.ParsedSqlContext;
+import org.onetwo.common.db.dquery.DbmSqlFileResource;
 import org.onetwo.common.db.spi.FileNamedSqlGenerator;
 import org.onetwo.common.db.spi.NamedQueryFile;
 import org.onetwo.common.db.spi.NamedQueryInfoParser;
@@ -45,7 +46,8 @@ public class DefaultFileNamedSqlGeneratorTest {
 	public void testFindUsers() {
 		String file = "sql/org.onetwo.common.dbm.model.dao.SqlFileParser.jfish.sql";
 		SpringResourceAdapterImpl sqlFile = new SpringResourceAdapterImpl(SpringUtils.classpath(file));
-		NamedQueryFile namedQueryFile = sqlFileManager.buildSqlFile(sqlFile);
+		DbmSqlFileResource<?> sqlRes = new DbmSqlFileResource<>(sqlFile, null, null);
+		NamedQueryFile namedQueryFile = sqlFileManager.buildSqlFile(sqlRes);
 		
 		UserVersionEntity user = new UserVersionEntity();
 		Map<Object, Object> params = Maps.newHashMap();
@@ -85,7 +87,8 @@ public class DefaultFileNamedSqlGeneratorTest {
 	public void testFindUsers2() {
 		String file = "sql/org.onetwo.common.dbm.model.dao.SqlFileParser.jfish.sql";
 		SpringResourceAdapterImpl sqlFile = new SpringResourceAdapterImpl(SpringUtils.classpath(file));
-		NamedQueryFile namedQueryFile = sqlFileManager.buildSqlFile(sqlFile);
+		DbmSqlFileResource<?> sqlRes = new DbmSqlFileResource<>(sqlFile, null, null);
+		NamedQueryFile namedQueryFile = sqlFileManager.buildSqlFile(sqlRes);
 		
 		UserVersionEntity user = new UserVersionEntity();
 		user.setAge(11);
@@ -130,7 +133,8 @@ public class DefaultFileNamedSqlGeneratorTest {
 	public void testFindUsersWithWhere() {
 		String file = "sql/org.onetwo.common.dbm.model.dao.SqlFileParser.jfish.sql";
 		SpringResourceAdapterImpl sqlFile = new SpringResourceAdapterImpl(SpringUtils.classpath(file));
-		NamedQueryFile namedQueryFile = sqlFileManager.buildSqlFile(sqlFile);
+		DbmSqlFileResource<?> sqlRes = new DbmSqlFileResource<>(sqlFile, null, null);
+		NamedQueryFile namedQueryFile = sqlFileManager.buildSqlFile(sqlRes);
 		
 		UserVersionEntity user = new UserVersionEntity();
 		user.setAge(11);
@@ -172,7 +176,8 @@ public class DefaultFileNamedSqlGeneratorTest {
 	public void testUpdateUser() {
 		String file = "sql/org.onetwo.common.dbm.model.dao.SqlFileParser.jfish.sql";
 		SpringResourceAdapterImpl sqlFile = new SpringResourceAdapterImpl(SpringUtils.classpath(file));
-		NamedQueryFile namedQueryFile = sqlFileManager.buildSqlFile(sqlFile);
+		DbmSqlFileResource<?> sqlRes = new DbmSqlFileResource<>(sqlFile, null, null);
+		NamedQueryFile namedQueryFile = sqlFileManager.buildSqlFile(sqlRes);
 		
 		UserVersionEntity user = new UserVersionEntity();
 		user.setId(1L);
@@ -218,7 +223,8 @@ public class DefaultFileNamedSqlGeneratorTest {
 	public void testUpdateUserWithSet() {
 		String file = "sql/org.onetwo.common.dbm.model.dao.SqlFileParser.jfish.sql";
 		SpringResourceAdapterImpl sqlFile = new SpringResourceAdapterImpl(SpringUtils.classpath(file));
-		NamedQueryFile namedQueryFile = sqlFileManager.buildSqlFile(sqlFile);
+		DbmSqlFileResource<?> sqlRes = new DbmSqlFileResource<>(sqlFile, null, null);
+		NamedQueryFile namedQueryFile = sqlFileManager.buildSqlFile(sqlRes);
 		
 		UserVersionEntity user = new UserVersionEntity();
 		user.setId(1L);

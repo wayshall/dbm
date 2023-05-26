@@ -854,6 +854,8 @@ public interface UserDao {
 ```
 
 ## DbmRepository动态查询后缀函数支持
+
+### 无参数后缀函数
 DbmRepository的动态查询，命名参数支持后缀函数，以便于把一些参数值加工处理。
 比如使用like查询的时候，一般的查询片段如下：
 ```sql
@@ -863,6 +865,23 @@ where userName like :userName
 dbm提供了后缀函数支持来避免手工处理这种情况，所以在sql里，可以写成：
 ```sql
 where userName like :userName?likeString
+```
+
+### 有参数后缀函数
+5.0版本后增加了参数支持
+目前Date类型的参数增加了两个带参数的后缀函数：minutes_ago, minutes_later.
+用于需要对时间参数类型处理，比如需要查询某个特定时间前后30分钟的数据时，可以这样写：
+```sql
+select 
+    d.*
+from 
+    data d
+where
+    1=1 
+[#if request.uploadTime??]
+    and d.upload_time between :request.uploadTime?$30_minutes_ago and :request.uploadTime?$30_minutes_later
+[/#if]
+
 ```
 
 ### 全局后缀函数

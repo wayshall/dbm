@@ -2,7 +2,7 @@ package org.onetwo.common.db.spi;
 
 import java.util.Collection;
 
-import org.onetwo.common.propconf.ResourceAdapter;
+import org.onetwo.common.db.dquery.DbmSqlFileResource;
 
 public interface NamedSqlFileManager {
 
@@ -11,7 +11,7 @@ public interface NamedSqlFileManager {
 	public NamedQueryInfo getNamedQueryInfo(String name);
 	public boolean contains(String fullname);
 //	public void build();
-	public NamedQueryFile buildSqlFile(ResourceAdapter<?> sqlFile);
+	public NamedQueryFile buildSqlFile(DbmSqlFileResource<?> sqlFile);
 	
 	public NamedQueryFile getNamespaceProperties(String namespace);
 	public boolean containsNamespace(String namespace);

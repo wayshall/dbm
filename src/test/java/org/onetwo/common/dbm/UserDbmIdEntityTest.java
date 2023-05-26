@@ -30,6 +30,9 @@ public class UserDbmIdEntityTest extends DbmBaseTest {
 
 	@Test
 	public void testSaveSnowflakeUserEntity() {
+
+		entityManager.removeAll(SnowflakeIdUserEntity.class);
+		
 		SnowflakeIdUserEntity user = new SnowflakeIdUserEntity();
 		user.setUserName("snowflake1");
 		
@@ -43,6 +46,8 @@ public class UserDbmIdEntityTest extends DbmBaseTest {
 	
 	@Test
 	public void testSaveUserTableDbmIdEntity(){
+		entityManager.removeAll(UserTableDbmIdEntity.class);
+		
 		UserTableDbmIdEntity user = new UserTableDbmIdEntity();
 		user.setUserName("dbm");
 		

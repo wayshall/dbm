@@ -3,6 +3,7 @@ package org.onetwo.common.db.filequery;
 import java.util.List;
 import java.util.Properties;
 
+import org.onetwo.common.db.dquery.DbmSqlFileResource;
 import org.onetwo.common.db.spi.NamedQueryFile;
 import org.onetwo.common.db.spi.NamedQueryInfo;
 import org.onetwo.common.db.spi.NamedQueryInfoParser;
@@ -39,7 +40,7 @@ public class DefaultSqlFileParser implements NamedQueryInfoParser {
 	protected boolean debug = true;
 	
 	@Override
-	public void parseToNamedQueryFile(NamedQueryFile np, ResourceAdapter<?> file) {
+	public void parseToNamedQueryFile(NamedQueryFile np, DbmSqlFileResource<?> file) {
 		JFishPropertiesData jproperties = loadSqlFile(file);
 		if(jproperties==null){
 			return ;

@@ -1,6 +1,6 @@
 package org.onetwo.common.dbm;
 
-import static org.hamcrest.CoreMatchers.equalTo;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 
@@ -30,26 +30,31 @@ public class UserTableIdEntityTest extends DbmBaseTest {
 
 	@Test
 	public void testSample(){
+		entityManager.removeAll(UserTableIdEntity.class);
+		
 		UserTableIdEntity user = new UserTableIdEntity();
 		user.setUserName("dbm");
 		
 		//save
 		Long userId = entityManager.save(user).getId();
-		assertThat(userId, notNullValue());
+		assertThat(userId).isNotNull();
 		System.out.println("userId: " + userId);
 		
 		//user querys dsl api
-		UserTableIdEntity queryUser = Querys.from(entityManager, UserTableIdEntity.class)
+		List<UserTableIdEntity> queryUser = Querys.from(entityManager, UserTableIdEntity.class)
 											.where()
 												.field("userName").is(user.getUserName())
 											.end()
 											.toQuery()
-											.one();
-		assertThat(queryUser, equalTo(user));
+											.list();
+		assertThat(queryUser).size().isEqualTo(1);
+		assertThat(queryUser.get(0)).isEqualTo(user);
 	}
 	
 	@Test
 	public void testSaveList(){
+		entityManager.removeAll(UserTableIdEntity.class);
+		
 		List<UserTableIdEntity> users = LangOps.generateList(1000, i->{
 			UserTableIdEntity user = new UserTableIdEntity();
 			user.setUserName("dbm-"+i);

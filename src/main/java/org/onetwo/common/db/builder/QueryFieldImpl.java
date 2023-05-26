@@ -75,6 +75,13 @@ public class QueryFieldImpl implements QueryField {
 		if (isDbmQueryField()) {
 			DbmQueryNameStrategy dbmStrategy = (DbmQueryNameStrategy)this.queryNameStrategy;
 			DbmMappedField field = dbmStrategy.getDbmMappedField(this.fieldName);
+			if (field==null) {
+//				field = dbmStrategy.getDbmMappedField(this.fieldName);
+//				throw new DbmException("field not found for entry."
+//						+ "fieldName: " + this.fieldName + ", "
+//								+ "entry: " + dbmStrategy.getDbmMappedEntry().getEntityName());
+				return value;
+			}
 			if (field.isEnumeratedOrdinal()) {
 				if (LangUtils.isMultiple(field)) {
 					List<Object> values = LangUtils.asList(value).stream().map(e -> ordinalIfPossible(e)).collect(Collectors.toList());

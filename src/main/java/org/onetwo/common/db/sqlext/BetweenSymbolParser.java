@@ -42,9 +42,9 @@ public class BetweenSymbolParser extends CommonSQLSymbolParser implements HqlSym
 			throw new DbmException("between parameter value can not be null");
 		}
 		
-		if (!startValue.getClass().equals(endValue.getClass())) {
-			throw new DbmException("the type of between parameter value can not be difference");
-		}
+//		if (!startValue.getClass().equals(endValue.getClass())) {
+//			throw new DbmException("the type of between parameter value can not be difference");
+//		}
 		
 //		if (startValue instanceof Date) {
 //			return this.dateIn.parse(symbol, context);
@@ -63,6 +63,7 @@ public class BetweenSymbolParser extends CommonSQLSymbolParser implements HqlSym
 		// endValue
 		paramValues.addValue(field, endValue, hql);
 		
+		hql.append(" ");
 //		hql.append(" ) ");
 		
 		return hql.toString();
