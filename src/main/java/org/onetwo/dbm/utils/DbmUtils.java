@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 import javax.sql.DataSource;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.onetwo.common.date.DateUtils;
 import org.onetwo.common.db.dquery.condition.directive.DynamicConditionDirective;
@@ -418,6 +419,12 @@ final public class DbmUtils {
 		} else if (val instanceof DbmEnumValueMapping) {
 			DbmEnumValueMapping<?> dbmEnum = (DbmEnumValueMapping<?>)val;
 			val = dbmEnum.getEnumMappingValue();
+		}
+		if (val instanceof String) {
+			String str = val.toString();
+			if (str.length()>1000) {
+				val = StringUtils.substring(str, 0, 1000) + "...";
+			}
 		}
 		return val;
 	}
