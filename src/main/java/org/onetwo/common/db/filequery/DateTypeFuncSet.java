@@ -22,6 +22,10 @@ public class DateTypeFuncSet {
 		return DateUtils.format(DateUtils.DATE_TIME, date);
 	}
 	
+	public static Date nextDay(Date date) {
+		return DateUtils.addDay(date, 1);
+	}
+	
 	private DateTypeFuncSet() {
 	}
 
