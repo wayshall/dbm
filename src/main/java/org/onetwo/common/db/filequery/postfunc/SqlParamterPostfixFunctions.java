@@ -239,7 +239,15 @@ public class SqlParamterPostfixFunctions implements SqlParamterPostfixFunctionRe
 		return res;
 	}
 
-
+	/***
+	 * 以下划线“_”分割为字符为数组，$开头的视作参数，其余部分再用下划线“_”连接起来，作为需要调用的方法名
+	 * 如：d.upload_time <= :request.uploadTime?$30_minutes_ago
+	 * 将会调用minutesAgo(30) 或者 minutes_ago(30)
+	 * @see https://github.com/wayshall/dbm/issues/51
+	 * @see DateTypeFuncSet#minutesAgo(Date, SqlPostfixFunctionInfo)
+	 * @param input
+	 * @return
+	 */
 	public SqlPostfixFunctionInfo parseSqlPostfixFunc(String input) {
 		List<String> paramsList = Lists.newArrayList();
         List<String> funcNames = Lists.newArrayList();
