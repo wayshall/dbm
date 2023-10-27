@@ -34,6 +34,7 @@ public interface WhereCauseBuilder<E> {
 	
 	WhereCauseBuilder<E> or();
 	WhereCauseBuilder<E> and();
+	WhereCauseBuilder<E> endSub();
 	/***
 	 * 
 	 * @author weishao zeng

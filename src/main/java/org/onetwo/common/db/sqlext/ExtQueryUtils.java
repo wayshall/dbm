@@ -9,6 +9,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.onetwo.common.db.DruidUtils;
 import org.onetwo.common.db.RawSqlWrapper;
@@ -66,16 +68,22 @@ public abstract class ExtQueryUtils {
 		
 	}
 	
-	public static String[] appendOperationToFields(String[] fields, QueryDSLOps op){
-		return appendOperationToFields(fields, op.getActualOperator());
+	public static String[] appendOperationToFields(String[] fields, QueryDSLOps... ops){
+		List<String> opList = Stream.of(ops).map(op -> {
+			return op.getActualOperator();
+		}).collect(Collectors.toList());
+		return appendOperationToFields(fields, opList.toArray(new String[0]));
 	}
 	
-	public static String[] appendOperationToFields(String[] fields, String op){
+	public static String[] appendOperationToFields(String[] fields, String... ops){
 		Assert.notEmpty(fields);
 		String[] newFileds = null;
+		int index = 0;
 		for(String field : fields){
+			String op = ops.length==1?ops[0]:ops[index];
 			field = field + QueryField.SPLIT_SYMBOL + op;
 			newFileds = (String[])ArrayUtils.add(newFileds, field);
+			index++;
 		}
 		return newFileds;
 	}
