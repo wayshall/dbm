@@ -16,6 +16,7 @@ import org.onetwo.common.db.sqlext.ExtQueryInner;
 import org.onetwo.common.db.sqlext.JPASQLSymbolManagerImpl;
 import org.onetwo.common.db.sqlext.SQLSymbolManagerFactory;
 import org.onetwo.common.dbm.model.hib.entity.UserEntity;
+import org.onetwo.common.dbm.model.hib.entity.UserEntity.UserGenders;
 
 public class QuerysTest {
 
@@ -80,6 +81,34 @@ public class QuerysTest {
 		String sql = "select u from UserEntity u where u.age = :u_age0 and u.userName like :u_userName1 "
 				+ "and ( u.email like :u_email2 or ( u.mobile = :u_mobile3 ) )";
 		String paramsting = "{u_age0=12, u_userName1=%test%, u_email2=%qq.com, u_mobile3=13666666666}";
+		System.out.println("sql: " + extQuery.getSql().trim());
+		System.out.println("params value: " + extQuery.getParamsValue().getValues().toString());
+		Assert.assertEquals(sql.trim(), extQuery.getSql().trim());
+		Assert.assertEquals(paramsting, extQuery.getParamsValue().getValues().toString());
+	}
+
+	@Test
+	public void testOr3() {
+		String userName = "test";
+		QueryBuilder<UserEntity> q = Querys.from((BaseEntityManager)null, UserEntity.class)
+				.where()
+					.field("age").is(12)
+					.field("userName").when(()->userName!=null).like(userName)
+					.and()
+						.field("email").prelike("qq.com")
+						.or()
+						.field("mobile").is("13666666666")
+						.field("gender").is(UserGenders.MALE)
+						.endSub()
+					.endSub()
+					.field("status").is("NORMAL")
+					.end();
+
+		ExtQueryInner extQuery = sqlSymbolManagerFactory.getJPA().createSelectQuery(UserEntity.class, "u", q.getParams());
+		extQuery.build();
+		
+		String sql = "select u from UserEntity u where u.age = :u_age0 and u.userName like :u_userName1 and ( u.email like :u_email2 or ( u.mobile = :u_mobile3 and u.gender = :u_gender4 ) ) and u.status = :u_status5";
+		String paramsting = "{u_age0=12, u_userName1=%test%, u_email2=%qq.com, u_mobile3=13666666666, u_gender4=11.0, u_status5=NORMAL}";
 		System.out.println("sql: " + extQuery.getSql().trim());
 		System.out.println("params value: " + extQuery.getParamsValue().getValues().toString());
 		Assert.assertEquals(sql.trim(), extQuery.getSql().trim());

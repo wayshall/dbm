@@ -13,6 +13,10 @@ abstract public class WhereCauseBuilderField<E> {
 		return queryBuilder;
 	}
 
+	public WhereCauseBuilder<E> end() {
+		return queryBuilder;
+	}
+
 	abstract public String[] getOPFields();
 	
 	abstract public Object getValues();

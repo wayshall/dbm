@@ -12,6 +12,7 @@ import org.onetwo.common.db.sqlext.ExtQuery.KeyObject;
 import org.onetwo.common.reflect.ReflectUtils;
 import org.onetwo.common.utils.LangUtils;
 import org.onetwo.dbm.core.spi.DbmSessionFactory;
+import org.onetwo.dbm.exception.DbmException;
 import org.onetwo.dbm.mapping.DbmMappedEntry;
 
 import com.google.common.collect.Maps;
@@ -20,7 +21,7 @@ public class DefaultWhereCauseBuilder<E> implements WhereCauseBuilder<E> {
 	public static final String[] EXCLUDE_PROPERTIES = new String[] { "page", "pageNo", "pageSize", "pagination", "autoCount" };
 	
 	final protected QueryBuilderImpl<E> queryBuilder;
-	final protected Map<Object, Object> params;
+	protected Map<Object, Object> params;
 	private DefaultWhereCauseBuilder<E> parent;
 	private KeyObject keyObject;
 	
@@ -174,6 +175,9 @@ public class DefaultWhereCauseBuilder<E> implements WhereCauseBuilder<E> {
 	
 	@Override
 	public WhereCauseBuilder<E> or() {
+		if (parent!=null) {
+			endSub();
+		}
 		return new DefaultWhereCauseBuilder<>(this, (KeyObject)K.OR);
 	}
 	
@@ -187,11 +191,21 @@ public class DefaultWhereCauseBuilder<E> implements WhereCauseBuilder<E> {
 		return new DefaultWhereCauseBuilderField<>(this, fields);
 	}
 
+	public DefaultWhereCauseBuilder<E> endSub(){
+//		throw new DbmException("sub query not found!");
+		if (parent==null) {
+			throw new DbmException("sub query not found!");
+		}
+		if (!params.isEmpty()) {
+			parent.getParams().put(keyObject, params);
+		}
+		return parent;
+	}
+
 	@Override
 	public QueryBuilder<E> end(){
-		if (parent!=null && !params.isEmpty()) {
-			parent.getParams().put(keyObject, params);
-			return parent.end();
+		if (parent!=null) {
+			endSub();
 		}
 		return queryBuilder;
 	}
