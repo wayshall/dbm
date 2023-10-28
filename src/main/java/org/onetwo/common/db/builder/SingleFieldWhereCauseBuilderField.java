@@ -85,7 +85,7 @@ public class SingleFieldWhereCauseBuilderField<E> extends WhereCauseBuilderField
 	 * @param values
 	 * @return
 	 */
-	public SingleFieldWhereCauseBuilderFieldEnder<E> equalTo(Object... values) {
+	public <T> SingleFieldWhereCauseBuilderFieldEnder<E> equalTo(T... values) {
 		setOpValues(QueryDSLOps.EQ, values);
 		return ender();
 	}
@@ -101,7 +101,7 @@ public class SingleFieldWhereCauseBuilderField<E> extends WhereCauseBuilderField
 		return queryBuilder;
 	}
 	
-	public SingleFieldWhereCauseBuilderFieldEnder<E> is(Object... values) {
+	public <T> SingleFieldWhereCauseBuilderFieldEnder<E> is(T... values) {
 		return equalTo(values);
 	}
 	
@@ -110,7 +110,8 @@ public class SingleFieldWhereCauseBuilderField<E> extends WhereCauseBuilderField
 //			this.op = QueryDSLOps.IS_NULL;
 //			this.values = new Object[]{isNull};
 //		});
-		this.setOpValue(QueryDSLOps.IS_NULL, isNull);
+//		this.setOpValue(QueryDSLOps.IS_NULL, isNull);
+		this.setOpValues(QueryDSLOps.IS_NULL, isNull);
 		return ender();
 	}
 	
@@ -137,19 +138,19 @@ public class SingleFieldWhereCauseBuilderField<E> extends WhereCauseBuilderField
 	
 	public <T> SingleFieldWhereCauseBuilderFieldEnder<E> in(T... values) {
 //		this.setOpValues(QueryDSLOps.IN, values);
-		this.setOpValue(QueryDSLOps.IN, values);
+		this.setOpValues(QueryDSLOps.IN, new Object[] { values });
 		return ender();
 	}
 	
 	public <T> SingleFieldWhereCauseBuilderFieldEnder<E> in(Collection<T> values) {
 //		this.setOpValues(QueryDSLOps.IN, values.toArray());
-		this.setOpValue(QueryDSLOps.IN, values);
+		this.setOpValues(QueryDSLOps.IN, new Object[] { values });
 		return ender();
 	}
 	
 	public <T> SingleFieldWhereCauseBuilderFieldEnder<E> notIn(T... values) {
 //		this.setOpValues(QueryDSLOps.NOT_IN, values);
-		this.setOpValue(QueryDSLOps.NOT_IN, values);
+		this.setOpValues(QueryDSLOps.NOT_IN, new Object[] { values });
 		return ender();
 	}
 	
@@ -168,7 +169,7 @@ public class SingleFieldWhereCauseBuilderField<E> extends WhereCauseBuilderField
 		} else {
 			values = new Date[]{start, end};
 		}
-		setOpValue(QueryDSLOps.DATE_IN, values);
+		setOpValues(QueryDSLOps.DATE_IN, new Object[] { values });
 		return ender();
 	}
 
@@ -182,7 +183,8 @@ public class SingleFieldWhereCauseBuilderField<E> extends WhereCauseBuilderField
 	 * @return
 	 */
 	public SingleFieldWhereCauseBuilderFieldEnder<E> between(final Object start, final Object end) {
-		setOpValue(QueryDSLOps.BETWEEN, new Object[]{start, end});
+		Object[] range = new Object[]{start, end};
+		setOpValues(QueryDSLOps.BETWEEN, new Object[] { range });
 		return ender();
 	}
 	

@@ -41,7 +41,8 @@ public interface WhereCauseField<E, R> {
 //
 //	WhereCauseBuilder<E> end();
 //
-	R is(Object... values);
+	@SuppressWarnings("unchecked")
+	<T> R is(T... values);
 //
 //	WhereCauseBuilder<E> isNull(boolean isNull);
 //

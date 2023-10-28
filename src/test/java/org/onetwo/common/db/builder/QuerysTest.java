@@ -125,7 +125,9 @@ public class QuerysTest {
 		QueryBuilder<UserEntity> q = Querys.from((BaseEntityManager)null, UserEntity.class)
 				.where()
 					.field("age")
-						.is(12)
+						.isNull()
+						.or()
+						.lessEqual(12)
 					.field("null_field")
 						.is(nullValue)
 					.field("userName")
@@ -148,7 +150,7 @@ public class QuerysTest {
 		ExtQueryInner extQuery = sqlSymbolManagerFactory.getJPA().createSelectQuery(UserEntity.class, "u", q.getParams());
 		extQuery.build();
 		
-		String sql = "select u from UserEntity u where u.age = :u_age0 and u.userName like :u_userName1 and ( u.email is not null or u.email = :u_email2 ) and ( u.status = :u_status3 or u.status = :u_status4 )";
+		String sql = "select u from UserEntity u where ( u.age is null or u.age <= :u_age0 ) and u.userName like :u_userName1 and ( u.email is not null or u.email like :u_email2 ) and ( u.status = :u_status3 or u.status = :u_status4 )";
 		String paramsting = "{u_age0=12, u_userName1=%test%, u_email2=%@test.com, u_status3=NORMAL, u_status4=DISABLED}";
 		System.out.println("sql: " + extQuery.getSql().trim());
 		System.out.println("params value: " + extQuery.getParamsValue().getValues().toString());
