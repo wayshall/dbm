@@ -88,6 +88,16 @@ public abstract class ExtQueryUtils {
 		return newFileds;
 	}
 
+	public static String[] appendOperationToFields(String field, QueryDSLOps... ops){
+		Assert.notEmpty(ops);
+		String[] newFileds = null;
+		for(QueryDSLOps op : ops){
+			field = field + QueryField.SPLIT_SYMBOL + op.getActualOperator();
+			newFileds = (String[])ArrayUtils.add(newFileds, field);
+		}
+		return newFileds;
+	}
+
 	public static List processValue(Object fields, Object values, IfNull ifNull){
 		return processValue(fields, values, ifNull, false);
 	}

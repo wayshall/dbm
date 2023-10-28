@@ -24,6 +24,7 @@ public class DefaultWhereCauseBuilder<E> implements WhereCauseBuilder<E> {
 	protected Map<Object, Object> params;
 	private DefaultWhereCauseBuilder<E> parent;
 	private KeyObject keyObject;
+	private WhereCauseBuilderField<E, ?> lastField;
 	
 	public DefaultWhereCauseBuilder(QueryBuilderImpl<E> queryBuilder) {
 		super();
@@ -42,9 +43,13 @@ public class DefaultWhereCauseBuilder<E> implements WhereCauseBuilder<E> {
 	Map<Object, Object> getParams() {
 		return params;
 	}
+	
+	public WhereCauseBuilder<E> getParent() {
+		return parent;
+	}
 
 	@Override
-	public DefaultWhereCauseBuilder<E> addField(WhereCauseBuilderField<E> field){
+	public DefaultWhereCauseBuilder<E> addField(WhereCauseBuilderField<E, ?> field){
 		this.params.put(field.getOPFields(), field.getValues());
 		return self();
 	}
@@ -169,15 +174,33 @@ public class DefaultWhereCauseBuilder<E> implements WhereCauseBuilder<E> {
 	}
 	
 	@Override
+	public SingleFieldWhereCauseBuilderField<E> field(String fieldName){
+//		this.addLastField();
+		SingleFieldWhereCauseBuilderField<E> field = new SingleFieldWhereCauseBuilderField<>(this, fieldName);
+		this.lastField = field;
+		return field;
+	}
+	
+	@Override
 	public DefaultWhereCauseBuilderField<E> field(String...fields){
-		return new DefaultWhereCauseBuilderField<>(this, fields);
+		this.addLastField();
+		DefaultWhereCauseBuilderField<E> field = new DefaultWhereCauseBuilderField<>(this, fields);
+		this.lastField = field;
+		return field;
+	}
+	
+	private void addLastField() {
+		if (this.lastField!=null) {
+			this.lastField.addField();
+			this.lastField = null;
+		}
 	}
 	
 	@Override
 	public WhereCauseBuilder<E> or() {
-		if (parent!=null) {
-			endSub();
-		}
+//		if (parent!=null) {
+//			endSub();
+//		}
 		return new DefaultWhereCauseBuilder<>(this, (KeyObject)K.OR);
 	}
 	
@@ -204,6 +227,7 @@ public class DefaultWhereCauseBuilder<E> implements WhereCauseBuilder<E> {
 
 	@Override
 	public QueryBuilder<E> end(){
+		addLastField();
 		if (parent!=null) {
 			endSub();
 		}
@@ -219,5 +243,10 @@ public class DefaultWhereCauseBuilder<E> implements WhereCauseBuilder<E> {
 	@Override
 	public ExecuteAction toExecute() {
 		return queryBuilder.toExecute();
+	}
+
+	@Override
+	public QueryBuilder<E> getQueryBuilder() {
+		return queryBuilder;
 	}
 }

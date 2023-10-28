@@ -6,6 +6,11 @@ import javax.persistence.metamodel.SingularAttribute;
 
 
 public interface WhereCauseBuilder<E> {
+	
+	QueryBuilder<E> getQueryBuilder();
+	
+	WhereCauseBuilder<E> getParent();
+	
 	WhereCauseBuilder<E> debug();
 
 	/****
@@ -44,7 +49,7 @@ public interface WhereCauseBuilder<E> {
 	 */
 	WhereCauseBuilder<E> addFields(Object entity, boolean useLikeIfStringVlue);
 	
-	WhereCauseBuilder<E> addField(WhereCauseBuilderField<E> field);
+	WhereCauseBuilder<E> addField(WhereCauseBuilderField<E, ?> field);
 
 	WhereCauseBuilder<E> ignoreIfNull();
 	
@@ -69,6 +74,7 @@ public interface WhereCauseBuilder<E> {
 
 	WhereCauseBuilder<E> calmIfNull();
 
+	SingleFieldWhereCauseBuilderField<E> field(String field);
 	DefaultWhereCauseBuilderField<E> field(String... fields);
 	DefaultWhereCauseBuilderField<E> field(SingularAttribute<?, ?>... fields);
 	
