@@ -12,22 +12,22 @@ import javax.persistence.metamodel.SingularAttribute;
 import org.apache.commons.lang3.ArrayUtils;
 import org.onetwo.common.db.sqlext.ExtQueryUtils;
 import org.onetwo.common.db.sqlext.QueryDSLOps;
-import org.onetwo.common.utils.LangUtils;
+import org.onetwo.common.utils.CUtils;
 import org.onetwo.common.utils.StringUtils;
 import org.onetwo.common.utils.func.Closure;
 
 
-@SuppressWarnings("unchecked")
-public class DefaultWhereCauseBuilderField<E> extends WhereCauseBuilderField<E> {
+public class DefaultWhereCauseBuilderField<E> extends WhereCauseBuilderField<E, WhereCauseBuilder<E>> {
 	
 	private String[] fields;
 	private QueryDSLOps op;
 	private QueryDSLOps[] ops;
 	private Object values;
 	
-	private Supplier<Boolean> whenPredicate;
+	protected Supplier<Boolean> whenPredicate;
 	// 是否已添加到queryBuilder
 	private boolean added;
+	private boolean autoAddField = true;
 
 	public DefaultWhereCauseBuilderField(WhereCauseBuilder<E> squery, String... fields) {
 		super(squery);
@@ -42,10 +42,6 @@ public class DefaultWhereCauseBuilderField<E> extends WhereCauseBuilderField<E> 
 							.toArray(new String[0]);
 	}
 
-	public DefaultWhereCauseBuilderField<E> when(Supplier<Boolean> predicate) {
-		this.whenPredicate = predicate;
-		return this;
-	}
 
 	/***
 	 *  like '%value'
@@ -120,14 +116,15 @@ public class DefaultWhereCauseBuilderField<E> extends WhereCauseBuilderField<E> 
 	 * @param values
 	 * @return
 	 */
-	public <T> WhereCauseBuilder<E> equalTo(T... values) {
+	public WhereCauseBuilder<E> equalTo(Object... values) {
 		return this.doWhenPredicate(()->{
-			this.op = QueryDSLOps.EQ;
+//			this.op = QueryDSLOps.EQ;
 			this.values = values;
+			setOp(QueryDSLOps.EQ);
 		});
 	}
 
-	public <T> WhereCauseBuilder<E> value(QueryDSLOps sqlOp, Supplier<T> valueSupplier) {
+	public WhereCauseBuilder<E> value(QueryDSLOps sqlOp, Supplier<Object> valueSupplier) {
 		return this.doWhenPredicate(()->{
 			this.op = sqlOp;
 			this.values = new Object[] {valueSupplier.get()};
@@ -143,7 +140,7 @@ public class DefaultWhereCauseBuilderField<E> extends WhereCauseBuilderField<E> 
 
 	public DefaultWhereCauseBuilderField<E> or(QueryDSLOps sqlOps, Object values) {
 		this.ops = ArrayUtils.add(this.ops, sqlOps);
-		this.values = LangUtils.arrayAdd((Object[])this.values, values);
+		this.values = CUtils.arrayAdd((Object[])this.values, values);
 		return this;
 	}
 
@@ -156,11 +153,11 @@ public class DefaultWhereCauseBuilderField<E> extends WhereCauseBuilderField<E> 
 		return queryBuilder;
 	}
 	
-	public <T> WhereCauseBuilder<E> is(T... values) {
+	public WhereCauseBuilder<E> is(Object... values) {
 		return equalTo(values);
 	}
 	
-	public <T> WhereCauseBuilder<E> is(Supplier<T> valueSupplier) {
+	public WhereCauseBuilder<E> is(Supplier<Object> valueSupplier) {
 		return value(QueryDSLOps.EQ, valueSupplier);
 	}
 	
@@ -175,11 +172,19 @@ public class DefaultWhereCauseBuilderField<E> extends WhereCauseBuilderField<E> 
 		boolean rs = whenPredicate==null?true:Optional.ofNullable(whenPredicate.get()).orElse(false);
 		if(rs){
 			setValueAction.execute();
-			queryBuilder.addField(this);
-			this.markAdded();
-			whenPredicate = null;
+			if (autoAddField) {
+				this.addField();
+			}
 		}
 		return queryBuilder;
+	}
+	
+	void addField() {
+		if (this.added) {
+			return ;
+		}
+		queryBuilder.addField(this);
+		this.markAdded();
 	}
 	
 //	public WhereCauseBuilder<E> ifElse(boolean predicate, Closure1<DefaultWhereCauseBuilderField<E>> ifAction, Closure1<DefaultWhereCauseBuilderField<E>> elseAction){
@@ -224,7 +229,7 @@ public class DefaultWhereCauseBuilderField<E> extends WhereCauseBuilderField<E> 
 	 * @param values
 	 * @return
 	 */
-	public <T> WhereCauseBuilder<E> notEqualTo(T... values) {
+	public WhereCauseBuilder<E> notEqualTo(Object... values) {
 		return this.doWhenPredicate(()->{
 			this.op = QueryDSLOps.NEQ;
 			this.values = values;
@@ -236,7 +241,7 @@ public class DefaultWhereCauseBuilderField<E> extends WhereCauseBuilderField<E> 
 	 * @param values
 	 * @return
 	 */
-	public <T> WhereCauseBuilder<E> greaterThan(T... values) {
+	public WhereCauseBuilder<E> greaterThan(Object... values) {
 		return this.doWhenPredicate(()->{
 			this.op = QueryDSLOps.GT;
 			this.values = values;
@@ -248,14 +253,14 @@ public class DefaultWhereCauseBuilderField<E> extends WhereCauseBuilderField<E> 
 		return queryBuilder;*/
 	}
 	
-	public <T> WhereCauseBuilder<E> in(T... values) {
+	public WhereCauseBuilder<E> in(Object... values) {
 		return this.doWhenPredicate(()->{
 			this.op = QueryDSLOps.IN;
 			this.values = values;
 		});
 	}
 	
-	public <T> WhereCauseBuilder<E> in(Collection<T> values) {
+	public WhereCauseBuilder<E> in(Collection<?> values) {
 		return this.doWhenPredicate(()->{
 			this.op = QueryDSLOps.IN;
 			this.values = values;
@@ -267,7 +272,7 @@ public class DefaultWhereCauseBuilderField<E> extends WhereCauseBuilderField<E> 
 		return queryBuilder;*/
 	}
 	
-	public <T> WhereCauseBuilder<E> notIn(T... values) {
+	public WhereCauseBuilder<E> notIn(Object... values) {
 		return this.doWhenPredicate(()->{
 			this.op = QueryDSLOps.NOT_IN;
 			this.values = values;
@@ -324,7 +329,7 @@ public class DefaultWhereCauseBuilderField<E> extends WhereCauseBuilderField<E> 
 	 * @param values
 	 * @return
 	 */
-	public <T> WhereCauseBuilder<E> greaterEqual(T... values) {
+	public WhereCauseBuilder<E> greaterEqual(Object... values) {
 		return this.doWhenPredicate(()->{
 			this.op = QueryDSLOps.GE;
 			this.values = values;
@@ -341,7 +346,7 @@ public class DefaultWhereCauseBuilderField<E> extends WhereCauseBuilderField<E> 
 	 * @param values
 	 * @return
 	 */
-	public <T> WhereCauseBuilder<E> lessThan(T... values) {
+	public WhereCauseBuilder<E> lessThan(Object... values) {
 		return this.doWhenPredicate(()->{
 			this.op = QueryDSLOps.LT;
 			this.values = values;
@@ -358,7 +363,7 @@ public class DefaultWhereCauseBuilderField<E> extends WhereCauseBuilderField<E> 
 	 * @param values
 	 * @return
 	 */
-	public <T> WhereCauseBuilder<E> lessEqual(T... values) {
+	public WhereCauseBuilder<E> lessEqual(Object... values) {
 		return this.doWhenPredicate(()->{
 			this.op = QueryDSLOps.LE;
 			this.values = values;
@@ -415,13 +420,9 @@ public class DefaultWhereCauseBuilderField<E> extends WhereCauseBuilderField<E> 
 	public Object getValues() {
 		return values;
 	}
-	
-	private void markAdded() {
-		this.added = true;
-	}
-	
-	private boolean isAdded() {
-		return this.added;
+
+	protected void setOp(QueryDSLOps op) {
+		this.op = op;
 	}
 
 }

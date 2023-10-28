@@ -1,8 +1,14 @@
 package org.onetwo.common.db.builder;
 
-abstract public class WhereCauseBuilderField<E> {
+import java.util.Optional;
+import java.util.function.Supplier;
+
+abstract public class WhereCauseBuilderField<E, R> implements WhereCauseField<E, R> {
 	
 	protected WhereCauseBuilder<E> queryBuilder;
+	protected Supplier<Boolean> whenPredicate;
+	// 是否已添加到queryBuilder
+	protected boolean added;
 
 	public WhereCauseBuilderField(WhereCauseBuilder<E> squery) {
 		super();
@@ -21,4 +27,28 @@ abstract public class WhereCauseBuilderField<E> {
 	
 	abstract public Object getValues();
 
+	public WhereCauseField<E, ?> when(Supplier<Boolean> predicate) {
+		this.whenPredicate = predicate;
+		return this;
+	}
+
+	void markAdded() {
+		this.added = true;
+		this.whenPredicate = null;
+	}
+	
+	boolean isAdded() {
+		return this.added;
+	}
+	
+	void addField() {
+		if (isAdded()) {
+			return ;
+		}
+		boolean rs = whenPredicate==null?true:Optional.ofNullable(whenPredicate.get()).orElse(false);
+		if(rs){
+			queryBuilder.addField(this);
+			this.markAdded();
+		}
+	}
 }
