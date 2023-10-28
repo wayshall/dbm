@@ -116,7 +116,8 @@ public class DefaultWhereCauseBuilderField<E> extends WhereCauseBuilderField<E, 
 	 * @param values
 	 * @return
 	 */
-	public WhereCauseBuilder<E> equalTo(Object... values) {
+	@SuppressWarnings("unchecked")
+	public <T> WhereCauseBuilder<E> equalTo(T... values) {
 		return this.doWhenPredicate(()->{
 //			this.op = QueryDSLOps.EQ;
 			this.values = values;
@@ -153,7 +154,8 @@ public class DefaultWhereCauseBuilderField<E> extends WhereCauseBuilderField<E, 
 		return queryBuilder;
 	}
 	
-	public WhereCauseBuilder<E> is(Object... values) {
+	@SuppressWarnings("unchecked")
+	public <T> WhereCauseBuilder<E> is(T... values) {
 		return equalTo(values);
 	}
 	
