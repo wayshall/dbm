@@ -42,7 +42,11 @@ public class DefaultWhereCauseBuilderField<E> extends WhereCauseBuilderField<E, 
 							.toArray(new String[0]);
 	}
 
-
+	public DefaultWhereCauseBuilderField<E> when(Supplier<Boolean> predicate) {
+		this.whenPredicate = predicate;
+		return this;
+	}
+	
 	/***
 	 *  like '%value'
 	 * @author weishao zeng

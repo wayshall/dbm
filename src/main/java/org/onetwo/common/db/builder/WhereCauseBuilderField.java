@@ -27,11 +27,6 @@ abstract public class WhereCauseBuilderField<E, R> implements WhereCauseField<E,
 	
 	abstract public Object getValues();
 
-	public WhereCauseField<E, ?> when(Supplier<Boolean> predicate) {
-		this.whenPredicate = predicate;
-		return this;
-	}
-
 	void markAdded() {
 		this.added = true;
 		this.whenPredicate = null;
