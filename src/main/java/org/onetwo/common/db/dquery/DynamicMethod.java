@@ -39,6 +39,7 @@ import org.onetwo.common.reflect.ReflectUtils;
 import org.onetwo.common.utils.LangUtils;
 import org.onetwo.common.utils.Page;
 import org.onetwo.common.utils.PageRequest;
+import org.onetwo.common.utils.PageableRequest;
 import org.onetwo.common.utils.StringUtils;
 import org.onetwo.dbm.exception.DbmException;
 import org.onetwo.dbm.exception.FileNamedQueryException;
@@ -320,7 +321,8 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 				parseContextParameter = parameter;
 				queryParseContext = this.parseContextParameter.getParameterAnnotation(QueryParseContext.class);
 				
-			} else if (PageRequest.class.isAssignableFrom(parameter.getParameterType())) {
+//			} else if (PageRequest.class.isAssignableFrom(parameter.getParameterType())) {
+			} else if (PageableRequest.class.isAssignableFrom(parameter.getParameterType())) {
 				this.pageRequestParamter = parameter;
 //				specialParameters.add(parameter);
 				
@@ -401,11 +403,11 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 			return (Page<?>)args[pageParamter.getParameterIndex()];
 			
 		} else if (pageRequestParamter!=null) {
-			PageRequest pageRequest = (PageRequest)args[pageRequestParamter.getParameterIndex()];
+			PageableRequest pageRequest = (PageableRequest)args[pageRequestParamter.getParameterIndex()];
 			return pageRequest.toPageObject();
 			
 		} else if (queryParseContext!=null) {
-			PageRequest pageRequest = (PageRequest)queryParseContext.get(PageRequest.class);
+			PageableRequest pageRequest = (PageableRequest)queryParseContext.get(PageRequest.class);
 			if (pageRequest==null) {
 				return null;
 			}
