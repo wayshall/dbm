@@ -16,6 +16,7 @@ import javax.persistence.IdClass;
 import org.apache.commons.lang3.StringUtils;
 import org.onetwo.common.annotation.AnnotationInfo;
 import org.onetwo.common.db.TimeRecordableEntity;
+import org.onetwo.common.db.sqlext.QueryDSLOps;
 import org.onetwo.common.log.JFishLoggerFactory;
 import org.onetwo.common.reflect.ReflectUtils;
 import org.onetwo.common.spring.SpringUtils;
@@ -596,7 +597,8 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 		}
 		EntrySQLBuilder sqlb = getStaticSelectVersionSqlBuilder();
 		sqlb.build();
-		JdbcStatementContext<Object[]> kv = SimpleJdbcStatementContext.create(sqlb, new Object[]{getId(object), getVersionField().getValue(object)});
+//		JdbcStatementContext<Object[]> kv = SimpleJdbcStatementContext.create(sqlb, new Object[]{getId(object), getVersionField().getValue(object)});
+		JdbcStatementContext<Object[]> kv = SimpleJdbcStatementContext.create(sqlb, new Object[]{getId(object)});
 		return kv;
 	}
 	
@@ -641,8 +643,8 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 		}
 		// 复合主键存在多个id的情况
 		EntrySQLBuilder sqlBuilder = dsb.getSqlBuilder();
-		for (DbmMappedField idField : sqlBuilder.getWhereCauseFields()) {
-			Object idValue = idField.getValue(idObject);
+		for (DbmMappedFieldValue idField : sqlBuilder.getWhereCauseFields()) {
+			Object idValue = idField.getField().getValue(idObject);
 			dsb.addCauseValue(idValue);
 		}
 	}
@@ -803,7 +805,8 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 		} else {
 			// 复合主键存在多个id的情况
 			EntrySQLBuilder sqlBuilder = dsb.getSqlBuilder();
-			for (DbmMappedField idField : sqlBuilder.getWhereCauseFields()) {
+			for (DbmMappedFieldValue fv : sqlBuilder.getWhereCauseFields()) {
+				DbmMappedField idField = fv.getField();
 				if (idField.isIdentify()) {
 					Object idValue = idField.getValue(entityObject);
 					dsb.addCauseValue(idValue);
@@ -899,7 +902,9 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 				sqlBuilder.appendWhere(mfield, val);
 			} else if(mfield.isVersionControll()){
 //				Assert.notNull(val, "version field["+mfield.getName()+"] can not be null : " + entity);
-				if (val!=null) {
+				if (val==null) {
+					sqlBuilder.appendWhere(mfield, QueryDSLOps.IS_NULL, null);
+				} else {
 					sqlBuilder.appendWhere(mfield, val);
 //					val = mfield.getVersionableType().getVersionValule(val);
 				}

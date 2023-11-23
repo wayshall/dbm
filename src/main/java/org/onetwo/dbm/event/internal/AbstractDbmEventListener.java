@@ -243,12 +243,14 @@ abstract public class AbstractDbmEventListener implements DbmEventListener<DbmSe
 		DbmMappedField versionField = entry.getVersionField();
 		JdbcStatementContext<Object[]> versionContext = entry.makeSelectVersion(singleEntity);
 		
-		Object[] id = entry.getIds(singleEntity);
+//		Object[] id = entry.getIds(singleEntity);
 		try {
-			Object last = es.getDbmJdbcOperations().queryForObject(versionContext.getSql(), versionField.getColumnType(), id);
+			Object last = es.getDbmJdbcOperations().queryForObject(versionContext.getSql(), 
+															versionField.getColumnType(), 
+															versionContext.getValue());
 			return last;
 		} catch (EmptyResultDataAccessException e) {
-			throw new EntityNotFoundException("get entity version error: ", entry.getEntityClass(), id);
+			throw new EntityNotFoundException("get entity version error: ", entry.getEntityClass(), org.apache.commons.lang3.ArrayUtils.toString(versionContext.getValue()));
 		}
 	}
 	

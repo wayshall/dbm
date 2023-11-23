@@ -16,7 +16,7 @@ public interface EntrySQLBuilder {
 	
 	Object getVersionValue(Object[] updateValues);
 	
-	List<DbmMappedField> getWhereCauseFields();
+	List<DbmMappedFieldValue> getWhereCauseFields();
 	
 //	void setLock(LockInfo lock);
 
