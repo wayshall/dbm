@@ -30,14 +30,14 @@ public class EntrySQLBuilderImpl implements EntrySQLBuilder {
 	public static final Expression PARSER = ExpressionFacotry.DOLOR;
 
 	
-	public static final String QMARK = "?";
+	public static final String QMARK = DbmMappedFieldValue.QMARK;
 
 	protected String alias = "this_";
 	protected DbmMappedEntryMeta entry;
 	protected String tableName;
 //	protected DbmMappedField identifyField;
-	protected List<DbmMappedField> fields = LangUtils.newArrayList();
-	protected List<DbmMappedField> whereCauseFields = LangUtils.newArrayList();
+	protected List<DbmMappedFieldValue> fields = LangUtils.newArrayList();
+	protected List<DbmMappedFieldValue> whereCauseFields = LangUtils.newArrayList();
 	
 	private boolean debug;
 //	private String placeHoder;
@@ -77,7 +77,7 @@ public class EntrySQLBuilderImpl implements EntrySQLBuilder {
 	
 	public EntrySQLBuilder append(DbmMappedField column){
 		if(column!=null)
-			this.fields.add(column);
+			this.fields.add(DbmMappedFieldValue.create(column, dialet));
 		return this;
 	}
 	
@@ -90,13 +90,27 @@ public class EntrySQLBuilderImpl implements EntrySQLBuilder {
 	
 	public EntrySQLBuilder appendWhere(DbmMappedField column){
 		if(column!=null)
+			this.whereCauseFields.add(DbmMappedFieldValue.create(column, dialet));
+		return this;
+	}
+	
+	public EntrySQLBuilder appendWhere(DbmMappedFieldValue column){
+		if(column!=null) {
+			if (column.getDialet()==null) {
+				column.setDialet(dialet);
+			}
 			this.whereCauseFields.add(column);
+		}
 		return this;
 	}
 	
 	public EntrySQLBuilder append(Collection<? extends DbmMappedField> columns){
-		if(columns!=null)
-			this.fields.addAll(columns);
+		if(columns!=null) {
+//			this.fields.addAll(columns);
+			columns.forEach(column -> {
+				append(column);
+			});
+		}
 		return this;
 	}
 	
@@ -281,36 +295,39 @@ public class EntrySQLBuilderImpl implements EntrySQLBuilder {
 		this.debug = debug;
 	}
 
-	protected List<String> toWhereString(List<DbmMappedField> columns){
+	protected List<String> toWhereString(List<DbmMappedFieldValue> columns){
 		return toWhereString(columns, true);
 	}
 	
-	protected List<String> toWhereString(Collection<DbmMappedField> columns, boolean alias){
+	protected List<String> toWhereString(Collection<DbmMappedFieldValue> columns, boolean alias){
 		List<String> strs = new ArrayList<String>();
-		String namedStr = QMARK;
-		String fstr = null;
-		for(DbmMappedField field : columns){
-			fstr = alias?field.getColumn().getNameWithAlias():field.getColumn().getName();
-			fstr = dialet.wrapKeywordColumnName(fstr);
-			String op = " = ";
-			if(namedPlaceHoder){
-				namedStr = alias?field.getColumn().getNamedPlaceHolderWithAlias():field.getColumn().getNamedPlaceHolder();
-				strs.add(fstr + op + namedStr);
-			}else{
-				strs.add(fstr + op +namedStr);
-			}
+//		String namedStr = QMARK;
+//		String fstr = null;
+//		String op = " = ";
+		for(DbmMappedFieldValue fv : columns){
+//			DbmMappedField field = fv.getField();
+//			fstr = alias?field.getColumn().getNameWithAlias():field.getColumn().getName();
+//			fstr = dialet.wrapKeywordColumnName(fstr);
+//			if(namedPlaceHoder){
+//				namedStr = alias?field.getColumn().getNamedPlaceHolderWithAlias():field.getColumn().getNamedPlaceHolder();
+//				strs.add(fstr + op + namedStr);
+//			}else{
+//				strs.add(fstr + op +namedStr);
+//			}
+			strs.add(fv.toWhereString(namedPlaceHoder, alias));
 		}
 		return strs;
 	}
 	
 
-	protected List<String> nameToString(Collection<DbmMappedField> columns){
+	protected List<String> nameToString(Collection<DbmMappedFieldValue> columns){
 		return this.nameToString(columns, true);
 	}
 	
-	protected List<String> nameToString(Collection<DbmMappedField> columns, boolean alias){
+	protected List<String> nameToString(Collection<DbmMappedFieldValue> columns, boolean alias){
 		List<String> strs = new ArrayList<String>();
-		for(DbmMappedField field : columns){
+		for(DbmMappedFieldValue fv : columns){
+			DbmMappedField field = fv.getField();
 			String columnName = alias?field.getColumn().getNameWithAlias():field.getColumn().getName();
 			columnName = dialet.wrapKeywordColumnName(columnName);
 			strs.add(columnName);
@@ -333,9 +350,10 @@ public class EntrySQLBuilderImpl implements EntrySQLBuilder {
 	 * @param alias
 	 * @return
 	 */
-	protected List<String> javaNameToNamedString(Collection<DbmMappedField> columns, boolean alias){
+	protected List<String> javaNameToNamedString(Collection<DbmMappedFieldValue> columns, boolean alias){
 		List<String> strs = new ArrayList<String>();
-		for(DbmMappedField field : columns){
+		for(DbmMappedFieldValue fv : columns){
+			DbmMappedField field = fv.getField();
 			if(namedPlaceHoder)
 				strs.add(alias?field.getColumn().getNamedPlaceHolderWithAlias():field.getColumn().getNamedPlaceHolder());
 			else
@@ -351,9 +369,10 @@ public class EntrySQLBuilderImpl implements EntrySQLBuilder {
 	 * @param columns
 	 * @return
 	 */
-	protected List<String> duplicateKeyUpdateSqlString(Collection<DbmMappedField> columns){
+	protected List<String> duplicateKeyUpdateSqlString(Collection<DbmMappedFieldValue> columns){
 		List<String> strs = new ArrayList<String>();
-		for(DbmMappedField field : columns){
+		for(DbmMappedFieldValue fv : columns){
+			DbmMappedField field = fv.getField();
 			// 忽略主键
 			if (field.isIdentify()) {
 				continue ;
@@ -384,11 +403,11 @@ public class EntrySQLBuilderImpl implements EntrySQLBuilder {
 		return type;
 	}
 
-	public List<DbmMappedField> getFields() {
+	public List<DbmMappedFieldValue> getFields() {
 		return fields;
 	}
 
-	public List<DbmMappedField> getWhereCauseFields() {
+	public List<DbmMappedFieldValue> getWhereCauseFields() {
 		return whereCauseFields;
 	}
 
@@ -401,7 +420,15 @@ public class EntrySQLBuilderImpl implements EntrySQLBuilder {
 	}
 	
 	public Object getVersionValue(Object[] updateValues){
-		int valueIndex = fields.indexOf(entry.getVersionField());
+		int valueIndex = -1;
+		for (int i = 0; i < fields.size(); i++) {
+			if (fields.get(i).getField().equals(entry.getVersionField())) {
+				valueIndex = i;
+			}
+		}
+		if (valueIndex==-1) {
+			throw new DbmException("version field not found on entry: " + entry.getEntityName());
+		}
 		return updateValues[valueIndex];
 	}
 

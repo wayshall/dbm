@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.onetwo.common.db.sqlext.QueryDSLOps;
 import org.onetwo.common.utils.ArrayUtils;
 import org.onetwo.common.utils.Assert;
 import org.onetwo.common.utils.CUtils;
@@ -46,8 +47,16 @@ public class JdbcStatementContextBuilder implements JdbcStatementContext<List<Ob
 	}
 	
 	public JdbcStatementContextBuilder appendWhere(DbmMappedField column, Object val){
-		this.sqlBuilder.appendWhere(column);
+		this.sqlBuilder.appendWhere(new DbmMappedFieldValue(column, QueryDSLOps.EQ, val, sqlBuilder.getDialet()));
 		this.causeValues.add(val);
+		return this;
+	}
+	
+	public JdbcStatementContextBuilder appendWhere(DbmMappedField column, QueryDSLOps op, Object val){
+		this.sqlBuilder.appendWhere(new DbmMappedFieldValue(column, op, val, sqlBuilder.getDialet()));
+		if (val!=null) {
+			this.causeValues.add(val);
+		}
 		return this;
 	}
 	
@@ -59,7 +68,8 @@ public class JdbcStatementContextBuilder implements JdbcStatementContext<List<Ob
 		Assert.notNull(entity);
 		Object val = null;
 		EntrySQLBuilderImpl builder = getSqlBuilder();
-		for(DbmMappedField field : builder.getFields()){
+		for(DbmMappedFieldValue fv : builder.getFields()){
+			DbmMappedField field = fv.getField();
 			val = field.getValue(entity);
 //			val = field.getValueForJdbcAndFireDbmEventAction(entity, getEventAction());
 			Object newFieldValue = field.fireDbmEntityFieldEvents(val, getEventAction());
@@ -120,7 +130,8 @@ public class JdbcStatementContextBuilder implements JdbcStatementContext<List<Ob
 	
 	public JdbcStatementContextBuilder processWhereCauseValuesFromEntity(Object entity){
 		Assert.notNull(entity);
-		for(DbmMappedField field : this.sqlBuilder.getWhereCauseFields()){
+		for(DbmMappedFieldValue fv : this.sqlBuilder.getWhereCauseFields()){
+			DbmMappedField field = fv.getField();
 			Object val = field.getValue(entity);
 			SqlParameterValue pvalue = convertSqlParameterValue(field, val);
 			this.causeValues.add(pvalue);
