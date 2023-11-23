@@ -19,6 +19,9 @@ public class IntegerVersionableType implements VersionableType<Integer> {
 
 	@Override
 	public boolean isEquals(Integer newVersion, Integer oldVersion) {
+		if (newVersion==null && oldVersion==null) {
+			return true;
+		}
 		return newVersion!=null && newVersion.equals(oldVersion);
 	}
 

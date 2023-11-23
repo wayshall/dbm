@@ -898,9 +898,11 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 				Assert.notNull(val, "id can not be null : " + entity);
 				sqlBuilder.appendWhere(mfield, val);
 			} else if(mfield.isVersionControll()){
-				Assert.notNull(val, "version field["+mfield.getName()+"] can not be null : " + entity);
-				sqlBuilder.appendWhere(mfield, val);
-				val = mfield.getVersionableType().getVersionValule(val);
+//				Assert.notNull(val, "version field["+mfield.getName()+"] can not be null : " + entity);
+				if (val!=null) {
+					sqlBuilder.appendWhere(mfield, val);
+//					val = mfield.getVersionableType().getVersionValule(val);
+				}
 			}
 		}
 		return sqlBuilder;
