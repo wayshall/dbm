@@ -284,7 +284,7 @@ public class SingleFieldWhereCauseBuilderField<E> extends WhereCauseBuilderField
 			return this.field.queryBuilder.field(fieldName);
 		}
 
-		public WhereCauseField<E, ?> field(String... fieldName) {
+		public DefaultWhereCauseBuilderField<E> field(String... fieldName) {
 			this.field.addField();
 			return this.field.queryBuilder.field(fieldName);
 		}
