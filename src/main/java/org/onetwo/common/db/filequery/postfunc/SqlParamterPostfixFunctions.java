@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.apache.commons.compress.utils.Lists;
 import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
 import org.onetwo.common.convert.Types;
 import org.onetwo.common.db.spi.SqlParamterPostfixFunctionRegistry;
@@ -18,6 +17,7 @@ import org.onetwo.common.utils.LangUtils;
 import org.onetwo.common.utils.StringUtils;
 import org.onetwo.dbm.exception.DbmException;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 /*****
