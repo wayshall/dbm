@@ -62,7 +62,7 @@ import org.springframework.jdbc.support.rowset.SqlRowSetMetaData;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionSystemException;
-import org.springframework.util.Assert;
+import org.onetwo.common.utils.Assert;
 import org.springframework.util.ClassUtils;
 
 import com.google.common.collect.Lists;

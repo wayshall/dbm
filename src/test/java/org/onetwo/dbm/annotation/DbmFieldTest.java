@@ -2,7 +2,7 @@ package org.onetwo.dbm.annotation;
 
 import java.util.Map;
 
-import javax.persistence.Entity;
+import jakarta.persistence.Entity;
 
 import org.junit.Test;
 import org.onetwo.dbm.mapping.DbmFieldValueConverter;

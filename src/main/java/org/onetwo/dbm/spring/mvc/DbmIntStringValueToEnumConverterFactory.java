@@ -6,7 +6,7 @@ import org.onetwo.dbm.exception.DbmException;
 import org.onetwo.dbm.mapping.DbmEnumValueMapping;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.converter.ConverterFactory;
-import org.springframework.util.Assert;
+import org.onetwo.common.utils.Assert;
 
 import net.jodah.typetools.TypeResolver;
 

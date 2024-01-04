@@ -2,9 +2,9 @@ package org.onetwo.common.dbm.model.entity;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
 import org.hibernate.validator.constraints.Length;
 import org.onetwo.dbm.annotation.DbmFieldListeners;

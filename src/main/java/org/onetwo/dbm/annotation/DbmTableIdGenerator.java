@@ -5,8 +5,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import javax.persistence.GenerationType;
-import javax.persistence.TableGenerator;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.TableGenerator;
 
 import org.springframework.core.annotation.AliasFor;
 

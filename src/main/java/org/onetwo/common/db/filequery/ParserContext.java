@@ -12,7 +12,7 @@ import org.onetwo.common.utils.CUtils;
 import org.onetwo.common.utils.LangUtils;
 import org.onetwo.common.utils.list.JFishList;
 import org.onetwo.common.utils.list.NoIndexIt;
-import org.springframework.util.Assert;
+import org.onetwo.common.utils.Assert;
 
 public class ParserContext implements Map<Object, Object> {
 	

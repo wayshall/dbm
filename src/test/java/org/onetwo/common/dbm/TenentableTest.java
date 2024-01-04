@@ -2,7 +2,7 @@ package org.onetwo.common.dbm;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 import org.junit.Test;
 import org.onetwo.common.base.DbmBaseTest;

@@ -7,12 +7,10 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import javax.sql.DataSource;
 
-import org.hibernate.SQLQuery;
 import org.hibernate.query.NativeQuery;
+import org.onetwo.common.utils.Page;
 import org.onetwo.common.db.ParsedSqlContext;
 import org.onetwo.common.db.dquery.DynamicMethod;
 import org.onetwo.common.db.dquery.NamedQueryInvokeContext;
@@ -25,7 +23,6 @@ import org.onetwo.common.db.spi.NamedQueryInfoParser;
 import org.onetwo.common.db.spi.QueryProvideManager;
 import org.onetwo.common.db.spi.QueryWrapper;
 import org.onetwo.common.db.spi.SqlParamterPostfixFunctionRegistry;
-import org.onetwo.common.utils.Page;
 import org.onetwo.dbm.annotation.DbmResultMapping;
 import org.onetwo.dbm.core.spi.DbmInterceptor;
 import org.onetwo.dbm.core.spi.DbmInterceptorChain;
@@ -39,6 +36,9 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterUtils;
 
 import com.google.common.collect.ImmutableList;
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 
 /**
  * @author wayshall
@@ -225,14 +225,16 @@ public class HibernateJPAQueryProvideManager implements QueryProvideManager, Ini
 		
 		protected QueryWrapper createDataQuery(CreateQueryCmd createQueryCmd){
 			QueryWrapper dataQuery = this.queryProvideManager.createQuery(createQueryCmd);
-			SQLQuery sqlQuery = dataQuery.unwarp(SQLQuery.class);
+			NativeQuery<?> sqlQuery = dataQuery.unwarp(NativeQuery.class);
 			DynamicMethod dmethod = invokeContext.getDynamicMethod();
 			if(dmethod.isAnnotationPresent(DbmResultMapping.class)){
 				DbmResultMapping dbmResultMapping = dmethod.getMethod().getAnnotation(DbmResultMapping.class);
 				HibernateNestedBeanTransformer<?> transformer = new HibernateNestedBeanTransformer<>(invokeContext.getResultComponentClass(), dbmResultMapping);
-				sqlQuery.setResultTransformer(transformer);
+//				sqlQuery.setResultTransformer(transformer);
+				sqlQuery.setTupleTransformer(transformer);
 			}else{
-				sqlQuery.setResultTransformer(new HibernateRowToBeanTransformer(createQueryCmd.getMappedClass()));
+//				sqlQuery.setResultTransformer(new HibernateRowToBeanTransformer(createQueryCmd.getMappedClass()));
+				sqlQuery.setTupleTransformer(new HibernateRowToBeanTransformer(createQueryCmd.getMappedClass()));
 			}
 			return dataQuery;
 		}

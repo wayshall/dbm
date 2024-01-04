@@ -2,7 +2,7 @@ package org.onetwo.dbm.id;
 
 import org.onetwo.common.utils.StringUtils;
 import org.springframework.transaction.TransactionDefinition;
-import org.springframework.util.Assert;
+import org.onetwo.common.utils.Assert;
 
 /**
  * @author wayshall

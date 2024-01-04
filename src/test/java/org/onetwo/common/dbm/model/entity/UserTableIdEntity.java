@@ -1,8 +1,8 @@
 package org.onetwo.common.dbm.model.entity;
 
-import javax.persistence.Entity;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
+import jakarta.persistence.Entity;
+import jakarta.persistence.SequenceGenerator;
+import jakarta.persistence.Table;
 
 import org.hibernate.validator.constraints.Length;
 import org.onetwo.dbm.annotation.DbmTableIdGenerator;

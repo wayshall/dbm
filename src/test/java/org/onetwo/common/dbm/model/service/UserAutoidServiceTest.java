@@ -5,7 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.Date;
 import java.util.List;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import javax.sql.DataSource;
 
 import org.junit.Assert;

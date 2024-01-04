@@ -2,8 +2,8 @@ package org.onetwo.common.dbm.model.vo;
 
 import java.util.List;
 
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 
 import org.onetwo.common.dbm.model.hib.entity.DepartmentEntity.DepartStatus;
 import org.onetwo.dbm.annotation.DbmRowMapper;

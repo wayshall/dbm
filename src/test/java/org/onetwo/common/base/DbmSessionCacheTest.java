@@ -5,7 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import javax.sql.DataSource;
 
 import org.apache.commons.lang3.tuple.Pair;

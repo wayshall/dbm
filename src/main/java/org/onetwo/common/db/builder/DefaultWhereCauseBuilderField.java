@@ -7,7 +7,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.persistence.metamodel.SingularAttribute;
+import jakarta.persistence.metamodel.SingularAttribute;
 
 import org.onetwo.common.db.sqlext.ExtQueryUtils;
 import org.onetwo.common.db.sqlext.QueryDSLOps;

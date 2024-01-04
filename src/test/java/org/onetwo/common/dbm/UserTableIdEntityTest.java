@@ -7,7 +7,7 @@ import static org.junit.Assert.assertThat;
 import java.util.Collection;
 import java.util.List;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 import org.junit.Test;
 import org.onetwo.common.base.DbmBaseTest;

@@ -7,7 +7,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.function.Supplier;
 
 import javax.sql.DataSource;
-import javax.validation.Validator;
+import jakarta.validation.Validator;
 
 import org.onetwo.common.db.filequery.postfunc.SqlParamterPostfixFunctions;
 import org.onetwo.common.db.filter.annotation.DataQueryFilterListener;
@@ -49,7 +49,7 @@ import org.onetwo.dbm.mapping.MutilMappedEntryManager;
 import org.onetwo.dbm.query.JFishSQLSymbolManagerImpl;
 import org.springframework.aop.aspectj.annotation.AspectJProxyFactory;
 import org.springframework.context.ApplicationContext;
-import org.springframework.util.Assert;
+import org.onetwo.common.utils.Assert;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;

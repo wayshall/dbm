@@ -7,8 +7,8 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 
 import org.onetwo.common.annotation.AnnotationInfo;
 import org.onetwo.common.log.JFishLoggerFactory;

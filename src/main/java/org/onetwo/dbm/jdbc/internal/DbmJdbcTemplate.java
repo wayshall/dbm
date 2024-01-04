@@ -40,7 +40,7 @@ import org.springframework.jdbc.core.StatementCallback;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.jdbc.support.KeyHolder;
-import org.springframework.util.Assert;
+import org.onetwo.common.utils.Assert;
 
 public class DbmJdbcTemplate extends JdbcTemplate implements DbmJdbcOperations {
 	

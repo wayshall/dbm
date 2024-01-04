@@ -8,8 +8,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 
 import org.junit.Test;
 import org.onetwo.common.base.DbmBaseTest;

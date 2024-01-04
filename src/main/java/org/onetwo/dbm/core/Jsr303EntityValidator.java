@@ -1,6 +1,6 @@
 package org.onetwo.dbm.core;
 
-import javax.validation.Validator;
+import jakarta.validation.Validator;
 
 import org.onetwo.common.spring.validator.ValidatorWrapper;
 import org.onetwo.dbm.mapping.EntityValidator;

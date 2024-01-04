@@ -12,7 +12,7 @@ import org.onetwo.common.utils.StringUtils;
 import org.springframework.jdbc.core.SqlParameterValue;
 import org.springframework.jdbc.core.SqlTypeValue;
 import org.springframework.jdbc.core.StatementCreatorUtils;
-import org.springframework.util.Assert;
+import org.onetwo.common.utils.Assert;
 
 final public class JdbcUtils {
 	

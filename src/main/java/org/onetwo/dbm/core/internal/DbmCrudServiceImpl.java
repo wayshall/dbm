@@ -5,7 +5,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import javax.validation.ValidationException;
+import jakarta.validation.ValidationException;
 
 import org.onetwo.common.db.BaseCrudEntityManager;
 import org.onetwo.common.db.spi.BaseEntityManager;

@@ -9,7 +9,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 import org.junit.Test;
 import org.onetwo.common.base.DbmBaseTest;

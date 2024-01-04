@@ -9,8 +9,8 @@ import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.Map;
 
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 
 import org.onetwo.common.date.DateUtils;
 import org.onetwo.common.date.Dates;

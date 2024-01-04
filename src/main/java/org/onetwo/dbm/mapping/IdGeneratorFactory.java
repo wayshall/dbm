@@ -4,8 +4,8 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Optional;
 
-import javax.persistence.SequenceGenerator;
-import javax.persistence.TableGenerator;
+import jakarta.persistence.SequenceGenerator;
+import jakarta.persistence.TableGenerator;
 
 import org.apache.commons.lang3.StringUtils;
 import org.onetwo.common.annotation.AnnotationInfo;

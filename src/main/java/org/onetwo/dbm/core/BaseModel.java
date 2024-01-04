@@ -2,7 +2,7 @@ package org.onetwo.dbm.core;
 
 import java.io.Serializable;
 
-import javax.persistence.Transient;
+import jakarta.persistence.Transient;
 
 import org.onetwo.common.db.spi.BaseEntityManager;
 import org.onetwo.common.db.spi.CrudEntityManager;

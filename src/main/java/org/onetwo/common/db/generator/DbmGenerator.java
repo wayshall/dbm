@@ -14,7 +14,7 @@ import org.onetwo.common.db.generator.ftl.TomcatDataSourceBuilder;
 import org.onetwo.common.file.FileUtils;
 import org.onetwo.common.utils.LangUtils;
 import org.onetwo.dbm.exception.DbmException;
-import org.springframework.util.Assert;
+import org.onetwo.common.utils.Assert;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;

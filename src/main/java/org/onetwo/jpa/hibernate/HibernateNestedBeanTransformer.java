@@ -3,12 +3,13 @@ package org.onetwo.jpa.hibernate;
 import java.util.List;
 import java.util.Map;
 
-import org.hibernate.transform.ResultTransformer;
+import org.hibernate.query.ResultListTransformer;
+import org.hibernate.query.TupleTransformer;
 import org.onetwo.dbm.annotation.DbmResultMapping;
 import org.onetwo.dbm.jdbc.mapper.nested.AbstractNestedBeanMapper;
 import org.onetwo.dbm.jdbc.spi.ColumnValueGetter;
 import org.onetwo.dbm.mapping.DbmMappedField;
-import org.springframework.util.Assert;
+import org.onetwo.common.utils.Assert;
 
 import com.google.common.collect.Maps;
 
@@ -17,7 +18,7 @@ import com.google.common.collect.Maps;
  * <br/>
  */
 @SuppressWarnings({ "rawtypes", "serial" })
-public class HibernateNestedBeanTransformer<T> extends AbstractNestedBeanMapper<T> implements ResultTransformer {
+public class HibernateNestedBeanTransformer<T> extends AbstractNestedBeanMapper<T> implements TupleTransformer<Object>, ResultListTransformer<T> {
 
 	private Map<String, Integer> names;
 	
@@ -47,7 +48,7 @@ public class HibernateNestedBeanTransformer<T> extends AbstractNestedBeanMapper<
 	}
 
 	@Override
-	public List transformList(List collection) {
+	public List<T> transformList(List<T> collection) {
 		return collection;
 	}
 	

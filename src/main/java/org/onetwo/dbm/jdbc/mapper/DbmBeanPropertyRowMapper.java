@@ -20,7 +20,7 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.jdbc.support.rowset.ResultSetWrappingSqlRowSet;
 import org.springframework.jdbc.support.rowset.SqlRowSetMetaData;
-import org.springframework.util.Assert;
+import org.onetwo.common.utils.Assert;
 import org.springframework.util.ClassUtils;
 
 public class DbmBeanPropertyRowMapper<T> extends DbmDataRowMapper<T> implements DataRowMapper<T>, DataColumnMapper {

@@ -3,7 +3,7 @@ package org.onetwo.common.db.builder;
 import java.util.Map;
 import java.util.function.Supplier;
 
-import javax.persistence.metamodel.SingularAttribute;
+import jakarta.persistence.metamodel.SingularAttribute;
 
 import org.onetwo.common.db.builder.QueryBuilderImpl.SubQueryBuilder;
 import org.onetwo.common.db.filter.DataQueryParamaterEnhancer;

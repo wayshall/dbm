@@ -1,8 +1,8 @@
 package org.onetwo.common.dbm.model.entity;
 
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 
 import org.hibernate.validator.constraints.Length;
 import org.onetwo.dbm.annotation.DbmEntity;

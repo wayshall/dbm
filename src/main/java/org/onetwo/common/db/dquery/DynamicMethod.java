@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import javax.persistence.EnumType;
+import jakarta.persistence.EnumType;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.onetwo.common.db.dquery.DynamicMethod.DynamicMethodParameter;

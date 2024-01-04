@@ -23,7 +23,7 @@ import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.core.SqlParameterValue;
 import org.springframework.jdbc.core.SqlProvider;
 import org.springframework.jdbc.core.StatementCreatorUtils;
-import org.springframework.util.Assert;
+import org.onetwo.common.utils.Assert;
 
 /****
  * 复制自spring PreparedStatementCreatorFactory的实现，主要是增加JdbcStatementParameterSetter接口，统一参数设置入口

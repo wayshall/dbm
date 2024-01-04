@@ -8,7 +8,7 @@ import static org.junit.Assert.assertThat;
 import java.util.Date;
 import java.util.List;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 import org.junit.Assert;
 import org.junit.Test;

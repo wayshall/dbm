@@ -1,10 +1,10 @@
 package org.onetwo.common.dbm.model.entity;
 
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.TableGenerator;
-import javax.persistence.Version;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.TableGenerator;
+import jakarta.persistence.Version;
 
 import org.onetwo.dbm.annotation.DbmEntity;
 

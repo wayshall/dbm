@@ -1,6 +1,6 @@
 package org.onetwo.common.base;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import javax.sql.DataSource;
 
 import org.junit.After;

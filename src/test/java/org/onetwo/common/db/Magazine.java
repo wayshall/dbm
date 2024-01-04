@@ -2,8 +2,8 @@ package org.onetwo.common.db;
 
 import java.util.Map;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 
 import org.onetwo.common.db.filter.DataQueryParamaterEnhancer;
 import org.onetwo.common.db.filter.IDataQueryParamterEnhancer;

@@ -10,8 +10,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import javax.persistence.Entity;
-import javax.persistence.ManyToOne;
+import jakarta.persistence.Entity;
+import jakarta.persistence.ManyToOne;
 
 import org.junit.Assert;
 import org.junit.Test;

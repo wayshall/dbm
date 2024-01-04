@@ -2,7 +2,7 @@ package org.onetwo.common.hibernate;
 
 import java.util.Properties;
 
-import javax.persistence.EntityManagerFactory;
+import jakarta.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
 import org.onetwo.common.dbm.model.dao.CompanyDao;

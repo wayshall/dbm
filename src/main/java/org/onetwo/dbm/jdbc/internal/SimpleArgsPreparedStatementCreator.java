@@ -12,7 +12,7 @@ import org.onetwo.common.utils.LangUtils;
 import org.onetwo.dbm.jdbc.spi.SqlParametersProvider;
 import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.SqlProvider;
-import org.springframework.util.Assert;
+import org.onetwo.common.utils.Assert;
 
 public class SimpleArgsPreparedStatementCreator implements PreparedStatementCreator, SqlProvider, SqlParametersProvider {
 

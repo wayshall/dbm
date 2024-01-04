@@ -2,7 +2,7 @@ package org.onetwo.common.dbm;
 
 import java.lang.annotation.Annotation;
 
-import javax.persistence.Id;
+import jakarta.persistence.Id;
 
 import org.junit.Assert;
 import org.junit.Test;

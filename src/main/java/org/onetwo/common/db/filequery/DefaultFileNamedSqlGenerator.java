@@ -14,7 +14,7 @@ import org.onetwo.common.db.spi.SqlTemplateParser;
 import org.onetwo.common.db.sqlext.ExtQueryUtils;
 import org.onetwo.common.utils.LangUtils;
 import org.onetwo.dbm.exception.DbmException;
-import org.springframework.util.Assert;
+import org.onetwo.common.utils.Assert;
 
 /****
  * sql语句解释

@@ -5,7 +5,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import javax.persistence.GenerationType;
+import jakarta.persistence.GenerationType;
 
 import org.onetwo.dbm.id.SnowflakeGenerator;
 

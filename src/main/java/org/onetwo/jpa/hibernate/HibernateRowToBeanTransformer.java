@@ -10,13 +10,13 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.hibernate.transform.AliasedTupleSubsetResultTransformer;
+import org.hibernate.query.TupleTransformer;
 import org.onetwo.common.spring.converter.IntegerToEnumConverterFactory;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.PropertyAccessorFactory;
 import org.springframework.format.support.FormattingConversionService;
 import org.springframework.format.support.FormattingConversionServiceFactoryBean;
-import org.springframework.util.Assert;
+import org.onetwo.common.utils.Assert;
 
 import com.google.common.collect.Sets;
 
@@ -25,7 +25,9 @@ import com.google.common.collect.Sets;
  * <br/>
  */
 @SuppressWarnings("serial")
-public class HibernateRowToBeanTransformer extends AliasedTupleSubsetResultTransformer {
+public class HibernateRowToBeanTransformer implements TupleTransformer<Object>  
+//extends AliasedTupleSubsetResultTransformer 
+{
 	private static final FormattingConversionService conversionService;
 	
 	static {

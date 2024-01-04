@@ -1,7 +1,7 @@
 package org.onetwo.dbm.jpa;
 
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
+import jakarta.persistence.SequenceGenerator;
+import jakarta.persistence.Table;
 
 import org.onetwo.common.db.sql.SequenceNameManager;
 import org.onetwo.common.utils.StringUtils;

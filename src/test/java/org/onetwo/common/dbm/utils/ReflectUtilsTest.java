@@ -6,7 +6,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Map;
 
-import javax.persistence.TableGenerator;
+import jakarta.persistence.TableGenerator;
 
 import org.junit.Test;
 import org.onetwo.common.dbm.model.entity.UserTableIdEntity;

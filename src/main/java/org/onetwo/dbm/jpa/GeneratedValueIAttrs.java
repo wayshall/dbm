@@ -1,6 +1,6 @@
 package org.onetwo.dbm.jpa;
 
-import javax.persistence.GenerationType;
+import jakarta.persistence.GenerationType;
 
 /**
  * @author wayshall

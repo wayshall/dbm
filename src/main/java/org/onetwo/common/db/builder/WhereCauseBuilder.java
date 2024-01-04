@@ -2,7 +2,7 @@ package org.onetwo.common.db.builder;
 
 import java.util.function.Supplier;
 
-import javax.persistence.metamodel.SingularAttribute;
+import jakarta.persistence.metamodel.SingularAttribute;
 
 
 public interface WhereCauseBuilder<E> {

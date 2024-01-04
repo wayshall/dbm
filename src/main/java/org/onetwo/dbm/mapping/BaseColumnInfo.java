@@ -4,7 +4,7 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.Date;
 
-import javax.persistence.FetchType;
+import jakarta.persistence.FetchType;
 
 import org.onetwo.common.utils.StringUtils;
 

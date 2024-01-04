@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.StringWriter;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 import org.onetwo.common.db.generator.TemplateEngine;
 import org.onetwo.common.exception.BaseException;

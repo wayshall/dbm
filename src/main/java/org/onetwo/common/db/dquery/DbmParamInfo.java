@@ -1,6 +1,6 @@
 package org.onetwo.common.db.dquery;
 
-import javax.persistence.EnumType;
+import jakarta.persistence.EnumType;
 
 import lombok.Data;
 

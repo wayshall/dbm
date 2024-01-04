@@ -1,7 +1,7 @@
 package org.onetwo.dbm.jdbc;
 
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.util.Assert;
+import org.onetwo.common.utils.Assert;
 
 public class AbstractResultSetExtractor<T> {
 	protected final RowMapper<T> rowMapper;

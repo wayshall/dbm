@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 
-import javax.persistence.Column;
+import jakarta.persistence.Column;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.HashCodeBuilder;

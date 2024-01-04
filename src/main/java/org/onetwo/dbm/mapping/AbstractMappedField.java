@@ -6,8 +6,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 
 import org.onetwo.common.reflect.ReflectUtils;
 import org.onetwo.common.spring.SpringUtils;

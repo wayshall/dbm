@@ -1,7 +1,7 @@
 package org.onetwo.dbm.core.internal;
 
 import org.springframework.core.Ordered;
-import org.springframework.util.Assert;
+import org.onetwo.common.utils.Assert;
 
 /**
  * @author wayshall
