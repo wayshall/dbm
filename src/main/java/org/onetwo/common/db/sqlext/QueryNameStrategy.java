@@ -84,7 +84,7 @@ public class QueryNameStrategy {
 
 	public static String checkFieldNameValid(String field){
 		Assert.hasText(field);
-		SqlUtils.check(field);
+		SqlUtils.checkSQLSafeField(field);
 		return field;
 	}
 }
