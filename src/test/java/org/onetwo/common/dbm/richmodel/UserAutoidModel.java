@@ -14,7 +14,7 @@ import javax.persistence.Table;
 
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.Length;
-import org.hibernate.validator.constraints.NotBlank;
+import javax.validation.constraints.NotBlank;
 import org.onetwo.common.dbm.model.entity.UserAutoidEntity.UserStatus;
 import org.onetwo.dbm.richmodel.RichModel;
 import org.springframework.format.annotation.DateTimeFormat;

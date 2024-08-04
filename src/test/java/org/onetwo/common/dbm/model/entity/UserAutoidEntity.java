@@ -14,7 +14,7 @@ import javax.persistence.Table;
 
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.Length;
-import org.hibernate.validator.constraints.NotBlank;
+import javax.validation.constraints.NotBlank;
 import org.onetwo.common.db.spi.CrudEntityManager;
 import org.onetwo.dbm.annotation.DbmEncryptField;
 import org.onetwo.dbm.utils.Dbms;

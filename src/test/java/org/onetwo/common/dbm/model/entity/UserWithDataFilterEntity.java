@@ -13,7 +13,7 @@ import javax.persistence.TemporalType;
 
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.Length;
-import org.hibernate.validator.constraints.NotBlank;
+import javax.validation.constraints.NotBlank;
 import org.onetwo.common.db.filter.DataQueryParamaterEnhancer;
 import org.onetwo.common.db.filter.IDataQueryParamterEnhancer;
 import org.onetwo.common.db.sqlext.ExtQuery;
