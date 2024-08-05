@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import org.onetwo.common.db.filequery.directive.SqlTemplateMethodModelEx;
 import org.onetwo.common.db.spi.NamedQueryInfo;
 import org.onetwo.common.db.spi.QueryConfigData;
 import org.onetwo.common.db.spi.QueryContextVariable;
@@ -43,6 +44,11 @@ public class ParserContext implements Map<Object, Object> {
 		this.context.put(CONTEXT_KEY, ParserContextFunctionSet.getInstance());
 	}
 	
+	public void addMethodEx(SqlTemplateMethodModelEx method) {
+		for (String methodName : method.getMethodNames()) {
+			put(methodName, method);
+		}
+	}
 
 	public NamedQueryInfo getQueryInfo() {
 		return queryInfo;

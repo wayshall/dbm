@@ -157,8 +157,8 @@ public class JPAMappedEntryBuilder extends DbmMappedEntryBuilder {
 	}
 
 	@Override
-	protected boolean ignoreMappedField(JFishProperty field){
-		return super.ignoreMappedField(field) || field.hasAnnotation(Transient.class);
+	protected boolean ignoreMappedField(DbmMappedEntry entry, JFishProperty field){
+		return super.ignoreMappedField(entry, field) || field.hasAnnotation(Transient.class);
 	}
 
 	@Override

@@ -991,8 +991,42 @@ sql模板使用的实际上是freemarker模板引擎，因此freemarker支持的
 [/#list]
 ```
 条件表达式除了通常的逻辑判断外，还有一些比较常用到的表达式：
-- 变量??,双问号，用于判断一个变量是否存在
-- 变量?has_content，用于判断变量是有内容，比如字符串的话，相等于判断是否为空。
+- 双问号，用于判断一个变量是否存在
+```Java
+    [#if request.userName??]
+        t.user_name = :request.userName 
+    [/#if]
+```
+- has_content，用于判断变量是否为null或者空白：
+```Java
+    [#if request.userName?has_content]
+        t.user_name = :request.userName?likeString
+    [/#if]
+```
+- trim?has_content，用于判断变量为null，并且非空白字符串：
+```Java
+    [#if request.userName?? && request.userName?trim?has_content]
+        t.user_name = :request.userName?likeString
+    [/#if]
+```
+或者使用5.0新增的方法：
+```Java
+    [#if isNotBlank(request.userNameList)]
+        t.user_name = :request.userName?likeString
+    [/#if]
+```
+- 判断list类型的变量是否你为空
+```Java
+    [#if request.userNameList?? && (request.userNameList?size > 0)]
+        t.user_name in ( :request.userNameList )
+    [/#if]
+```
+或者使用5.0新增的方法：
+```Java
+    [#if isNotEmpty(request.userNameList)]
+        t.user_name in ( :request.userNameList )
+    [/#if]
+```
 
 ### dbm扩展指令
 另外增加了一些特定的指令以帮助处理sql，包括：
