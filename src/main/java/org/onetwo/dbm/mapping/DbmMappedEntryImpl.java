@@ -164,7 +164,7 @@ public class DbmMappedEntryImpl extends AbstractDbmMappedEntryImpl implements Db
 
 
 	@Override
-	protected EntrySQLBuilderImpl getStaticFetchSqlBuilder() {
+	public EntrySQLBuilder getStaticFetchSqlBuilder() {
 		return staticFetchSqlBuilder;
 	}
 

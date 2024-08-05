@@ -550,16 +550,16 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 		}
 	}
 
-	protected EntrySQLBuilderImpl getStaticInsertOrUpdateSqlBuilder() {
+	protected EntrySQLBuilder getStaticInsertOrUpdateSqlBuilder() {
 		throw new UnsupportedOperationException();
 	}
-	protected EntrySQLBuilderImpl getStaticInsertOrIgnoreSqlBuilder() {
+	protected EntrySQLBuilder getStaticInsertOrIgnoreSqlBuilder() {
 		throw new UnsupportedOperationException();
 	}
-	abstract protected EntrySQLBuilderImpl getStaticInsertSqlBuilder();
-	abstract protected EntrySQLBuilderImpl getStaticUpdateSqlBuilder();
-	abstract protected EntrySQLBuilderImpl getStaticDeleteSqlBuilder();
-	abstract protected EntrySQLBuilderImpl getStaticFetchSqlBuilder();
+	abstract protected EntrySQLBuilder getStaticInsertSqlBuilder();
+	abstract protected EntrySQLBuilder getStaticUpdateSqlBuilder();
+	abstract protected EntrySQLBuilder getStaticDeleteSqlBuilder();
+	abstract public EntrySQLBuilder getStaticFetchSqlBuilder();
 	/*protected EntrySQLBuilderImpl getStaticSelectLockSqlBuilder(){
 		throw new UnsupportedOperationException("getStaticSelectLockSqlBuilder");
 	}*/
@@ -665,7 +665,7 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 	@Override
 	public JdbcStatementContext<List<Object[]>> makeInsert(Object entity){
 		this.throwIfQueryableOnly();
-		EntrySQLBuilderImpl insertSqlBuilder = getStaticInsertSqlBuilder();
+		EntrySQLBuilder insertSqlBuilder = getStaticInsertSqlBuilder();
 		JdbcStatementContextBuilder dsb = JdbcStatementContextBuilder.create(DbmEventAction.insert, this, insertSqlBuilder);
 		if(LangUtils.isMultiple(entity)){
 			List<Object> list = LangUtils.asList(entity);
@@ -699,7 +699,7 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 	@Override
 	public JdbcStatementContext<List<Object[]>> makeMysqlInsertOrIgnore(Object entity) {
 		this.throwIfQueryableOnly();
-		EntrySQLBuilderImpl insertOrUpdateSqlBuilder = getStaticInsertOrIgnoreSqlBuilder();
+		EntrySQLBuilder insertOrUpdateSqlBuilder = getStaticInsertOrIgnoreSqlBuilder();
 		JdbcStatementContextBuilder dsb = JdbcStatementContextBuilder.create(DbmEventAction.batchInsertOrIgnore, this, insertOrUpdateSqlBuilder);
 		makeJdbcStatementContext(dsb, entity);
 		dsb.build();
@@ -715,7 +715,7 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 	@Override
 	public JdbcStatementContext<List<Object[]>> makeMysqlInsertOrUpdate(Object entity) {
 		this.throwIfQueryableOnly();
-		EntrySQLBuilderImpl insertOrUpdateSqlBuilder = getStaticInsertOrUpdateSqlBuilder();
+		EntrySQLBuilder insertOrUpdateSqlBuilder = getStaticInsertOrUpdateSqlBuilder();
 		JdbcStatementContextBuilder dsb = JdbcStatementContextBuilder.create(DbmEventAction.batchInsertOrUpdate, this, insertOrUpdateSqlBuilder);
 		makeJdbcStatementContext(dsb, entity);
 		dsb.build();
