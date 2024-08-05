@@ -281,7 +281,7 @@ public class DbmMappedEntryBuilder implements MappedEntryBuilder, RegisterManage
 		return entry;
 	}
 	
-	protected boolean ignoreMappedField(JFishProperty field){
+	protected boolean ignoreMappedField(DbmMappedEntry entry, JFishProperty field){
 		return Modifier.isTransient(field.getModifiers()) || Modifier.isStatic(field.getModifiers());
 	}
 
@@ -393,7 +393,7 @@ public class DbmMappedEntryBuilder implements MappedEntryBuilder, RegisterManage
 		this.buildMappedField(mfield);
 		
 		// transient
-		if (!ignoreMappedField(prop)) {
+		if (!ignoreMappedField(entry, prop)) {
 			BaseColumnInfo col = this.buildColumnInfo(entry.getTableInfo(), mfield);
 			
 			//设置关系

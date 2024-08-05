@@ -14,6 +14,7 @@ import org.onetwo.common.db.dquery.annotation.QueryParseContext;
 import org.onetwo.common.db.dquery.annotation.QueryResultType;
 import org.onetwo.common.db.dquery.annotation.QuerySqlTemplateParser;
 import org.onetwo.common.db.dquery.annotation.Sql;
+import org.onetwo.common.db.filequery.ParserContext;
 import org.onetwo.common.db.spi.SqlTemplateParser;
 import org.onetwo.common.dbm.model.entity.UserTableIdEntity;
 import org.onetwo.common.dbm.model.hib.entity.UserEntity;
@@ -51,7 +52,7 @@ public interface UserDao extends CustomUserDao {
 	public class SimpleSqlTemplateParser implements SqlTemplateParser {
 
 		@Override
-		public String parseSql(String name, Object context) {
+		public String parseSql(String name, ParserContext context) {
 			if ("countStop".equals(name)) {
 				return "select count(1) from test_user t where  t.status = :status";
 			}

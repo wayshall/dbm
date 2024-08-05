@@ -1,5 +1,6 @@
 package org.onetwo.common.db.spi;
 
+import org.onetwo.common.db.filequery.ParserContext;
 import org.onetwo.common.spring.ftl.TemplateParser;
 
 /**
@@ -11,9 +12,9 @@ import org.onetwo.common.spring.ftl.TemplateParser;
 public interface SqlTemplateParser extends TemplateParser {
 	
 	default String parse(String name, Object context) {
-		return parseSql(name, context);
+		return parseSql(name, (ParserContext)context);
 	}
 	
-	String parseSql(String name, Object context);
+	String parseSql(String name, ParserContext context);
 
 }
