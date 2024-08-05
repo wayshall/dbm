@@ -65,7 +65,7 @@ public class JFishExtQueryImplTest {
 		/*String sql2 = "select ent.CREATE_TIME as createTime, ent.DELETE_TOUR as deleteTour, ent.FAIL_REASON as failReason, ent.FAIL_TOUR as failTour, ent.ID as id, ent.LAST_UPDATE_TIME as lastUpdateTime, ent.NEW_TOUR as newTour, ent.REPET_LOG_SUPPLIER_ID as repetLogSupplierId, ent.ROUTE_NAME as routeName, ent.STATE as state, ent.SUPPLIER_ROUTE_CODE as supplierRouteCode, ent.SYN_END_TIME as synEndTime, ent.SYN_START_TIME as synStartTime, ent.TYPE as type, ent.UPDATE_TOUR as updateTour, ent.YOOYO_ROUTE_ID as yooyoRouteId from SYN_LOG_ROUTE ent " +
 				"left join syn_log_supplier sup on sup.id = ent.log_supplier_id where ent.log_supplier_id = :ent_log_supplier_id0 and sup.supplierCode = :sup_supplierCode1 and ceil(t.syn_end_time-t.syn_start_time) >= :ceil_t_syn_end_time_t_syn_start_time_2 order by ent.ID desc";
 		*/
-		String sql = "select ent.* from SYN_LOG_ROUTE ent left join syn_log_supplier sup on sup.id = ent.log_supplier_id "
+		String sql = "select ent.log_supplier_id, ent.id, ent.syn_end_time, ent.supplier_code, ent.syn_start_time from SYN_LOG_ROUTE ent left join syn_log_supplier sup on sup.id = ent.log_supplier_id "
 				+ "where ent.log_supplier_id = :ent_log_supplier_id0 and sup.supplier_code = :sup_supplier_code1 and ceil(ent.syn_end_time-ent.syn_start_time) >= :ceil_ent_syn_end_time_ent_syn_start_time_2";
 		String paramsting = "{ent_log_supplier_id0=22, sup_supplier_code1=supplierCodeValue, ceil_ent_syn_end_time_ent_syn_start_time_2=1}";
 		System.out.println("testSqlQueryJoin: " + sql.trim());

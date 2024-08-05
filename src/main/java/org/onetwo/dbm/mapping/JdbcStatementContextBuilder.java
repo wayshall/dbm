@@ -20,19 +20,19 @@ public class JdbcStatementContextBuilder implements JdbcStatementContext<List<Ob
 		SQLBuilder sb = sqlBuilderFactory.createQMark(entry.getTableInfo().getName(), entry.getTableInfo().getAlias(), dtype);
 		return create(entry, sb);
 	}*/
-	public static JdbcStatementContextBuilder create(DbmEventAction eventAction, AbstractDbmMappedEntryImpl entry, EntrySQLBuilderImpl sqlBuilder){
+	public static JdbcStatementContextBuilder create(DbmEventAction eventAction, AbstractDbmMappedEntryImpl entry, EntrySQLBuilder sqlBuilder){
 		JdbcStatementContextBuilder dsql = new JdbcStatementContextBuilder(eventAction, entry, sqlBuilder);
 		return dsql;
 	}
 	
 	private AbstractDbmMappedEntryImpl entry;
-	private EntrySQLBuilderImpl sqlBuilder;
+	private EntrySQLBuilder sqlBuilder;
 	private Map<DbmMappedField, Object> columnValues = CUtils.newLinkedHashMap();
 	private List<Object> causeValues = new ArrayList<Object>(5);
 	private List<Object[]> values;
 	private final DbmEventAction eventAction;
 
-	private JdbcStatementContextBuilder(DbmEventAction eventAction, AbstractDbmMappedEntryImpl entry, EntrySQLBuilderImpl sqlBuilder) {
+	private JdbcStatementContextBuilder(DbmEventAction eventAction, AbstractDbmMappedEntryImpl entry, EntrySQLBuilder sqlBuilder) {
 		super();
 		this.entry = entry;
 		this.sqlBuilder = sqlBuilder;
@@ -67,7 +67,7 @@ public class JdbcStatementContextBuilder implements JdbcStatementContext<List<Ob
 	public JdbcStatementContextBuilder processColumnValues(Object entity){
 		Assert.notNull(entity);
 		Object val = null;
-		EntrySQLBuilderImpl builder = getSqlBuilder();
+		EntrySQLBuilder builder = getSqlBuilder();
 		for(DbmMappedFieldValue fv : builder.getFields()){
 			DbmMappedField field = fv.getField();
 			val = field.getValue(entity);
@@ -187,7 +187,7 @@ public class JdbcStatementContextBuilder implements JdbcStatementContext<List<Ob
 		return entry;
 	}
 
-	public EntrySQLBuilderImpl getSqlBuilder() {
+	public EntrySQLBuilder getSqlBuilder() {
 		return sqlBuilder;
 	}
 

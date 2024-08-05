@@ -132,4 +132,6 @@ public interface DbmMappedEntry extends DbmMappedEntryMeta {
 	List<DbmEntityListener> getEntityListeners();
 	List<DbmEntityFieldListener> getFieldListeners();
 	
+	EntrySQLBuilder getStaticFetchSqlBuilder();
+	
 }

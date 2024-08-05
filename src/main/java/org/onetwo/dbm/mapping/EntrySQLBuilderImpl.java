@@ -325,10 +325,36 @@ public class EntrySQLBuilderImpl implements EntrySQLBuilder {
 	}
 	
 	protected List<String> nameToString(Collection<DbmMappedFieldValue> columns, boolean alias){
+//		List<String> strs = new ArrayList<String>();
+//		for(DbmMappedFieldValue fv : columns){
+//			DbmMappedField field = fv.getField();
+//			String columnName = alias?field.getColumn().getNameWithAlias():field.getColumn().getName();
+//			columnName = dialet.wrapKeywordColumnName(columnName);
+//			strs.add(columnName);
+//		}
+//		return strs;
+		if (alias) {
+			return fieldNameToString(columns, getAlias());
+		} else {
+			return fieldNameToString(columns, null);
+		}
+		
+		
+	}
+	
+	public List<String> fieldNameToString(String alias){
+		return fieldNameToString(this.fields, alias);
+	}
+	
+	protected List<String> fieldNameToString(Collection<DbmMappedFieldValue> columns, String alias){
+//		Assert.hasText(alias, "table alias can not be blank");
 		List<String> strs = new ArrayList<String>();
 		for(DbmMappedFieldValue fv : columns){
 			DbmMappedField field = fv.getField();
-			String columnName = alias?field.getColumn().getNameWithAlias():field.getColumn().getName();
+			String columnName = field.getColumn().getName();
+			if (StringUtils.isNotBlank(alias)) {
+				columnName = alias + "." + columnName;
+			}
 			columnName = dialet.wrapKeywordColumnName(columnName);
 			strs.add(columnName);
 		}
