@@ -27,6 +27,7 @@ import org.onetwo.common.utils.CUtils;
 import org.onetwo.common.utils.LangUtils;
 import org.onetwo.common.utils.StringUtils;
 import org.onetwo.common.utils.list.JFishList;
+import org.onetwo.dbm.exception.DbmException;
 
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public abstract class ExtQueryUtils {
@@ -69,8 +70,13 @@ public abstract class ExtQueryUtils {
 	}
 	
 	public static String[] appendOperationToFields(String[] fields, QueryDSLOps... ops){
-		List<String> opList = Stream.of(ops).map(op -> {
-			return op.getActualOperator();
+		List<QueryDSLOps> oplist = CUtils.trimAsList(ops);
+		List<String> opList = oplist.stream().map(op -> {
+			try {
+				return op.getActualOperator();
+			} catch (Exception e) {
+				throw new DbmException("error operation: " + op);
+			}
 		}).collect(Collectors.toList());
 		return appendOperationToFields(fields, opList.toArray(new String[0]));
 	}
@@ -80,7 +86,14 @@ public abstract class ExtQueryUtils {
 		String[] newFileds = null;
 		int index = 0;
 		for(String field : fields){
-			String op = ops.length==1?ops[0]:ops[index];
+			String op;
+			if (LangUtils.isEmpty(ops)) {
+				op = QueryDSLOps.EQ.getActualOperator();
+			} else if (ops.length==1) {
+				op = ops[0];
+			} else {
+				op = ops[index];
+			}
 			field = field + QueryField.SPLIT_SYMBOL + op;
 			newFileds = (String[])ArrayUtils.add(newFileds, field);
 			index++;

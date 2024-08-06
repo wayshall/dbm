@@ -26,7 +26,7 @@ public class DefaultWhereCauseBuilderField<E> extends WhereCauseBuilderField<E, 
 	
 	protected Supplier<Boolean> whenPredicate;
 	// 是否已添加到queryBuilder
-	private boolean added;
+//	private boolean added;
 	private boolean autoAddField = true;
 
 	public DefaultWhereCauseBuilderField(WhereCauseBuilder<E> squery, String... fields) {
@@ -181,6 +181,8 @@ public class DefaultWhereCauseBuilderField<E> extends WhereCauseBuilderField<E, 
 			if (autoAddField) {
 				this.addField();
 			}
+		} else {
+			this.markAdded();
 		}
 		return queryBuilder;
 	}

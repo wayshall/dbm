@@ -29,7 +29,7 @@ abstract public class WhereCauseBuilderField<E, R> implements WhereCauseField<E,
 
 	void markAdded() {
 		this.added = true;
-		this.whenPredicate = null;
+//		this.whenPredicate = null;
 	}
 	
 	boolean isAdded() {
