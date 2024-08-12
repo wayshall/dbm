@@ -11,10 +11,9 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
-
-import org.hibernate.validator.constraints.Email;
-import org.hibernate.validator.constraints.Length;
 import javax.validation.constraints.NotBlank;
+
+import org.hibernate.validator.constraints.Length;
 import org.onetwo.common.db.spi.CrudEntityManager;
 import org.onetwo.dbm.annotation.DbmEncryptField;
 import org.onetwo.dbm.utils.Dbms;
@@ -42,7 +41,6 @@ public class UserAutoidEntity implements Serializable {
 	@Length(min=1, max=50)
 	protected String userName;
 	@Length(min=0, max=50)
-	@Email
 	protected String email;
 	protected String mobile;
 	protected UserStatus status;
