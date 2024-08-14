@@ -9,7 +9,7 @@ import java.util.function.Supplier;
 import javax.sql.DataSource;
 import javax.validation.Validator;
 
-import org.onetwo.common.db.filequery.SqlParamterPostfixFunctions;
+import org.onetwo.common.db.filequery.postfunc.SqlParamterPostfixFunctions;
 import org.onetwo.common.db.filter.annotation.DataQueryFilterListener;
 import org.onetwo.common.db.spi.SqlParamterPostfixFunctionRegistry;
 import org.onetwo.common.db.sql.SequenceNameManager;
@@ -224,8 +224,10 @@ public class SimpleDbmInnerServiceRegistry implements DbmInnerServiceRegistry {
 			if(dataBaseConfig.isEnabledDebugContext()){
 				interceptors.add(new DebugContextInterceptor(context.getSessionFactory()));
 			}
+			interceptors.add(new DbmThreadLocalInterceptor(context.getSessionFactory()));
 			interceptors.add(new SessionCacheInterceptor(context.getSessionFactory()));
 			interceptors.add(new LogSqlInterceptor(dataBaseConfig, context.getSessionFactory()));
+//			interceptors.add(new LogSqlByAnnotationInterceptor(dataBaseConfig, context.getSessionFactory()));
 			interceptors.add(new JdbcEventInterceptor(edgeEventBus));
 			/*if(this.interceptors!=null){
 				interceptors.addAll(this.interceptors);

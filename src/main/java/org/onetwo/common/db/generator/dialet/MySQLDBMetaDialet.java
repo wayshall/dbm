@@ -12,10 +12,10 @@ import org.onetwo.common.db.generator.meta.TableMeta;
 import org.onetwo.common.db.generator.utils.DBUtils;
 import org.onetwo.common.utils.StringUtils;
 
-public class MysqlMetaDialet extends BaseMetaDialet implements DatabaseMetaDialet {
+public class MySQLDBMetaDialet extends BaseMetaDialet implements DatabaseMetaDialet {
 	
 	
-	public MysqlMetaDialet(DataSource dataSource) {
+	public MySQLDBMetaDialet(DataSource dataSource) {
 		super(dataSource);
 	}
 	

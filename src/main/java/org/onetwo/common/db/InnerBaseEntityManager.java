@@ -3,6 +3,7 @@ package org.onetwo.common.db;
 import java.util.List;
 
 import org.onetwo.common.db.spi.BaseEntityManager;
+import org.onetwo.common.db.sqlext.DeleteExtQuery;
 import org.onetwo.common.db.sqlext.SelectExtQuery;
 import org.onetwo.common.utils.Page;
 
@@ -17,6 +18,8 @@ public interface InnerBaseEntityManager extends BaseEntityManager {
 	<T> T findUnique(DbmQueryValue queryValue);
 
 	Number count(SelectExtQuery extQuery);
+	
+	int remove(DeleteExtQuery deleteQuery);
 	
 	/****
 	 * 检测数据是否存在

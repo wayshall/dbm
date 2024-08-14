@@ -5,11 +5,12 @@ import java.util.List;
 import java.util.Map;
 
 import org.hibernate.LockOptions;
-import org.hibernate.SQLQuery;
+import org.hibernate.query.NativeQuery;
 import org.onetwo.common.db.AbstractQueryWrapper;
 import org.onetwo.common.db.spi.QueryWrapper;
 import org.onetwo.common.reflect.ReflectUtils;
 import org.onetwo.dbm.dialet.DBDialect.LockInfo;
+import org.onetwo.dbm.exception.DbmException;
 import org.onetwo.dbm.utils.DbmLock;
 import org.springframework.jdbc.core.RowMapper;
 
@@ -20,9 +21,9 @@ import org.springframework.jdbc.core.RowMapper;
 @SuppressWarnings({ "unchecked" })
 public class HibernateDbmQueryWrapper extends AbstractQueryWrapper implements QueryWrapper {
 	
-	final private SQLQuery sqlQuery;
+	final private NativeQuery<?> sqlQuery;
 
-	public HibernateDbmQueryWrapper(SQLQuery sqlQuery) {
+	public HibernateDbmQueryWrapper(NativeQuery<?> sqlQuery) {
 		super();
 		this.sqlQuery = sqlQuery;
 	}
@@ -43,7 +44,7 @@ public class HibernateDbmQueryWrapper extends AbstractQueryWrapper implements Qu
 
 	@Override
 	public <T> List<T> getResultList() {
-		return sqlQuery.list();
+		return (List<T>) sqlQuery.list();
 	}
 
 	@Override
@@ -65,7 +66,15 @@ public class HibernateDbmQueryWrapper extends AbstractQueryWrapper implements Qu
 
 	@Override
 	public QueryWrapper setParameter(int position, Object value) {
-		sqlQuery.setParameter(position, value);
+		try {
+			sqlQuery.setParameter(position, value);
+		} catch (IllegalArgumentException e) {
+			if (e.getLocalizedMessage().contains("Could not locate ordinal parameter")) {
+				throw new DbmException(e.getMessage() + ". try to set hibernate.query.sql.jdbc_style_params_base=true", e);
+			} else {
+				throw e;
+			}
+		}
 		return this;
 	}
 
@@ -105,6 +114,16 @@ public class HibernateDbmQueryWrapper extends AbstractQueryWrapper implements Qu
 			logger.warn("getNamedParams from hibernate sql query error!");
 			return Collections.EMPTY_MAP;
 		}
+	}
+
+	@Override
+	public boolean isUseAutoLimitSqlIfPagination() {
+		return true;
+	}
+
+	@Override
+	public void setUseAutoLimitSqlIfPagination(boolean useAutoLimitSqlIfPagination) {
+		logger.error("hibernate query not support this operation!");
 	}
 
 }

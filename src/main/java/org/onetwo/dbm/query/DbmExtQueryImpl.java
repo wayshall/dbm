@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import org.onetwo.common.db.sqlext.ExtQueryListener;
 import org.onetwo.common.db.sqlext.SQLSymbolManager;
 import org.onetwo.common.db.sqlext.SelectExtQueryImpl;
+import org.onetwo.common.utils.StringUtils;
 import org.onetwo.dbm.mapping.DbmMappedEntry;
 
 public class DbmExtQueryImpl extends SelectExtQueryImpl {
@@ -33,7 +34,13 @@ public class DbmExtQueryImpl extends SelectExtQueryImpl {
 
 
 	protected String getDefaultSelectFields(Class<?> entityClass, String alias){
-		return alias + ".*";
+		if (this.entry==null) {
+			return alias + ".*";
+		}
+		List<String> fields = this.entry.getStaticFetchSqlBuilder().fieldNameToString(alias);
+		String selectStr = StringUtils.join(fields, ", ");
+		return selectStr;
+//		return alias + ".*";
 	}
 
 	protected List<String> getSelectFieldsWithExclude(List<String> unselectFields){
@@ -55,7 +62,7 @@ public class DbmExtQueryImpl extends SelectExtQueryImpl {
 		if(entry!=null && !entry.getIdentifyFields().isEmpty()){
 			return entry.getIdentifyFields().get(0).getColumn().getName();
 		}
-		return "*";
+		return "1";
 	}
 	
 	@Override

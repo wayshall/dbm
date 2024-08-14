@@ -1,6 +1,6 @@
 package org.onetwo.common.db.spi;
 
-import org.onetwo.common.db.filequery.SqlParamterPostfixFunction;
+import org.onetwo.common.db.filequery.postfunc.SqlPostfixFunction;
 
 /***
  * 
@@ -14,6 +14,11 @@ import org.onetwo.common.db.filequery.SqlParamterPostfixFunction;
 public interface SqlParamterPostfixFunctionRegistry {
 
 	String getFuncPostfixMark();
-	SqlParamterPostfixFunction getFunc(String postfix);
+//	@Deprecated
+//	SqlParamterPostfixFunction getFunc(String postfix);
+	Object executeFunc(String property, Object value, String postfix);
+//	SqlParamterPostfixFunction getFunc(Object value, String postfix);
+	
+	SqlParamterPostfixFunctionRegistry register(String postfix, SqlPostfixFunction func);
 
 }

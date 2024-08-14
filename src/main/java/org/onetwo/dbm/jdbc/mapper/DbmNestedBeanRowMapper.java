@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.onetwo.dbm.annotation.DbmResultMapping;
 import org.onetwo.dbm.jdbc.internal.ResultSetColumnValueGetter;
+import org.onetwo.dbm.jdbc.mapper.nested.AbstractNestedBeanMapper;
 import org.onetwo.dbm.jdbc.spi.ColumnValueGetter;
 import org.onetwo.dbm.utils.DbmUtils;
 import org.springframework.jdbc.support.rowset.ResultSetWrappingSqlRowSet;
@@ -29,7 +30,9 @@ public class DbmNestedBeanRowMapper<T> extends AbstractNestedBeanMapper<T> imple
 		Map<String, Integer> names = DbmUtils.lookupColumnNames(rsmd);
 		
 		ColumnValueGetter columnValueGetter = new ResultSetColumnValueGetter(resutSetWrapper, getRowMapperFactory().getJdbcResultSetGetter());
-		T mappedObject = (T)this.resultClassMapper.mapResult(resutSetWrapper, names, columnValueGetter, rowNum);
+
+		RowResultContext rowContext = new RowResultContext(resutSetWrapper, null, null);
+		T mappedObject = (T)this.resultClassMapper.mapResult(rowContext, names, columnValueGetter, rowNum);
 		return mappedObject;
 	}
 

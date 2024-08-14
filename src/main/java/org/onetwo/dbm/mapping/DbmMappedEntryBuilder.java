@@ -13,6 +13,7 @@ import javax.persistence.GenerationType;
 import org.onetwo.common.annotation.AnnotationInfo;
 import org.onetwo.common.log.JFishLoggerFactory;
 import org.onetwo.common.reflect.ReflectUtils;
+import org.onetwo.common.spring.SpringUtils;
 import org.onetwo.common.utils.Assert;
 import org.onetwo.common.utils.JFishFieldInfoImpl;
 import org.onetwo.common.utils.JFishProperty;
@@ -223,7 +224,8 @@ public class DbmMappedEntryBuilder implements MappedEntryBuilder, RegisterManage
 	 * @return
 	 */
 	public DbmMappedEntry buildMappedEntry(Class<?> entityClass, boolean byProperty) {
-		AnnotationInfo annotationInfo = new AnnotationInfo(entityClass);
+//		AnnotationInfo annotationInfo = new AnnotationInfo(entityClass);
+		AnnotationInfo annotationInfo = SpringUtils.createAnnotationInfo(entityClass);
 		DbmMappedEntry entry = createDbmMappedEntry(annotationInfo);
 		this.listenerManager.notifyAfterCreatedMappedEntry(entry);
 
@@ -279,7 +281,7 @@ public class DbmMappedEntryBuilder implements MappedEntryBuilder, RegisterManage
 		return entry;
 	}
 	
-	protected boolean ignoreMappedField(JFishProperty field){
+	protected boolean ignoreMappedField(DbmMappedEntry entry, JFishProperty field){
 		return Modifier.isTransient(field.getModifiers()) || Modifier.isStatic(field.getModifiers());
 	}
 
@@ -391,7 +393,7 @@ public class DbmMappedEntryBuilder implements MappedEntryBuilder, RegisterManage
 		this.buildMappedField(mfield);
 		
 		// transient
-		if (!ignoreMappedField(prop)) {
+		if (!ignoreMappedField(entry, prop)) {
 			BaseColumnInfo col = this.buildColumnInfo(entry.getTableInfo(), mfield);
 			
 			//设置关系

@@ -1,10 +1,13 @@
 package org.onetwo.common.db.sqlext;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.io.IOException;
 import java.util.List;
 
 import org.junit.Test;
 import org.onetwo.common.db.DruidUtils;
+import org.onetwo.common.db.sql.SelectItemInfo;
 import org.onetwo.common.file.FileUtils;
 import org.springframework.core.io.ClassPathResource;
 
@@ -15,15 +18,36 @@ import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.expr.SQLAggregateExpr;
 import com.alibaba.druid.sql.ast.expr.SQLIdentifierExpr;
 import com.alibaba.druid.sql.ast.expr.SQLIntegerExpr;
+import com.alibaba.druid.sql.ast.statement.SQLJoinTableSource;
+import com.alibaba.druid.sql.ast.statement.SQLJoinTableSource.JoinType;
 import com.alibaba.druid.sql.ast.statement.SQLSelect;
 import com.alibaba.druid.sql.ast.statement.SQLSelectItem;
 import com.alibaba.druid.sql.ast.statement.SQLSelectQueryBlock;
 import com.alibaba.druid.sql.ast.statement.SQLSelectStatement;
 import com.alibaba.druid.sql.ast.statement.SQLSubqueryTableSource;
+import com.alibaba.druid.sql.ast.statement.SQLTableSource;
+import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlSelectQueryBlock;
 import com.alibaba.druid.sql.dialect.mysql.visitor.MySqlSchemaStatVisitor;
 import com.alibaba.druid.util.JdbcUtils;
 
 public class DruidUtilsTest {
+
+	@Test
+	public void testFullJoinSql(){
+		String sql = "SELECT   * FROM  emp e FULL   JOIN dept d     ON d.deptno = e.deptno";
+		List<SQLStatement> statements = SQLUtils.parseStatements(sql, JdbcUtils.MYSQL);
+		statements.forEach(s -> {
+			SQLSelectStatement select = (SQLSelectStatement) s;
+			System.out.println("statements: " + select.getSelect().toString());
+		});
+		
+		SQLSelectStatement selectStatement = (SQLSelectStatement) statements.get(0);
+		SQLSelect select = selectStatement.getSelect();
+		MySqlSelectQueryBlock query = (MySqlSelectQueryBlock) select.getQuery();
+		SQLTableSource from = query.getFrom();
+		SQLJoinTableSource joinTable = (SQLJoinTableSource) from;
+		JoinType joinType = joinTable.getJoinType();
+	}
 
 	@Test
 	public void testParseSql(){
@@ -51,7 +75,7 @@ public class DruidUtilsTest {
             stmt.accept(visitor);
             
             //获取表名称
-            System.out.println("Tables : " + visitor.getCurrentTable());
+            System.out.println("Tables : " + visitor.getTables());
             //获取操作方法名称
             System.out.println("Tables : " + visitor.getTables());
             //获取字段名称
@@ -161,6 +185,28 @@ public class DruidUtilsTest {
 		
 		
 		return selectStatement;
+	}
+	
+	@Test
+	public void testGetSelectColumnNames() {
+		String sql = "SELECT\n"
+				+ "	dpt.`name` as '地市',\n"
+				+ "	cd.max_qty as '最大客户销量',\n"
+				+ "	cd.max_product_cnt as '最大品规数',\n"
+				+ "	cd.price_range_cnt as '全市经营价位段档位数量',\n"
+				+ "	cd.begin_date as '开始日期',\n"
+				+ "	cd.end_date as '结束日期'\n"
+				+ "FROM\n"
+				+ "	tbc2_target_city_data cd \n"
+				+ "left join \n"
+				+ "	org_department dpt on dpt.id = cd.depart_id\n"
+				+ "WHERE\n"
+				+ "	cd.depart_id = :city_depart_id";
+		
+		List<SelectItemInfo> selectItems = DruidUtils.extractSelectItems(sql);
+		System.out.println(selectItems);
+		assertThat(selectItems).size().isEqualTo(6);
+		
 	}
 	
 }

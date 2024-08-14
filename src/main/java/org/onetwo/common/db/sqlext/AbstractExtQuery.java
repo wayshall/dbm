@@ -14,6 +14,7 @@ import org.onetwo.common.log.JFishLoggerFactory;
 import org.onetwo.common.utils.CUtils;
 import org.onetwo.common.utils.LangUtils;
 import org.onetwo.common.utils.StringUtils;
+import org.onetwo.dbm.exception.DbmException;
 import org.slf4j.Logger;
 
 import com.google.common.collect.Maps;
@@ -207,23 +208,27 @@ abstract public class AbstractExtQuery implements ExtQueryInner{
 				continue;
 			}*/
 
-			if (K.OR.equals(fields)) {
-				if (!Map.class.isAssignableFrom(values.getClass())) {
-					throw new ServiceException("sub query's vaue must be map!");
+			if (fields instanceof KeyObject) {
+				KeyObject keyObject = (KeyObject) fields;
+				if (K.OR.key().equals(keyObject.key())) {
+					if (!Map.class.isAssignableFrom(values.getClass())) {
+						throw new ServiceException("sub query's vaue must be map!");
+					}
+					Map<?, ?> subParams = (Map<?, ?>) values;
+					h = this.buildWhere(subParams, true);
+					where.append("or ");
+				} else if(K.AND.key().equals(keyObject.key())){
+					if (!Map.class.isAssignableFrom(values.getClass())) {
+						throw new ServiceException("sub query's vaue must be map!");
+					}
+					Map<?, ?> subParams = (Map<?, ?>) values;
+					h = this.buildWhere(subParams, true);
+					
+					if(!first) {
+						where.append("and ");
+					}
 				}
-				Map<?, ?> subParams = (Map<?, ?>) values;
-				h = this.buildWhere(subParams, true);
-				where.append("or ");
-			} else if(K.AND.equals(fields)){
-				if (!Map.class.isAssignableFrom(values.getClass())) {
-					throw new ServiceException("sub query's vaue must be map!");
-				}
-				Map<?, ?> subParams = (Map<?, ?>) values;
-				h = this.buildWhere(subParams, true);
 				
-				if(!first) {
-					where.append("and ");
-				}
 			} /*else if(K.RAW_QL.equals(fields)){
 				if (!values.getClass().isArray() && !List.class.isAssignableFrom(values.getClass()) && !String.class.isAssignableFrom(values.getClass()))
 					throw new ServiceException("raw-ql args error: " + values);
@@ -275,14 +280,25 @@ abstract public class AbstractExtQuery implements ExtQueryInner{
 			return null;*/
 		//actually, never can not be null
 		//Fix: 去掉 valueList.isEmpty()条件, null没有被忽略，但empty却被忽略了，行为应该交给IfNull控制
-		if (valueList == null)
+		if (valueList == null) {
 			return null;
+		}
+		
+		if (valueList.isEmpty()) {
+			if(ifNull==IfNull.Ignore){
+				return null;
+			}else if(ifNull==IfNull.Throw){
+				throw new DbmException("the fields["+LangUtils.toString(fields)+"] 's value can not be empty.");
+			}
+		}
+		
 
 //		List<?> fieldList =  MyUtils.asList(fields);
 		List<?> fieldList =  CUtils.trimAndexcludeTheClassElement(true, fields);
 		int index = 0;
 		String h = null;
 		StringBuilder causeScript = new StringBuilder();
+		Object firstValue = LangUtils.isEmpty(valueList)?null:valueList.get(0);
  
 		for (int i = 0; i < fieldList.size(); i++) {
 			Object p = fieldList.get(i);
@@ -299,10 +315,10 @@ abstract public class AbstractExtQuery implements ExtQueryInner{
 					v = valueList.get(i);
 				}
 			} catch (IndexOutOfBoundsException e) {
-				v = valueList.get(0);//if can't find the corresponding value, get the first one.
+				v = firstValue;//if can't find the corresponding value, get the first one.
 			}
 
-			QueryField qf = QueryFieldImpl.create(p);
+			QueryField qf = QueryFieldImpl.create(p, queryNameStrategy);
 			qf.init(this, v);
 			
 //			SQLSymbolParserContext context = SQLSymbolParserContext.create(qf.getFieldName(), v, paramsValue, ifNull);

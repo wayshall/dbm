@@ -17,8 +17,10 @@ import java.util.stream.Collectors;
 import javax.sql.DataSource;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.onetwo.common.date.DateUtils;
+import org.onetwo.common.db.dquery.condition.directive.DynamicConditionDirective;
 import org.onetwo.common.db.filequery.directive.SetDirective;
 import org.onetwo.common.db.filequery.directive.WhereDirective;
 import org.onetwo.common.log.JFishLoggerFactory;
@@ -36,8 +38,10 @@ import org.onetwo.dbm.core.spi.DbmTransaction;
 import org.onetwo.dbm.exception.DbmException;
 import org.onetwo.dbm.exception.UpdateCountException;
 import org.onetwo.dbm.jdbc.JdbcUtils;
+import org.onetwo.dbm.jdbc.method.JdbcOperationMethod;
 import org.onetwo.dbm.jdbc.spi.SqlParametersProvider;
 import org.onetwo.dbm.mapping.DbmEntityFieldListener;
+import org.onetwo.dbm.mapping.DbmEnumValueMapping;
 import org.onetwo.dbm.mapping.DbmMappedField;
 import org.onetwo.dbm.spring.EnableDbm;
 import org.slf4j.Logger;
@@ -49,6 +53,8 @@ import org.springframework.data.transaction.ChainedTransactionManager;
 import org.springframework.jdbc.core.SqlParameterValue;
 import org.springframework.jdbc.core.SqlProvider;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterUtils;
+import org.springframework.jdbc.core.namedparam.ParsedSql;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSourceUtils;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
@@ -66,9 +72,28 @@ final public class DbmUtils {
 	
 	private static final Logger logger = JFishLoggerFactory.getLogger(DbmUtils.class);
 	
+	public static final int MAX_PRINTABLE_ARG_SIZE = 50;
+	
 	public final static ConversionService CONVERSION_SERVICE = new DefaultConversionService();
 	
 	private static final String CHAINED_TRANSACTION_MANAGER = "org.springframework.data.transaction.ChainedTransactionManager";
+
+	public static final int INVALID_VALUE_FIRST_RECORD = -1;
+	public static final int INVALID_VALUE_MAX_RESULTS = 0;
+
+	public static final String FIRST_RESULT_NAME = "DbmQueryFirstResult";
+	public static final String MAX_RESULT_NAME = "DbmQueryMaxResult";
+
+	/****
+	 * 是否分页
+	 * @author weishao zeng
+	 * @param first
+	 * @param maxResults
+	 * @return
+	 */
+	public static boolean isLimitedQuery(Integer first, Integer maxResults){
+		return first>INVALID_VALUE_FIRST_RECORD && maxResults>INVALID_VALUE_MAX_RESULTS;
+	}
 	
 	public static boolean isChanedTransactionManagerPresent(){
 		return ClassUtils.isPresent(CHAINED_TRANSACTION_MANAGER, ClassUtils.getDefaultClassLoader());
@@ -284,10 +309,31 @@ final public class DbmUtils {
 	}
 	
 
+	public static Pair<String, Object> findSqlAndParams(JdbcOperationMethod invokeMethod, Object[] args){
+		String sql;
+		Object sqlArgs = null;
+		if (invokeMethod.getSqlParameter()!=null) {
+			sql = (String)args[invokeMethod.getSqlParameter().getParameterIndex()];
+			if (invokeMethod.getSqlArgsParameter()!=null) {
+				sqlArgs = args[invokeMethod.getSqlArgsParameter().getParameterIndex()];
+			}
+		} else if (invokeMethod.getSqlProviderParameter()!=null) {
+			SqlProvider sqlProvider = (SqlProvider) args[invokeMethod.getSqlProviderParameter().getParameterIndex()];
+			sql = sqlProvider.getSql();
+			if (sqlProvider instanceof SqlParametersProvider) {
+				sqlArgs = ((SqlParametersProvider)sqlProvider).getSqlParameters();
+			}
+		} else {
+			throw new DbmException("sql parameter not found: " + invokeMethod.getMethod().getName());
+		}
+		Pair<String, Object> sqlParams = Pair.of(sql, sqlArgs);
+		return sqlParams;
+	}
+	
 	public static Pair<String, Object> findSqlAndParams(Object[] args){
 		String sql = null;
 		Object params = null;
-		int maxArgSize = 50;
+//		int maxArgSize = 50;
 		for (int i = 0; i < args.length; i++) {
 			Object arg = args[i];
 			if(arg==null){
@@ -312,14 +358,31 @@ final public class DbmUtils {
 					params = ((SqlParametersProvider)arg).getSqlParameterList();
 				}
 			}
-			if (LangUtils.size(params)>maxArgSize) {
-				params = "<<Parameter Size is more than " + maxArgSize + ">>";
-			}
+//			if (LangUtils.size(params)>maxArgSize) {
+//				params = "<<Parameter Size is more than " + maxArgSize + ">>";
+//			}
 		}
 		if(sql==null){
 			return null;
 		}
 		return Pair.of(sql, params);
+	}
+
+	public static String objectToString(Object obj){
+		if (obj!=null && obj.getClass().isArray()) {
+			Object[] rawArgs = (Object[]) obj;
+			Object[] args = new Object[rawArgs.length];
+			for (int i = 0; i < rawArgs.length; i++) {
+				if (LangUtils.isMultiple(rawArgs[i]) && LangUtils.size(rawArgs[i]) > MAX_PRINTABLE_ARG_SIZE) {
+					args[i] = "<<Argutment Size is more than " + MAX_PRINTABLE_ARG_SIZE + ">>"; 
+				} else {
+					args[i] = rawArgs[i];
+				}
+			}
+			return LangUtils.toString(args);
+		} else {
+			return LangUtils.toString(obj);
+		}
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -328,7 +391,13 @@ final public class DbmUtils {
 			Map<?, ?> temp = (Map<?, ?>) arg;
 			Map<Object, Object> newParams = Maps.newLinkedHashMap();
 			temp.forEach((k, v)->{
-				newParams.put(k, formatValueIfNeed(v));
+				if (v instanceof Collection) {
+					Collection<?> c = (Collection<?>) v;
+					List<Object> list = c.stream().map(cv -> formatValueIfNeed(cv)).collect(Collectors.toList());
+					newParams.put(k, list);
+				} else {
+					newParams.put(k, formatValueIfNeed(v));
+				}
 			});
 			return newParams;
 		} else if (arg!=null && arg.getClass().isArray()){
@@ -342,8 +411,20 @@ final public class DbmUtils {
 	
 	public static Object formatValueIfNeed(Object arg) {
 		Object val = arg;
-		if (arg instanceof Date) {
-			val = DateUtils.formatDateTime((Date)arg);
+		if (val instanceof SqlParameterValue) {
+			val = ((SqlParameterValue)val).getValue();
+		}
+		if (val instanceof Date) {
+			val = DateUtils.formatDateTime((Date)val);
+		} else if (val instanceof DbmEnumValueMapping) {
+			DbmEnumValueMapping<?> dbmEnum = (DbmEnumValueMapping<?>)val;
+			val = dbmEnum.getEnumMappingValue();
+		}
+		if (val instanceof String) {
+			String str = val.toString();
+			if (str.length()>1000) {
+				val = StringUtils.substring(str, 0, 1000) + "...";
+			}
 		}
 		return val;
 	}
@@ -411,6 +492,24 @@ final public class DbmUtils {
 		configurer.addDirective(new StrDirective());
 		configurer.addDirective(new WhereDirective());
 		configurer.addDirective(new SetDirective());
+		
+		configurer.addDirective(new DynamicConditionDirective());
+	}
+	
+	/***
+	 * for test
+	 * @author weishao zeng
+	 * @param sql
+	 * @param paramSource
+	 * @return
+	 */
+	@Deprecated
+	public static ParsedSql parseNamedSql(String sql, SqlParameterSource paramSource) {
+		ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(sql);
+//		String sqlToUse = NamedParameterUtils.substituteNamedParameters(parsedSql, paramSource);
+//		//Object[] params = NamedParameterUtils.buildValueArray(parsedSql, paramSource, null);
+//		List<SqlParameter> declaredParameters = NamedParameterUtils.buildSqlParameterList(parsedSql, paramSource);
+		return parsedSql;
 	}
 	
 	private DbmUtils(){

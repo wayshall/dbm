@@ -23,13 +23,19 @@ import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.core.SqlParameterValue;
 import org.springframework.jdbc.core.SqlProvider;
 import org.springframework.jdbc.core.StatementCreatorUtils;
-import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
 import org.springframework.util.Assert;
 
 /****
  * 复制自spring PreparedStatementCreatorFactory的实现，主要是增加JdbcStatementParameterSetter接口，统一参数设置入口
  * @author way
  *
+ * Helper class that efficiently creates multiple {@link PreparedStatementCreator}
+ * objects with different parameters based on a SQL statement and a single
+ * set of parameter declarations.
+ *
+ * @author Rod Johnson
+ * @author Thomas Risberg
+ * @author Juergen Hoeller
  */
 public class DbmPreparedStatementCreatorFactory {
 	/** The SQL, which won't change when the parameters change */
@@ -46,7 +52,7 @@ public class DbmPreparedStatementCreatorFactory {
 
 	private String[] generatedKeysColumnNames = null;
 
-	private NativeJdbcExtractor nativeJdbcExtractor;
+//	private NativeJdbcExtractor nativeJdbcExtractor;
 	
 	private JdbcStatementParameterSetter parameterSetter;
 
@@ -129,10 +135,10 @@ public class DbmPreparedStatementCreatorFactory {
 
 	/**
 	 * Specify the NativeJdbcExtractor to use for unwrapping PreparedStatements, if any.
-	 */
+	 
 	public void setNativeJdbcExtractor(NativeJdbcExtractor nativeJdbcExtractor) {
 		this.nativeJdbcExtractor = nativeJdbcExtractor;
-	}
+	}*/
 
 
 	/**
@@ -243,9 +249,9 @@ public class DbmPreparedStatementCreatorFactory {
 		public void setValues(PreparedStatement ps) throws SQLException {
 			// Determine PreparedStatement to pass to custom types.
 			PreparedStatement psToUse = ps;
-			if (nativeJdbcExtractor != null) {
+			/*if (nativeJdbcExtractor != null) {
 				psToUse = nativeJdbcExtractor.getNativePreparedStatement(ps);
-			}
+			}*/
 
 			// Set arguments: Does nothing if there are no parameters.
 			int sqlColIndx = 1;

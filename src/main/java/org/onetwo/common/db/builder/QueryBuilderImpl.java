@@ -8,7 +8,6 @@ import org.onetwo.common.db.InnerBaseEntityManager;
 import org.onetwo.common.db.RawSqlWrapper;
 import org.onetwo.common.db.sqlext.ExtQuery;
 import org.onetwo.common.db.sqlext.ExtQuery.K;
-import org.onetwo.common.db.sqlext.ExtQueryInner;
 import org.onetwo.common.db.sqlext.SQLSymbolManager;
 import org.onetwo.common.utils.LangUtils;
 import org.onetwo.common.utils.StringUtils;
@@ -124,6 +123,11 @@ public class QueryBuilderImpl<E> implements QueryBuilder<E> {
 		return self();
 	}
 	@Override
+	public QueryBuilderImpl<E> count(String field) {
+		this.params.put(K.COUNT, field);
+		return self();
+	}
+	@Override
 	public QueryBuilderImpl<E> unselect(String...fields){
 		this.params.put(K.UNSELECT, fields);
 		return self();
@@ -131,9 +135,13 @@ public class QueryBuilderImpl<E> implements QueryBuilder<E> {
 	
 	/***
 	 * @param first from 0
+	 * @param size 若size<=0，则不设置限制参数
 	 */
 	@Override
 	public QueryBuilderImpl<E> limit(int first, int size){
+		if (size<=0) {
+			return self();
+		}
 		this.params.put(K.FIRST_RESULT, first);
 		this.params.put(K.MAX_RESULTS, size);
 		return self();
@@ -217,13 +225,19 @@ public class QueryBuilderImpl<E> implements QueryBuilder<E> {
 	public QueryAction<E> toSelect(){
 		return createQueryAction();
 	}
-
-	public int delete(){
-		InnerBaseEntityManager em = (InnerBaseEntityManager) baseEntityManager;
-		ExtQueryInner query = em.getSQLSymbolManager().createDeleteQuery(entityClass, params);
-		ExtQuery q = query.build();
-		return em.createQuery(q.getSql(), q.getParamsValue().asMap()).executeUpdate();
+	
+	@Override
+	public ExecuteAction toExecute() {
+		ExecuteAction executeAction = new ExecuteActionImpl(this);
+		return executeAction;
 	}
+
+//	public int delete(){
+//		InnerBaseEntityManager em = (InnerBaseEntityManager) baseEntityManager;
+//		ExtQueryInner query = em.getSQLSymbolManager().createDeleteQuery(entityClass, params);
+//		ExtQuery q = query.build();
+//		return em.createQuery(q.getSql(), q.getParamsValue().asMap()).executeUpdate();
+//	}
 	
 	/*public ParamValues getParamValues(){
 		return extQuery.getParamsValue();

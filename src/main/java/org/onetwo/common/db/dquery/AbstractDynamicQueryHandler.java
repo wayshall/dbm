@@ -174,7 +174,7 @@ abstract public class AbstractDynamicQueryHandler implements DynamicQueryHandler
 		}catch (Throwable e) {
 			String qname = invokeContext.getNamedQueryInfo().getFullName();
 //			throw new FileNamedQueryException("invoke query["+invokeContext.getQueryName()+"] error : " + e.getMessage(), e);
-			throw new FileNamedQueryException("invoke query["+qname+"] error : ", e).put("queryName", qname);
+			throw new FileNamedQueryException("invoke query["+qname+"] error : ", e);//.put("queryName", qname);
 		}
 		
 	}
@@ -230,17 +230,26 @@ abstract public class AbstractDynamicQueryHandler implements DynamicQueryHandler
 			
 		} else if (dmethod.hasPageParamter()){
 			Page<?> page = dmethod.getPageParamter(args);
-			result = em.getFileNamedQueryManager().findPage(page, invokeContext);
+			// DbmNamedFileQueryFactory#findPage
+			Page<?> resultPage = em.getFileNamedQueryManager().findPage(page, invokeContext);
+			result = convertPageByResultType(resultPage, resultClass);
+			
+		} else if (dmethod.getPageParamter(args)!=null) {
+			// 通过是否能获取page参数再次判断是否分页查询
+			Page<?> page = dmethod.getPageParamter(args);
+			// DbmNamedFileQueryFactory#findPage
+			Page<?> resultPage = em.getFileNamedQueryManager().findPage(page, invokeContext);
+			result = convertPageByResultType(resultPage, resultClass);
+			
 		} else if (Collection.class.isAssignableFrom(resultClass)){
 			List<?> datalist = em.getFileNamedQueryManager().findList(invokeContext);
-			if(resultClass.isAssignableFrom(datalist.getClass())){
+			if (resultClass.isAssignableFrom(datalist.getClass())){
 				result = datalist;
-			}else{
+			} else {
 				Collection<Object> collections = CUtils.newCollections((Class<Collection<Object>>)resultClass, datalist.size());
 				collections.addAll(datalist);
 				result = collections;
 			}
-			
 		} else if (QueryWrapper.class.isAssignableFrom(resultClass)){
 			QueryWrapper dq = em.getFileNamedQueryManager().createQuery(invokeContext);
 			return dq;
@@ -260,6 +269,25 @@ abstract public class AbstractDynamicQueryHandler implements DynamicQueryHandler
 			return Optional.ofNullable(result);
 		}
 		
+		if (dmethod.getMethodReturnType().isPrimitive() && result==null) {
+			throw new FileNamedQueryException("Null return value from sql query, does not match primitive return type for: " + dmethod.getMethod().toGenericString());
+		}
+		
+		return result;
+	}
+	
+	/***
+	 * 兼容使用了pageRequest类型参数，但返回结果实际上不需要分页对象的情况
+	 * @author weishao zeng
+	 * @return
+	 */
+	private Object convertPageByResultType(Page<?> resultPage, Class<?> resultClass) {
+		Object result;
+		if (List.class.isAssignableFrom(resultClass)) {
+			result = resultPage.getResult();
+		} else {
+			result = resultPage;
+		}
 		return result;
 	}
 	

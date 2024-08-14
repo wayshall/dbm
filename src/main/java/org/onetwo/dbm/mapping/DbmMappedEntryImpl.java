@@ -13,6 +13,7 @@ public class DbmMappedEntryImpl extends AbstractDbmMappedEntryImpl implements Db
 	
 
 	private EntrySQLBuilderImpl staticInsertOrUpdateSqlBuilder;
+	private EntrySQLBuilderImpl staticInsertOrIgnoreSqlBuilder;
 	private EntrySQLBuilderImpl staticInsertSqlBuilder;
 	private EntrySQLBuilderImpl staticUpdateSqlBuilder;
 	private EntrySQLBuilderImpl staticFetchAllSqlBuilder;
@@ -72,6 +73,10 @@ public class DbmMappedEntryImpl extends AbstractDbmMappedEntryImpl implements Db
 		staticInsertOrUpdateSqlBuilder = createSQLBuilder(SqlBuilderType.insertOrUpdate);
 		staticInsertOrUpdateSqlBuilder.append(getInsertableFields());
 		staticInsertOrUpdateSqlBuilder.build();
+
+		staticInsertOrIgnoreSqlBuilder = createSQLBuilder(SqlBuilderType.insertOrIgnore);
+		staticInsertOrIgnoreSqlBuilder.append(getInsertableFields());
+		staticInsertOrIgnoreSqlBuilder.build();
 		
 		staticInsertSqlBuilder = createSQLBuilder(SqlBuilderType.insert);
 		staticInsertSqlBuilder.append(getInsertableFields());
@@ -114,6 +119,7 @@ public class DbmMappedEntryImpl extends AbstractDbmMappedEntryImpl implements Db
 		staticDeleteAllSqlBuilder.build();
 		
 		staticSelectVersionSqlBuilder = createSQLBuilder(SqlBuilderType.query);
+		staticSelectVersionSqlBuilder.setNamedPlaceHoder(false);
 		staticSelectVersionSqlBuilder.append(getVersionField());
 		staticSelectVersionSqlBuilder.appendWhere(getIdentifyFields());
 		staticSelectVersionSqlBuilder.build();
@@ -130,6 +136,12 @@ public class DbmMappedEntryImpl extends AbstractDbmMappedEntryImpl implements Db
 		return staticSelectLockSqlBuilder;
 	}*/
 
+
+
+	@Override
+	protected EntrySQLBuilderImpl getStaticInsertOrIgnoreSqlBuilder() {
+		return staticInsertOrIgnoreSqlBuilder;
+	}
 
 	@Override
 	protected EntrySQLBuilderImpl getStaticInsertOrUpdateSqlBuilder() {
@@ -153,7 +165,7 @@ public class DbmMappedEntryImpl extends AbstractDbmMappedEntryImpl implements Db
 
 
 	@Override
-	protected EntrySQLBuilderImpl getStaticFetchSqlBuilder() {
+	public EntrySQLBuilder getStaticFetchSqlBuilder() {
 		return staticFetchSqlBuilder;
 	}
 

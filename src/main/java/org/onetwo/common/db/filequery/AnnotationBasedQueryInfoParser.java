@@ -34,6 +34,9 @@ public class AnnotationBasedQueryInfoParser implements NamedQueryInfoParser {
 		}
 		DbmSqlFileResource<?> dbmSqlFile = (DbmSqlFileResource<?>) file;
 		Class<?> interfaceClass = dbmSqlFile.getMappedInterface();
+		if (interfaceClass==null) {
+			return Collections.emptySet();
+		}
 		Set<Method> methods = MethodIntrospector.selectMethods(interfaceClass, (MethodFilter)method->{
 			return AnnotationUtils.findAnnotation(method, Query.class)!=null;
 		});
@@ -42,7 +45,7 @@ public class AnnotationBasedQueryInfoParser implements NamedQueryInfoParser {
 	}
 	
 	@Override
-	public void parseToNamedQueryFile(NamedQueryFile namedQueryFile, ResourceAdapter<?> file) {
+	public void parseToNamedQueryFile(NamedQueryFile namedQueryFile, DbmSqlFileResource<?> file) {
 		Set<Method> methods = selectMethods(namedQueryFile, file);
 		
 		if(methods.isEmpty()){
@@ -81,6 +84,7 @@ public class AnnotationBasedQueryInfoParser implements NamedQueryInfoParser {
 			info.setQueryConfig(config);
 		}
 		config.setLikeQueryFields(Arrays.asList(query.likeQueryFields()));
+		config.setUseAutoLimitSqlIfPagination(query.useAutoLimitSqlIfPagination());
 		
 		Set<QueryContextVariable> variables = new LinkedHashSet<>();
 		

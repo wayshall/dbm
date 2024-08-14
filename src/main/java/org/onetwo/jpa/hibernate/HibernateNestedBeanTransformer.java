@@ -5,7 +5,7 @@ import java.util.Map;
 
 import org.hibernate.transform.ResultTransformer;
 import org.onetwo.dbm.annotation.DbmResultMapping;
-import org.onetwo.dbm.jdbc.mapper.AbstractNestedBeanMapper;
+import org.onetwo.dbm.jdbc.mapper.nested.AbstractNestedBeanMapper;
 import org.onetwo.dbm.jdbc.spi.ColumnValueGetter;
 import org.onetwo.dbm.mapping.DbmMappedField;
 import org.springframework.util.Assert;

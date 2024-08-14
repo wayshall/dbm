@@ -18,7 +18,9 @@ import org.onetwo.dbm.core.spi.DbmSessionFactory;
 import org.onetwo.dbm.event.internal.EdgeEventBus;
 import org.onetwo.dbm.exception.DbmException;
 import org.onetwo.dbm.id.DbmIds;
+import org.onetwo.dbm.id.DefaultTableIdGeneratorManager;
 import org.onetwo.dbm.id.SnowflakeIdGenerator;
+import org.onetwo.dbm.id.TableIdGeneratorManager;
 import org.onetwo.dbm.mapping.DbmConfig;
 import org.onetwo.dbm.mapping.DbmConfig.SnowflakeIdConfig;
 import org.onetwo.dbm.mapping.DefaultDbmConfig;
@@ -140,6 +142,13 @@ public class DbmSpringConfiguration implements ApplicationContextAware, Initiali
 		return sid;
 	}
 	
+	@Bean
+	@Autowired
+	public TableIdGeneratorManager tableIdGeneratorManager(DbmSessionFactory sessionFactory) {
+		DefaultTableIdGeneratorManager tidManager = new DefaultTableIdGeneratorManager(dbmEntityManager(sessionFactory));
+		return tidManager;
+	}
+	
 	/*@Bean
 	public DataQueryFilterListener dataQueryFilterListener(){
 		return new DataQueryFilterListener();
@@ -180,14 +189,17 @@ public class DbmSpringConfiguration implements ApplicationContextAware, Initiali
 	@Autowired
 	public DbmSessionFactory dbmSessionFactory(ApplicationContext applicationContext, PlatformTransactionManager transactionManager, Map<String, DataSource> dataSources){
 		if(LangUtils.isEmpty(dataSources)){
-			throw new DbmException("no dataSource found, you must be configure a dataSource!");
+			throw new DbmException("dataSource not found, you must be configure a dataSource!");
 		}
 		DataSource dataSource = null;
 		String dataSourceName = getDataSourceName();
 		if(StringUtils.isBlank(dataSourceName)){
-			dataSource = dataSources.size()==1?dataSources.values().iterator().next():dataSources.get("dataSource");
+			dataSource = dataSources.size()==1?dataSources.values().iterator().next():dataSources.get(dataSourceName);
 		}else{
 			dataSource = dataSources.get(dataSourceName);
+			if (dataSource==null) {
+				throw new DbmException("dataSource not found: " + dataSourceName);
+			}
 		}
 		DbmSessionFactoryImpl sf = new DbmSessionFactoryImpl(applicationContext, transactionManager, dataSource);
 		sf.setPackagesToScan(getAllDbmPackageNames().toArray(new String[0]));

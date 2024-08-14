@@ -12,12 +12,13 @@ import javax.persistence.PersistenceContext;
 import javax.sql.DataSource;
 
 import org.hibernate.SQLQuery;
+import org.hibernate.query.NativeQuery;
 import org.onetwo.common.db.ParsedSqlContext;
 import org.onetwo.common.db.dquery.DynamicMethod;
 import org.onetwo.common.db.dquery.NamedQueryInvokeContext;
 import org.onetwo.common.db.filequery.DbmNamedSqlFileManager;
-import org.onetwo.common.db.filequery.SqlParamterPostfixFunctions;
 import org.onetwo.common.db.filequery.func.SqlFunctionDialet;
+import org.onetwo.common.db.filequery.postfunc.SqlParamterPostfixFunctions;
 import org.onetwo.common.db.spi.CreateQueryCmd;
 import org.onetwo.common.db.spi.FileNamedQueryFactory;
 import org.onetwo.common.db.spi.NamedQueryInfoParser;
@@ -86,7 +87,9 @@ public class HibernateJPAQueryProvideManager implements QueryProvideManager, Ini
 	@Override
 	public QueryWrapper createQuery(CreateQueryCmd createQueryCmd) {
 		if(createQueryCmd.isNativeSql()){
-			SQLQuery sqlQuery = entityManager.createNativeQuery(createQueryCmd.getSql()).unwrap(SQLQuery.class);
+			NativeQuery<?> sqlQuery = entityManager.createNativeQuery(createQueryCmd.getSql()).unwrap(NativeQuery.class);
+//			sqlQuery.getParameterMetadata().setOrdinalParametersZeroBased(true);
+//			sqlQuery.getParameterMetadata().setOrdinalParametersZeroBased(true);
 			HibernateDbmQueryWrapper wrapper = new HibernateDbmQueryWrapper(sqlQuery);
 			return wrapper;
 		}else{

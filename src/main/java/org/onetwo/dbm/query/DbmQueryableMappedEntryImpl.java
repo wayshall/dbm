@@ -78,7 +78,7 @@ public class DbmQueryableMappedEntryImpl extends AbstractDbmMappedEntryImpl impl
 	}
 
 	@Override
-	protected EntrySQLBuilderImpl getStaticFetchSqlBuilder() {
+	public EntrySQLBuilder getStaticFetchSqlBuilder() {
 		return staticFetchSqlBuilder;
 	}
 

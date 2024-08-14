@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.onetwo.common.db.sqlext.QueryDSLOps;
 import org.onetwo.common.utils.ArrayUtils;
 import org.onetwo.common.utils.Assert;
 import org.onetwo.common.utils.CUtils;
@@ -19,19 +20,19 @@ public class JdbcStatementContextBuilder implements JdbcStatementContext<List<Ob
 		SQLBuilder sb = sqlBuilderFactory.createQMark(entry.getTableInfo().getName(), entry.getTableInfo().getAlias(), dtype);
 		return create(entry, sb);
 	}*/
-	public static JdbcStatementContextBuilder create(DbmEventAction eventAction, AbstractDbmMappedEntryImpl entry, EntrySQLBuilderImpl sqlBuilder){
+	public static JdbcStatementContextBuilder create(DbmEventAction eventAction, AbstractDbmMappedEntryImpl entry, EntrySQLBuilder sqlBuilder){
 		JdbcStatementContextBuilder dsql = new JdbcStatementContextBuilder(eventAction, entry, sqlBuilder);
 		return dsql;
 	}
 	
 	private AbstractDbmMappedEntryImpl entry;
-	private EntrySQLBuilderImpl sqlBuilder;
+	private EntrySQLBuilder sqlBuilder;
 	private Map<DbmMappedField, Object> columnValues = CUtils.newLinkedHashMap();
 	private List<Object> causeValues = new ArrayList<Object>(5);
 	private List<Object[]> values;
 	private final DbmEventAction eventAction;
 
-	private JdbcStatementContextBuilder(DbmEventAction eventAction, AbstractDbmMappedEntryImpl entry, EntrySQLBuilderImpl sqlBuilder) {
+	private JdbcStatementContextBuilder(DbmEventAction eventAction, AbstractDbmMappedEntryImpl entry, EntrySQLBuilder sqlBuilder) {
 		super();
 		this.entry = entry;
 		this.sqlBuilder = sqlBuilder;
@@ -46,8 +47,16 @@ public class JdbcStatementContextBuilder implements JdbcStatementContext<List<Ob
 	}
 	
 	public JdbcStatementContextBuilder appendWhere(DbmMappedField column, Object val){
-		this.sqlBuilder.appendWhere(column);
+		this.sqlBuilder.appendWhere(new DbmMappedFieldValue(column, QueryDSLOps.EQ, val, sqlBuilder.getDialet()));
 		this.causeValues.add(val);
+		return this;
+	}
+	
+	public JdbcStatementContextBuilder appendWhere(DbmMappedField column, QueryDSLOps op, Object val){
+		this.sqlBuilder.appendWhere(new DbmMappedFieldValue(column, op, val, sqlBuilder.getDialet()));
+		if (val!=null) {
+			this.causeValues.add(val);
+		}
 		return this;
 	}
 	
@@ -58,8 +67,9 @@ public class JdbcStatementContextBuilder implements JdbcStatementContext<List<Ob
 	public JdbcStatementContextBuilder processColumnValues(Object entity){
 		Assert.notNull(entity);
 		Object val = null;
-		EntrySQLBuilderImpl builder = getSqlBuilder();
-		for(DbmMappedField field : builder.getFields()){
+		EntrySQLBuilder builder = getSqlBuilder();
+		for(DbmMappedFieldValue fv : builder.getFields()){
+			DbmMappedField field = fv.getField();
 			val = field.getValue(entity);
 //			val = field.getValueForJdbcAndFireDbmEventAction(entity, getEventAction());
 			Object newFieldValue = field.fireDbmEntityFieldEvents(val, getEventAction());
@@ -96,6 +106,9 @@ public class JdbcStatementContextBuilder implements JdbcStatementContext<List<Ob
 		}else if(SqlBuilderType.insertOrUpdate==sqltype){
 			batchValues = columnValues.values().toArray();
 			
+		}else if(SqlBuilderType.insertOrIgnore==sqltype){
+			batchValues = columnValues.values().toArray();
+			
 		}else if(SqlBuilderType.delete==sqltype){
 //			this.getColumnValues().addAll(getCauseValues());
 			batchValues = ArrayUtils.addAll(columnValues.values().toArray(), causeValues.toArray());
@@ -117,7 +130,8 @@ public class JdbcStatementContextBuilder implements JdbcStatementContext<List<Ob
 	
 	public JdbcStatementContextBuilder processWhereCauseValuesFromEntity(Object entity){
 		Assert.notNull(entity);
-		for(DbmMappedField field : this.sqlBuilder.getWhereCauseFields()){
+		for(DbmMappedFieldValue fv : this.sqlBuilder.getWhereCauseFields()){
+			DbmMappedField field = fv.getField();
 			Object val = field.getValue(entity);
 			SqlParameterValue pvalue = convertSqlParameterValue(field, val);
 			this.causeValues.add(pvalue);
@@ -173,7 +187,7 @@ public class JdbcStatementContextBuilder implements JdbcStatementContext<List<Ob
 		return entry;
 	}
 
-	public EntrySQLBuilderImpl getSqlBuilder() {
+	public EntrySQLBuilder getSqlBuilder() {
 		return sqlBuilder;
 	}
 

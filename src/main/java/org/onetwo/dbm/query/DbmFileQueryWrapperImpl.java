@@ -16,6 +16,7 @@ public class DbmFileQueryWrapperImpl extends DefaultFileQueryWrapper {
 	}
 	
 	protected QueryWrapper createDataQuery(CreateQueryCmd createQueryCmd){
+		// DbmQueryWrapperImpl
 		QueryWrapper dataQuery = this.queryProvideManager.createQuery(createQueryCmd);
 		Optional<DbmEntityManager> dbm = getProviderManager(DbmEntityManager.class);
 		if(!countQuery && dbm.isPresent()){

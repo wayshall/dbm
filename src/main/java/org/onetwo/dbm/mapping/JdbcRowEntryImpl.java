@@ -30,22 +30,22 @@ public class JdbcRowEntryImpl extends AbstractDbmMappedEntryImpl {
 	}
 
 	@Override
-	protected EntrySQLBuilderImpl getStaticInsertSqlBuilder() {
+	protected EntrySQLBuilder getStaticInsertSqlBuilder() {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	protected EntrySQLBuilderImpl getStaticUpdateSqlBuilder() {
+	protected EntrySQLBuilder getStaticUpdateSqlBuilder() {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	protected EntrySQLBuilderImpl getStaticDeleteSqlBuilder() {
+	protected EntrySQLBuilder getStaticDeleteSqlBuilder() {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	protected EntrySQLBuilderImpl getStaticFetchSqlBuilder() {
+	public EntrySQLBuilder getStaticFetchSqlBuilder() {
 		throw new UnsupportedOperationException();
 	}
 

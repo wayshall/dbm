@@ -19,6 +19,9 @@ public class LongVersionableType implements VersionableType<Long> {
 
 	@Override
 	public boolean isEquals(Long newVersion, Long oldVersion) {
+		if (newVersion==null && oldVersion==null) {
+			return true;
+		}
 		return newVersion!=null && newVersion.equals(oldVersion);
 	}
 

@@ -23,6 +23,7 @@ import org.onetwo.common.spring.SpringUtils;
 import org.onetwo.common.utils.ArrayUtils;
 import org.onetwo.common.utils.Assert;
 import org.onetwo.common.utils.LangUtils;
+import org.onetwo.dbm.utils.DbmUtils;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.jdbc.core.RowMapper;
 
@@ -83,6 +84,9 @@ public class DefaultFileQueryWrapper extends AbstractQueryWrapper /* implements 
 	
 	protected ParsedSqlContext createParsedSqlContext(){
 		Optional<SqlFunctionDialet> sqlFunction = queryProvideManager.getSqlFunctionDialet();
+//		if (isLimiteQuery()) {
+//			parserContext.put("_limitQuery", true);
+//		}
 		FileNamedSqlGenerator sqlGen = new DefaultFileNamedSqlGenerator(countQuery, parser, parserContext, 
 //																		resultClass, ascFields, desFields, 
 																		params, sqlFunction);
@@ -99,7 +103,10 @@ public class DefaultFileQueryWrapper extends AbstractQueryWrapper /* implements 
 		ParsedSqlContext sqlAndValues = createParsedSqlContext();
 		
 		CreateQueryCmd createQueryCmd = new CreateQueryCmd(sqlAndValues.getParsedSql(), resultClass, info.isNativeSql());
+		// DbmQueryWrapperImpl
 		QueryWrapper dataQuery = createDataQuery(createQueryCmd);
+		boolean useAutoLimitSqlIfPagination = invokeContext.getNamedQueryInfo().isUseAutoLimitSqlIfPagination();
+		dataQuery.setUseAutoLimitSqlIfPagination(useAutoLimitSqlIfPagination);
 		
 		if(sqlAndValues.isListValue()){
 			doIndexParameters(dataQuery, sqlAndValues.asList());
@@ -146,10 +153,14 @@ public class DefaultFileQueryWrapper extends AbstractQueryWrapper /* implements 
 	}
 	
 	final protected void setLimitResult(QueryWrapper dataQuery){
-		if(firstRecord>0)
+		if(firstRecord>DbmUtils.INVALID_VALUE_FIRST_RECORD)
 			dataQuery.setFirstResult(firstRecord);
-		if(maxRecords>0)
+		if(maxRecords>DbmUtils.INVALID_VALUE_MAX_RESULTS)
 			dataQuery.setMaxResults(maxRecords);
+	}
+	
+	protected boolean isLimiteQuery() {
+		return DbmUtils.isLimitedQuery(firstRecord, maxRecords);
 	}
 
 	public QueryWrapper setParameter(int index, Object value) {
@@ -317,5 +328,15 @@ public class DefaultFileQueryWrapper extends AbstractQueryWrapper /* implements 
 	@Override
 	public <T> T unwarp(Class<T> clazz) {
 		return clazz.cast(dataQuery);
+	}
+
+	@Override
+	public boolean isUseAutoLimitSqlIfPagination() {
+		return this.dataQuery.isUseAutoLimitSqlIfPagination();
+	}
+
+	@Override
+	public void setUseAutoLimitSqlIfPagination(boolean useAutoLimitSqlIfPagination) {
+		this.setUseAutoLimitSqlIfPagination(useAutoLimitSqlIfPagination);
 	}
 }

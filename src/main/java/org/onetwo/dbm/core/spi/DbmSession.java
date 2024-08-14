@@ -8,8 +8,8 @@ import java.util.Map;
 import org.onetwo.common.db.DbmQueryValue;
 import org.onetwo.common.db.sql.DynamicQuery;
 import org.onetwo.common.utils.Page;
-import org.onetwo.dbm.annotation.DbmJdbcOperationMark;
 import org.onetwo.dbm.core.internal.SessionTransactionType;
+import org.onetwo.dbm.jdbc.annotation.DbmJdbcOperationMark;
 import org.onetwo.dbm.jdbc.spi.DbmJdbcOperationType;
 import org.onetwo.dbm.query.DbmQuery;
 import org.onetwo.dbm.utils.DbmLock;
@@ -134,6 +134,9 @@ public interface DbmSession {
 
 	@DbmJdbcOperationMark(type=DbmJdbcOperationType.BATCH_INSERT)
 	public <T> int batchInsert(Collection<T> entities, Integer batchSize);
+	
+	@DbmJdbcOperationMark(type=DbmJdbcOperationType.BATCH_INSERT)
+	public <T> int batchInsertOrIgnore(Collection<T> entities, Integer batchSize);
 	
 	/***
 	 * 目前只支持mysql

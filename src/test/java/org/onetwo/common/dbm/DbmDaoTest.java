@@ -25,10 +25,9 @@ import org.onetwo.common.utils.LangUtils;
 import org.onetwo.dbm.core.spi.DbmEntityManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.Rollback;
-import org.springframework.transaction.annotation.Transactional;
 
 //@TransactionConfiguration(defaultRollback=true)
-@Transactional
+//@Transactional
 @Rollback(false)
 public class DbmDaoTest extends DbmBaseTest {
 	

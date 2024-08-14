@@ -736,7 +736,6 @@ public class ExtQueryImplTest {
 //		System.out.println("testHas: " + q.getParamsValue().getValues().toString());
 		Assert.assertEquals(sql.trim(), q.getSql().trim());
 		Assert.assertEquals(paramsting, q.getParamsValue().getValues().toString());
-		
 	}
 
 	@Test

@@ -1,9 +1,12 @@
 package org.onetwo.common.db.filequery;
 
+import java.beans.PropertyDescriptor;
 import java.util.Enumeration;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.onetwo.common.db.DataBase;
+import org.onetwo.common.db.dquery.DbmSqlFileResource;
 import org.onetwo.common.db.filequery.SimpleSqlFileLineLexer.LineToken;
 import org.onetwo.common.db.spi.NamedQueryFile;
 import org.onetwo.common.db.spi.NamedQueryInfoParser;
@@ -13,6 +16,7 @@ import org.onetwo.common.db.spi.SqlDirectiveExtractor;
 import org.onetwo.common.log.JFishLoggerFactory;
 import org.onetwo.common.propconf.JFishProperties;
 import org.onetwo.common.propconf.ResourceAdapter;
+import org.onetwo.dbm.exception.DbmException;
 import org.onetwo.dbm.exception.FileNamedQueryException;
 import org.slf4j.Logger;
 import org.springframework.beans.BeanWrapper;
@@ -104,7 +108,7 @@ public class MultipCommentsSqlFileParser implements NamedQueryInfoParser {
 	private List<QueryGlobalVariable> queryGlobalVariable;
 	
 	@Override
-	public void parseToNamedQueryFile(NamedQueryFile namespaceInfo, ResourceAdapter<?> sqlFile) {
+	public void parseToNamedQueryFile(NamedQueryFile namespaceInfo, DbmSqlFileResource<?> sqlFile) {
 		if(!sqlFile.exists()){
 			logger.info("sql file is not exists, ignore parse. namespace: " + namespaceInfo.getNamespace());
 			return ;
@@ -147,7 +151,7 @@ public class MultipCommentsSqlFileParser implements NamedQueryInfoParser {
 	}
 	
 	protected void parseQueryStatement(SimpleSqlFileLineLexer lineLexer,
-										NamedQueryFile namespaceInfo, ResourceAdapter<?> f){
+										NamedQueryFile namespaceInfo, DbmSqlFileResource<?> f){
 		List<String> comments = lineLexer.getLineBuf();
 		JFishProperties config = parseComments(comments);
 		//name
@@ -171,6 +175,7 @@ public class MultipCommentsSqlFileParser implements NamedQueryInfoParser {
 
 			bean.setName(name);
 			bean.setConfig(config);
+			bean.setDataBase(f.getDatabase());
 
 			namespaceInfo.put(bean.getName(), bean, true);
 
@@ -206,7 +211,7 @@ public class MultipCommentsSqlFileParser implements NamedQueryInfoParser {
 				config.remove(FileBaseNamedQueryInfo.FRAGMENT_KEY);
 				
 			}else{
-				throw new FileNamedQueryException("named query["+name+"]'s  must be specify a @property or @fragment."
+				throw new FileNamedQueryException("named query["+name+"]is repeated! rename it or set a @property or @fragment directive "
 						+ "near at line : " + lineLexer.getLineReader().getLineNumber());
 			}
 //			sqlPropertyName = config.getProperty(PROPERTY_KEY);
@@ -286,7 +291,16 @@ public class MultipCommentsSqlFileParser implements NamedQueryInfoParser {
 		if(prop.indexOf(FileBaseNamedQueryInfo.DOT_KEY)!=-1){
 			prop = org.onetwo.common.utils.StringUtils.toCamel(prop, FileBaseNamedQueryInfo.DOT_KEY, false);
 		}
-		beanBw.setPropertyValue(prop, val);
+		PropertyDescriptor pd = beanBw.getPropertyDescriptor(prop);
+		if (pd.getPropertyType()==DataBase.class) {
+			val = DataBase.of(val.toString());
+		}
+		try {
+			beanBw.setPropertyValue(prop, val);
+		} catch (Exception e) {
+			FileBaseNamedQueryInfo bean = (FileBaseNamedQueryInfo)beanBw.getWrappedInstance();
+			throw new DbmException("NamedQuery[" + bean.getFullName() + "] set property error. perperty: " + prop + ", value: " + val);
+		}
 		/*try {
 			ReflectUtils.setExpr(bean, prop, val);
 		} catch (Exception e) {

@@ -6,9 +6,9 @@ import lombok.Data;
 
 @Data
 public class DefaultDbmConfig implements DbmConfig {
-	/*public static final String JFISH_BASE_PACKAGES = "jfish.base.packages";
-	public static final String JFISH_DBM_SQL_LOG = "jfish.dbm.sql.log";
-	public static final String JFISH_DBM_SQL_WATCH = "jfish.dbm.sql.watch";*/
+	/*public static final String JFISH_BASE_PACKAGES = org.onetwo.boot.core.config.BootJFishConfig.ZIFISH_CONFIG_PREFIX+ ".base.packages";
+	public static final String JFISH_DBM_SQL_LOG = org.onetwo.boot.core.config.BootJFishConfig.ZIFISH_CONFIG_PREFIX+ ".dbm.sql.log";
+	public static final String JFISH_DBM_SQL_WATCH = org.onetwo.boot.core.config.BootJFishConfig.ZIFISH_CONFIG_PREFIX+ ".dbm.sql.watch";*/
 	/***
 	 * the threshold of useBatchOptimize
 	 */
@@ -21,7 +21,7 @@ public class DefaultDbmConfig implements DbmConfig {
 	private boolean logSql = true;
 	private boolean watchSqlFile = true;
 //	private String[] modelPackagesToScan;
-	private String dataSource;
+	private String dataSource = "dataSource";
 	
 	private EnableDbmAttributes enableDbmAttributes;
 	

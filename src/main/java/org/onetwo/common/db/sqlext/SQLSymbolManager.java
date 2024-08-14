@@ -3,8 +3,6 @@ package org.onetwo.common.db.sqlext;
 import java.util.List;
 import java.util.Map;
 
-import org.onetwo.common.db.builder.QueryField;
-
 /***
  * sql操作符管理
  * 
@@ -13,6 +11,11 @@ import org.onetwo.common.db.builder.QueryField;
  */
 public interface SQLSymbolManager {
 	
+	/***
+	 * 用 QueryDSLOperators 代替这些操作符常量
+	 * @author way
+	 
+	@Deprecated
 	public static class FieldOP {
 		public static final char SPLIT_SYMBOL = QueryField.SPLIT_SYMBOL;
 		public static final String like = "like";
@@ -27,6 +30,7 @@ public interface SQLSymbolManager {
 		public static final String neq = "!=";
 		public static final String neq2 = "<>";
 		public static final String in = "in";
+		public static final String between = "between";
 		public static final String not_in = "not in";
 		public static final String date_in = "date in";
 		public static final String is_null = "is null";
@@ -43,22 +47,24 @@ public interface SQLSymbolManager {
 		public static final String qstr(String name, String op){
 			return name + QueryField.SPLIT_SYMBOL + op;
 		}
-	}
+	}*
+	 */
 
-	public ExtQueryDialet getSqlDialet();
+	ExtQueryDialet getSqlDialet();
 
-	public SQLSymbolManager register(String symbol, HqlSymbolParser parser);
-	public SQLSymbolManager register(HqlSymbolParser parser);
+	SQLSymbolManager register(QueryDSLOps symbol, HqlSymbolParser parser);
+	SQLSymbolManager register(HqlSymbolParser parser);
 	
-	public HqlSymbolParser getHqlSymbolParser(String symbol);
+	HqlSymbolParser getHqlSymbolParser(String symbol);
+	HqlSymbolParser getHqlSymbolParser(QueryDSLOps symbol);
 //	public String createHql(Map<Object, Object> properties, List<Object> values) ;
 //	public PlaceHolder getPlaceHolder();
 	
-	public ExtQueryInner createDeleteQuery(Class<?> entityClass, Map<Object, Object> properties);
+	DeleteExtQuery createDeleteQuery(Class<?> entityClass, Map<Object, Object> properties);
 	
-	public SelectExtQuery createSelectQuery(Class<?> entityClass, Map<Object, Object> properties);
-	public SelectExtQuery createSelectQuery(Class<?> entityClass, String alias, Map<Object, Object> properties);
+	SelectExtQuery createSelectQuery(Class<?> entityClass, Map<Object, Object> properties);
+	SelectExtQuery createSelectQuery(Class<?> entityClass, String alias, Map<Object, Object> properties);
 	
-	public void setListeners(List<ExtQueryListener> listeners);
+	void setListeners(List<ExtQueryListener> listeners);
 	
 }

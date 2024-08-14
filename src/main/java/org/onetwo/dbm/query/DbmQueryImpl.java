@@ -10,16 +10,17 @@ import org.onetwo.common.utils.Assert;
 import org.onetwo.dbm.core.spi.DbmSessionImplementor;
 import org.onetwo.dbm.dialet.DBDialect;
 import org.onetwo.dbm.dialet.DBDialect.LockInfo;
+import org.onetwo.dbm.utils.DbmUtils;
 import org.slf4j.Logger;
 import org.springframework.jdbc.core.RowMapper;
 
 @SuppressWarnings("unchecked")
 public class DbmQueryImpl implements DbmQuery {
-	private static final int INVALID_VALUE = -1;
-	private static final int INVALID_VALUE_MAX_RESULTS = 0;
+//	private static final int INVALID_VALUE = -1;
+//	private static final int INVALID_VALUE_MAX_RESULTS = 0;
 
-	private static final String FIRST_RESULT_NAME = "DbmQueryFirstResult";
-	private static final String MAX_RESULT_NAME = "DbmQueryMaxResult";
+	private static final String FIRST_RESULT_NAME = DbmUtils.FIRST_RESULT_NAME;
+	private static final String MAX_RESULT_NAME = DbmUtils.MAX_RESULT_NAME;
 	
 	
 	protected final Logger logger = JFishLoggerFactory.getLogger(this.getClass());
@@ -33,10 +34,15 @@ public class DbmQueryImpl implements DbmQuery {
 	private Class<?> resultClass;
 	
 	private int firstResult = 0;
-	private int maxResults = INVALID_VALUE_MAX_RESULTS;
+	private int maxResults = DbmUtils.INVALID_VALUE_MAX_RESULTS;
 	
 	private RowMapper<?> rowMapper;
 	private LockInfo lockInfo;
+	
+	/***
+	 * 是否自动生成分页sql片段
+	 */
+	private boolean useAutoLimitSqlIfPagination = true;
 //	private QType qtype;
 
 	public DbmQueryImpl(DbmSessionImplementor session, String sqlString, Class<?> resultClass) {
@@ -138,8 +144,11 @@ public class DbmQueryImpl implements DbmQuery {
 
 	public String getSqlString() {
 		String sql = sqlString;
-		if(isLimitedQuery()){
-			sql = dbDialect.getLimitStringWithNamed(sqlString, FIRST_RESULT_NAME, MAX_RESULT_NAME);
+//		if(isLimitedQuery()){
+		if (isLimitedQuery()) {
+			if(useAutoLimitSqlIfPagination){
+				sql = dbDialect.getLimitStringWithNamed(sqlString, FIRST_RESULT_NAME, MAX_RESULT_NAME);
+			}
 		}
 		if(lockInfo!=null){
 			sql += " " + dbDialect.getLockSqlString(lockInfo);
@@ -175,7 +184,7 @@ public class DbmQueryImpl implements DbmQuery {
 	}
 
 	public boolean isLimitedQuery(){
-		return this.getFirstResult()>INVALID_VALUE && this.getMaxResults()>INVALID_VALUE_MAX_RESULTS;
+		return DbmUtils.isLimitedQuery(getFirstResult(), getMaxResults());
 	}
 
 	/* (non-Javadoc)
@@ -247,6 +256,18 @@ public class DbmQueryImpl implements DbmQuery {
 	@Override
 	public Map<String, Object> getParameters() {
 		return queryValue.getValues();
+	}
+
+	public boolean isUseAutoLimitSqlIfPagination() {
+		return useAutoLimitSqlIfPagination;
+	}
+
+	public void setUseAutoLimitSqlIfPagination(boolean useAutoLimitSqlIfPagination) {
+		this.useAutoLimitSqlIfPagination = useAutoLimitSqlIfPagination;
+	}
+	
+	public String toString() {
+		return this.sqlString;
 	}
 	
 }

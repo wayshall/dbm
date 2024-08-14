@@ -20,7 +20,7 @@ public class TableDocGeneratorTest {
 		StringBuilder columnNames = new StringBuilder();
 		StringBuilder columnComments = new StringBuilder();
 		TableMeta tableMeta = g.dbGenerator().table("api_swagger_model")
-						.meta()
+						.metaConfig()
 						.tableMeta();
 		ColumnMeta pk = tableMeta.getPrimaryKey();
 		columnNames.append(pk.getName()).append("、\n");

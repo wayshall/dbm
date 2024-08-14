@@ -2,6 +2,7 @@ package org.onetwo.dbm.event.internal;
 
 import java.io.Serializable;
 
+import org.onetwo.common.convert.Types;
 import org.onetwo.dbm.event.spi.DbmInsertEvent;
 import org.onetwo.dbm.event.spi.DbmSessionEvent;
 import org.onetwo.dbm.id.IdentifierGenerator;
@@ -53,6 +54,10 @@ abstract public class InsertEventListener extends AbstractDbmEventListener {
 //			if (idField.isGeneratedValue()) {
 			if (!entry.hasIdentifyValue(entity) && idField.isGeneratedValue()) {
 				Object id = generatedIdentifyBeforeInsert(es, idField);
+				Class<?> actualType = idField.getColumnType();
+				if (!actualType.isInstance(id)) {
+					id = Types.convertObject(id, actualType, id);
+				}
 				idField.setValue(entity, id);
 			}
 		}

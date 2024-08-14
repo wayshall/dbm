@@ -10,6 +10,7 @@ import java.util.concurrent.ExecutionException;
 import org.onetwo.common.annotation.AnnotationInfo;
 import org.onetwo.common.log.JFishLoggerFactory;
 import org.onetwo.common.reflect.ReflectUtils;
+import org.onetwo.common.spring.SpringUtils;
 import org.onetwo.common.spring.utils.ResourcesScanner;
 import org.onetwo.common.spring.utils.ScanResourcesCallback;
 import org.onetwo.common.utils.Assert;
@@ -253,7 +254,8 @@ public class MutilMappedEntryManager implements MappedEntryBuilder, MappedEntryM
 		String key = getCacheKey(clazz);
 		try {
 			entry = readOnlyEntryCaches.get(key, ()->{
-				AnnotationInfo annotationInfo = new AnnotationInfo(clazz);
+//				AnnotationInfo annotationInfo = new AnnotationInfo(clazz);
+				AnnotationInfo annotationInfo = SpringUtils.createAnnotationInfo(clazz);
 				JdbcRowEntryImpl rowEntry = new JdbcRowEntryImpl(annotationInfo, serviceRegistry);
 				DbmMappedEntry value = buildMappedFields(rowEntry);
 

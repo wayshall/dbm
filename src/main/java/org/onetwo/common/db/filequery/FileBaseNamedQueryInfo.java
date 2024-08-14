@@ -3,6 +3,7 @@ package org.onetwo.common.db.filequery;
 import java.util.List;
 import java.util.Map;
 
+import org.onetwo.common.db.DataBase;
 import org.onetwo.common.db.spi.FileSqlParserType;
 import org.onetwo.common.db.spi.NamedQueryFile;
 import org.onetwo.common.db.spi.NamedQueryInfo;
@@ -71,6 +72,8 @@ public class FileBaseNamedQueryInfo implements Cloneable, NamedQueryInfo {
 	private boolean nativeSql = true;
 	
 	private QueryConfigData queryConfig;// = new QueryConfigData(); //ParsedSqlUtils.EMPTY_CONFIG;
+	
+	private DataBase dataBase;
 
 	public String getNamespace() {
 		return namespace;
@@ -235,6 +238,13 @@ public class FileBaseNamedQueryInfo implements Cloneable, NamedQueryInfo {
 	}
 	public void setQueryConfig(QueryConfigData queryConfig) {
 		this.queryConfig = queryConfig;
+	}
+	
+	public DataBase getDataBase() {
+		return dataBase;
+	}
+	public void setDataBase(DataBase dataBase) {
+		this.dataBase = dataBase;
 	}
 	/***
 	 * fullName.fragment.attrName

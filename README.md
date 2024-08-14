@@ -23,6 +23,7 @@
 - [BaseEntityManager接口和QueryDSL](#BaseEntityManager接口和QueryDSL)
 - [CrudEntityManager接口](#crudentitymanager接口)
 - [DbmRepository动态sql查询接口](#DbmRepository动态sql查询接口)
+- [DbmRepository动态查询后缀函数支持](#DbmRepository动态查询后缀函数支持)
 - [sql片段支持](#sql片段支持)
 - [动态sql查询的语法和指令](#动态sql查询的语法和指令)
 - [用DbmRepository执行脚本](#用DbmRepository执行脚本)
@@ -38,11 +39,12 @@
 - [从其它地方加载DbmRepository接口的sql](#从其它地方加载DbmRepository接口的sql)
 - [直接传入要执行的sql作为参数](#直接传入要执行的sql作为参数)
 - [其它映射特性](#其它映射特性)
+- [分页查询](#分页查询)
 - [批量插入](#批量插入)
 - [充血模型支持](#充血模型支持)
 - [参数配置](#参数配置)
 - [代码生成器](#代码生成器)
-- [辅助工具：导出表结构为excel](#辅助工具：导出表结构为excel)
+- [辅助工具导出表结构为excell](#辅助工具导出表结构为excel)
 - [捐赠](#捐赠)
 
 
@@ -108,7 +110,7 @@ spring 4.0+
 <dependency>
     <groupId>org.onetwo4j</groupId>
     <artifactId>onetwo-dbm</artifactId>
-    <version>4.8.0-SNAPSHOT</version>
+    <version>4.9.0-SNAPSHOT</version>
 </dependency>
 
 ```
@@ -204,6 +206,17 @@ public class UserEntity implements Serializable {
 	    allocationSize=50
 	)
 	protected Long id;
+}
+```
+
+也可以使用5.0新增的@DbmTableIdGenerator注解简化配置：
+```Java
+@Entity
+@Table(name="t_user")
+public class UserEntity implements Serializable {
+
+    @DbmTableIdGenerator("seq_test_user")
+    Long id;
 }
 ```
 
@@ -818,6 +831,7 @@ public class UserAutoidServiceImpl {
 `
    注意：从4.7.3开始，dbm的 DbmRepository接口 支持Java8接口默认方法。
 `
+
 ### 通过@Query直接在代码里写sql
 虽然本人不喜欢不推荐在代码里写sql，但实际开发中经常遇到很多人都是喜欢简单粗暴，直接在代码里通过注解写sql，所以，新版（4.5.2-SNAPSHOT+）的dbm提供了@Query来支持在代码里写sql。
 
@@ -838,6 +852,52 @@ public interface UserDao {
 
 }
 ```
+
+## DbmRepository动态查询后缀函数支持
+
+### 无参数后缀函数
+DbmRepository的动态查询，命名参数支持后缀函数，以便于把一些参数值加工处理。
+比如使用like查询的时候，一般的查询片段如下：
+```sql
+where userName like :userName
+```
+若用户输入的userName参数是test，则此时是在前后添加模糊匹配符号的，实际参数应为：%test%.
+dbm提供了后缀函数支持来避免手工处理这种情况，所以在sql里，可以写成：
+```sql
+where userName like :userName?likeString
+```
+
+### 有参数后缀函数
+5.0版本后增加了参数支持
+目前Date类型的参数增加了两个带参数的后缀函数：minutes_ago, minutes_later.
+用于需要对时间参数类型处理，比如需要查询某个特定时间前后30分钟的数据时，可以这样写：
+```sql
+select 
+    d.*
+from 
+    data d
+where
+    1=1 
+[#if request.uploadTime??]
+    and d.upload_time between :request.uploadTime?$30_minutes_ago and :request.uploadTime?$30_minutes_later
+[/#if]
+
+```
+
+### 全局后缀函数
+- preLikeString
+在参数值前面加上'%'，如userName=test，则实际值为：%test
+
+- postLikeString
+在参数值后面加上'%'，如userName=test，则实际值为：test%
+
+### Date类型后缀函数(DateTypeFuncSet)
+- dateString
+按 yyyy-MM-dd 格式化Date类型参数
+- dateTimeString
+按 yyyy-MM-dd HH:mm:ss 格式化Date类型参数
+- yyyyMMdd
+按 yyyyMMdd 格式化Date类型参数
 
 ## sql片段支持
 有时候，两个查询方法的sql里，大部分是相同的（比如查询条件），只有小部分不同，如果写两份，就需要维护两份sql。这时候，你可以使用sql片段@fragment
@@ -894,7 +954,7 @@ findUserListLikeName的sql可以改写为：
  */
 select 
     usr.*
-${fragment['queryUser.fragment.subWhere']}
+${fragment['subWhere']}
 ```
 
 countUserLikeName改写为：
@@ -908,7 +968,7 @@ select
 ${fragment['queryUser.fragment.subWhere']}
 ```
 
-
+${fragment['subWhere']} 和 ${fragment['queryUser.fragment.subWhere']} 均可引用到名为subWhere的sql片段，前者表示在queryUser这个查询下查找，后者则可以跨不同的命名查询查找sql片段
 
 
 
@@ -931,8 +991,42 @@ sql模板使用的实际上是freemarker模板引擎，因此freemarker支持的
 [/#list]
 ```
 条件表达式除了通常的逻辑判断外，还有一些比较常用到的表达式：
-- 变量??,双问号，用于判断一个变量是否存在
-- 变量?has_content，用于判断变量是有内容，比如字符串的话，相等于判断是否为空。
+- 双问号，用于判断一个变量是否存在
+```Java
+    [#if request.userName??]
+        t.user_name = :request.userName 
+    [/#if]
+```
+- has_content，用于判断变量是否为null或者空白：
+```Java
+    [#if request.userName?has_content]
+        t.user_name = :request.userName?likeString
+    [/#if]
+```
+- trim?has_content，用于判断变量为null，并且非空白字符串：
+```Java
+    [#if request.userName?? && request.userName?trim?has_content]
+        t.user_name = :request.userName?likeString
+    [/#if]
+```
+或者使用5.0新增的方法：
+```Java
+    [#if isNotBlank(request.userNameList)]
+        t.user_name = :request.userName?likeString
+    [/#if]
+```
+- 判断list类型的变量是否你为空
+```Java
+    [#if request.userNameList?? && (request.userNameList?size > 0)]
+        t.user_name in ( :request.userNameList )
+    [/#if]
+```
+或者使用5.0新增的方法：
+```Java
+    [#if isNotEmpty(request.userNameList)]
+        t.user_name in ( :request.userNameList )
+    [/#if]
+```
 
 ### dbm扩展指令
 另外增加了一些特定的指令以帮助处理sql，包括：
@@ -1194,11 +1288,17 @@ DbmRepository 查询接口还可以通过注解支持绑定不同的数据源，
 public interface Datasource1Dao {
 }
 
-@DbmRepository(dataSource="dataSourceName2")
+@DbmRepository(dataSource="dataSourceName2", ignoreRegisterIfDataSourceNotFound=true)
 public interface Datasource2Dao {
 }
 ```
 
+- dataSource
+通过指定DataSource的Bean名称，让Dao使用所需数据源执行sql
+
+- ignoreRegisterIfDataSourceNotFound
+若指定了dataSource属性，却没有找到对应的dataSource Bean时，是否忽略注册此 DbmRepository Bean。
+此属性适用于某些特殊场景，比如某些共用的服务引用了此Dao，但在应用中并不会使用到此Dao查询数据，从而避免程序启动失败。
 
 
 ## DbmRepository接口对其它orm框架的兼容
@@ -1330,7 +1430,9 @@ public class EmployeeVO  {
 ```
 解释：   
 - @DbmResultMapping 注解表明，查询返回的结果需要复杂的嵌套映射
-- @DbmNestedResult 注解告诉dbm，返回的CompanyVO对象中，哪些属性是需要复杂的嵌套映射的。property用于指明具体的属性名称，columnPrefix用于指明，需要把返回的结果集中，哪些前缀的列都映射到property指定的属性里，默认会使用property。nestedType标识该属性的嵌套类型，有三个值，ASSOCIATION表示一对一的关联对象，COLLECTION表示一对多的集合对象，MAP也是一对多，但该属性的类型是个Map类型。id属性可选，配置了可一定程度上加快映射速度。
+- @DbmNestedResult 注解告诉dbm，返回的CompanyVO对象中，哪些属性是需要复杂的嵌套映射的。
+property用于指明具体的属性名称，columnPrefix用于指明，需要把返回的结果集中，哪些前缀的列都映射到property指定的属性里，默认会使用property。nestedType标识该属性的嵌套类型，有三个值，ASSOCIATION表示一对一的关联对象，COLLECTION表示一对多的集合对象，MAP也是一对多，但该属性的类型是个Map类型。
+id属性，用于指定嵌套对象的某个属性作为识别对象的唯一标识，配置了可一定程度上加快映射速度。
 
 ### 对应的sql
 ```sql
@@ -1362,6 +1464,18 @@ List<CompanyVO> companies = companyDao.findNestedCompanies();
 - 注意：若嵌套类型为NestedType.COLLECTION，而容器的元素为简单类型，则把@DbmNestedResult 注解的id属性设置为“value”即可。
 
 
+## 分页查询
+
+### DbmRepository分页查询接口
+DbmRepository查询接口支持自动分页功能；
+需要分页的方法必须遵守下面的约定：
+- 接口其中一个参数必须是 org.onetwo.common.utils.Page 类型 或 org.onetwo.common.utils.PageRequest 类型
+- （可选）返回为org.onetwo.common.utils.Page 类型
+若参数为Page类型时，因为Page带有List类型的result属性，所以查询的list会设置到page参数的result属性里；
+若参数为PageRequest类型时，则返回类型必须为Page 类型
+
+### 自定义分页查询
+参看 [提供自定义分页的能力](https://github.com/wayshall/dbm/issues/45)
 
 
 ## 自定义实现DbmRepository接口

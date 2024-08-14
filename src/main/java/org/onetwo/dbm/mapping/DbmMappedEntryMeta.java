@@ -40,6 +40,10 @@ public interface DbmMappedEntryMeta {
 
 	List<DbmMappedField> getIdentifyFields();
 	
+	/****
+	 * 是否id自增策略
+	 * @return
+	 */
 	default boolean hasIdentityStrategyField() {
 		return getIdentifyFields().stream().anyMatch(field -> field.isIdentityStrategy());
 	}

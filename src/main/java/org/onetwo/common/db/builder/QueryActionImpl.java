@@ -14,6 +14,8 @@ import org.onetwo.common.utils.Page;
 import org.onetwo.dbm.core.spi.DbmEntityManager;
 import org.onetwo.dbm.exception.DbmException;
 import org.onetwo.dbm.jdbc.DbmMapRowMapperResultSetExtractor;
+import org.onetwo.dbm.jdbc.SimpleMapRowMapperResultSetExtractor;
+import org.onetwo.dbm.jdbc.mapper.JdbcDaoRowMapperFactory.SingleColumnRowMapperAdapter;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowMapper;
 
@@ -21,7 +23,7 @@ import org.springframework.jdbc.core.RowMapper;
 public class QueryActionImpl<E> implements QueryAction<E> {
 
 	protected InnerBaseEntityManager baseEntityManager;
-	private SelectExtQuery extQuery;
+	private ExtQueryInner extQuery;
 	final private QueryBuilder<E> queryBuilder;
 	
 //	private final Class<?> entityClass;
@@ -42,17 +44,20 @@ public class QueryActionImpl<E> implements QueryAction<E> {
 //		extQuery.build();
 	}
 	
-	final protected SelectExtQuery createExtQuery() {
-		extQuery = getSQLSymbolManager().createSelectQuery(this.queryBuilder.getEntityClass(), this.queryBuilder.getAlias(), this.queryBuilder.getParams());
+	final protected SelectExtQuery createSelectQuery() {
+		SelectExtQuery extQuery = getSQLSymbolManager().createSelectQuery(this.queryBuilder.getEntityClass(), this.queryBuilder.getAlias(), this.queryBuilder.getParams());
 		return extQuery;
 	}
 	
-	public SelectExtQuery getExtQuery() {
+	public SelectExtQuery getSelectQuery() {
 //		throwIfHasNotBuild();
 		if (extQuery==null) {
-			this.createExtQuery();
+			this.extQuery = this.createSelectQuery();
 		}
-		return extQuery;
+		if (!SelectExtQuery.class.isInstance(extQuery)) {
+			throw new DbmException("It's not a SelectExtQuery: " + extQuery.getClass().getSimpleName());
+		}
+		return (SelectExtQuery) extQuery;
 	}
 
 	protected SQLSymbolManager getSQLSymbolManager() {
@@ -73,7 +78,7 @@ public class QueryActionImpl<E> implements QueryAction<E> {
 		// 这句必须在创建extQuery前调用
 		this.queryBuilder.limit(0, 1);
 		
-		List<E> list = baseEntityManager.select(getExtQuery());
+		List<E> list = baseEntityManager.select(getSelectQuery());
 		if (LangUtils.isEmpty(list)) {
 			return null;
 		}
@@ -86,7 +91,7 @@ public class QueryActionImpl<E> implements QueryAction<E> {
 		// 这句必须在创建extQuery前调用
 		this.queryBuilder.limit(0, 1);
 		// 创建后，设置选择id
-		this.getExtQuery().selectId();
+		this.getSelectQuery().selectId();
 		E one = one();
 		return one!=null;
 	}
@@ -97,29 +102,31 @@ public class QueryActionImpl<E> implements QueryAction<E> {
 	@Override
 	public E unique() {
 		checkOperation();
-		return (E)baseEntityManager.selectUnique(getExtQuery());
+		return (E)baseEntityManager.selectUnique(getSelectQuery());
 	}
 
 	@Override
 	public List<E> list() {
 		checkOperation();
-		return baseEntityManager.select(getExtQuery());
+		return baseEntityManager.select(getSelectQuery());
 	}
 
 	@Override
 	public <T> List<T> listAs(Class<T> toClass){
 		checkOperation();
 		if (LangUtils.isSimpleType(toClass)) {
-			throw new DbmException("target class can not be a simple type: " + toClass);
+//			throw new DbmException("target class can not be a simple type: " + toClass);
+			RowMapper<T> rowMapper = new SingleColumnRowMapperAdapter<>(toClass);
+			return listWith(rowMapper);
 		}
-		List<?> datas = baseEntityManager.select(getExtQuery());
+		List<?> datas = baseEntityManager.select(getSelectQuery());
 		return CopyUtils.copy(toClass, datas);
 	}
 
 	@Override
 	public Page<E> page(Page<E> page) {
 		checkOperation();
-		baseEntityManager.selectPage(page, getExtQuery());
+		baseEntityManager.selectPage(page, getSelectQuery());
 		return page;
 	}
 
@@ -138,27 +145,23 @@ public class QueryActionImpl<E> implements QueryAction<E> {
 	}
 	
 	public <T> T extractAs(ResultSetExtractor<T> rse) {
-		T res = this.getDbmEntityManager().getCurrentSession().find(convertAsDbmQueryValue(getExtQuery()), rse);
+		T res = this.getDbmEntityManager().getCurrentSession().find(convertAsDbmQueryValue(getSelectQuery()), rse);
 		return res;
 	}
 	
 	public <K, V> Map<K, V> asMap(DbmMapRowMapperResultSetExtractor<K, V> rse) {
-		Map<K, V> res = this.getDbmEntityManager().getCurrentSession().find(convertAsDbmQueryValue(getExtQuery()), rse);
+		Map<K, V> res = this.getDbmEntityManager().getCurrentSession().find(convertAsDbmQueryValue(getSelectQuery()), rse);
 		return res;
 	}
 	
-//	public <K, V> Map<K, V> asMap(){
-//		ResultSetExtractor<Map<K, V>> rse = new DbmMapRowMapperResultSetExtractor<K, V>() {
-//			public void putToMap(Map<K, V> results, ResultSet rs, int rowNum) {
-//				
-//			}
-//		};
-//		Map<K, V> res = this.getDbmEntityManager().getCurrentSession().find(convertAsDbmQueryValue(getExtQuery()), rse);
-//		return res;
-//	}
-	
+	@Override
+	public <K, V> Map<K, V> asMap(SimpleMapRowMapperResultSetExtractor<K, V> rse) {
+		Map<K, V> res = this.getDbmEntityManager().getCurrentSession().find(convertAsDbmQueryValue(getSelectQuery()), rse);
+		return res;
+	}
+
 	public <T> List<T> listWith(RowMapper<T> rowMapper) {
-		SelectExtQuery query = getExtQuery();
+		SelectExtQuery query = getSelectQuery();
 		DbmQueryValue dqv = convertAsDbmQueryValue(query);
 		List<T> res = this.getDbmEntityManager().getCurrentSession().findListWihtLimit(dqv, rowMapper, query.getFirstResult(), query.getMaxResults());
 		return res;
@@ -167,7 +170,7 @@ public class QueryActionImpl<E> implements QueryAction<E> {
 	@Override
 	public Number count() {
 		checkOperation();
-		return baseEntityManager.count(getExtQuery());
+		return baseEntityManager.count(getSelectQuery());
 	}
 
 	protected DbmEntityManager getDbmEntityManager(){

@@ -13,7 +13,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.onetwo.common.base.DbmBaseTest;
+import org.onetwo.common.base.DbmBaseTestWithouTransactional;
 import org.onetwo.common.dbm.model.entity.UserLongVersionEntity;
 import org.onetwo.common.dbm.model.hib.entity.UserEntity.UserGenders;
 import org.onetwo.common.dbm.model.service.UserLongVersionService;
@@ -21,10 +21,9 @@ import org.onetwo.common.utils.JodatimeUtils;
 import org.onetwo.common.utils.LangUtils;
 import org.onetwo.dbm.exception.EntityVersionException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.annotation.Rollback;
 
-@Rollback(false)
-public class DbmLongVersionTest extends DbmBaseTest {
+//@Rollback(false)
+public class DbmLongVersionTest extends DbmBaseTestWithouTransactional {
 
 	@Autowired
 	private UserLongVersionService userLongVersionService;

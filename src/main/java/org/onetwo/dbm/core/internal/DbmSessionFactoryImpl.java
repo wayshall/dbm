@@ -12,6 +12,7 @@ import org.onetwo.common.db.generator.dialet.DatabaseMetaDialet;
 import org.onetwo.common.db.generator.dialet.DelegateDatabaseMetaDialet;
 import org.onetwo.common.db.sql.SequenceNameManager;
 import org.onetwo.common.db.sqlext.SQLSymbolManager;
+import org.onetwo.common.ds.TransactionManagerAwareDataSource;
 import org.onetwo.common.log.JFishLoggerFactory;
 import org.onetwo.common.spring.Springs;
 import org.onetwo.common.utils.Assert;
@@ -27,6 +28,7 @@ import org.onetwo.dbm.exception.DbmException;
 import org.onetwo.dbm.jdbc.mapper.RowMapperFactory;
 import org.onetwo.dbm.mapping.DbmConfig;
 import org.onetwo.dbm.mapping.MappedEntryManager;
+import org.onetwo.dbm.utils.DbmErrors;
 import org.onetwo.dbm.utils.DbmTransactionSupports;
 import org.onetwo.dbm.utils.DbmUtils;
 import org.slf4j.Logger;
@@ -77,8 +79,27 @@ public class DbmSessionFactoryImpl implements InitializingBean, DbmSessionFactor
 	public DbmSessionFactoryImpl(ApplicationContext applicationContext, PlatformTransactionManager transactionManager,
 			DataSource dataSource) {
 		super();
-		this.transactionManager = transactionManager;
-		this.dataSource = dataSource;
+		DataSource ds = dataSource;
+		PlatformTransactionManager tm = transactionManager;
+		if (dataSource instanceof TransactionManagerAwareDataSource) {
+			TransactionManagerAwareDataSource tmds = (TransactionManagerAwareDataSource) dataSource;
+			ds = tmds.getTargetDataSource();
+			if (transactionManager==null) {
+				// 如果transactionManager为null，则直接从数据源对象里获取
+				tm = tmds.getTransactionManager();
+			}
+		}
+		
+		if (this.transactionManager instanceof DataSourceTransactionManager) {
+			DataSourceTransactionManager dsm = (DataSourceTransactionManager) this.transactionManager;
+			if (dsm.getDataSource()!=ds) {
+				// 配置的数据源和事务管理器不匹配，即事务管理器管理的数据源和注入的数据源不同
+				throw new DbmException(DbmErrors.ERR_DS_NOT_MATCHED_TM);
+			}
+		}
+		
+		this.dataSource = ds;
+		this.transactionManager = tm;
 	}
 
 	public DbmInterceptorManager getInterceptorManager() {
@@ -184,11 +205,12 @@ public class DbmSessionFactoryImpl implements InitializingBean, DbmSessionFactor
 			return sessionOpt.get();
 		}
 		if(!TransactionSynchronizationManager.isSynchronizationActive()){
-			if(this.dataBaseConfig.isAutoProxySessionTransaction()){
-				TransactionSynchronizationManager.initSynchronization();
-			}else{
-				throw new DbmException("no transaction synchronization in current thread, you should add @Transactional to transaction method!");
-			}
+//			if(this.dataBaseConfig.isAutoProxySessionTransaction()){
+//				TransactionSynchronizationManager.initSynchronization();
+//			}else{
+//				throw new DbmException("no transaction synchronization in current thread, you should add @Transactional to transaction method!");
+//			}
+			TransactionSynchronizationManager.initSynchronization();
 		}
 		
 		if(TransactionSynchronizationManager.isActualTransactionActive()){//transaction exists in current thread

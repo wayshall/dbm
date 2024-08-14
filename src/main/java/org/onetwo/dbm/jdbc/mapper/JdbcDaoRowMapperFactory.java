@@ -3,8 +3,10 @@ package org.onetwo.dbm.jdbc.mapper;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 import org.onetwo.common.db.dquery.NamedQueryInvokeContext;
 import org.onetwo.common.utils.LangUtils;
@@ -47,6 +49,8 @@ public class JdbcDaoRowMapperFactory implements RowMapperFactory {
 		}else if(isSingleColumnRowType(type)){
 			//唯一，而且返回类型是简单类型，则返回单列的RowMapper
 			rowMapper = new SingleColumnRowMapperAdapter<>(type);
+		}else if(type==LinkedHashMap.class){
+			rowMapper = new CustomMapRowMapper(colCount -> new LinkedHashMap<>(colCount));
 		}else if(LangUtils.isMapClass(type)){
 //			rowMapper = new ColumnMapRowMapper();
 			rowMapper = CAMEL_NAME_ROW_MAPPER;
@@ -73,14 +77,26 @@ public class JdbcDaoRowMapperFactory implements RowMapperFactory {
 		return new BeanPropertyRowMapperAdapter<>(entityClass);
 	}
 	
-	static class CamelNameRowMapper extends ColumnMapRowMapper implements DataRowMapper<Map<String, Object>>{
+	public static class CamelNameRowMapper extends ColumnMapRowMapper implements DataRowMapper<Map<String, Object>>{
 
 		protected Map<String, Object> createColumnMap(int columnCount) {
 			return new CamelMap<Object>(columnCount);
 		}
 	}
 	
-	static class SingleColumnRowMapperAdapter<T> extends SingleColumnRowMapper<T> implements DataRowMapper<T>{
+	public static class CustomMapRowMapper extends ColumnMapRowMapper implements DataRowMapper<Map<String, Object>>{
+		private Function<Integer, Map<String, Object>> mapSupplier;
+		
+		public CustomMapRowMapper(Function<Integer, Map<String, Object>> mapSupplier) {
+			this.mapSupplier = mapSupplier;
+		}
+
+		protected Map<String, Object> createColumnMap(int columnCount) {
+			return mapSupplier.apply(columnCount);
+		}
+	}
+	
+	public static class SingleColumnRowMapperAdapter<T> extends SingleColumnRowMapper<T> implements DataRowMapper<T>{
 
 		public SingleColumnRowMapperAdapter() {
 		}
@@ -90,7 +106,7 @@ public class JdbcDaoRowMapperFactory implements RowMapperFactory {
 		}
 	}
 
-	static class BeanPropertyRowMapperAdapter<T> extends BeanPropertyRowMapper<T> implements DataRowMapper<T>{
+	public static class BeanPropertyRowMapperAdapter<T> extends BeanPropertyRowMapper<T> implements DataRowMapper<T>{
 
 		public BeanPropertyRowMapperAdapter() {
 		}

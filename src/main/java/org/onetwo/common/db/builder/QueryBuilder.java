@@ -2,7 +2,6 @@ package org.onetwo.common.db.builder;
 
 import java.util.Map;
 
-import org.onetwo.common.db.sqlext.ExtQuery.K;
 import org.onetwo.dbm.dialet.DBDialect.LockInfo;
 
 /***
@@ -37,12 +36,13 @@ public interface QueryBuilder<E> {
 
 	public QueryBuilder<E> select(String... fields);
 	public QueryBuilder<E> unselect(String...fields);
+	public QueryBuilder<E> count(String field);
 
 	/***
 	 * 
 	 * @author weishao zeng
 	 * @param first  from 0
-	 * @param size
+	 * @param size 若size<=0，则不设置限制参数
 	 * @return
 	 */
 	public QueryBuilder<E> limit(int first, int size);
@@ -67,9 +67,11 @@ public interface QueryBuilder<E> {
 	public QueryAction<E> toQuery();
 	public QueryAction<E> toSelect();
 	
-	public int delete();
+//	public int delete();
 	
 	public Map<Object, Object> getParams();
+
+	ExecuteAction toExecute();
 	
 //	public ParamValues getParamValues();
 //	public String getSql();

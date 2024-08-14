@@ -205,8 +205,12 @@ public class DbGenerator {
 			return tableContext;
 		}
 		
-		public TableMetaConfig meta(){
+		public TableMetaConfig metaConfig(){
 			return new TableMetaConfig(tableMeta, this);
+		}
+		
+		public TableMeta tableMeta(){
+			return tableMeta;
 		}
 		
 		public DbTableGenerator addGeneratedConfig(String templatePath, String outfilePath){
@@ -298,7 +302,7 @@ public class DbGenerator {
 		} */
 		
 		public DbTableGenerator serviceImplTemplate(String templatePath){
-			return javaClassTemplate("service.impl", templatePath);
+			return javaClassTemplate("service", templatePath);
 		}
 		
 		public DbTableGenerator javaClassTemplate(String javaClassPackage, String templatePath){

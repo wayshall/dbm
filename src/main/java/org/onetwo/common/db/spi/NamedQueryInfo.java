@@ -37,6 +37,14 @@ public interface NamedQueryInfo {
 	 * @return
 	 */
 	String getFragmentTemplateName(String attr);
+	
+	default boolean isUseAutoLimitSqlIfPagination() {
+		QueryConfigData config = getQueryConfig();
+		if (config==null) {
+			return true;
+		}
+		return config.isUseAutoLimitSqlIfPagination();
+	}
 	/*public String getCountSql2() {
 		if(StringUtils.isBlank(countSql)){
 			this.countSql = ExtQueryUtils.buildCountSql(this.getSql(), "");

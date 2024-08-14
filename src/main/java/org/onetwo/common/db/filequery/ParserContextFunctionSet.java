@@ -37,7 +37,7 @@ public class ParserContextFunctionSet implements QueryContextVariable {
 	}
 	
 	public String check(String sqlValue){
-		return SqlUtils.check(sqlValue);
+		return SqlUtils.checkSqlValue(sqlValue);
 	}
 	
 	/****

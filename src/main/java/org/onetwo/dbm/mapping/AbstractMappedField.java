@@ -176,6 +176,10 @@ abstract public class AbstractMappedField implements DbmMappedField{
 		return enumType!=null;
 	}
 	
+	public boolean isEnumeratedOrdinal() {
+		return enumType==DbmEnumType.ORDINAL;
+	}
+	
 	/****
 	 * 和 {@link #getValue(Object)}对应
 	 * 把value（一般从数据库获取）设置为实体的实际值（经过转换器转换的值，如转为java枚举量）
@@ -258,14 +262,14 @@ abstract public class AbstractMappedField implements DbmMappedField{
 	public Object fireDbmEntityFieldEvents(final Object fieldValue, DbmEventAction eventAction){
 //		boolean doListener = false;
 		Object newFieldValue = fieldValue;
-		if(DbmEventAction.insert==eventAction){
+		if(eventAction.isInserting()){
 			if(!fieldListeners.isEmpty()){
 				for(DbmEntityFieldListener fl : fieldListeners){
 					newFieldValue = fl.beforeFieldInsert(this, newFieldValue);
 //					doListener = true;
 				}
 			}
-		}else if(DbmEventAction.update==eventAction){
+		} else if(eventAction.isUpdating()){
 			if(!fieldListeners.isEmpty()){
 				for(DbmEntityFieldListener fl : fieldListeners){
 					newFieldValue = fl.beforeFieldUpdate(this, newFieldValue);
@@ -348,6 +352,9 @@ abstract public class AbstractMappedField implements DbmMappedField{
 		return this.strategyType==StrategyType.SEQ;
 	}
 
+	/***
+	 * 是否id自增策略
+	 */
 	@Override
 	public boolean isIdentityStrategy() {
 		return this.strategyType==StrategyType.IDENTITY;

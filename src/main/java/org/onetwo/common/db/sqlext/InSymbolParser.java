@@ -14,11 +14,10 @@ import org.onetwo.common.utils.LangUtils;
  */
 public class InSymbolParser extends CommonSQLSymbolParser implements HqlSymbolParser {
 	
-	public InSymbolParser(SQLSymbolManager sqlSymbolManager, String symbol){
+	public InSymbolParser(SQLSymbolManager sqlSymbolManager, QueryDSLOps symbol){
 		super(sqlSymbolManager, symbol);
 	}
 	
-	@SuppressWarnings("rawtypes")
 	public String parse(String symbol, QueryField context){
 
 		String field = context.getActualFieldName();
@@ -34,7 +33,7 @@ public class InSymbolParser extends CommonSQLSymbolParser implements HqlSymbolPa
 			return null;
 		}*/
 
-		List paramlist = convertValues(field, value, ifNull);
+		List<?> paramlist = convertValues(field, value, ifNull);
 		if (LangUtils.isEmpty(paramlist)) {
 			return null;
 		}

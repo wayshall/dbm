@@ -60,5 +60,11 @@ public interface QueryWrapper {
 	public void setRowMapper(RowMapper<?> rowMapper);
 	
 	public <T> T unwarp(Class<T> clazz);
+	
+
+	boolean isUseAutoLimitSqlIfPagination();
+
+	void setUseAutoLimitSqlIfPagination(boolean useAutoLimitSqlIfPagination);
+	
 
 }

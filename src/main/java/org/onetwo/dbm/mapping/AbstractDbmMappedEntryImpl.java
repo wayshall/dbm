@@ -1,5 +1,6 @@
 package org.onetwo.dbm.mapping;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -15,6 +16,7 @@ import javax.persistence.IdClass;
 import org.apache.commons.lang3.StringUtils;
 import org.onetwo.common.annotation.AnnotationInfo;
 import org.onetwo.common.db.TimeRecordableEntity;
+import org.onetwo.common.db.sqlext.QueryDSLOps;
 import org.onetwo.common.log.JFishLoggerFactory;
 import org.onetwo.common.reflect.ReflectUtils;
 import org.onetwo.common.spring.SpringUtils;
@@ -264,15 +266,15 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 	 * 如果是复合主键，只要有一个主键为null，即返回null
 	 */
 	@Override
-	public Object getId(Object entity){
+	public Serializable getId(Object entity){
 //		if(getIdentifyField()==null)
 //			return null;
 //		return getIdentifyField().getValue(entity);
 		if (!isCompositePK()) {
-			Object idValue = this.getIdentifyFields().get(0).getValue(entity);
+			Serializable idValue = (Serializable)getIdentifyFields().get(0).getValue(entity);
 			return idValue;
 		}
-		Object idValue = ReflectUtils.newInstance(idClass);
+		Serializable idValue = (Serializable)ReflectUtils.newInstance(idClass);
 		ConfigurablePropertyAccessor accesor = SpringUtils.newPropertyAccessor(idValue, true);
 		for (DbmMappedField field : this.getIdentifyFields()) {
 			Object fieldValue = field.getValue(entity);
@@ -283,6 +285,27 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 			accesor.setPropertyValue(field.getName(), fieldValue);
 		}
 		return idValue;
+	}
+	
+	@Override
+	public Object[] getIds(Object entity){
+//		if(getIdentifyField()==null)
+//			return null;
+//		return getIdentifyField().getValue(entity);
+		if (!isCompositePK()) {
+			Object idValue = this.getIdentifyFields().get(0).getValue(entity);
+			return new Object[] {idValue};
+		}
+		
+		List<DbmMappedField> idFields = this.getIdentifyFields();
+		Object[] idValues = new Object[idFields.size()];
+		int index = 0;
+		for (DbmMappedField field : idFields) {
+			Object fieldValue = field.getValue(entity);
+			idValues[index] = fieldValue;
+			index++;
+		}
+		return idValues;
 	}
 	
 	@Override
@@ -528,13 +551,16 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 		}
 	}
 
-	protected EntrySQLBuilderImpl getStaticInsertOrUpdateSqlBuilder() {
+	protected EntrySQLBuilder getStaticInsertOrUpdateSqlBuilder() {
 		throw new UnsupportedOperationException();
 	}
-	abstract protected EntrySQLBuilderImpl getStaticInsertSqlBuilder();
-	abstract protected EntrySQLBuilderImpl getStaticUpdateSqlBuilder();
-	abstract protected EntrySQLBuilderImpl getStaticDeleteSqlBuilder();
-	abstract protected EntrySQLBuilderImpl getStaticFetchSqlBuilder();
+	protected EntrySQLBuilder getStaticInsertOrIgnoreSqlBuilder() {
+		throw new UnsupportedOperationException();
+	}
+	abstract protected EntrySQLBuilder getStaticInsertSqlBuilder();
+	abstract protected EntrySQLBuilder getStaticUpdateSqlBuilder();
+	abstract protected EntrySQLBuilder getStaticDeleteSqlBuilder();
+	abstract public EntrySQLBuilder getStaticFetchSqlBuilder();
 	/*protected EntrySQLBuilderImpl getStaticSelectLockSqlBuilder(){
 		throw new UnsupportedOperationException("getStaticSelectLockSqlBuilder");
 	}*/
@@ -571,7 +597,8 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 		}
 		EntrySQLBuilder sqlb = getStaticSelectVersionSqlBuilder();
 		sqlb.build();
-		JdbcStatementContext<Object[]> kv = SimpleJdbcStatementContext.create(sqlb, new Object[]{getId(object), getVersionField().getValue(object)});
+//		JdbcStatementContext<Object[]> kv = SimpleJdbcStatementContext.create(sqlb, new Object[]{getId(object), getVersionField().getValue(object)});
+		JdbcStatementContext<Object[]> kv = SimpleJdbcStatementContext.create(sqlb, new Object[]{getId(object)});
 		return kv;
 	}
 	
@@ -616,8 +643,8 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 		}
 		// 复合主键存在多个id的情况
 		EntrySQLBuilder sqlBuilder = dsb.getSqlBuilder();
-		for (DbmMappedField idField : sqlBuilder.getWhereCauseFields()) {
-			Object idValue = idField.getValue(idObject);
+		for (DbmMappedFieldValue idField : sqlBuilder.getWhereCauseFields()) {
+			Object idValue = idField.getField().getValue(idObject);
 			dsb.addCauseValue(idValue);
 		}
 	}
@@ -640,7 +667,7 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 	@Override
 	public JdbcStatementContext<List<Object[]>> makeInsert(Object entity){
 		this.throwIfQueryableOnly();
-		EntrySQLBuilderImpl insertSqlBuilder = getStaticInsertSqlBuilder();
+		EntrySQLBuilder insertSqlBuilder = getStaticInsertSqlBuilder();
 		JdbcStatementContextBuilder dsb = JdbcStatementContextBuilder.create(DbmEventAction.insert, this, insertSqlBuilder);
 		if(LangUtils.isMultiple(entity)){
 			List<Object> list = LangUtils.asList(entity);
@@ -666,6 +693,22 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 	}
 
 	/****
+	 * 利用mysql特有语法插入或忽略：insert ignore into
+	 * @author weishao zeng
+	 * @param entity
+	 * @return
+	 */
+	@Override
+	public JdbcStatementContext<List<Object[]>> makeMysqlInsertOrIgnore(Object entity) {
+		this.throwIfQueryableOnly();
+		EntrySQLBuilder insertOrUpdateSqlBuilder = getStaticInsertOrIgnoreSqlBuilder();
+		JdbcStatementContextBuilder dsb = JdbcStatementContextBuilder.create(DbmEventAction.batchInsertOrIgnore, this, insertOrUpdateSqlBuilder);
+		makeJdbcStatementContext(dsb, entity);
+		dsb.build();
+		return dsb;
+	}
+	
+	/****
 	 * 利用mysql特有语法插入或更新：ON DUPLICATE KEY UPDATE
 	 * @author weishao zeng
 	 * @param entity
@@ -674,8 +717,14 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 	@Override
 	public JdbcStatementContext<List<Object[]>> makeMysqlInsertOrUpdate(Object entity) {
 		this.throwIfQueryableOnly();
-		EntrySQLBuilderImpl insertOrUpdateSqlBuilder = getStaticInsertOrUpdateSqlBuilder();
-		JdbcStatementContextBuilder dsb = JdbcStatementContextBuilder.create(DbmEventAction.insert, this, insertOrUpdateSqlBuilder);
+		EntrySQLBuilder insertOrUpdateSqlBuilder = getStaticInsertOrUpdateSqlBuilder();
+		JdbcStatementContextBuilder dsb = JdbcStatementContextBuilder.create(DbmEventAction.batchInsertOrUpdate, this, insertOrUpdateSqlBuilder);
+		makeJdbcStatementContext(dsb, entity);
+		dsb.build();
+		return dsb;
+	}
+
+	protected JdbcStatementContext<List<Object[]>> makeJdbcStatementContext(JdbcStatementContextBuilder dsb, Object entity) {
 		if(LangUtils.isMultiple(entity)){
 			List<Object> list = LangUtils.asList(entity);
 			if(LangUtils.isEmpty(list)) {
@@ -694,9 +743,6 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 //			dsb.setColumnValuesFromEntity(entity);
 			dsb.processColumnValues(entity);
 		}
-		dsb.build();
-//		KVEntry<String, List<Object[]>> kv = new KVEntry<String, List<Object[]>>(dsb.getSql(), dsb.getValues());
-//		JdbcStatementContext<List<Object[]>> context = SqlBuilderJdbcStatementContext.create(dsb.getSql(), dsb); 
 		return dsb;
 	}
 	
@@ -759,7 +805,8 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 		} else {
 			// 复合主键存在多个id的情况
 			EntrySQLBuilder sqlBuilder = dsb.getSqlBuilder();
-			for (DbmMappedField idField : sqlBuilder.getWhereCauseFields()) {
+			for (DbmMappedFieldValue fv : sqlBuilder.getWhereCauseFields()) {
+				DbmMappedField idField = fv.getField();
 				if (idField.isIdentify()) {
 					Object idValue = idField.getValue(entityObject);
 					dsb.addCauseValue(idValue);
@@ -854,9 +901,13 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 				Assert.notNull(val, "id can not be null : " + entity);
 				sqlBuilder.appendWhere(mfield, val);
 			} else if(mfield.isVersionControll()){
-				Assert.notNull(val, "version field["+mfield.getName()+"] can not be null : " + entity);
-				sqlBuilder.appendWhere(mfield, val);
-				val = mfield.getVersionableType().getVersionValule(val);
+//				Assert.notNull(val, "version field["+mfield.getName()+"] can not be null : " + entity);
+				if (val==null) {
+					sqlBuilder.appendWhere(mfield, QueryDSLOps.IS_NULL, null);
+				} else {
+					sqlBuilder.appendWhere(mfield, val);
+//					val = mfield.getVersionableType().getVersionValule(val);
+				}
 			}
 		}
 		return sqlBuilder;
@@ -874,7 +925,6 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 			Object newFieldValue = mfield.fireDbmEntityFieldEvents(val, DbmEventAction.update);
 			if(newFieldValue!=val){
 				val = newFieldValue;
-				mfield.setValue(entity, val);
 			}
 			/*if(mfield.fireDbmEntityFieldEvents(val, DbmEventAction.update)!=val){
 				mfield.setValue(entity, val);
@@ -883,8 +933,20 @@ abstract public class AbstractDbmMappedEntryImpl implements DbmMappedEntry {
 				// 获取新的版本值
 				val = mfield.getVersionableType().getVersionValule(val);
 			}
-			if(val!=null)
-				sqlBuilder.append(mfield, val);
+			// 忽略null值和空字符串
+			if (val==null) {
+				continue;
+			}
+			// 映射的类型为String时
+			if (String.class.isAssignableFrom(mfield.getColumnType())) {
+				String str = val.toString();
+				// 忽略空字符串
+				if (StringUtils.isBlank(str)) {
+					continue;
+				}
+			}
+			sqlBuilder.append(mfield, val);
+			mfield.setValue(entity, val);
 			// where字段在processIBaseEntity之前另外处理，因为如果使用了类似updateAt的字段做版本，processIBaseEntity方法会修改updateAt字段的值
 			/* 
 			 * if(mfield.isIdentify()){

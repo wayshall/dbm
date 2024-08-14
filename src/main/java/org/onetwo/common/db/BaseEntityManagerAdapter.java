@@ -9,6 +9,7 @@ import org.onetwo.common.db.builder.QueryBuilder;
 import org.onetwo.common.db.spi.QueryWrapper;
 import org.onetwo.common.db.spi.SqlParamterPostfixFunctionRegistry;
 import org.onetwo.common.db.sql.SequenceNameManager;
+import org.onetwo.common.db.sqlext.DeleteExtQuery;
 import org.onetwo.common.db.sqlext.ExtQuery.K;
 import org.onetwo.common.db.sqlext.SelectExtQuery;
 import org.onetwo.common.exception.BaseException;
@@ -18,6 +19,8 @@ import org.onetwo.common.utils.CUtils;
 import org.onetwo.common.utils.LangUtils;
 import org.onetwo.common.utils.Page;
 import org.slf4j.Logger;
+
+import com.google.common.collect.Lists;
 
 @SuppressWarnings("unchecked")
 public abstract class BaseEntityManagerAdapter implements InnerBaseEntityManager {
@@ -101,6 +104,13 @@ public abstract class BaseEntityManagerAdapter implements InnerBaseEntityManager
 		return createQuery(extQuery).getResultList();
 	}
 
+	@Override
+	public int remove(DeleteExtQuery deleteQuery) {
+		deleteQuery.build();
+		QueryWrapper q = this.createQuery(deleteQuery.getSql(), deleteQuery.getParamsValue().asMap());
+		return q.executeUpdate();
+	}
+
 //	@Override
 //	public <T> T selectOne(SelectExtQuery extQuery) {
 //		// 限制返回一条
@@ -157,6 +167,11 @@ public abstract class BaseEntityManagerAdapter implements InnerBaseEntityManager
 			if(page.getTotalCount()<1){
 				return ;
 			}
+		}
+		if (page.getPageSize()<=0) {
+			// 若设置了页数为0，则直接返回
+			page.setResult(Lists.newArrayList());
+			return ;
 		}
 		List<T> datalist = createQuery(extQuery).setPageParameter(page).getResultList();
 		if(!page.isAutoCount()){

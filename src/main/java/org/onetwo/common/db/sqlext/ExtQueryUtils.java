@@ -9,6 +9,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.onetwo.common.db.DruidUtils;
 import org.onetwo.common.db.RawSqlWrapper;
@@ -17,6 +19,7 @@ import org.onetwo.common.db.builder.QueryField;
 import org.onetwo.common.db.builder.QueryFieldImpl;
 import org.onetwo.common.db.builder.SqlFuncFieldImpl;
 import org.onetwo.common.db.sqlext.ExtQuery.K.IfNull;
+import org.onetwo.common.log.JFishLoggerFactory;
 import org.onetwo.common.reflect.ReflectUtils;
 import org.onetwo.common.utils.ArrayUtils;
 import org.onetwo.common.utils.Assert;
@@ -24,6 +27,7 @@ import org.onetwo.common.utils.CUtils;
 import org.onetwo.common.utils.LangUtils;
 import org.onetwo.common.utils.StringUtils;
 import org.onetwo.common.utils.list.JFishList;
+import org.onetwo.dbm.exception.DbmException;
 
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public abstract class ExtQueryUtils {
@@ -65,12 +69,44 @@ public abstract class ExtQueryUtils {
 		
 	}
 	
-	public static String[] appendOperationToFields(String[] fields, String op){
+	public static String[] appendOperationToFields(String[] fields, QueryDSLOps... ops){
+		List<QueryDSLOps> oplist = CUtils.trimAsList(ops);
+		List<String> opList = oplist.stream().map(op -> {
+			try {
+				return op.getActualOperator();
+			} catch (Exception e) {
+				throw new DbmException("error operation: " + op);
+			}
+		}).collect(Collectors.toList());
+		return appendOperationToFields(fields, opList.toArray(new String[0]));
+	}
+	
+	public static String[] appendOperationToFields(String[] fields, String... ops){
 		Assert.notEmpty(fields);
 		String[] newFileds = null;
+		int index = 0;
 		for(String field : fields){
+			String op;
+			if (LangUtils.isEmpty(ops)) {
+				op = QueryDSLOps.EQ.getActualOperator();
+			} else if (ops.length==1) {
+				op = ops[0];
+			} else {
+				op = ops[index];
+			}
 			field = field + QueryField.SPLIT_SYMBOL + op;
 			newFileds = (String[])ArrayUtils.add(newFileds, field);
+			index++;
+		}
+		return newFileds;
+	}
+
+	public static String[] appendOperationToFields(final String field, QueryDSLOps... ops){
+		Assert.notEmpty(ops);
+		String[] newFileds = null;
+		for(QueryDSLOps op : ops){
+			String fieldWithOp = field + QueryField.SPLIT_SYMBOL + op.getActualOperator();
+			newFileds = (String[])ArrayUtils.add(newFileds, fieldWithOp);
 		}
 		return newFileds;
 	}
@@ -98,14 +134,14 @@ public abstract class ExtQueryUtils {
 				/*valueList = new ArrayList();
 				valueList.add(values);*/
 				if(LangUtils.isMultiple(values)){
-					valueList = CUtils.tolist(values, false);
+					valueList = CUtils.tolist(values, trimNull);
 				}else{
 					valueList = new ArrayList();
 					valueList.add(values);
 				}
 			}
 		}else{
-			valueList = LangUtils.asList(values, trimNull);
+			valueList = CUtils.tolist(values, trimNull);
 		}
 		return valueList;
 	}
@@ -151,7 +187,11 @@ public abstract class ExtQueryUtils {
 	
 	public static String buildCountSql(String sql, String countValue){
 		if(SqlUtils.isDruidPresent()){
-			return DruidUtils.toCountSql(sql);
+			try {
+				return DruidUtils.toCountSql(sql);
+			} catch (Exception e) {
+				JFishLoggerFactory.getCommonLogger().error("druid parse sql error: " + e.getMessage());
+			}
 		}
 
 		//不能全部转为小写，因为会改变 命名参数，导致设置jdbc参数值时取不到对应的值而出错:No value supplied for the SQL parameter
@@ -207,7 +247,7 @@ public abstract class ExtQueryUtils {
 		List<?> keylist = JFishList.newList().flatAddObject(params.keySet());
 		Set<String> fields = LangUtils.newHashSet();
 		for(Object key : keylist){
-			QueryField qf = QueryFieldImpl.create(key);
+			QueryField qf = QueryFieldImpl.create(key, null);
 			fields.add(qf.getFieldName());
 		}
 		return fields;

@@ -10,6 +10,8 @@ import org.onetwo.common.utils.Assert;
 import org.onetwo.common.utils.Page;
 import org.springframework.jdbc.core.RowMapper;
 
+import com.google.common.collect.Lists;
+
 
 public class DbmNamedFileQueryFactory extends AbstractFileNamedQueryFactory {
 
@@ -33,8 +35,9 @@ public class DbmNamedFileQueryFactory extends AbstractFileNamedQueryFactory {
 		Assert.notNull(invokeContext);
 		QueryWrapper jq = newQueryWrapperInstance(count, invokeContext);
 		jq.setQueryConfig(invokeContext.getParsedParams());
-//		jq.setRowMapper(rowMapper);
-		return jq.getRawQuery(QueryWrapper.class);
+//		jq.setRowMapper(rowMapper); DbmFileQueryWrapperImpl
+//		return jq.getRawQuery(QueryWrapper.class);
+		return jq;
 	}
 	
 	protected QueryWrapper newQueryWrapperInstance(boolean count, NamedQueryInvokeContext invokeContext) {
@@ -63,6 +66,13 @@ public class DbmNamedFileQueryFactory extends AbstractFileNamedQueryFactory {
 			total = (total==null?0:total);
 			page.setTotalCount(total);
 			if(total>0){
+				if (page.getPageSize()<=0) {
+					// 若设置了页数为0，则直接返回
+					page.setResult(Lists.newArrayList());
+					return page;
+				}
+				
+				// DbmQueryWrapperImpl
 				jq = this.createQuery(invokeContext);
 				/*jq.setFirstResult(page.getFirst()-1);
 				jq.setMaxResults(page.getPageSize());*/
@@ -71,6 +81,13 @@ public class DbmNamedFileQueryFactory extends AbstractFileNamedQueryFactory {
 				page.setResult(datalist);
 			}
 		}else{
+			if (page.getPageSize()<=0) {
+				// 若设置了页数为0，则直接返回
+				page.setResult(Lists.newArrayList());
+				return page;
+			}
+			
+			// QueryWrapper -> DbmFileQueryWrapperImpl
 			QueryWrapper jq = this.createQuery(invokeContext);
 			jq.setPageParameter(page);
 			List<T> datalist = jq.getResultList();
@@ -88,6 +105,12 @@ public class DbmNamedFileQueryFactory extends AbstractFileNamedQueryFactory {
 			Long total = jq.getSingleResult();
 			page.setTotalCount(total);
 			if(total!=null && total>0){
+				if (page.getPageSize()<=0) {
+					// 若设置了页数为0，则直接返回
+					page.setResult(Lists.newArrayList());
+					return page;
+				}
+				
 				jq = this.createQuery(invokeContext);
 				/*jq.setFirstResult(page.getFirst()-1);
 				jq.setMaxResults(page.getPageSize());*/
@@ -97,6 +120,12 @@ public class DbmNamedFileQueryFactory extends AbstractFileNamedQueryFactory {
 				page.setResult(datalist);
 			}
 		}else{
+			if (page.getPageSize()<=0) {
+				// 若设置了页数为0，则直接返回
+				page.setResult(Lists.newArrayList());
+				return page;
+			}
+			
 			QueryWrapper jq = this.createQuery(invokeContext);
 			jq.setPageParameter(page);
 			jq.setRowMapper(rowMapper);

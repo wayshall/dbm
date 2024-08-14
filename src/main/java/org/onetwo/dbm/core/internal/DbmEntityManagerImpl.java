@@ -68,6 +68,10 @@ public class DbmEntityManagerImpl extends BaseEntityManagerAdapter implements Qu
 		this.sessionFactory = sessionFactory;
 	}
 
+	public void setNamedQueryInfoParsers(List<NamedQueryInfoParser> namedQueryInfoParsers) {
+		this.namedQueryInfoParsers = namedQueryInfoParsers;
+	}
+
 	@Override
 	public DataSource getDataSource() {
 		return this.sessionFactory.getDataSource();
@@ -201,9 +205,16 @@ public class DbmEntityManagerImpl extends BaseEntityManagerAdapter implements Qu
 //		return updateCount==1?entity:null;
 		
 		T entity = load(entityClass, id);
-		int updateCount = getCurrentSession().delete(entity);
+//		int updateCount = getCurrentSession().delete(entity);
+		int updateCount = 0;
+		if (entity instanceof ILogicDeleteEntity) {
+			((ILogicDeleteEntity)entity).deleted();
+			updateCount = getCurrentSession().update(entity);
+		} else {
+			updateCount = getCurrentSession().delete(entity);
+		}
 		if (updateCount!=1) {
-			throw new DbmException("remove entity error, id: " + id);
+			throw new DbmException("remove entity error, id: " + id + ", entity: " + entityClass);
 		}
 		return entity;
 	}

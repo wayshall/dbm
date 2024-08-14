@@ -7,22 +7,38 @@ package org.onetwo.dbm.event.spi;
  */
 public enum DbmEventAction {
 	//for dbm session event action
-	insertOrUpdate,
-	insert,
-	update,
-	delete,
-	find,
-	lock,
+	insertOrUpdate(true, true),
+	insert(true, false),
+	update(false, true),
+	delete(false, false),
+	find(false, false),
+	lock(false, false),
 	
-	extQuery,
+	extQuery(false, false),
 	
-	batchInsert,
-	batchUpdate,
-	batchInsertOrUpdate
+	batchInsert(true, false),
+	batchUpdate(false, true),
+	batchInsertOrUpdate(true, true),
+	batchInsertOrIgnore(true, false);
 //	saveRef,
 //	dropRef
 	
 	//for jdbc operation event
 	/*jdbcAfterUpdate,
 	jdbcAfterQuery*/
+	
+	private boolean inserting;
+	private boolean updating;
+	private DbmEventAction(boolean inserting, boolean updating) {
+		this.inserting = inserting;
+		this.updating = updating;
+	}
+	
+	public boolean isInserting() {
+		return inserting;
+	}
+	public boolean isUpdating() {
+		return updating;
+	}
+	
 }
