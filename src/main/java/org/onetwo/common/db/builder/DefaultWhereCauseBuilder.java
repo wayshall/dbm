@@ -12,6 +12,7 @@ import org.onetwo.common.db.sqlext.ExtQuery.KeyObject;
 import org.onetwo.common.reflect.ReflectUtils;
 import org.onetwo.common.utils.LangUtils;
 import org.onetwo.dbm.core.spi.DbmSessionFactory;
+import org.onetwo.dbm.exception.DbmException;
 import org.onetwo.dbm.mapping.DbmMappedEntry;
 
 import com.google.common.collect.Maps;
@@ -20,9 +21,10 @@ public class DefaultWhereCauseBuilder<E> implements WhereCauseBuilder<E> {
 	public static final String[] EXCLUDE_PROPERTIES = new String[] { "page", "pageNo", "pageSize", "pagination", "autoCount" };
 	
 	final protected QueryBuilderImpl<E> queryBuilder;
-	final protected Map<Object, Object> params;
+	protected Map<Object, Object> params;
 	private DefaultWhereCauseBuilder<E> parent;
 	private KeyObject keyObject;
+	private WhereCauseBuilderField<E, ?> lastField;
 	
 	public DefaultWhereCauseBuilder(QueryBuilderImpl<E> queryBuilder) {
 		super();
@@ -41,9 +43,13 @@ public class DefaultWhereCauseBuilder<E> implements WhereCauseBuilder<E> {
 	Map<Object, Object> getParams() {
 		return params;
 	}
+	
+	public WhereCauseBuilder<E> getParent() {
+		return parent;
+	}
 
 	@Override
-	public DefaultWhereCauseBuilder<E> addField(WhereCauseBuilderField<E> field){
+	public DefaultWhereCauseBuilder<E> addField(WhereCauseBuilderField<E, ?> field){
 		this.params.put(field.getOPFields(), field.getValues());
 		return self();
 	}
@@ -168,12 +174,33 @@ public class DefaultWhereCauseBuilder<E> implements WhereCauseBuilder<E> {
 	}
 	
 	@Override
+	public SingleFieldWhereCauseBuilderField<E> field(String fieldName){
+//		this.addLastField();
+		SingleFieldWhereCauseBuilderField<E> field = new SingleFieldWhereCauseBuilderField<>(this, fieldName);
+		this.lastField = field;
+		return field;
+	}
+	
+	@Override
 	public DefaultWhereCauseBuilderField<E> field(String...fields){
-		return new DefaultWhereCauseBuilderField<>(this, fields);
+		this.addLastField();
+		DefaultWhereCauseBuilderField<E> field = new DefaultWhereCauseBuilderField<>(this, fields);
+		this.lastField = field;
+		return field;
+	}
+	
+	private void addLastField() {
+		if (this.lastField!=null) {
+			this.lastField.addField();
+			this.lastField = null;
+		}
 	}
 	
 	@Override
 	public WhereCauseBuilder<E> or() {
+//		if (parent!=null) {
+//			endSub();
+//		}
 		return new DefaultWhereCauseBuilder<>(this, (KeyObject)K.OR);
 	}
 	
@@ -187,11 +214,22 @@ public class DefaultWhereCauseBuilder<E> implements WhereCauseBuilder<E> {
 		return new DefaultWhereCauseBuilderField<>(this, fields);
 	}
 
+	public DefaultWhereCauseBuilder<E> endSub(){
+//		throw new DbmException("sub query not found!");
+		if (parent==null) {
+			throw new DbmException("sub query not found!");
+		}
+		if (!params.isEmpty()) {
+			parent.getParams().put(keyObject, params);
+		}
+		return parent;
+	}
+
 	@Override
 	public QueryBuilder<E> end(){
-		if (parent!=null && !params.isEmpty()) {
-			parent.getParams().put(keyObject, params);
-			return parent.end();
+		addLastField();
+		if (parent!=null) {
+			endSub();
 		}
 		return queryBuilder;
 	}
@@ -205,5 +243,10 @@ public class DefaultWhereCauseBuilder<E> implements WhereCauseBuilder<E> {
 	@Override
 	public ExecuteAction toExecute() {
 		return queryBuilder.toExecute();
+	}
+
+	@Override
+	public QueryBuilder<E> getQueryBuilder() {
+		return queryBuilder;
 	}
 }

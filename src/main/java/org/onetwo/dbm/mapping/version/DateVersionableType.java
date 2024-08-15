@@ -19,6 +19,9 @@ public class DateVersionableType implements VersionableType<Date> {
 
 	@Override
 	public boolean isEquals(Date newVersion, Date oldVersion) {
+		if (newVersion==null && oldVersion==null) {
+			return true;
+		}
 		return newVersion!=null && newVersion.equals(oldVersion);
 	}
 

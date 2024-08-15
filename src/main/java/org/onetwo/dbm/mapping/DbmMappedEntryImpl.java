@@ -119,6 +119,7 @@ public class DbmMappedEntryImpl extends AbstractDbmMappedEntryImpl implements Db
 		staticDeleteAllSqlBuilder.build();
 		
 		staticSelectVersionSqlBuilder = createSQLBuilder(SqlBuilderType.query);
+		staticSelectVersionSqlBuilder.setNamedPlaceHoder(false);
 		staticSelectVersionSqlBuilder.append(getVersionField());
 		staticSelectVersionSqlBuilder.appendWhere(getIdentifyFields());
 		staticSelectVersionSqlBuilder.build();

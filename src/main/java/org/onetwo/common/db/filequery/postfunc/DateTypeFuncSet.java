@@ -26,6 +26,10 @@ public class DateTypeFuncSet {
 		return DateUtils.format(DateUtils.DATE_TIME, date);
 	}
 	
+	public static Date nextDay(Date date) {
+		return DateUtils.addDay(date, 1);
+	}
+	
 	public static Date minutesAgo(Date date, SqlPostfixFunctionInfo funcInfo) {
 		if (LangUtils.isEmpty(funcInfo.getArgumentNames())) {
 			throw new DbmException("sql postfix function argument not found!");
@@ -41,6 +45,15 @@ public class DateTypeFuncSet {
 		}
 		int numb = Types.asInteger(funcInfo.getArgumentNames().get(0));
 		return DateUtils.addMinutes(date, numb);
+	}
+
+	
+	public static Date daysLater(Date date, SqlPostfixFunctionInfo funcInfo) {
+		if (LangUtils.isEmpty(funcInfo.getArgumentNames())) {
+			throw new DbmException("sql postfix function argument not found!");
+		}
+		int numb = Types.asInteger(funcInfo.getArgumentNames().get(0));
+		return DateUtils.addDay(date, numb);
 	}
 	
 	private DateTypeFuncSet() {

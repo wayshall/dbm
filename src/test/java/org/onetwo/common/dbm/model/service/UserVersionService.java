@@ -1,6 +1,7 @@
 package org.onetwo.common.dbm.model.service;
 
 import java.util.concurrent.BrokenBarrierException;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.CyclicBarrier;
 
 import org.onetwo.common.db.spi.BaseEntityManager;
@@ -44,8 +45,9 @@ public class UserVersionService {
 		return this.baseEntityManager.load(UserVersionEntity.class, user.getId());
 	}
 	
-	public UserVersionEntity updateWithCountDownLatch1(Long id, CyclicBarrier cyclicBarrier)  {
+	public UserVersionEntity updateWithCountDownLatch1(Long id, CyclicBarrier cyclicBarrier, CountDownLatch latch2)  {
 		UserVersionEntity user = this.baseEntityManager.load(UserVersionEntity.class, id);
+		latch2.countDown();
 		try {
 			cyclicBarrier.await();
 		} catch (InterruptedException | BrokenBarrierException e) {
