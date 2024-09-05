@@ -44,3 +44,5 @@ application-product.yaml
 /core/release.properties
 /core/modules/common/src/test/java/org/onetwo/common/drawtest
 dump.rdb
+/.apt_generated/
+/.apt_generated_tests/
