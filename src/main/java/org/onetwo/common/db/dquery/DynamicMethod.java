@@ -28,6 +28,7 @@ import org.onetwo.common.db.dquery.annotation.QuerySqlTemplateParser;
 import org.onetwo.common.db.dquery.annotation.Sql;
 import org.onetwo.common.db.dquery.annotation.SqlScript;
 import org.onetwo.common.db.dquery.condition.DynamicFieldCondition;
+import org.onetwo.common.db.filequery.DbmSqlParamParser;
 import org.onetwo.common.db.filequery.TemplateNameIsSqlTemplateParser;
 import org.onetwo.common.db.spi.QueryConfigData;
 import org.onetwo.common.db.spi.QueryWrapper;
@@ -90,6 +91,11 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 	private DynamicMethodParameter queryNameParameter;
 	private DynamicMethodParameter sqlParameter;
 //	private DynamicMethodParameter dynamicQueryMetaProviderParameter;
+	/***
+	 * 是否基于文件和@Query注解的查询。
+	 * 相对于动态传入sql，或者根据@QueryName自定义sql解释器而言
+	 */
+	private boolean staticNamedQuery = true;
 	
 	/***
 	 * 动态传入返回类型
@@ -135,6 +141,8 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 //		checkAndFindQuerySwitch(parameters);
 		// check queryName paramter
 //		checkAndFindQueryNameParameter(parameters);
+
+		this.staticNamedQuery = true;
 		checkAndFindSpecialParameters(parameters);
 		
 		
@@ -295,6 +303,7 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 //				}
 				queryNameParameter = parameter;
 				specialParameters.add(parameter);
+				this.staticNamedQuery = false;
 				
 			} else if (sqlParameter==null && parameter.hasParameterAnnotation(Sql.class)) {
 				if(parameter.getParameterType()!=String.class){
@@ -302,7 +311,9 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 				}
 //				Sql queryNameAnno = parameter.getParameterAnnotation(Sql.class);
 //				this.dynamicSqlTemplateParser = DbmUtils.createDbmBean(TemplateNameIsSqlTemplateParser.class);
-				this.dynamicSqlTemplateParser = TemplateNameIsSqlTemplateParser.INSTANCE;
+//				this.dynamicSqlTemplateParser = TemplateNameIsSqlTemplateParser.INSTANCE;
+				this.dynamicSqlTemplateParser = DbmSqlParamParser.INSTANCE;
+				this.staticNamedQuery = false;
 				this.sqlParameter = parameter;
 				this.queryNameParameter = parameter;
 				specialParameters.add(parameter);
@@ -390,6 +401,10 @@ public class DynamicMethod extends AbstractMethodResolver<DynamicMethodParameter
 	
 	public SqlTemplateParser getDynamicSqlTemplateParser() {
 		return dynamicSqlTemplateParser;
+	}
+	
+	public boolean isStaticNamedQuery() {
+		return staticNamedQuery;
 	}
 
 	@Override

@@ -143,7 +143,8 @@ abstract public class AbstractDynamicQueryHandler implements DynamicQueryHandler
 	
 	protected MethodDynamicQueryInvokeContext createMethodInvokeContext(DynamicMethod dmethod, Object[] args) {
 		MethodDynamicQueryInvokeContext invokeContext = null;
-		if (dmethod.getDynamicSqlTemplateParser()==null) {
+//		if (dmethod.getDynamicSqlTemplateParser()==null) {
+		if (dmethod.isStaticNamedQuery()) {
 			NamedQueryInfo namedQueryInfo = getNamedQueryInfo(dmethod, args);
 			if(namedQueryInfo==null) {
 				String qname = getQueryName(dmethod, args);
@@ -174,7 +175,7 @@ abstract public class AbstractDynamicQueryHandler implements DynamicQueryHandler
 		}catch (Throwable e) {
 			String qname = invokeContext.getNamedQueryInfo().getFullName();
 //			throw new FileNamedQueryException("invoke query["+invokeContext.getQueryName()+"] error : " + e.getMessage(), e);
-			throw new FileNamedQueryException("invoke query["+qname+"] error : ", e);//.put("queryName", qname);
+			throw new FileNamedQueryException("invoke query error : " + qname, e);//.put("queryName", qname);
 		}
 		
 	}
