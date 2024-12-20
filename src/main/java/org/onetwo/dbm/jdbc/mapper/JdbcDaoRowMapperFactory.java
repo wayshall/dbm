@@ -2,6 +2,9 @@ package org.onetwo.dbm.jdbc.mapper;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -14,6 +17,7 @@ import org.onetwo.common.utils.map.CamelMap;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.ColumnMapRowMapper;
 import org.springframework.jdbc.core.SingleColumnRowMapper;
+import org.springframework.jdbc.support.JdbcUtils;
 
 public class JdbcDaoRowMapperFactory implements RowMapperFactory {
 	
@@ -77,11 +81,33 @@ public class JdbcDaoRowMapperFactory implements RowMapperFactory {
 		return new BeanPropertyRowMapperAdapter<>(entityClass);
 	}
 	
-	public static class CamelNameRowMapper extends ColumnMapRowMapper implements DataRowMapper<Map<String, Object>>{
+	public static class CamelNameRowMapper implements DataRowMapper<Map<String, String>>{
 
-		protected Map<String, Object> createColumnMap(int columnCount) {
-			return new CamelMap<Object>(columnCount);
+		protected Map<String, String> createColumnMap(int columnCount) {
+			return new CamelMap<String>(columnCount);
 		}
+
+		@Override
+		public Map<String, String> mapRow(ResultSet rs, int rowNum) throws SQLException {
+			ResultSetMetaData rsmd = rs.getMetaData();
+			int columnCount = rsmd.getColumnCount();
+			Map<String, String> mapOfColValues = createColumnMap(columnCount);
+			for (int i = 1; i <= columnCount; i++) {
+				String key = getColumnKey(JdbcUtils.lookupColumnName(rsmd, i));
+				String obj = getColumnValue(rs, i);
+				mapOfColValues.put(key, obj);
+			}
+			return mapOfColValues;
+		}
+
+		protected String getColumnValue(ResultSet rs, int index) throws SQLException {
+			return (String)JdbcUtils.getResultSetValue(rs, index, String.class);
+		}
+
+		protected String getColumnKey(String columnName) {
+			return columnName;
+		}
+
 	}
 	
 	public static class CustomMapRowMapper extends ColumnMapRowMapper implements DataRowMapper<Map<String, Object>>{
