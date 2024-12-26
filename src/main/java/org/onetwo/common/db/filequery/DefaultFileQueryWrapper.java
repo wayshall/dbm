@@ -23,6 +23,7 @@ import org.onetwo.common.spring.SpringUtils;
 import org.onetwo.common.utils.ArrayUtils;
 import org.onetwo.common.utils.Assert;
 import org.onetwo.common.utils.LangUtils;
+import org.onetwo.dbm.exception.DbmException;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.jdbc.core.RowMapper;
 
@@ -134,7 +135,12 @@ public class DefaultFileQueryWrapper extends AbstractQueryWrapper /* implements 
 		for(SqlParamterMeta parameter : sqlWrapper.getParameters()){
 			if(!paramBean.isReadableProperty(parameter.getProperty()))
 				continue;
-			Object pvalue = parameter.getParamterValue(paramBean);
+			Object pvalue;
+			try {
+				pvalue = parameter.getParamterValue(paramBean);
+			} catch (Exception e) {
+				throw new DbmException("get paramter value error. paramger: " + parameter.getName(), e);
+			}
 			if(pvalue!=null && info.getQueryConfig().isLikeQueryField(parameter.getName())){
 				pvalue = ExtQueryUtils.getLikeString(pvalue.toString());
 			}

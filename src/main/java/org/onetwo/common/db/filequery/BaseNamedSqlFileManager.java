@@ -21,6 +21,7 @@ import org.onetwo.common.utils.Assert;
 import org.onetwo.common.utils.LangUtils;
 import org.onetwo.common.watch.FileChangeListener;
 import org.onetwo.common.watch.FileWatcher;
+import org.onetwo.common.watch.FileWatcher.WatchFileTask;
 import org.onetwo.dbm.exception.DbmException;
 import org.onetwo.dbm.exception.FileNamedQueryException;
 import org.slf4j.Logger;
@@ -43,7 +44,6 @@ abstract public class BaseNamedSqlFileManager implements NamedSqlFileManager {
 
 	protected final Logger logger = JFishLoggerFactory.getLogger(getClass());
 	
-	private FileWatcher fileMonitor;
 	private long period = 1;
 	
 	private Map<String, NamedQueryFile> namespaceProperties = Maps.newHashMap();
@@ -55,6 +55,8 @@ abstract public class BaseNamedSqlFileManager implements NamedSqlFileManager {
 	final private NamedQueryFileListener listener;
 	
 	private boolean watchSqlFile;
+	private volatile FileWatcher fileMonitor;
+	private volatile WatchFileTask watchFileTask;
 	
 	public BaseNamedSqlFileManager(boolean watchSqlFile, NamedQueryFileListener listener) {
 		this.watchSqlFile = watchSqlFile;
@@ -120,16 +122,24 @@ abstract public class BaseNamedSqlFileManager implements NamedSqlFileManager {
 	 * @param sqlfileArray
 	 */
 	protected void buildSqlFileMonitor(DbmSqlFileResource<?>... sqlfileArray){
+		if(LangUtils.isEmpty(sqlfileArray))
+			return ;
 		if(watchSqlFile){
-			if(fileMonitor==null)
-				fileMonitor = FileWatcher.newWatcher(1);
-			this.watchFiles(sqlfileArray);
+			if (this.watchFileTask==null) {
+				this.initWatchFileTask();
+			}
+			this.watchFileTask.addFiles(sqlfileArray);
 		}
 	}
-	protected void watchFiles(DbmSqlFileResource<?>[] sqlResourceArray){
-		if(LangUtils.isEmpty(sqlResourceArray))
+	
+	synchronized private void initWatchFileTask(){
+		if (fileMonitor==null) {
+			fileMonitor = FileWatcher.newWatcher(1);
+		}
+		if (watchFileTask!=null) {
 			return ;
-		this.fileMonitor.watchFile(period, new FileChangeListener() {
+		}
+		watchFileTask = this.fileMonitor.createTask(period, new FileChangeListener() {
 			
 			@Override
 			public void fileChanged(ResourceAdapter<?> file) {
@@ -139,7 +149,7 @@ abstract public class BaseNamedSqlFileManager implements NamedSqlFileManager {
 					logger.error("watch sql file error: " + e.getMessage(), e);
 				}
 			}
-		}, sqlResourceArray);
+		});
 	}
 	
 	public void reloadFile(DbmSqlFileResource<?> file){
