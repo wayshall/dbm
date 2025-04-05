@@ -90,7 +90,7 @@
 JDK 1.8+
 
 ## maven
-当前snapshot版本：5.2.7-SNAPSHOT
+当前snapshot版本：5.2.8
 
 若使用snapshot版本，请添加snapshotRepository仓储：
 ```xml
@@ -109,7 +109,7 @@ JDK 1.8+
 <dependency>
     <groupId>org.onetwo4j</groupId>
     <artifactId>onetwo-dbm</artifactId>
-    <version>5.2.7-SNAPSHOT</version>
+    <version>5.2.8</version>
 </dependency>
 
 ```
